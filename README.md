@@ -1,4 +1,4 @@
-![Logo](https://github.com/swedenconnect/technical-framework/blob/master/img/sweden-connect.png)
+![Logo](docs/images/sweden-connect.png)
 
 
 # Signature Service according to the Swedish eID Framework
@@ -14,10 +14,16 @@ Framework specifications - https://docs.swedenconnect.se/technical-framework.
 
 > TODO
 
-## Contributing
+## Documentation
+
+* TODO: *Published documentation (architectural and configuration)*
+
+* [Internal documentation](internal-docs) - Designdocuments, code-style, etc.
+
+* TODO: *Java API documentation*
 
 
 
 -----
 
-Copyright &copy; 2021, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under the MIT license.
+Copyright &copy; 2022, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under the MIT license.
