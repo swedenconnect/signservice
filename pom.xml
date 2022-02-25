@@ -1,0 +1,462 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>se.swedenconnect.signservice</groupId>
+  <artifactId>signservice-parent</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0.0-SNAPSHOT</version>
+
+  <name>Sweden Connect :: SignService :: Parent POM</name>
+  <description>Parent POM for SignService libraries</description>
+  <url>https://github.com/swedenconnect/signservice</url>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:https://github.com/swedenconnect/signservice.git</connection>
+    <developerConnection>scm:git:https://github.com/swedenconnect/signservice.git</developerConnection>
+    <url>https://github.com/idsec/signservice/tree/master</url>
+  </scm>
+
+  <organization>
+    <name>Sweden Connect</name>
+    <url>https://www.swedenconnect.se</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <name>Martin Lindström</name>
+      <email>martin@idsec.se</email>
+      <organization>IDsec Solutions AB</organization>
+      <organizationUrl>https://www.idsec.se</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Stefan Santesson</name>
+      <email>stefan@idsec.se</email>
+      <organization>IDsec Solutions AB</organization>
+      <organizationUrl>https://www.idsec.se</organizationUrl>
+    </developer>
+    
+    <developer>
+      <name>Magnus Hoflin</name>
+      <email>magnus.hoflin@digg.se</email>
+      <organization>DIGG</organization>
+      <organizationUrl>https://www.digg.se</organizationUrl>
+    </developer>
+    
+    <developer>
+      <name>Henric Norlander</name>
+      <email>extern.henric.norlander@digg.se</email>
+      <organization>DIGG</organization>
+      <organizationUrl>https://www.digg.se</organizationUrl>
+    </developer>
+    
+  </developers>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>11</java.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>https://repo1.maven.org/maven2/</url>
+    </repository>
+    <repository>
+      <id>shibboleth</id>
+      <name>Shibboleth Maven Repo</name>
+      <url>https://build.shibboleth.net/nexus/content/repositories/releases</url>
+    </repository>
+  </repositories>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
+  <modules>
+    <module>core</module>
+    <module>engine</module>
+  </modules>
+
+  <dependencyManagement>
+
+    <dependencies>
+    
+      <dependency>
+        <groupId>se.idsec.signservice.commons</groupId>
+        <artifactId>signservice-bom</artifactId>
+        <version>1.2.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+    </dependencies>
+
+  </dependencyManagement>
+
+  <dependencies>
+
+    <!-- We use JUnit 5 for our tests -->  
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>  
+
+  </dependencies>
+
+  <build>
+
+    <pluginManagement>
+
+      <plugins>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.10.0</version>
+          <configuration>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.2.2</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>3.0.0-M2</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>3.2.2</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.3.2</version>
+        </plugin>
+        
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.2.0</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok-maven-plugin</artifactId>
+          <version>1.18.20.0</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.11.0</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>3.0.0</version>
+          <executions>
+            <execution>
+              <id>enforce</id>
+              <configuration>
+                <rules>
+                  <dependencyConvergence />
+                </rules>
+              </configuration>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+      </plugins>
+
+    </pluginManagement>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok-maven-plugin</artifactId>
+        <configuration>
+          <addOutputDirectory>false</addOutputDirectory>
+          <sourceDirectory>src/main/java</sourceDirectory>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      
+      <!-- run mvn jacoco:report -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.7</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+        </executions>        
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <profiles>
+
+    <profile>
+      <id>javadoc</id>
+
+      <build>
+        <plugins>
+
+          <plugin>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>delombok</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-javadoc</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <sourcepath>target/generated-sources/delombok</sourcepath>
+              <additionalparam>-Xdoclint:all -Xdoclint:-missing</additionalparam>
+              <additionalOptions>-Xdoclint:all -Xdoclint:-missing</additionalOptions>
+              <additionalJOptions>
+                <additionalJOption>-Xdoclint:all</additionalJOption>
+                <additionalJOption>-Xdoclint:-missing</additionalJOption>
+              </additionalJOptions>
+              <links>
+                <link>https://idsec-solutions.github.io/signservice-commons/javadoc/signservice-commons/</link>
+                <link>https://idsec-solutions.github.io/signservice-commons/javadoc/xml-commons/</link>
+                <!-- TODO: Add more links here -->
+              </links>
+              <detectJavaApiLink>true</detectJavaApiLink>
+            </configuration>
+          </plugin>
+
+        </plugins>
+      </build>
+
+    </profile>
+
+    <profile>
+      <id>release</id>
+
+      <!-- See http://central.sonatype.org/pages/apache-maven.html for setup -->
+
+      <build>
+        <plugins>
+
+          <plugin>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>delombok</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>process-sources</phase>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+              <execution>
+                <phase>process-test-sources</phase>
+                <id>attach-test-sources</id>
+                <goals>
+                  <goal>test-jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-javadoc</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>aggregate</id>
+                <phase>site</phase>
+                <goals>
+                  <goal>aggregate</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <sourcepath>target/generated-sources/delombok</sourcepath>
+              <additionalparam>-Xdoclint:all -Xdoclint:-missing</additionalparam>
+              <additionalOptions>-Xdoclint:all -Xdoclint:-missing</additionalOptions>
+              <additionalJOptions>
+                <additionalJOption>-Xdoclint:all</additionalJOption>
+                <additionalJOption>-Xdoclint:-missing</additionalJOption>
+              </additionalJOptions>
+              <links>
+                <link>https://idsec-solutions.github.io/signservice-commons/javadoc/signservice-commons/</link>
+                <link>https://idsec-solutions.github.io/signservice-commons/javadoc/xml-commons/</link>
+                <!-- TODO: Add more links here -->
+              </links>              
+              <detectJavaApiLink>true</detectJavaApiLink>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.12</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>false</autoReleaseAfterClose>
+              <!-- 
+                Allows manual inspection of the staging repo before deploying it to the central repo. 
+                Use 'mvn nexus-staging:release -Prelease' to release and 'mvn nexus-staging:drop' to abort. 
+              -->
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.0.1</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <configuration>
+              <skip>false</skip>
+            </configuration>
+          </plugin>
+
+        </plugins>
+      </build>
+
+    </profile>
+
+  </profiles>
+
+</project>

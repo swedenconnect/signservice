@@ -14,6 +14,16 @@ Framework specifications - https://docs.swedenconnect.se/technical-framework.
 
 > TODO
 
+## Modules
+
+This repository comprises of the following modules:
+
+* [Core](core) - Core API:s and classes.
+
+* [Engine](engine) - Signature Service processing logic engine.
+
+* ...
+
 ## Documentation
 
 * TODO: *Published documentation (architectural and configuration)*
