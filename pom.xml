@@ -103,9 +103,28 @@
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-bom</artifactId>
-        <version>1.2.0-SNAPSHOT</version>
+        <version>1.2.0</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      
+      <dependency>
+        <groupId>se.idsec.signservice.commons</groupId>
+        <artifactId>signservice-commons</artifactId>
+        <version>1.2.0</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>se.idsec.signservice.commons</groupId>
+        <artifactId>signservice-xml-commons</artifactId>
+        <version>1.2.0</version>
+      </dependency>      
+      
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>4.0.1</version>
+        <scope>provided</scope>
       </dependency>
 
     </dependencies>
@@ -113,6 +132,11 @@
   </dependencyManagement>
 
   <dependencies>
+  
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+    </dependency>  
 
     <!-- We use JUnit 5 for our tests -->  
     <dependency>
