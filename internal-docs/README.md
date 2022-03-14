@@ -84,8 +84,6 @@ When implementing there are a number of useful libraries that can be used. This 
   - And more. Check https://github.com/swedenconnect.
   
 
-
-
 ## Code Style
 
 All developers contributing to this project should follow the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html). Read it!
@@ -95,15 +93,25 @@ All developers contributing to this project should follow the [Google Java Style
 * Eclipse: [eclipse-java-google-style.xml](eclipse-java-google-style.xml)
 * IntelliJ: [intellij-java-google-style.xml](intellij-java-google-style.xml)
 
-### MIT License Header
+### Apache v 2.0 License Header
 
 Include the following header in all Java files:
 
 ```
 /*
- * MIT License
- * 
  * Copyright 2022 Sweden Connect
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 ```
 

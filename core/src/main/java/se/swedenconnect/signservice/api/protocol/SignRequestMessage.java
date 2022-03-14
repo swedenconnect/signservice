@@ -1,7 +1,15 @@
 /*
- * MIT License
- *
  * Copyright 2022 Sweden Connect
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package se.swedenconnect.signservice.api.protocol;
 
@@ -11,8 +19,12 @@ import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.List;
 import se.idsec.signservice.security.sign.SignatureValidationResult;
+import se.swedenconnect.signservice.api.protocol.types.AuthnRequirements;
 import se.swedenconnect.signservice.api.protocol.types.MessageConditions;
+import se.swedenconnect.signservice.api.protocol.types.SignatureRequirements;
+import se.swedenconnect.signservice.api.protocol.types.SigningCertificateRequirements;
 import se.swedenconnect.signservice.api.session.SignServiceContext;
+import se.swedenconnect.signservice.api.signature.SignatureTask;
 
 /**
  * A generic representation of a signature request message.
@@ -112,5 +124,41 @@ public interface SignRequestMessage extends Serializable {
    */
   MessageConditions getConditions();
 
-  // TODO: Much more ...
+  /**
+   * Gets the requirements the signature requester (client) puts on how the user should be
+   * authenticated during the "authentication for signature" process.
+   *
+   * @return authentication requirements
+   */
+  AuthnRequirements getAuthnRequirements();
+
+  /**
+   * Gets the Base64-encoded "sign message". The sign message is a protocol specific extension that
+   * will be passed on to the authentication service.
+   *
+   * @return the Base64-encoded sign message, or null if none has been supplied
+   */
+  String getSignMessage();
+
+  /**
+   * Gets the specific signature requirements for this request.
+   *
+   * @return signature requirements
+   */
+  SignatureRequirements getSignatureRequirements();
+
+  /**
+   * Gets the requirements for how the generated signing certificate should be created.
+   *
+   * @return signing certificate requirements
+   */
+  SigningCertificateRequirements getSigningCertificateRequirements();
+
+  /**
+   * Gets the signature tasks, i.e., the to-be-signed data.
+   *
+   * @return a list of signature tasks
+   */
+  List<SignatureTask> getSignatureTasks();
+
 }
