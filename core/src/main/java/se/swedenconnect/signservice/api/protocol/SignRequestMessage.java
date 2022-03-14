@@ -65,12 +65,12 @@ public interface SignRequestMessage extends Serializable {
 
   /**
    * Verifies the message against the protocol and its underlying specifications. Such checks can
-   * comprise of verifying that the message is not too old.
+   * consist of verifying that the message is not too old.
    *
    * @param context the SignService context
    * @throws SignServiceProtocolException for validation errors
    */
-  // TODO: We may want to use an additional excpetion class that could map to errors being reported
+  // TODO: We may want to use an additional exception class that could map to errors being reported
   // back to the client.
   void verifyMessage(final SignServiceContext context) throws SignServiceProtocolException;
 
