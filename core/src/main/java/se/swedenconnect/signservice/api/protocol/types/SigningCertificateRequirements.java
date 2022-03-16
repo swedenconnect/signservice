@@ -29,9 +29,14 @@ public interface SigningCertificateRequirements extends Serializable {
    */
   CertificateType getCertificateType();
 
+  // TODO: Certificate profile name points to a defined profile
+
   /**
    * Gets the requested mappings between the signer's authentication attributes and attributes that
    * are to be placed in the issued signature certificate.
+   * <p>
+   * If a profile is given that regulates the attribute mappings, this list is not required.
+   * </p>
    *
    * @return a list of mapping directives of how to map from user/signer attributes to signature
    *         certificate attributes

@@ -23,7 +23,6 @@ import se.swedenconnect.signservice.api.protocol.types.AuthnRequirements;
 import se.swedenconnect.signservice.api.protocol.types.MessageConditions;
 import se.swedenconnect.signservice.api.protocol.types.SignatureRequirements;
 import se.swedenconnect.signservice.api.protocol.types.SigningCertificateRequirements;
-import se.swedenconnect.signservice.api.session.SignServiceContext;
 import se.swedenconnect.signservice.api.signature.SignatureTask;
 
 /**
@@ -60,19 +59,9 @@ public interface SignRequestMessage extends Serializable {
    * @throws SignatureException for errors during the validation process (pure signature validation
    *         errors are reported in the returned result)
    */
+  // TODO: Use a new class. TrustConf...
   SignatureValidationResult verifySignature(final List<X509Certificate> certificates)
       throws SignatureException;
-
-  /**
-   * Verifies the message against the protocol and its underlying specifications. Such checks can
-   * comprise of verifying that the message is not too old.
-   *
-   * @param context the SignService context
-   * @throws SignServiceProtocolException for validation errors
-   */
-  // TODO: We may want to use an additional excpetion class that could map to errors being reported
-  // back to the client.
-  void verifyMessage(final SignServiceContext context) throws SignServiceProtocolException;
 
   /**
    * Gets the "relay state" parameter that is associated with the message.

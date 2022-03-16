@@ -55,6 +55,8 @@ public interface SignServiceProtocolHandler {
   SignRequestMessage decodeRequest(final HttpServletRequest httpRequest,
       final SignServiceContext context) throws SignServiceProtocolException;
 
+  // TODO: createSignResponseMessage(pars) - factory
+
   /**
    * Encodes a response message so that it can be returned to the SignService application. The
    * method will create a {@link HttpRequestMessage} representing the response message as a HTTP

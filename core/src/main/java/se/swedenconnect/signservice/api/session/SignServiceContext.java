@@ -63,7 +63,7 @@ public interface SignServiceContext extends Serializable {
    * @param name the unique name of the element
    * @param type the type of the element
    * @return the element, or null if no matching element is available
-   * @throws ClassCastException if the element exists but is not of thegiven type
+   * @throws ClassCastException if the element exists but is not of the given type
    */
   <T extends Serializable> T get(final String name, final Class<T> type) throws ClassCastException;
 
