@@ -39,6 +39,7 @@ public interface SignResponseMessage extends Serializable {
    * @param signatureCredential the credential to use when signing
    * @throws SignatureException for signature errors
    */
+  // TODO: Move to encodeResponse?
   void sign(final PkiCredential signatureCredential) throws SignatureException;
 
   /**
