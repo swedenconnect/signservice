@@ -13,20 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.api.signature;
+package se.swedenconnect.signservice.api.audit;
 
 /**
- * Representation of an AdES type.
+ * Interface for the Audit Logger used within the SignService system.
+ *
+ * @see AuditLoggerSingleton
  */
-public enum AdESType {
-
-  /** BES means that the signing certificate hash must be covered by the signature. */
-  BES,
+public interface AuditLogger {
 
   /**
-   * EPES means that the signing certificate hash and a signature policy identifier must be covered
-   * by the signature.
+   * Audit logs the supplied event.
+   *
+   * @param event the event to be logged
+   * @throws AuditLoggerException runtime exception that is thrown if logging fails
    */
-  EPES;
+  void auditLog(final AuditEvent event) throws AuditLoggerException;
+
+  /**
+   * Creates an event that may be assigned parameters.
+   *
+   * @param eventId the event ID for the event
+   * @return an AuditEvent object
+   */
+  AuditEvent createAuditEvent(final String eventId);
 
 }

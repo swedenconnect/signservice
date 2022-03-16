@@ -29,14 +29,14 @@ public class DefaultSignServiceContextTest {
     final DefaultSignServiceContext context = new DefaultSignServiceContext("ID1");
     context.put("Item1", new String("Hejsan"));
     context.put("Item2", Integer.valueOf(17));
-    context.put("Item3", new String[] {"A", "B", "C"});
+    context.put("Item3", new String[] { "A", "B", "C" });
 
     final DefaultSignServiceContext context2 = SerializationUtils.roundtrip(context);
 
     Assertions.assertEquals("ID1", context.getId());
     Assertions.assertEquals("Hejsan", context2.get("Item1"));
     Assertions.assertEquals(Integer.valueOf(17), context2.get("Item2"));
-    Assertions.assertArrayEquals(new String[] {"A", "B", "C"}, context2.get("Item3"));
+    Assertions.assertArrayEquals(new String[] { "A", "B", "C" }, context2.get("Item3"));
   }
 
   @Test

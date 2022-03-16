@@ -86,12 +86,14 @@ When implementing there are a number of useful libraries that can be used. This 
 
 ## Code Style
 
-All developers contributing to this project should follow the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html). Read it!
+All developers contributing to this project should follow the [Spring Framework Code Style](https://github.com/spring-projects/spring-framework/wiki/Code-Style). Read it!
 
 ### Code Style Templates
 
-* Eclipse: [eclipse-java-google-style.xml](eclipse-java-google-style.xml)
-* IntelliJ: [intellij-java-google-style.xml](intellij-java-google-style.xml)
+* Eclipse: [code-style/spring-eclipse-code-style.xml](spring-eclipse-code-style.xml)
+* IntelliJ: [code-style/spring-intellij-code-style.xml](spring-intellij-code-style.xml)
+
+**Note**: For IntelliJ also make sure to set the editor in "never join already wrapped lines"-mode. See this [article](https://intellij-support.jetbrains.com/hc/en-us/community/posts/360006393539-How-to-prevent-IntelliJ-from-changing-file-formatting-if-lines-meet-hard-wrap-constraints-).
 
 ### Apache v 2.0 License Header
 

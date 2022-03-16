@@ -51,7 +51,8 @@ public class DefaultHttpRequestMessageTest {
 
   @Test
   public void testGetMethodParamSuppliedInConstructor() throws Exception {
-    final DefaultHttpRequestMessage message = new DefaultHttpRequestMessage("GET", BASE_URL + "?Param1=" + ENCODED_PARAM1);
+    final DefaultHttpRequestMessage message = new DefaultHttpRequestMessage("GET",
+        BASE_URL + "?Param1=" + ENCODED_PARAM1);
     message.addHttpParameter("Param2", PARAM2);
     message.addHttpHeader(HEADER, HEADER_VALUE);
 

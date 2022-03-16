@@ -1,24 +1,26 @@
 /*
  * Copyright 2022 Sweden Connect
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package se.swedenconnect.signservice.api.protocol;
 
 import java.io.Serializable;
 
 /**
- * A profile for a SignService protocol.
+ * An interface that represents the processing requirements of a protocol implementation.
  */
-public interface SignServiceProtocolProfile extends Serializable {
+public interface ProtocolProcessingRequirements extends Serializable {
 
   /**
    * An enum that represents the requirement on a message concerning whether is is signed or not.
@@ -33,13 +35,6 @@ public interface SignServiceProtocolProfile extends Serializable {
     /** The message should not be signed. */
     NO
   }
-
-  /**
-   * Gets the name of the SignService protocol profile.
-   *
-   * @return the name
-   */
-  String getName();
 
   /**
    * Tells the signature requirements for a sign request message.
@@ -61,7 +56,5 @@ public interface SignServiceProtocolProfile extends Serializable {
    * @return the HTTP method to use when sending back the response
    */
   String getResponseSendMethod();
-
-  // TODO: More here
 
 }

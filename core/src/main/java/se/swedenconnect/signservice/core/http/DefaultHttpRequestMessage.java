@@ -55,22 +55,19 @@ public class DefaultHttpRequestMessage implements HttpRequestMessage {
   /**
    * Constructor setting the HTTP method and the URL.
    * <p>
-   * If the method is GET it is possible to add additional parameters using
-   * {@link #addHttpParameter(String, String)}. These will be URL-encoded and added to the resulting
-   * URL (returned from {@link #getUrl()}).
+   * If the method is GET it is possible to add additional parameters using {@link #addHttpParameter(String, String)}.
+   * These will be URL-encoded and added to the resulting URL (returned from {@link #getUrl()}).
    * </p>
    * <p>
-   * If the method is POST and the supplied URL contains query parameters, they will not be
-   * interpreted as parameters that should be included in the POST body (i.e., be returned from
-   * {@link #getHttpParameters()}).
+   * If the method is POST and the supplied URL contains query parameters, they will not be interpreted as parameters
+   * that should be included in the POST body (i.e., be returned from {@link #getHttpParameters()}).
    * </p>
    *
    * @param method the HTTP method
    * @param url the URL
    * @throws IllegalArgumentException if the supplied URL is invalid
    */
-  public DefaultHttpRequestMessage(final String method, final String url)
-      throws IllegalArgumentException {
+  public DefaultHttpRequestMessage(final String method, final String url) throws IllegalArgumentException {
 
     this.method = Optional.ofNullable(method)
         .map(String::strip)
@@ -93,18 +90,17 @@ public class DefaultHttpRequestMessage implements HttpRequestMessage {
       // from the internal URI to the HTTP parameters ...
       //
       if (GET_METHOD.equals(this.method)) {
-        final List<NameValuePair> params =
-            URLEncodedUtils.parse(this.uri.getQuery(), Charset.forName("UTF-8"));
+        final List<NameValuePair> params = URLEncodedUtils.parse(this.uri.getQuery(), Charset.forName("UTF-8"));
         if (!params.isEmpty()) {
           this.httpParameters = new ArrayList<NameValuePair>();
-          params.stream().forEach(
-              p -> this.httpParameters.add(new BasicNameValuePair(p.getName(), p.getValue())));
+          params.stream().forEach(p -> this.httpParameters.add(new BasicNameValuePair(p.getName(), p.getValue())));
 
-          this.uri = new URI(this.uri.getScheme(), this.uri.getUserInfo(), this.uri.getHost(),
-              this.uri.getPort(), this.uri.getPath(), null, this.uri.getFragment());
+          this.uri = new URI(this.uri.getScheme(), this.uri.getUserInfo(), this.uri.getHost(), this.uri.getPort(),
+              this.uri.getPath(), null, this.uri.getFragment());
         }
       }
-    } catch (final URISyntaxException | MalformedURLException e) {
+    }
+    catch (final URISyntaxException | MalformedURLException e) {
       throw new IllegalArgumentException(e.getMessage(), e);
     }
   }
@@ -116,17 +112,20 @@ public class DefaultHttpRequestMessage implements HttpRequestMessage {
       if (GET_METHOD.equals(this.method)) {
         if (this.httpParameters == null || this.httpParameters.isEmpty()) {
           return this.uri.toURL().toExternalForm();
-        } else {
+        }
+        else {
           final URIBuilder builder = new URIBuilder(this.uri);
           for (final NameValuePair e : this.httpParameters) {
             builder.addParameter(e.getName(), e.getValue());
           }
           return builder.build().toURL().toExternalForm();
         }
-      } else {
+      }
+      else {
         return this.uri.toURL().toExternalForm();
       }
-    } catch (final MalformedURLException | URISyntaxException e) {
+    }
+    catch (final MalformedURLException | URISyntaxException e) {
       // We have already made sure that the URL we are working with is a valid
       // URL, so this can never happen ...
       throw new RuntimeException(e);
@@ -143,8 +142,7 @@ public class DefaultHttpRequestMessage implements HttpRequestMessage {
   @Override
   public Map<String, String> getHttpParameters() {
     return this.httpParameters != null
-        ? this.httpParameters.stream()
-            .collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue))
+        ? this.httpParameters.stream().collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue))
         : Collections.emptyMap();
   }
 
@@ -154,8 +152,8 @@ public class DefaultHttpRequestMessage implements HttpRequestMessage {
    * The supplied value <b>must not</b> be URL-encoded (RFC3986 or RFC2396).
    * </p>
    * <p>
-   * The order in which the parameters are added will be preserved if the method is GET and the
-   * parameters are made into query parameters.
+   * The order in which the parameters are added will be preserved if the method is GET and the parameters are made into
+   * query parameters.
    * </p>
    *
    * @param name the name of the HTTP parameter

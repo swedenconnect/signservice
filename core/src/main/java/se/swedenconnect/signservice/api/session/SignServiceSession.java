@@ -22,9 +22,8 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 
 /**
- * A representation of a session. The {@code SignServiceSession} is basically the same as
- * {@link HttpSession}, but since we don't want to get stuck in a particular session implementation,
- * we introduce this session abstraction.
+ * A representation of a session. The {@code SignServiceSession} is basically the same as {@link HttpSession}, but since
+ * we don't want to get stuck in a particular session implementation, we introduce this session abstraction.
  */
 public interface SignServiceSession {
 
@@ -89,8 +88,7 @@ public interface SignServiceSession {
    * @param attribute the attribute value
    * @throws IllegalStateException if this method is called on an invalidated session
    */
-  <T extends Serializable> void setSessionAttribute(final String name, final T attribute)
-      throws IllegalStateException;
+  <T extends Serializable> void setSessionAttribute(final String name, final T attribute) throws IllegalStateException;
 
   /**
    * Adds the {@link SignServiceContext} to the session.
@@ -130,15 +128,13 @@ public interface SignServiceSession {
   /**
    * Gets the last time the client sent a request associated with this session.
    * <p>
-   * Actions that your application takes, such as getting or setting a value associated with the
-   * session, do not affect the access time.
+   * Actions that your application takes, such as getting or setting a value associated with the session, do not affect
+   * the access time.
    * </p>
    *
    * @return an Instant
    * @throws IllegalStateException if this method is called on an invalidated session
    */
   Instant getLastAccessedTime() throws IllegalStateException;
-
-
 
 }

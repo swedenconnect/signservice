@@ -20,11 +20,11 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * The session handler is used by the SignService as an abstraction of handling sessions.
  */
-public interface SignServiceSessionHandler {
+public interface SessionHandler {
 
   /**
-   * Gets the current session object, or if no session exists a new session object is created. Maps
-   * to {@link #getSession(HttpServletRequest, boolean)} where {@code create} is {@code true}.
+   * Gets the current session object, or if no session exists a new session object is created. Maps to
+   * {@link #getSession(HttpServletRequest, boolean)} where {@code create} is {@code true}.
    *
    * @param httpRequest the HTTP servlet request
    * @return a session object
@@ -32,8 +32,8 @@ public interface SignServiceSessionHandler {
   SignServiceSession getSession(final HttpServletRequest httpRequest);
 
   /**
-   * Gets the current session object. If no session object exists a new session object is created if
-   * {@code created} is set to {@code true}, otherwise {@code null} is returned.
+   * Gets the current session object. If no session object exists a new session object is created if {@code created} is
+   * set to {@code true}, otherwise {@code null} is returned.
    *
    * @param httpRequest The HTTP servlet request
    * @param create whether to create a new session object if no session object exists
@@ -42,8 +42,8 @@ public interface SignServiceSessionHandler {
   SignServiceSession getSession(final HttpServletRequest httpRequest, final boolean create);
 
   /**
-   * Corresponds to {@link #getSession(HttpServletRequest)} but does not use a HTTP request as the
-   * base of maintaining session.
+   * Corresponds to {@link #getSession(HttpServletRequest)} but does not use a HTTP request as the base of maintaining
+   * session.
    *
    * @param input the session maintainer
    * @return a session object
@@ -51,8 +51,8 @@ public interface SignServiceSessionHandler {
   SignServiceSession getSession(final SessionMaintainer input);
 
   /**
-   * Corresponds to {@link #getSession(HttpServletRequest, boolean))} but does not use a HTTP
-   * request as the base of maintaining session.
+   * Corresponds to {@link #getSession(HttpServletRequest, boolean))} but does not use a HTTP request as the base of
+   * maintaining session.
    *
    * @param input the session maintainer
    * @param create whether to create a new session object if no session object exists

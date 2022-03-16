@@ -1,20 +1,23 @@
 /*
  * Copyright 2022 Sweden Connect
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package se.swedenconnect.signservice.api.protocol;
 
 import java.io.Serializable;
 import java.security.SignatureException;
+
 import se.swedenconnect.security.credential.PkiCredential;
 
 /**
@@ -23,17 +26,17 @@ import se.swedenconnect.security.credential.PkiCredential;
 public interface SignResponseMessage extends Serializable {
 
   /**
-   * Gets the protocol profile for this type of message.
+   * Gets the protocol processing requirements for this type of message.
    *
-   * @return a protocol profile
+   * @return processing requirements
    */
-  SignServiceProtocolProfile getProtocolProfile();
+  ProtocolProcessingRequirements getProcessingRequirements();
 
   /**
    * Signs the message using the supplied signing credential.
    * <p>
-   * Requirements for how the signature is created is controlled by the protocol itself along with
-   * settings in the protocol profile.
+   * Requirements for how the signature is created is controlled by the protocol itself along with settings in the
+   * protocol profile.
    * </p>
    *
    * @param signatureCredential the credential to use when signing
@@ -46,9 +49,9 @@ public interface SignResponseMessage extends Serializable {
    * Encodes the message according to its protocol to a Base64-encoded string.
    *
    * @return the encoding
-   * @throws SignServiceProtocolException for encoding errors
+   * @throws ProtocolException for encoding errors
    */
-  String encode() throws SignServiceProtocolException;
+  String encode() throws ProtocolException;
 
   /**
    * Assigns the relay state parameter associated with this message.

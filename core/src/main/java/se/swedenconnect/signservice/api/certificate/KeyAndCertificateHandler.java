@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.api.session;
-
-import javax.servlet.http.HttpServletRequest;
+package se.swedenconnect.signservice.api.certificate;
 
 /**
- * Marker interface for representing the input needed by the {@link SessionHandler} to get a session object.
- * In most cases a {@link HttpServletRequest} is used, but when session handling is not based on HTTP requests but other
- * means we need a way of representing the input passed to
- * {@link SessionHandler#getSession(SessionMaintainer)} and
- * {@link SessionHandler#getSession(SessionMaintainer, boolean)}.
+ * Defines the handler that is responsible of generating keys and issuing signing certificates.
  */
-public interface SessionMaintainer {
+public interface KeyAndCertificateHandler {
+
+  /**
+   * Gets the name of the handler.
+   *
+   * @return the handler name
+   */
+  String getName();
+
+  // TODO: generate key, issue certificate, configuration, ...
+
 }

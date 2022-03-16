@@ -1,15 +1,17 @@
 /*
  * Copyright 2022 Sweden Connect
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package se.swedenconnect.signservice.api.protocol;
 
@@ -18,6 +20,7 @@ import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.List;
+
 import se.idsec.signservice.security.sign.SignatureValidationResult;
 import se.swedenconnect.signservice.api.protocol.types.AuthnRequirements;
 import se.swedenconnect.signservice.api.protocol.types.MessageConditions;
@@ -31,11 +34,11 @@ import se.swedenconnect.signservice.api.signature.SignatureTask;
 public interface SignRequestMessage extends Serializable {
 
   /**
-   * Gets the protocol profile for this type of message.
+   * Gets the protocol processing requirements this type of message.
    *
-   * @return a protocol profile
+   * @return processing requirements
    */
-  SignServiceProtocolProfile getProtocolProfile();
+  ProtocolProcessingRequirements getProcessingRequirements();
 
   /**
    * Tells whether the message has been signed.
@@ -60,8 +63,7 @@ public interface SignRequestMessage extends Serializable {
    *         errors are reported in the returned result)
    */
   // TODO: Use a new class. TrustConf...
-  SignatureValidationResult verifySignature(final List<X509Certificate> certificates)
-      throws SignatureException;
+  SignatureValidationResult verifySignature(final List<X509Certificate> certificates) throws SignatureException;
 
   /**
    * Gets the "relay state" parameter that is associated with the message.

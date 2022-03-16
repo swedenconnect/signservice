@@ -18,11 +18,11 @@ package se.swedenconnect.signservice.api.session;
 import java.io.Serializable;
 
 /**
- * The {@code SignServiceContext} holds the current context and state for an operation. It is stored
- * in the session and all modules can read and update it.
+ * The {@code SignServiceContext} holds the current context and state for an operation. It is stored in the session and
+ * all modules can read and update it.
  * <p>
- * The data stored in the context is not fixed and is determined by the different modules that need
- * to handle session data.
+ * The data stored in the context is not fixed and is determined by the different modules that need to handle session
+ * data.
  * </p>
  * <p>
  * The context is initialized by the SignService Engine.
@@ -31,8 +31,7 @@ import java.io.Serializable;
 public interface SignServiceContext extends Serializable {
 
   /**
-   * Gets the unique ID for the current operation. This ID should be included in all logs (process-
-   * and audit logs).
+   * Gets the unique ID for the current operation. This ID should be included in all logs (process- and audit logs).
    *
    * @return the unique ID for the operation
    */
@@ -70,9 +69,8 @@ public interface SignServiceContext extends Serializable {
   /**
    * Removes the named element from the context.
    * <p>
-   * The rationale behind this method is that a module that writes a large data element to the
-   * context should be able to remove it when it os no longer needed. In this way, storing the
-   * context is cheaper.
+   * The rationale behind this method is that a module that writes a large data element to the context should be able to
+   * remove it when it os no longer needed. In this way, storing the context is cheaper.
    * </p>
    *
    * @param <T> the type of the element

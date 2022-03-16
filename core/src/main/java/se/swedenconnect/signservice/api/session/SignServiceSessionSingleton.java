@@ -36,8 +36,7 @@ public class SignServiceSessionSingleton {
   /**
    * Is called to initialize the singleton with the session it should carry.
    *
-   * @param session
-   *          the session object
+   * @param session the session object
    */
   public static void init(final SignServiceSession session) {
     THREAD_LOCAL.get().session = session;

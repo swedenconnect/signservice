@@ -15,7 +15,6 @@
  */
 package se.swedenconnect.signservice.core.session;
 
-
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;

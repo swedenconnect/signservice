@@ -22,6 +22,8 @@ import java.util.Optional;
 
 import se.swedenconnect.signservice.api.session.SignServiceContext;
 
+// TODO: We may move this to the session base module ...
+
 /**
  * Default implementation of the {@link SignServiceContext} interface.
  */
@@ -66,8 +68,7 @@ public class DefaultSignServiceContext implements SignServiceContext {
 
   /** {@inheritDoc} */
   @Override
-  public <T extends Serializable> T get(final String name, final Class<T> type)
-      throws ClassCastException {
+  public <T extends Serializable> T get(final String name, final Class<T> type) throws ClassCastException {
 
     return Optional.ofNullable(this.data.get(name)).map(type::cast).orElse(null);
   }
