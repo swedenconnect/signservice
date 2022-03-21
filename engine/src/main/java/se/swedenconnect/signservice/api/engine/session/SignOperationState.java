@@ -13,30 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.api.client;
-
-import java.security.cert.X509Certificate;
-import java.util.List;
+package se.swedenconnect.signservice.api.engine.session;
 
 /**
- * Representation of SignService client configuration.
+ * Defines the different "states" a sign operation may be in.
  */
-public interface ClientConfiguration {
+public enum SignOperationState {
 
-  /**
-   * Gets the unique client identifier.
-   *
-   * @return the client id
-   */
-  String getClientId();
+  /** State that represents a newly created session. */
+  NEW,
 
-  /**
-   * Gets the certificate, or certificates, that we expect the client to use when signing messages.
-   *
-   * @return a list of certificates
-   */
-  List<X509Certificate> getTrustedCertificates();
+  /** State that tells that user authentication is ongoing. */
+  AUTHN_ONGOING,
 
-  // TODO: certificates, response URL:s, ...
+  // TODO: more here
 
+  COMPLETED;
 }

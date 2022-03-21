@@ -31,30 +31,30 @@ public interface SignServiceEngine {
    * <p>
    * The internals, and the current state, of the engine will find out the type of message and process it accordingly.
    * </p>
+   * <p>
+   * Apart from processing requests, the engine may also serve resources. Examples of such resources are status pages
+   * and authentication provider metadata. When a request being processed is a request for a resource the method will
+   * not return a {@link HttpRequestMessage}, but instead {@code null} and write the resource to the supplied
+   * {@link HttpServletResponse}. However, it will <b>not</b> commit the response. This is the responsibility of the
+   * caller.
+   * </p>
    *
    * @param httpRequest the HTTP request
    * @param httpResponse the HTTP response
-   * @return a HttpRequestMessage that informs the calling application which HTTP message to send
+   * @return a HttpRequestMessage that informs the calling application which HTTP message to send, or null if the
+   *           request processed was a request to a resource
    * @throws UnrecoverableSignServiceException if a HTTP message can not be sent as a result of the processing. This can
-   *   occur in cases when the engine can not successfully produce a response message to send
+   *           occur in cases when the engine can not successfully produce a response message to send
    */
   HttpRequestMessage processRequest(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse)
       throws UnrecoverableSignServiceException;
 
   /**
-   * Gets the application unique name for this engine instance.
+   * A predicate that given a request tells whether this engine instance can process the request.
    *
-   * @return the engine's name
+   * @param httpRequest the HTTP request
+   * @return true if the engine can process the request and false otherwise
    */
-  String getEngineName();
-
-  /**
-   * A predicate that tells whether a request received by the SignService application on a certain URL path can be
-   * processed by this engine instance.
-   *
-   * @param path the URL path (relative to the application root path)
-   * @return true if this instance can process the request and false otherwise
-   */
-  boolean canProcess(final String path);
+  boolean canProcess(final HttpServletRequest httpRequest);
 
 }

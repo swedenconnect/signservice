@@ -53,16 +53,15 @@ public interface SignRequestMessage extends Serializable {
    * Invoking this method on a message that is not signed will lead to an error.
    * </p>
    * <p>
-   * Note that there is a direct trust regarding expected signing certificates. Thus, the validator
-   * does not perform any certificate chain building to find a trusted certificate.
+   * Note that there is a direct trust regarding expected signing certificates. Thus, the validator does not perform any
+   * certificate chain building to find a trusted certificate.
    * </p>
    *
    * @param certificates a list of certificates that are acceptable as signer certificates.
    * @return a SignatureValidationResult object
-   * @throws SignatureException for errors during the validation process (pure signature validation
-   *         errors are reported in the returned result)
+   * @throws SignatureException for errors during the validation process (pure signature validation errors are reported
+   *           in the returned result)
    */
-  // TODO: Use a new class. TrustConf...
   SignatureValidationResult verifySignature(final List<X509Certificate> certificates) throws SignatureException;
 
   /**
@@ -94,8 +93,8 @@ public interface SignRequestMessage extends Serializable {
   String getClientId();
 
   /**
-   * Gets the URL where the client wants response messages to be sent. This information may also be
-   * configured at the SignService.
+   * Gets the URL where the client wants response messages to be sent. This information may also be configured at the
+   * SignService.
    *
    * @return the URL, or null if the protocol implementation does not support this feature
    */
@@ -116,20 +115,28 @@ public interface SignRequestMessage extends Serializable {
   MessageConditions getConditions();
 
   /**
-   * Gets the requirements the signature requester (client) puts on how the user should be
-   * authenticated during the "authentication for signature" process.
+   * Gets the requirements the signature requester (client) puts on how the user should be authenticated during the
+   * "authentication for signature" process.
    *
    * @return authentication requirements
    */
   AuthnRequirements getAuthnRequirements();
 
   /**
-   * Gets the Base64-encoded "sign message". The sign message is a protocol specific extension that
-   * will be passed on to the authentication service.
+   * Gets the raw "sign message". The sign message is a protocol specific extension that will be passed on to the
+   * authentication service.
    *
-   * @return the Base64-encoded sign message, or null if none has been supplied
+   * @return the sign message, or null if none has been supplied
    */
-  String getSignMessage();
+  byte[] getSignMessage();
+
+  /**
+   * Tells whether the requester requires that the "sign message" is displayed for the user during the signature
+   * operation.
+   *
+   * @return true if the sign message must be displayed, and false if it does not have to be displayed (or is not set)
+   */
+  boolean getMustShowSignMessage();
 
   /**
    * Gets the specific signature requirements for this request.
@@ -151,5 +158,16 @@ public interface SignRequestMessage extends Serializable {
    * @return a list of signature tasks
    */
   List<SignatureTask> getSignatureTasks();
+
+  /**
+   * Gets a string that can be used for logging.
+   * <p>
+   * The method must never throw an exception.
+   * </p>
+   *
+   * @param detailed flag indicating that a detailed log string is wanted
+   * @return a log string of the message
+   */
+  String getLogString(final boolean detailed);
 
 }

@@ -17,6 +17,7 @@ package se.swedenconnect.signservice.api.protocol;
 
 import javax.servlet.http.HttpServletRequest;
 
+import se.swedenconnect.signservice.api.engine.SignServiceError;
 import se.swedenconnect.signservice.api.session.SignServiceContext;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 
@@ -73,5 +74,14 @@ public interface ProtocolHandler {
    */
   HttpRequestMessage encodeResponse(final SignResponseMessage responseMessage, final SignServiceContext context)
       throws ProtocolException;
+
+  /**
+   * Translates from the generic {@link SignServiceError} object to a protocol specific {@link SignResponseResult}
+   * object.
+   *
+   * @param error the error to translate
+   * @return a SignResponseResult
+   */
+  SignResponseResult translateError(final SignServiceError error);
 
 }

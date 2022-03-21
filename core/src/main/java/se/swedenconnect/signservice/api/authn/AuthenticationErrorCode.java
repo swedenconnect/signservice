@@ -13,30 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.api.client;
-
-import java.security.cert.X509Certificate;
-import java.util.List;
+package se.swedenconnect.signservice.api.authn;
 
 /**
- * Representation of SignService client configuration.
+ * Enumeration of authentication error codes.
  */
-public interface ClientConfiguration {
+public enum AuthenticationErrorCode {
 
-  /**
-   * Gets the unique client identifier.
-   *
-   * @return the client id
-   */
-  String getClientId();
+  /** The user cancelled the authentication. */
+  USER_CANCEL,
 
-  /**
-   * Gets the certificate, or certificates, that we expect the client to use when signing messages.
-   *
-   * @return a list of certificates
-   */
-  List<X509Certificate> getTrustedCertificates();
-
-  // TODO: certificates, response URL:s, ...
-
+  /** The user failed to authenticate - general authentication error. */
+  FAILED_AUTHN;
 }

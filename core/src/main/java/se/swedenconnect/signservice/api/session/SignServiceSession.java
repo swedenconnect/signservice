@@ -28,7 +28,7 @@ import javax.servlet.http.HttpSession;
 public interface SignServiceSession {
 
   /** The name of the session object that holds the {@link SignServiceContext}. */
-  String CONTEXT_SESSION_NAME = SignServiceContext.class.getPackageName();
+  String CONTEXT_SESSION_NAME = SignServiceContext.class.getPackageName() + ".Context";
 
   /**
    * Gets the unique ID for the session.

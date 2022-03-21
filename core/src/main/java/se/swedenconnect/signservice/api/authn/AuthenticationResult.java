@@ -16,28 +16,24 @@
 package se.swedenconnect.signservice.api.authn;
 
 import se.swedenconnect.signservice.api.authn.types.IdentityAssertion;
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 
 /**
- * Represents the result from an authentication call ({@link AuthenticationHandler}). The result is either an
- * {@link IdentityAssertion} that represents a completed, and successful, authentication or a HTTP request message which
- * is used to indicate to the caller that the user should be directed to remote authentication service.
+ * Represents the result from a successful and completed authentication call.
  */
 public interface AuthenticationResult {
 
   /**
-   * Gets the HTTP request message. This is set if the authentication scheme needs to direct the user to a remote
-   * authentication service.
-   *
-   * @return a HTTP request message
-   */
-  HttpRequestMessage getHttpRequestMessage();
-
-  /**
-   * Gets the {@link IdentityAssertion} that represents a completed, and successful, authentication.
+   * Gets the {@link IdentityAssertion} that holds the identity assertion from the authentication process.
    *
    * @return an identity assertion object
    */
   IdentityAssertion getAssertion();
+
+  /**
+   * Predicate that tells whether the sign message was display to the user during authentication.
+   *
+   * @return true if the sign message was display, and false otherwise
+   */
+  boolean signMessageDisplayed();
 
 }

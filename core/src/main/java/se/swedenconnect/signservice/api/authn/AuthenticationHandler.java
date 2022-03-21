@@ -30,9 +30,10 @@ import se.swedenconnect.signservice.api.session.SignServiceContext;
  * <b>authenticate><b> - Initiates the authentication operation with the supplied authentication requirements and the
  * supplied session context. If the authentication can be performed without directing the user to a remote
  * authentication service the result is delivered directly in the result object
- * ({@link AuthenticationResult#getAssertion()}. If the user needs to be directed to a remote authentication service the
- * result object will contain the HTTP request object, see {@link AuthenticationResult#getHttpRequestMessage()}. In
- * these cases, the authentication process is resumed by invoking {@code resumeAuthentication}.
+ * {@link AuthenticationResultChoice#getAuthenticationResult()} If the user needs to be directed to a remote
+ * authentication service the result object will contain the HTTP request object, see
+ * {@link AuthenticationResultChoice#getHttpRequestMessage()}. In these cases, the authentication process is resumed by
+ * invoking {@code resumeAuthentication}.
  * </p>
  * <p>
  * <b>resumeAuthentication</b> - In the cases where a call to {@code authenticate} led to the user being directed to a
@@ -55,22 +56,32 @@ public interface AuthenticationHandler {
    *
    * @param authnRequirements the requested authentication requirements
    * @param context the SignService context
-   * @return an AuthenticationResult object
+   * @return a choice object holding the authentication result or a HTTP request object (indicating that the user should
+   *           be directed to an authentication service)
    * @throws UserAuthenticationException for authentication errors
    */
-  AuthenticationResult authenticate(final AuthnRequirements authnRequirements, final SignServiceContext context)
+  AuthenticationResultChoice authenticate(final AuthnRequirements authnRequirements, final SignServiceContext context)
       throws UserAuthenticationException;
 
   /**
    * Resumes an authentication process.
    *
    * @param httpRequest the HTTP servlet request (containing authentication result from the remote authentication
-   *   service)
+   *          service)
    * @param context the SignService context
-   * @return an AuthenticationResult object
+   * @return a choice object holding the authentication result or a HTTP request object (indicating that the user should
+   *           be directed to an authentication service)
    * @throws UserAuthenticationException for authentication errors
    */
-  AuthenticationResult resumeAuthentication(final HttpServletRequest httpRequest, final SignServiceContext context)
-      throws UserAuthenticationException;
+  AuthenticationResultChoice resumeAuthentication(final HttpServletRequest httpRequest,
+      final SignServiceContext context) throws UserAuthenticationException;
 
+  /**
+   * A predicate that given a request tells whether this handler can process the request. This method must be invoked
+   * before {@link #resumeAuthentication(HttpServletRequest, SignServiceContext)} is called.
+   *
+   * @param httpRequest the HTTP request
+   * @return true if the handler can process the request and false otherwise
+   */
+  boolean canProcess(final HttpServletRequest httpRequest);
 }

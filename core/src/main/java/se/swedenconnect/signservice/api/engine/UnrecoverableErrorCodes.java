@@ -26,6 +26,12 @@ public class UnrecoverableErrorCodes {
   /** Prefix for "unrecoverable" error codes. */
   private static final String ERROR_PREFIX = "error.unrecoverable.";
 
+  /** A requested resource was not found. */
+  public static final String NOT_FOUND = ERROR_PREFIX + "not-found";
+
+  /** Error getting HTTP resource. */
+  public static final String HTTP_GET_ERROR = ERROR_PREFIX + "http-get-error";
+
   /** The client is not not known to the SignService (i.e., is not registered). */
   public static final String UNKNOWN_CLIENT = ERROR_PREFIX + "unknown-client";
 
@@ -38,6 +44,9 @@ public class UnrecoverableErrorCodes {
   public static final String PROTOCOL_ERROR = ERROR_PREFIX + "protocol-error";
 
   // TODO: Define more error codes
+
+  /** Represents an state error. */
+  public static final String STATE_ERROR = ERROR_PREFIX + "state-error";
 
   /** Represents an internal SignService error. */
   public static final String INTERNAL_ERROR = ERROR_PREFIX + "internal-error";
