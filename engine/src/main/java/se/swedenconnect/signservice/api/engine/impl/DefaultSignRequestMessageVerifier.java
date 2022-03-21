@@ -18,7 +18,6 @@ package se.swedenconnect.signservice.api.engine.impl;
 import java.security.SignatureException;
 
 import lombok.extern.slf4j.Slf4j;
-import se.idsec.signservice.security.sign.SignatureValidationResult;
 import se.swedenconnect.signservice.api.engine.SignRequestMessageVerifier;
 import se.swedenconnect.signservice.api.engine.SignServiceErrorException;
 import se.swedenconnect.signservice.api.engine.UnrecoverableErrorCodes;
@@ -71,28 +70,17 @@ public class DefaultSignRequestMessageVerifier implements SignRequestMessageVeri
     }
     else {
       try {
-        final SignatureValidationResult result = signRequestMessage.verifySignature(
-            configuration.getClientConfiguration().getTrustedCertificates());
+        signRequestMessage.verifySignature(configuration.getClientConfiguration().getTrustedCertificates());
 
-        if (result.isSuccess()) {
           log.debug("{}: Signature on message was successfully verified. [id: '{}', request-id: '{}']",
               configuration.getName(), context.getId(), signRequestMessage.getRequestId());
-        }
-        else {
-          log.info("{}: Signature validation of message failed. "
-              + "Status: '{}. Message: '{}' [id: '{}', request-id: '{}']",
-              configuration.getName(), result.getStatus(), result.getStatusMessage(),
-              context.getId(), signRequestMessage.getRequestId());
-
-          throw new UnrecoverableSignServiceException(
-              UnrecoverableErrorCodes.AUTHN_FAILED, "Request message signature validation failed");
-        }
       }
       catch (final SignatureException e) {
         log.info("{}: Signature validation of sign request message failed - {}. [id: '{}', request-id: '{}']",
             configuration.getName(), e.getMessage(), context.getId(), signRequestMessage.getRequestId(), e);
+
         throw new UnrecoverableSignServiceException(
-            UnrecoverableErrorCodes.AUTHN_FAILED, "Request message is not signed", e);
+            UnrecoverableErrorCodes.AUTHN_FAILED, "Request message signature validation failed: " + e.getMessage());
       }
     }
 

@@ -21,7 +21,6 @@ import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.List;
 
-import se.idsec.signservice.security.sign.SignatureValidationResult;
 import se.swedenconnect.signservice.api.protocol.types.AuthnRequirements;
 import se.swedenconnect.signservice.api.protocol.types.MessageConditions;
 import se.swedenconnect.signservice.api.protocol.types.SignatureRequirements;
@@ -58,11 +57,9 @@ public interface SignRequestMessage extends Serializable {
    * </p>
    *
    * @param certificates a list of certificates that are acceptable as signer certificates.
-   * @return a SignatureValidationResult object
-   * @throws SignatureException for errors during the validation process (pure signature validation errors are reported
-   *           in the returned result)
+   * @throws SignatureException for signature validation errors
    */
-  SignatureValidationResult verifySignature(final List<X509Certificate> certificates) throws SignatureException;
+  void verifySignature(final List<X509Certificate> certificates) throws SignatureException;
 
   /**
    * Gets the "relay state" parameter that is associated with the message.
