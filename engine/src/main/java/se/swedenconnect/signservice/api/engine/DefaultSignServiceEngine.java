@@ -33,6 +33,7 @@ import se.swedenconnect.signservice.api.engine.session.SignOperationState;
 import se.swedenconnect.signservice.api.protocol.ProtocolException;
 import se.swedenconnect.signservice.api.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.api.session.SignServiceSession;
+import se.swedenconnect.signservice.api.storage.MessageReplayException;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
 
@@ -148,6 +149,19 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       // Decode the incoming request ...
       //
       final SignRequestMessage signRequestMessage = this.decodeMessage(httpRequest, context);
+
+      // Make sure that this is not a replay attack ...
+      //
+      try {
+        this.engineConfiguration.getMessageReplayChecker().checkReplay(signRequestMessage.getRequestId());
+      }
+      catch (final MessageReplayException e) {
+        log.warn("{}: Replay attack detected for message '{}' [id: '{}']",
+            this.engineConfiguration.getName(), signRequestMessage.getRequestId(), context.getId());
+
+        throw new UnrecoverableSignServiceException(
+            UnrecoverableErrorCodes.REPLAY_ATTACK, "Message is already being processed");
+      }
 
       // Verify sign request message ...
       //
