@@ -3,7 +3,7 @@
 
 # Signature Service according to the Swedish eID Framework
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This repository comprises of source code for building a Signature Service according to the Swedish eID 
 Framework specifications - https://docs.swedenconnect.se/technical-framework.
@@ -36,4 +36,4 @@ This repository comprises of the following modules:
 
 -----
 
-Copyright &copy; 2022, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under the MIT license.
+Copyright &copy; 2022, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).

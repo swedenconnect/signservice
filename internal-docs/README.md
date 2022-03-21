@@ -84,26 +84,36 @@ When implementing there are a number of useful libraries that can be used. This 
   - And more. Check https://github.com/swedenconnect.
   
 
-
-
 ## Code Style
 
-All developers contributing to this project should follow the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html). Read it!
+All developers contributing to this project should follow the [Spring Framework Code Style](https://github.com/spring-projects/spring-framework/wiki/Code-Style). Read it!
 
 ### Code Style Templates
 
-* Eclipse: [eclipse-java-google-style.xml](eclipse-java-google-style.xml)
-* IntelliJ: [intellij-java-google-style.xml](intellij-java-google-style.xml)
+* Eclipse: [code-style/spring-eclipse-code-style.xml](spring-eclipse-code-style.xml)
+* IntelliJ: [code-style/spring-intellij-code-style.xml](spring-intellij-code-style.xml)
 
-### MIT License Header
+**Note**: For IntelliJ also make sure to set the editor in "never join already wrapped lines"-mode. See this [article](https://intellij-support.jetbrains.com/hc/en-us/community/posts/360006393539-How-to-prevent-IntelliJ-from-changing-file-formatting-if-lines-meet-hard-wrap-constraints-).
+
+### Apache v 2.0 License Header
 
 Include the following header in all Java files:
 
 ```
 /*
- * MIT License
- * 
  * Copyright 2022 Sweden Connect
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 ```
 
