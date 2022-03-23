@@ -35,6 +35,9 @@ public class UnrecoverableErrorCodes {
   /** The client is not not known to the SignService (i.e., is not registered). */
   public static final String UNKNOWN_CLIENT = ERROR_PREFIX + "unknown-client";
 
+  /** Replay-attack detected. */
+  public static final String REPLAY_ATTACK = ERROR_PREFIX + "replay-attack-detected";
+
   /**
    * A request received from the client could not be validated, i.e., its signature failed to verify.
    */
