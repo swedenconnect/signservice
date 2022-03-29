@@ -29,7 +29,6 @@ public interface RequestedCertificateAttribute extends CertificateAttributeIdent
    *
    * @return the value to use if no mapping can be found, or null if no default value has been assigned
    */
-  // TODO: Will it always be String values?
   String getDefaultValue();
 
   /**
@@ -37,6 +36,6 @@ public interface RequestedCertificateAttribute extends CertificateAttributeIdent
    *
    * @return tells whether the attribute is required
    */
-  Boolean isRequired();
+  boolean isRequired();
 
 }

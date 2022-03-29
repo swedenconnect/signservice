@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.api.authn.types;
+package se.swedenconnect.signservice.core.attribute;
 
 import java.util.List;
 

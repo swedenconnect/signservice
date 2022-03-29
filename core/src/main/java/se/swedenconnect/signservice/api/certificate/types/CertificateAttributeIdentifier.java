@@ -32,6 +32,19 @@ public interface CertificateAttributeIdentifier extends Serializable {
 
   /**
    * Gets the identifier (name) of the certificate attribute.
+   * <p>
+   * This identifier is a reference to the certificate attribute or name type where the requester wants to store this
+   * attribute value. The information in this attribute depends on the {@link CertificateAttributeType} value. If the
+   * type is "rdn" or "sda", then this attribute MUST contain a string representation of an object identifier (OID). If
+   * the type is "san" (Subject Alternative Name) and the target name is a GeneralName, then this identifier MUST hold a
+   * string representation of the tag value of the target GeneralName type, e.g. "1" for rfc822Name (e-mail) or "2" for
+   * dNSName. If the type is "san" and the target name form is an OtherName, then this attribute value MUST include a
+   * string representation of the object identifier of the target OtherName form.
+   * </p>
+   * <p>
+   * Representation of an OID as a string in this attribute MUST consist of a sequence of integers delimited by a dot.
+   * This string MUST not contain white space or line breaks. Example: "2.5.4.32".
+   * </p>
    *
    * @return the attribute identifier
    */

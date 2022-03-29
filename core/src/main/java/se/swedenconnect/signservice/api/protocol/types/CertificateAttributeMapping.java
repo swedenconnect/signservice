@@ -18,7 +18,7 @@ package se.swedenconnect.signservice.api.protocol.types;
 import java.io.Serializable;
 import java.util.List;
 
-import se.swedenconnect.signservice.api.authn.types.IdentityAttributeIdentifier;
+import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
 
 /**
  * Describes how a signer's identity attribute(s) are mapped to a certificate attribute to be placed in the issued

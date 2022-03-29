@@ -91,7 +91,7 @@
         <setting id="org.eclipse.jdt.core.formatter.insert_space_after_opening_paren_in_parenthesized_expression" value="do not insert"/>
         <setting id="org.eclipse.jdt.core.formatter.text_block_indentation" value="0"/>
         <setting id="org.eclipse.jdt.core.formatter.align_type_members_on_columns" value="false"/>
-        <setting id="org.eclipse.jdt.core.formatter.alignment_for_assignment" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.alignment_for_assignment" value="16"/>
         <setting id="org.eclipse.jdt.core.formatter.alignment_for_module_statements" value="16"/>
         <setting id="org.eclipse.jdt.core.formatter.indent_body_declarations_compare_to_type_header" value="true"/>
         <setting id="org.eclipse.jdt.core.formatter.insert_space_between_empty_parens_in_method_declaration" value="do not insert"/>
