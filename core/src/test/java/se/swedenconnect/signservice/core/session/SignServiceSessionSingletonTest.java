@@ -41,7 +41,7 @@ public class SignServiceSessionSingletonTest {
   public void testInit() {
     try {
       SignServiceSessionSingleton.init(new MockedSignServiceSession("ABC123"));
-      Assertions.assertEquals("ABC123", SignServiceSessionSingleton.getSession().getSessionId());
+      Assertions.assertEquals("ABC123", SignServiceSessionSingleton.getSession().getId());
     }
     finally {
       SignServiceSessionSingleton.clear();
@@ -51,7 +51,7 @@ public class SignServiceSessionSingletonTest {
   @Test
   public void testClear() {
     SignServiceSessionSingleton.init(new MockedSignServiceSession("ABC123"));
-    Assertions.assertEquals("ABC123", SignServiceSessionSingleton.getSession().getSessionId());
+    Assertions.assertEquals("ABC123", SignServiceSessionSingleton.getSession().getId());
     SignServiceSessionSingleton.clear();
     Assertions.assertNull(SignServiceSessionSingleton.getSession());
   }
@@ -65,18 +65,18 @@ public class SignServiceSessionSingletonTest {
     }
 
     @Override
-    public String getSessionId() {
+    public String getId() {
       return this.sessionId;
     }
 
     @Override
-    public <T extends Serializable> T getSessionAttribute(String name)
+    public <T extends Serializable> T getAttribute(String name)
         throws IllegalStateException {
       return null;
     }
 
     @Override
-    public <T extends Serializable> T getSessionAttribute(String name, Class<T> type)
+    public <T extends Serializable> T getAttribute(String name, Class<T> type)
         throws IllegalStateException, ClassCastException {
       return null;
     }
@@ -87,12 +87,12 @@ public class SignServiceSessionSingletonTest {
     }
 
     @Override
-    public List<String> getSessionAttributeNames() throws IllegalStateException {
+    public List<String> getAttributeNames() throws IllegalStateException {
       return null;
     }
 
     @Override
-    public <T extends Serializable> void setSessionAttribute(String name, T attribute)
+    public <T extends Serializable> void setAttribute(String name, T attribute)
         throws IllegalStateException {
     }
 
@@ -101,7 +101,7 @@ public class SignServiceSessionSingletonTest {
     }
 
     @Override
-    public void removeSessionAttribute(String name) throws IllegalStateException {
+    public void removeAttribute(String name) throws IllegalStateException {
     }
 
     @Override

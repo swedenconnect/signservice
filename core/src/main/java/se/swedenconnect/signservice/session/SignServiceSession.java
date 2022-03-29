@@ -28,14 +28,14 @@ import javax.servlet.http.HttpSession;
 public interface SignServiceSession {
 
   /** The name of the session object that holds the {@link SignServiceContext}. */
-  String CONTEXT_SESSION_NAME = SignServiceContext.class.getPackageName() + ".Context";
+  String CONTEXT_NAME = SignServiceContext.class.getPackageName() + ".Context";
 
   /**
    * Gets the unique ID for the session.
    *
    * @return the session ID
    */
-  String getSessionId();
+  String getId();
 
   /**
    * Gets a named session attribute.
@@ -45,7 +45,7 @@ public interface SignServiceSession {
    * @return the attribute or null if no such attribute is available
    * @throws IllegalStateException if this method is called on an invalidated session
    */
-  <T extends Serializable> T getSessionAttribute(final String name) throws IllegalStateException;
+  <T extends Serializable> T getAttribute(final String name) throws IllegalStateException;
 
   /**
    * Gets a named session attribute having the specified type.
@@ -57,7 +57,7 @@ public interface SignServiceSession {
    * @throws IllegalStateException if this method is called on an invalidated session
    * @throws ClassCastException if the attribute exists but cannot be cast to the given type
    */
-  <T extends Serializable> T getSessionAttribute(final String name, final Class<T> type)
+  <T extends Serializable> T getAttribute(final String name, final Class<T> type)
       throws IllegalStateException, ClassCastException;
 
   /**
@@ -78,7 +78,7 @@ public interface SignServiceSession {
    * @return a list of attribute names
    * @throws IllegalStateException if this method is called on an invalidated session
    */
-  List<String> getSessionAttributeNames() throws IllegalStateException;
+  List<String> getAttributeNames() throws IllegalStateException;
 
   /**
    * Adds a session attribute to the session.
@@ -88,12 +88,12 @@ public interface SignServiceSession {
    * @param attribute the attribute value
    * @throws IllegalStateException if this method is called on an invalidated session
    */
-  <T extends Serializable> void setSessionAttribute(final String name, final T attribute) throws IllegalStateException;
+  <T extends Serializable> void setAttribute(final String name, final T attribute) throws IllegalStateException;
 
   /**
    * Adds the {@link SignServiceContext} to the session.
    * <p>
-   * This method is a convinience method that corresponds to the call
+   * This method is a convenience method that corresponds to the call
    * {@code setSessionAttribute(SignServiceSession.CONTEXT_SESSION_NAME, context)}.
    * </p>
    *
@@ -108,7 +108,7 @@ public interface SignServiceSession {
    * @param name the attribute name
    * @throws IllegalStateException if this method is called on an invalidated session
    */
-  void removeSessionAttribute(final String name) throws IllegalStateException;
+  void removeAttribute(final String name) throws IllegalStateException;
 
   /**
    * Invalidates this session then unbinds any objects bound to it.
