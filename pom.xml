@@ -93,6 +93,8 @@
 
   <modules>
     <module>core</module>
+    <module>authn</module>
+    <module>protocol</module>
     <module>engine</module>
   </modules>
 
@@ -126,7 +128,7 @@
         <version>4.0.1</version>
         <scope>provided</scope>
       </dependency>
-
+      
     </dependencies>
 
   </dependencyManagement>
@@ -148,12 +150,19 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>    
 
-    <!-- We use JUnit 5 for our tests -->  
+    <!-- We use JUnit 5 and Mockito for our tests -->  
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
-    </dependency>  
+    </dependency>
+    
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>4.4.0</version>
+      <scope>test</scope>
+    </dependency>
 
   </dependencies>
 

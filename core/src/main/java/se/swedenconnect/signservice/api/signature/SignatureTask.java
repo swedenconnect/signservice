@@ -16,7 +16,6 @@
 package se.swedenconnect.signservice.api.signature;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Representation of a "signature task". A task without a signature is used to represent the data to-be-signed and a
@@ -53,6 +52,14 @@ public interface SignatureTask extends Serializable {
   AdESObject getAdESObject();
 
   /**
+   * Gets the URI identifying one or more processing rules that the Signing Service MUST apply when processing and using
+   * the provided signed information octets.
+   *
+   * @return processing rules URI or null
+   */
+  String getProcessingRulesUri();
+
+  /**
    * Gets the raw "to-be-signed" data.
    *
    * @return to-be-signed data
@@ -71,13 +78,6 @@ public interface SignatureTask extends Serializable {
    *
    * @return the signature algorithm identifier, or null if no signature is present
    */
-  String getSignatureId();
-
-  /**
-   * Gets additional data associated with the sign task.
-   *
-   * @return additional data, or null if none is available
-   */
-  List<Object> getOther();
+  String getSignatureAlgorithmUri();
 
 }

@@ -37,4 +37,15 @@ public interface MessageConditions extends Serializable {
    */
   Instant getNotAfter();
 
+  /**
+   * Checks whether the supplied instant meets the not-before and not-after conditions.
+   * <p>
+   * In case not-before or not-after are not set, it means "accept".
+   * </p>
+   *
+   * @param instant the instant to test
+   * @return true if the supplied instant meets the criteria and false otherwise
+   */
+  boolean isWithinRange(final Instant instant);
+
 }

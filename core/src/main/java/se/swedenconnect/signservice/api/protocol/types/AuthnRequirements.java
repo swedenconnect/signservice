@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import se.swedenconnect.signservice.api.authn.types.AuthnContextIdentifier;
-import se.swedenconnect.signservice.api.authn.types.IdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 
 /**
  * Representation of the authentication requirements. This means the requirements the client puts on how the user should

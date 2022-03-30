@@ -71,6 +71,85 @@
 
   <dependencies>
 
+    <!-- Protocol base -->
+    <dependency>
+      <groupId>se.swedenconnect.signservice</groupId>
+      <artifactId>signservice-protocol-base</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- Authn base -->
+    <dependency>
+      <groupId>se.swedenconnect.signservice</groupId>
+      <artifactId>signservice-authn-base</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- SignService commons -->
+    <dependency>
+      <groupId>se.idsec.signservice.commons</groupId>
+      <artifactId>signservice-commons</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>se.idsec.signservice.commons</groupId>
+      <artifactId>signservice-xml-commons</artifactId>
+    </dependency>
+
+    <!-- JAXB -->
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.activation</groupId>
+      <artifactId>activation</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>se.swedenconnect.schemas</groupId>
+      <artifactId>oasis-dss-jaxb</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.activation</groupId>
+          <artifactId>activation</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>se.swedenconnect.schemas</groupId>
+      <artifactId>saml-jaxb</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>se.swedenconnect.schemas.csig</groupId>
+      <artifactId>dss-ext11-jaxb</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>se.swedenconnect.schemas</groupId>
+      <artifactId>etsi-xades-jaxb</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>se.swedenconnect.schemas</groupId>
+      <artifactId>etsi-xades-ext-jaxb</artifactId>
+    </dependency>
+    
+    <!-- Test -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>

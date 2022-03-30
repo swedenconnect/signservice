@@ -21,17 +21,54 @@ package se.swedenconnect.signservice.api.signature;
 public enum SignatureType {
 
   /** XML digital signature. */
-  XML,
+  XML("XML"),
 
   /** PDF signature. */
-  PDF,
+  PDF("PDF"),
 
   /** JSON signature. */
-  JSON,
+  JSON("JSON"),
 
   /** PKCS#7 signature. */
-  CMS;
+  CMS("CMS");
 
-  // TODO: more?
+  /**
+   * Returns the textual representation of the signature type.
+   *
+   * @return the type
+   */
+  public String getType() {
+    return this.type;
+  }
+
+  /**
+   * Maps the given type to an enum constant.
+   *
+   * @param type the textual representation of the signature type
+   * @return the enum constant
+   * @throws IllegalArgumentException if no constant is matched
+   */
+  public static SignatureType fromType(final String type)
+      throws IllegalArgumentException {
+    for (final SignatureType t : SignatureType.values()) {
+      if (t.getType().equals(type) || t.name().equals(type)) {
+        return t;
+      }
+    }
+    throw new IllegalArgumentException(
+        String.format("%s is not a valid SignatureType", type));
+  }
+
+  /** The type. */
+  private String type;
+
+  /**
+   * Constructor.
+   *
+   * @param type the type
+   */
+  SignatureType(final String type) {
+    this.type = type;
+  }
 
 }

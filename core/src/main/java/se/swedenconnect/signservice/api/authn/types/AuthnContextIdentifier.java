@@ -21,12 +21,8 @@ import java.io.Serializable;
  * A representation of an "Authentication Context Identifier". This identifier is often referred to as the "level of
  * assurance" (LoA), and represented as an URI. But since the SignService Core API:s are generic it is not directly
  * represented as a String.
- *
- * <p>
- * The interface extends the {@link Comparable} because some authentication context identifiers have an ordering.
- * </p>
  */
-public interface AuthnContextIdentifier extends Serializable, Comparable<AuthnContextIdentifier> {
+public interface AuthnContextIdentifier extends Serializable {
 
   /**
    * Gets the authentication context identifier.

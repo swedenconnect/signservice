@@ -16,7 +16,6 @@
 package se.swedenconnect.signservice.api.signature;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Representation of an AdES object.
@@ -27,13 +26,6 @@ public interface AdESObject extends Serializable {
   String getSignatureId();
 
   // TODO: Stefan. Provide documentation
-  String getObjectBytes();
-
-  /**
-   * Gets additional AdES data associated with this object.
-   *
-   * @return additional AdES data, or null if none is available
-   */
-  List<Object> getOther();
+  byte[] getObjectBytes();
 
 }

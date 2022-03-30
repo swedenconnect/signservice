@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.api.authn.types;
+package se.swedenconnect.signservice.core.attribute;
 
 import java.io.Serializable;
 
@@ -27,7 +27,6 @@ public interface IdentityAttributeIdentifier extends Serializable {
    *
    * @return the "type" of attribute
    */
-  // TODO: An authentication scheme should be represented using an interface ...
   String getScheme();
 
   /**
