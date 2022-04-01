@@ -30,8 +30,8 @@ import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.idsec.signservice.xml.DOMUtils;
 import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.dss_1_0.SignRequest;
-import se.swedenconnect.signservice.api.protocol.ProtocolException;
-import se.swedenconnect.signservice.api.protocol.ProtocolProcessingRequirements.SignatureRequirement;
+import se.swedenconnect.signservice.protocol.ProtocolException;
+import se.swedenconnect.signservice.protocol.ProtocolProcessingRequirements.SignatureRequirement;
 
 /**
  * Test cases for DssSignRequestMessage.

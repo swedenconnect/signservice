@@ -15,7 +15,7 @@
  */
 package se.swedenconnect.signservice.protocol.dss;
 
-import se.swedenconnect.signservice.api.protocol.ProtocolProcessingRequirements;
+import se.swedenconnect.signservice.protocol.ProtocolProcessingRequirements;
 
 /**
  * {@link ProtocolProcessingRequirements} for the implementation according to <a href=

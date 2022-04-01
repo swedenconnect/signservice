@@ -18,7 +18,8 @@ package se.swedenconnect.signservice.signature.impl;
 import java.util.Arrays;
 import java.util.Objects;
 
-import se.swedenconnect.signservice.api.signature.AdESObject;
+import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
+import se.swedenconnect.signservice.signature.AdESObject;
 
 /**
  * The default implementation of the {@link AdESObject} interface.
@@ -59,6 +60,7 @@ public class DefaultAdESObject implements AdESObject {
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -69,6 +71,7 @@ public class DefaultAdESObject implements AdESObject {
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public boolean equals(final Object obj) {
     if (this == obj) {
       return true;

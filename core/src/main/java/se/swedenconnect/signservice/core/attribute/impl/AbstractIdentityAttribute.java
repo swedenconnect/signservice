@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 
 /**
@@ -86,6 +87,7 @@ public abstract class AbstractIdentityAttribute<T> extends DefaultIdentityAttrib
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
@@ -95,6 +97,7 @@ public abstract class AbstractIdentityAttribute<T> extends DefaultIdentityAttrib
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public boolean equals(final Object obj) {
     if (this == obj) {
       return true;
@@ -113,10 +116,10 @@ public abstract class AbstractIdentityAttribute<T> extends DefaultIdentityAttrib
   @Override
   public String toString() {
     if (this.values.size() == 1) {
-      return String.format("%s: %s", this.values.get(0));
+      return String.format("%s: %s", super.toString(), this.values.get(0));
     }
     else {
-      return String.format("%s: %s", this.values);
+      return String.format("%s: %s", super.toString(), this.values);
     }
   }
 

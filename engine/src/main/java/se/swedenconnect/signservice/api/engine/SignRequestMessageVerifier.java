@@ -17,7 +17,8 @@ package se.swedenconnect.signservice.api.engine;
 
 import se.swedenconnect.signservice.api.engine.config.EngineConfiguration;
 import se.swedenconnect.signservice.api.engine.session.EngineContext;
-import se.swedenconnect.signservice.api.protocol.SignRequestMessage;
+import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
+import se.swedenconnect.signservice.protocol.SignRequestMessage;
 
 /**
  * Interface for verifying a {@link SignRequestMessage}.

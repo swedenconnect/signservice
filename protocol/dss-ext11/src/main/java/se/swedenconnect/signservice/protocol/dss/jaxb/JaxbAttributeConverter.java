@@ -32,13 +32,13 @@ import se.swedenconnect.schemas.saml_2_0.assertion.Attribute;
 import se.swedenconnect.signservice.core.attribute.AttributeConverter;
 import se.swedenconnect.signservice.core.attribute.AttributeException;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
-import se.swedenconnect.signservice.core.attribute.SamlIdentityAttribute;
-import se.swedenconnect.signservice.core.attribute.impl.AbstractSamlIdentityAttribute;
-import se.swedenconnect.signservice.core.attribute.impl.BooleanSamlIdentityAttribute;
-import se.swedenconnect.signservice.core.attribute.impl.DateSamlIdentityAttribute;
-import se.swedenconnect.signservice.core.attribute.impl.InstantSamlIdentityAttribute;
-import se.swedenconnect.signservice.core.attribute.impl.IntegerSamlIdentityAttribute;
-import se.swedenconnect.signservice.core.attribute.impl.StringSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.saml.SamlIdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.saml.impl.AbstractSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.saml.impl.BooleanSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.saml.impl.DateSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.saml.impl.InstantSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.saml.impl.IntegerSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
 
 /**
  * An {@link AttributeConverter} for the JAXB representation of a SAML {@link Attribute}.
@@ -108,26 +108,26 @@ public class JaxbAttributeConverter implements AttributeConverter<Attribute> {
     // Assert that all values have the same type and return this type.
     final Class<?> valueType = processValueType(attribute.getAttributeValues());
     AbstractSamlIdentityAttribute<?> genericAttribute;
-    if (valueType.equals(String.class)) {
+    if (String.class.isAssignableFrom(valueType)) {
       genericAttribute = new StringSamlIdentityAttribute(attributeName, friendlyName,
           attribute.getAttributeValues().stream()
               .map(String.class::cast)
               .collect(Collectors.toList()));
     }
-    else if (valueType.equals(Boolean.class)) {
+    else if (Boolean.class.isAssignableFrom(valueType)) {
       genericAttribute = new BooleanSamlIdentityAttribute(attributeName, friendlyName,
           attribute.getAttributeValues().stream()
               .map(Boolean.class::cast)
               .collect(Collectors.toList()));
     }
-    else if (valueType.equals(BigInteger.class)) {
+    else if (BigInteger.class.isAssignableFrom(valueType)) {
       genericAttribute = new IntegerSamlIdentityAttribute(attributeName, friendlyName,
           attribute.getAttributeValues().stream()
               .map(BigInteger.class::cast)
               .map(BigInteger::intValue)
               .collect(Collectors.toList()));
     }
-    else if (valueType.equals(XMLGregorianCalendar.class)) {
+    else if (XMLGregorianCalendar.class.isAssignableFrom(valueType)) {
       // date or dateTime?
       final XMLGregorianCalendar t = XMLGregorianCalendar.class.cast(attribute.getAttributeValues().get(0));
       if ("date".equals(t.getXMLSchemaType().getLocalPart())) {

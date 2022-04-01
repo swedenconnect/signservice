@@ -23,19 +23,23 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
-import se.swedenconnect.signservice.api.authn.AuthenticationResult;
-import se.swedenconnect.signservice.api.authn.AuthenticationResultChoice;
-import se.swedenconnect.signservice.api.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.api.engine.config.EngineConfiguration;
 import se.swedenconnect.signservice.api.engine.impl.DefaultSignRequestMessageVerifier;
 import se.swedenconnect.signservice.api.engine.session.EngineContext;
 import se.swedenconnect.signservice.api.engine.session.SignOperationState;
-import se.swedenconnect.signservice.api.protocol.ProtocolException;
-import se.swedenconnect.signservice.api.protocol.SignRequestMessage;
-import se.swedenconnect.signservice.api.session.SignServiceSession;
-import se.swedenconnect.signservice.api.storage.MessageReplayException;
+import se.swedenconnect.signservice.authn.AuthenticationResult;
+import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
+import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
+import se.swedenconnect.signservice.engine.SignServiceEngine;
+import se.swedenconnect.signservice.engine.SignServiceError;
+import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
+import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
+import se.swedenconnect.signservice.protocol.ProtocolException;
+import se.swedenconnect.signservice.protocol.SignRequestMessage;
+import se.swedenconnect.signservice.session.SignServiceSession;
+import se.swedenconnect.signservice.storage.MessageReplayException;
 
 /**
  * The default implementation of the {@link SignServiceEngine} API.

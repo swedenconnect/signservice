@@ -20,13 +20,13 @@ import java.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.api.engine.SignRequestMessageVerifier;
 import se.swedenconnect.signservice.api.engine.SignServiceErrorException;
-import se.swedenconnect.signservice.api.engine.UnrecoverableErrorCodes;
-import se.swedenconnect.signservice.api.engine.UnrecoverableSignServiceException;
 import se.swedenconnect.signservice.api.engine.config.EngineConfiguration;
 import se.swedenconnect.signservice.api.engine.session.EngineContext;
-import se.swedenconnect.signservice.api.protocol.ProtocolProcessingRequirements;
-import se.swedenconnect.signservice.api.protocol.ProtocolProcessingRequirements.SignatureRequirement;
-import se.swedenconnect.signservice.api.protocol.SignRequestMessage;
+import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
+import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
+import se.swedenconnect.signservice.protocol.ProtocolProcessingRequirements;
+import se.swedenconnect.signservice.protocol.SignRequestMessage;
+import se.swedenconnect.signservice.protocol.ProtocolProcessingRequirements.SignatureRequirement;
 
 /**
  * Default implementation of the {@link SignRequestMessageVerifier} interface.

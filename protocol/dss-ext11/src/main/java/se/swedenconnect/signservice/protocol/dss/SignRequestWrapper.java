@@ -115,45 +115,10 @@ public class SignRequestWrapper extends SignRequest implements Serializable {
     return this.signRequestExtension;
   }
 
-  /**
-   * Assigns the SignRequestExtension by adding it to OptionalInputs.
-   * <p>
-   * Note: If the OptionalInputs already contains data it is overwritten.
-   * </p>
-   *
-   * @param signRequestExtension the extension to add
-   */
-  public void setSignRequestExtension(final SignRequestExtension signRequestExtension) {
-    if (signRequestExtension == null) {
-      this.signRequest.setOptionalInputs(null);
-      this.signRequestExtension = null;
-      return;
-    }
-
-    try {
-      final AnyType optionalInputs = dssObjectFactory.createAnyType();
-      optionalInputs.getAnies().add(JAXBMarshaller.marshall(signRequestExtension).getDocumentElement());
-      this.signRequest.setOptionalInputs(optionalInputs);
-      this.signRequestExtension = signRequestExtension;
-    }
-    catch (final JAXBException e) {
-      log.error("Failed to marshall SignRequestExtension - {}", e.getMessage(), e);
-      throw new DssProtocolException("Failed to marshall SignRequestExtension", e);
-    }
-  }
-
   /** {@inheritDoc} */
   @Override
   public AnyType getOptionalInputs() {
     return this.signRequest.getOptionalInputs();
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void setOptionalInputs(final AnyType value) {
-    // Reset the signRequestExtension. It may be set as an AnyType.
-    this.signRequestExtension = null;
-    this.signRequest.setOptionalInputs(value);
   }
 
   /** {@inheritDoc} */
@@ -210,42 +175,6 @@ public class SignRequestWrapper extends SignRequest implements Serializable {
       }
     }
     return null;
-  }
-
-  /**
-   * Utility method that add a SignTasks object to the InputDocuments.
-   *
-   * @param signTasks the object to add
-   */
-  public void setSignTasks(final SignTasks signTasks) {
-    this.signTasks = signTasks;
-    if (this.signRequest.getInputDocuments() == null) {
-      if (this.signTasks == null) {
-        return;
-      }
-      this.signRequest.setInputDocuments(dssObjectFactory.createInputDocuments());
-    }
-    Element signTasksElement;
-    try {
-      signTasksElement = JAXBMarshaller.marshall(this.signTasks).getDocumentElement();
-    }
-    catch (final JAXBException e) {
-      log.error("Failed to marshall SignTasks - {}", e.getMessage(), e);
-      throw new DssProtocolException("Failed to marshall SignTasks", e);
-    }
-
-    for (final Object o : this.signRequest.getInputDocuments().getDocumentsAndTransformedDatasAndDocumentHashes()) {
-      if (o instanceof AnyType) {
-        // Replace the entire object.
-        final AnyType other = (AnyType) o;
-        other.unsetAnies();
-        other.getAnies().add(signTasksElement);
-        return;
-      }
-    }
-    final AnyType other = dssObjectFactory.createAnyType();
-    other.getAnies().add(signTasksElement);
-    this.signRequest.getInputDocuments().getDocumentsAndTransformedDatasAndDocumentHashes().add(other);
   }
 
   /** {@inheritDoc} */

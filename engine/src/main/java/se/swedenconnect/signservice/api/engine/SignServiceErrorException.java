@@ -15,6 +15,8 @@
  */
 package se.swedenconnect.signservice.api.engine;
 
+import se.swedenconnect.signservice.engine.SignServiceError;
+
 /**
  * Exception class for reporting a {@link SignServiceError}.
  */
