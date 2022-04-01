@@ -17,6 +17,7 @@ package se.swedenconnect.signservice.core.attribute.impl;
 
 import java.util.Objects;
 
+import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
 
 /**
@@ -69,12 +70,14 @@ public class DefaultIdentityAttributeIdentifier implements IdentityAttributeIden
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public int hashCode() {
     return Objects.hash(this.identifier, this.scheme);
   }
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public boolean equals(final Object obj) {
     if (this == obj) {
       return true;

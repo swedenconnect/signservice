@@ -28,9 +28,9 @@ import org.w3c.dom.Document;
 
 import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.idsec.signservice.xml.DOMUtils;
-import se.swedenconnect.signservice.api.protocol.ProtocolException;
-import se.swedenconnect.signservice.api.protocol.SignRequestMessage;
-import se.swedenconnect.signservice.api.session.SignServiceContext;
+import se.swedenconnect.signservice.protocol.ProtocolException;
+import se.swedenconnect.signservice.protocol.SignRequestMessage;
+import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * Test cases for DssProtocolHandler

@@ -59,22 +59,4 @@ public class DefaultIdentityAttributeIdentifierTest {
     Assertions.assertEquals("[SAML] urn:oid:1.2.752.29.4.13", id2.toString());
   }
 
-  @SuppressWarnings("unlikely-arg-type")
-  @Test
-  public void testEquals() {
-    final DefaultIdentityAttributeIdentifier id =
-        new DefaultIdentityAttributeIdentifier("SAML", "urn:oid:1.2.752.29.4.13", "personalIdentityNumber");
-    final DefaultIdentityAttributeIdentifier id2 =
-        new DefaultIdentityAttributeIdentifier("SAMLv2", "urn:oid:1.2.752.29.4.13", "personalIdentityNumber");
-
-    // Scheme is not the same
-    Assertions.assertFalse(id.equals(id2));
-    Assertions.assertFalse(id2.equals(id));
-
-    // Other weird tests - just to get a good coverage
-    Assertions.assertTrue(id.equals(id));
-    Assertions.assertFalse(id.equals(null));
-    Assertions.assertFalse(id.equals("hej"));
-    Assertions.assertFalse(id.equals(new DefaultIdentityAttributeIdentifier("SAML", "urn:oid:2.5.4.42", null)));
-  }
 }

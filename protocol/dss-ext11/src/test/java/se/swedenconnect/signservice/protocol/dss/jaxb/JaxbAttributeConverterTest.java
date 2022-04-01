@@ -15,7 +15,12 @@
  */
 package se.swedenconnect.signservice.protocol.dss.jaxb;
 
+import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Arrays;
+
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,8 +29,12 @@ import org.mockito.Mockito;
 import se.swedenconnect.schemas.saml_2_0.assertion.Attribute;
 import se.swedenconnect.signservice.core.attribute.AttributeException;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
-import se.swedenconnect.signservice.core.attribute.SamlIdentityAttribute;
-import se.swedenconnect.signservice.core.attribute.impl.StringSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.saml.SamlIdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.saml.impl.BooleanSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.saml.impl.DateSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.saml.impl.InstantSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.saml.impl.IntegerSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
 
 /**
  * Test cases for JaxbAttributeConverter.
@@ -51,7 +60,7 @@ public class JaxbAttributeConverterTest {
   }
 
   @Test
-  public void testConvertAndBack() throws AttributeException {
+  public void testConvertAndBackString() throws AttributeException {
     final StringSamlIdentityAttribute attr = new StringSamlIdentityAttribute(
         "urn:oid:2.5.4.42", "givenName", Arrays.asList("Hans", "Martin"));
 
@@ -66,6 +75,115 @@ public class JaxbAttributeConverterTest {
     final IdentityAttribute<?> genAttr = converter.convert(jaxb);
 
     Assertions.assertEquals(attr, genAttr);
+  }
+
+  @Test
+  public void testConvertAndBackBoolean() throws AttributeException {
+    final BooleanSamlIdentityAttribute attr = new BooleanSamlIdentityAttribute(
+        "urn:oid:1.2.3.4", "test", Boolean.TRUE);
+
+    final Attribute jaxb = converter.convert(attr);
+
+    Assertions.assertEquals("urn:oid:1.2.3.4", jaxb.getName());
+    Assertions.assertEquals("test", jaxb.getFriendlyName());
+    Assertions.assertEquals(SamlIdentityAttribute.DEFAULT_NAME_FORMAT, jaxb.getNameFormat());
+    Assertions.assertEquals(Boolean.TRUE, jaxb.getAttributeValues().get(0));
+
+    final IdentityAttribute<?> genAttr = converter.convert(jaxb);
+
+    Assertions.assertEquals(attr, genAttr);
+  }
+
+  @Test
+  public void testConvertAndBackInteger() throws AttributeException {
+    final IntegerSamlIdentityAttribute attr = new IntegerSamlIdentityAttribute(
+        "urn:oid:1.2.3.4", "test", Integer.valueOf(17));
+
+    final Attribute jaxb = converter.convert(attr);
+
+    Assertions.assertEquals("urn:oid:1.2.3.4", jaxb.getName());
+    Assertions.assertEquals("test", jaxb.getFriendlyName());
+    Assertions.assertEquals(SamlIdentityAttribute.DEFAULT_NAME_FORMAT, jaxb.getNameFormat());
+    Assertions.assertEquals(BigInteger.valueOf(17), jaxb.getAttributeValues().get(0));
+
+    final IdentityAttribute<?> genAttr = converter.convert(jaxb);
+
+    Assertions.assertEquals(attr, genAttr);
+  }
+
+  @Test
+  public void testConvertAndBackDate() throws AttributeException {
+    final DateSamlIdentityAttribute attr = new DateSamlIdentityAttribute(
+        "urn:oid:1.2.3.4", "test", LocalDate.parse("2022-04-01"));
+
+    final Attribute jaxb = converter.convert(attr);
+
+    Assertions.assertEquals("urn:oid:1.2.3.4", jaxb.getName());
+    Assertions.assertEquals("test", jaxb.getFriendlyName());
+    Assertions.assertEquals(SamlIdentityAttribute.DEFAULT_NAME_FORMAT, jaxb.getNameFormat());
+    Assertions.assertTrue(jaxb.getAttributeValues().get(0) instanceof XMLGregorianCalendar);
+    final XMLGregorianCalendar cal = (XMLGregorianCalendar) jaxb.getAttributeValues().get(0);
+    Assertions.assertEquals("date", cal.getXMLSchemaType().getLocalPart());
+    Assertions.assertEquals("2022-04-01", cal.toXMLFormat());
+
+    final IdentityAttribute<?> genAttr = converter.convert(jaxb);
+
+    Assertions.assertEquals(attr, genAttr);
+  }
+
+  @Test
+  public void testConvertAndBackInstant() throws AttributeException {
+    final InstantSamlIdentityAttribute attr = new InstantSamlIdentityAttribute(
+        "urn:oid:1.2.3.4", "test", Instant.parse("2021-12-03T10:15:30.00Z"));
+
+    final Attribute jaxb = converter.convert(attr);
+
+    Assertions.assertEquals("urn:oid:1.2.3.4", jaxb.getName());
+    Assertions.assertEquals("test", jaxb.getFriendlyName());
+    Assertions.assertEquals(SamlIdentityAttribute.DEFAULT_NAME_FORMAT, jaxb.getNameFormat());
+    Assertions.assertTrue(jaxb.getAttributeValues().get(0) instanceof XMLGregorianCalendar);
+    final XMLGregorianCalendar cal = (XMLGregorianCalendar) jaxb.getAttributeValues().get(0);
+    Assertions.assertEquals("dateTime", cal.getXMLSchemaType().getLocalPart());
+    Assertions.assertTrue(cal.toXMLFormat().startsWith("2021-12-03T"));
+
+    final IdentityAttribute<?> genAttr = converter.convert(jaxb);
+
+    Assertions.assertEquals(attr, genAttr);
+  }
+
+  @Test
+  public void testDifferentTypes() {
+    final Attribute jaxb = new Attribute();
+    jaxb.setName("urn:oid:2.5.4.42");
+    jaxb.setNameFormat(SamlIdentityAttribute.DEFAULT_NAME_FORMAT);
+    jaxb.getAttributeValues().add(new String("Kalle"));
+    jaxb.getAttributeValues().add(Boolean.TRUE);
+
+    Assertions.assertThrows(AttributeException.class, () -> {
+      converter.convert(jaxb);
+    }, "Multi-valued SAML attribute has different value types - this is not supported");
+  }
+
+  @Test
+  public void testMissingName() {
+    final Attribute jaxb = new Attribute();
+    jaxb.setNameFormat(SamlIdentityAttribute.DEFAULT_NAME_FORMAT);
+    jaxb.getAttributeValues().add(new String("Kalle"));
+
+    Assertions.assertThrows(AttributeException.class, () -> {
+      converter.convert(jaxb);
+    }, "Invalid SAML attribute - missing name");
+  }
+
+  @Test
+  public void testMissingValues() {
+    final Attribute jaxb = new Attribute();
+    jaxb.setName("urn:oid:2.5.4.42");
+    jaxb.setNameFormat(SamlIdentityAttribute.DEFAULT_NAME_FORMAT);
+
+    Assertions.assertThrows(AttributeException.class, () -> {
+      converter.convert(jaxb);
+    }, "Invalid SAML attribute - missing value(s)");
   }
 
   // TODO: More here

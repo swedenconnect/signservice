@@ -19,10 +19,11 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
-import se.swedenconnect.signservice.api.signature.AdESObject;
-import se.swedenconnect.signservice.api.signature.AdESType;
-import se.swedenconnect.signservice.api.signature.SignatureTask;
-import se.swedenconnect.signservice.api.signature.SignatureType;
+import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
+import se.swedenconnect.signservice.signature.AdESObject;
+import se.swedenconnect.signservice.signature.AdESType;
+import se.swedenconnect.signservice.signature.SignatureTask;
+import se.swedenconnect.signservice.signature.SignatureType;
 
 /**
  * Default implementation of the {@link SignatureTask} interface.
@@ -98,7 +99,7 @@ public class DefaultSignatureTask implements SignatureTask {
    * @param signatureType the signature type
    */
   public void setSignatureType(final String signatureType) {
-    this.signatureType = SignatureType.fromType(signatureType);
+    this.signatureType = signatureType != null ? SignatureType.fromType(signatureType) : null;
   }
 
   /** {@inheritDoc} */
@@ -219,6 +220,7 @@ public class DefaultSignatureTask implements SignatureTask {
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -232,6 +234,7 @@ public class DefaultSignatureTask implements SignatureTask {
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public boolean equals(final Object obj) {
     if (this == obj) {
       return true;

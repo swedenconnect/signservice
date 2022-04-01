@@ -15,9 +15,13 @@
  */
 package se.swedenconnect.signservice.core.session;
 
+import java.time.Instant;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 
 /**
  * Test cases for DefaultSignServiceContext.
@@ -37,6 +41,8 @@ public class DefaultSignServiceContextTest {
     Assertions.assertEquals("Hejsan", context2.get("Item1"));
     Assertions.assertEquals(Integer.valueOf(17), context2.get("Item2"));
     Assertions.assertArrayEquals(new String[] { "A", "B", "C" }, context2.get("Item3"));
+
+    Assertions.assertNull(context2.get("Item4", Instant.class));
   }
 
   @Test

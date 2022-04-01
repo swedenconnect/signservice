@@ -18,14 +18,14 @@ package se.swedenconnect.signservice.api.engine.config;
 import java.util.List;
 
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.api.audit.AuditLogger;
-import se.swedenconnect.signservice.api.authn.AuthenticationHandler;
-import se.swedenconnect.signservice.api.certificate.KeyAndCertificateHandler;
-import se.swedenconnect.signservice.api.client.ClientConfiguration;
-import se.swedenconnect.signservice.api.protocol.ProtocolHandler;
-import se.swedenconnect.signservice.api.session.SessionHandler;
-import se.swedenconnect.signservice.api.storage.MessageReplayChecker;
+import se.swedenconnect.signservice.audit.AuditLogger;
+import se.swedenconnect.signservice.authn.AuthenticationHandler;
+import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
+import se.swedenconnect.signservice.client.ClientConfiguration;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
+import se.swedenconnect.signservice.protocol.ProtocolHandler;
+import se.swedenconnect.signservice.session.SessionHandler;
+import se.swedenconnect.signservice.storage.MessageReplayChecker;
 
 /**
  * Interface defining the configuration API for an engine instance.

@@ -20,8 +20,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
-import se.swedenconnect.signservice.api.session.SignServiceContext;
-import se.swedenconnect.signservice.core.session.DefaultSignServiceContext;
+import se.swedenconnect.signservice.session.SignServiceContext;
+import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 
 /**
  * The {@code EngineContext} is a wrapper for the {@link SignServiceContext} that declares methods for context elements

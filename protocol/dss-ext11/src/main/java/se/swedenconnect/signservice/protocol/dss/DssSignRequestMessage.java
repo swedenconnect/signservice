@@ -55,29 +55,29 @@ import se.swedenconnect.schemas.saml_2_0.assertion.AttributeStatement;
 import se.swedenconnect.schemas.saml_2_0.assertion.AudienceRestriction;
 import se.swedenconnect.schemas.saml_2_0.assertion.Conditions;
 import se.swedenconnect.schemas.saml_2_0.assertion.NameIDType;
-import se.swedenconnect.signservice.api.certificate.types.CertificateAttributeType;
-import se.swedenconnect.signservice.api.protocol.ProtocolException;
-import se.swedenconnect.signservice.api.protocol.ProtocolProcessingRequirements;
-import se.swedenconnect.signservice.api.protocol.SignRequestMessage;
-import se.swedenconnect.signservice.api.protocol.types.AuthnRequirements;
-import se.swedenconnect.signservice.api.protocol.types.CertificateAttributeMapping;
-import se.swedenconnect.signservice.api.protocol.types.CertificateType;
-import se.swedenconnect.signservice.api.protocol.types.MessageConditions;
-import se.swedenconnect.signservice.api.protocol.types.SignatureRequirements;
-import se.swedenconnect.signservice.api.protocol.types.SigningCertificateRequirements;
-import se.swedenconnect.signservice.api.signature.SignatureTask;
-import se.swedenconnect.signservice.authn.types.SimpleAuthnContextIdentifier;
+import se.swedenconnect.signservice.authn.impl.SimpleAuthnContextIdentifier;
+import se.swedenconnect.signservice.certificate.CertificateAttributeType;
+import se.swedenconnect.signservice.certificate.CertificateType;
 import se.swedenconnect.signservice.core.attribute.AttributeException;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
 import se.swedenconnect.signservice.core.attribute.impl.DefaultIdentityAttributeIdentifier;
+import se.swedenconnect.signservice.protocol.ProtocolException;
+import se.swedenconnect.signservice.protocol.ProtocolProcessingRequirements;
+import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.dss.jaxb.JaxbAttributeConverter;
-import se.swedenconnect.signservice.protocol.types.DefaultAuthnRequirements;
-import se.swedenconnect.signservice.protocol.types.DefaultCertificateAttributeMapping;
-import se.swedenconnect.signservice.protocol.types.DefaultMessageConditions;
-import se.swedenconnect.signservice.protocol.types.DefaultRequestedCertificateAttribute;
-import se.swedenconnect.signservice.protocol.types.DefaultSignatureRequirements;
-import se.swedenconnect.signservice.protocol.types.DefaultSigningCertificateRequirements;
+import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
+import se.swedenconnect.signservice.protocol.msg.CertificateAttributeMapping;
+import se.swedenconnect.signservice.protocol.msg.MessageConditions;
+import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
+import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
+import se.swedenconnect.signservice.protocol.msg.impl.DefaultAuthnRequirements;
+import se.swedenconnect.signservice.protocol.msg.impl.DefaultCertificateAttributeMapping;
+import se.swedenconnect.signservice.protocol.msg.impl.DefaultMessageConditions;
+import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificateAttribute;
+import se.swedenconnect.signservice.protocol.msg.impl.DefaultSignatureRequirements;
+import se.swedenconnect.signservice.protocol.msg.impl.DefaultSigningCertificateRequirements;
+import se.swedenconnect.signservice.signature.SignatureTask;
 import se.swedenconnect.signservice.signature.impl.DefaultAdESObject;
 import se.swedenconnect.signservice.signature.impl.DefaultSignatureTask;
 
@@ -584,11 +584,10 @@ public class DssSignRequestMessage implements SignRequestMessage {
             .map(CertificateAttributeType::fromType)
             .orElse(null);
         final DefaultRequestedCertificateAttribute rca = new DefaultRequestedCertificateAttribute(
-            attrType, a.getCertAttributeRef());
+            attrType, a.getCertAttributeRef(), a.getFriendlyName());
         rca.setDefaultValue(a.getDefaultValue());
-        rca.setFriendlyName(a.getFriendlyName());
         rca.setRequired(a.isSetRequired() ? a.isRequired() : null);
-        cam.setRequestedCertificateAttribute(rca);
+        cam.setDestination(rca);
 
         if (a.isSetSamlAttributeNames()) {
           final Map<Integer, IdentityAttributeIdentifier> sources = new HashMap<>();

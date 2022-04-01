@@ -22,9 +22,9 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import se.swedenconnect.signservice.api.session.SignServiceContext;
-import se.swedenconnect.signservice.api.session.SignServiceSession;
-import se.swedenconnect.signservice.api.session.SignServiceSessionSingleton;
+import se.swedenconnect.signservice.session.SignServiceContext;
+import se.swedenconnect.signservice.session.SignServiceSession;
+import se.swedenconnect.signservice.session.SignServiceSessionSingleton;
 
 /**
  * Test cases for SignServiceSessionSingleton.

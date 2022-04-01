@@ -234,6 +234,12 @@
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>0.8.7</version>
+          <configuration>
+            <excludes>
+              <!-- Ignore coverage for exception classes -->
+              <exclude>**/*Exception.class</exclude>
+            </excludes>
+          </configuration>          
           <executions>
             <execution>
               <id>prepare-agent</id>
@@ -331,7 +337,6 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.7</version>
         <executions>
           <execution>
             <goals>
