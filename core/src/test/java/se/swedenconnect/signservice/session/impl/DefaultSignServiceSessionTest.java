@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 /**
  * Test class for {@link DefaultSignServiceSession}.
  */
-class DefaultSignServiceSessionTest {
+public class DefaultSignServiceSessionTest {
 
     HttpSession hSession;
     SignServiceSession session;
@@ -44,36 +44,36 @@ class DefaultSignServiceSessionTest {
     }
 
     @Test
-    void getId() {
+    void testGetId() {
         Assertions.assertEquals("1234", this.session.getId());
     }
 
     @Test
-    void getAttribute() {
+    void testGetAttribute() {
         Assertions.assertEquals("value1", this.session.getAttribute("name1"));
         Assertions.assertEquals("value2", this.session.getAttribute("name2"));
         Assertions.assertNull(this.session.getAttribute("name3"));
     }
 
     @Test
-    void getAttributeWithType() {
+    void testGetAttributeWithType() {
         Assertions.assertEquals("value1", this.session.getAttribute("name1", String.class));
     }
 
     @Test
-    void getSignServiceContext() {
+    void testGetSignServiceContext() {
         Assertions.assertInstanceOf(SignServiceContext.class, this.session.getSignServiceContext());
     }
 
     @Test
-    void setSignServiceContext() {
+    void testSetSignServiceContext() {
         final SignServiceContext ssc = mock(SignServiceContext.class);
         this.session.setSignServiceContext(ssc);
         verify(this.hSession).setAttribute(SignServiceSession.CONTEXT_NAME, ssc);
     }
 
     @Test
-    void getAttributeNames() {
+    void testGetAttributeNames() {
         final List<String> attributeNames = this.session.getAttributeNames();
         Assertions.assertTrue(attributeNames.contains("name1"));
         Assertions.assertTrue(attributeNames.contains("name2"));
@@ -81,30 +81,30 @@ class DefaultSignServiceSessionTest {
     }
 
     @Test
-    void setAttribute() {
+    void testSetAttribute() {
         this.session.setAttribute("name1", "value1");
         verify(this.hSession).setAttribute("name1", "value1");
     }
 
     @Test
-    void removeAttribute() {
+    void testRemoveAttribute() {
         this.session.removeAttribute("name1");
         verify(this.hSession).removeAttribute("name1");
     }
 
     @Test
-    void invalidate() {
+    void testInvalidate() {
         this.session.invalidate();
         verify(this.hSession).invalidate();
     }
 
     @Test
-    void getCreationTime() {
+    void testGetCreationTime() {
         Assertions.assertInstanceOf(Instant.class, this.session.getCreationTime());
     }
 
     @Test
-    void getLastAccessedTime() {
+    void testGetLastAccessedTime() {
         Assertions.assertInstanceOf(Instant.class, this.session.getLastAccessedTime());
     }
 

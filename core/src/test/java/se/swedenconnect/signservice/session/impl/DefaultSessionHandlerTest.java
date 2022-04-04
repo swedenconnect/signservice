@@ -33,10 +33,10 @@ import static org.mockito.Mockito.when;
 /**
  * Test class for {@link DefaultSessionHandler}.
  */
-class DefaultSessionHandlerTest {
+public class DefaultSessionHandlerTest {
 
     @Test
-    void getSession() {
+    void testGetSession() {
         final HttpServletRequest servletRequest = mock(HttpServletRequest.class);
         when(servletRequest.getSession(false)).thenReturn(mock(HttpSession.class));
 
@@ -47,7 +47,7 @@ class DefaultSessionHandlerTest {
     }
 
     @Test
-    void getNullSession() {
+    void testGetNullSession() {
         final HttpServletRequest servletRequest = mock(HttpServletRequest.class);
         when(servletRequest.getSession(false)).thenReturn(null);
 
@@ -58,7 +58,7 @@ class DefaultSessionHandlerTest {
     }
 
     @Test()
-    void getSessionUnsupported() {
+    void testSessionUnsupported() {
         final SessionHandler sh = new DefaultSessionHandler();
         final SessionMaintainer maintainer = new SessionMaintainer() {
         };
