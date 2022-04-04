@@ -5,16 +5,16 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-package se.swedenconnect.signservice.session.impl.servlet;
+package se.swedenconnect.signservice.session.impl;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,53 +30,51 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 
 /**
- * Test class for {@link ServletSignServiceSession}.
- *
- * @author magnus.hoflin@digg.se
+ * Test class for {@link DefaultSignServiceSession}.
  */
-class ServletSignServiceSessionTest {
+class DefaultSignServiceSessionTest {
 
     HttpSession hSession;
     SignServiceSession session;
 
     @BeforeEach
     void init() {
-        hSession = mockHttpSession();
-        session = new ServletSignServiceSession(hSession);
+        this.hSession = mockHttpSession();
+        session = new DefaultSignServiceSession(this.hSession);
     }
 
     @Test
     void getId() {
-        Assertions.assertEquals("1234", session.getId());
+        Assertions.assertEquals("1234", this.session.getId());
     }
 
     @Test
     void getAttribute() {
-        Assertions.assertEquals("value1", session.getAttribute("name1"));
-        Assertions.assertEquals("value2", session.getAttribute("name2"));
-        Assertions.assertNull(session.getAttribute("name3"));
+        Assertions.assertEquals("value1", this.session.getAttribute("name1"));
+        Assertions.assertEquals("value2", this.session.getAttribute("name2"));
+        Assertions.assertNull(this.session.getAttribute("name3"));
     }
 
     @Test
     void getAttributeWithType() {
-        Assertions.assertEquals("value1", session.getAttribute("name1", String.class));
+        Assertions.assertEquals("value1", this.session.getAttribute("name1", String.class));
     }
 
     @Test
     void getSignServiceContext() {
-        Assertions.assertInstanceOf(SignServiceContext.class, session.getSignServiceContext());
+        Assertions.assertInstanceOf(SignServiceContext.class, this.session.getSignServiceContext());
     }
 
     @Test
     void setSignServiceContext() {
-        SignServiceContext ssc = mock(SignServiceContext.class);
-        session.setSignServiceContext(ssc);
-        verify(hSession).setAttribute(SignServiceSession.CONTEXT_NAME, ssc);
+        final SignServiceContext ssc = mock(SignServiceContext.class);
+        this.session.setSignServiceContext(ssc);
+        verify(this.hSession).setAttribute(SignServiceSession.CONTEXT_NAME, ssc);
     }
 
     @Test
     void getAttributeNames() {
-        List<String> attributeNames = session.getAttributeNames();
+        final List<String> attributeNames = this.session.getAttributeNames();
         Assertions.assertTrue(attributeNames.contains("name1"));
         Assertions.assertTrue(attributeNames.contains("name2"));
         Assertions.assertFalse(attributeNames.contains("name3"));
@@ -84,34 +82,34 @@ class ServletSignServiceSessionTest {
 
     @Test
     void setAttribute() {
-        session.setAttribute("name1", "value1");
-        verify(hSession).setAttribute("name1", "value1");
+        this.session.setAttribute("name1", "value1");
+        verify(this.hSession).setAttribute("name1", "value1");
     }
 
     @Test
     void removeAttribute() {
-        session.removeAttribute("name1");
-        verify(hSession).removeAttribute("name1");
+        this.session.removeAttribute("name1");
+        verify(this.hSession).removeAttribute("name1");
     }
 
     @Test
     void invalidate() {
-        session.invalidate();
-        verify(hSession).invalidate();
+        this.session.invalidate();
+        verify(this.hSession).invalidate();
     }
 
     @Test
     void getCreationTime() {
-        Assertions.assertInstanceOf(Instant.class, session.getCreationTime());
+        Assertions.assertInstanceOf(Instant.class, this.session.getCreationTime());
     }
 
     @Test
     void getLastAccessedTime() {
-        Assertions.assertInstanceOf(Instant.class, session.getLastAccessedTime());
+        Assertions.assertInstanceOf(Instant.class, this.session.getLastAccessedTime());
     }
 
     private HttpSession mockHttpSession() {
-        HttpSession httpSession = mock(HttpSession.class);
+        final HttpSession httpSession = mock(HttpSession.class);
         when(httpSession.getId()).thenReturn("1234");
         when(httpSession.getAttribute("name1")).thenReturn("value1");
         when(httpSession.getAttribute("name2")).thenReturn("value2");

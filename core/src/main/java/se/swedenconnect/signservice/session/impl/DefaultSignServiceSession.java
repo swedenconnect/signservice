@@ -1,4 +1,20 @@
-package se.swedenconnect.signservice.session.impl.servlet;
+/*
+ * Copyright 2022 Sweden Connect
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package se.swedenconnect.signservice.session.impl;
 
 import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.SignServiceSession;
@@ -8,14 +24,13 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * {@link SignServiceSession} implementation where sessions are backed by
  * underlying {@link HttpSession} objects.
- *
- * @author magnus.hoflin@digg.se
  */
-class ServletSignServiceSession implements SignServiceSession {
+class DefaultSignServiceSession implements SignServiceSession {
 
     private final HttpSession inner;
 
@@ -25,64 +40,64 @@ class ServletSignServiceSession implements SignServiceSession {
      * @param httpSession The underlying session object. Must not be null.
      * @throws NullPointerException in case {@code httpSession} is null.
      */
-    ServletSignServiceSession(HttpSession httpSession) {
-        if (httpSession == null) throw new NullPointerException("httpSession cannot be null.");
-        inner = httpSession;
+    DefaultSignServiceSession(HttpSession httpSession) {
+        Objects.requireNonNull("httpSession cannot be null.");
+        this.inner = httpSession;
     }
 
     @Override
     public String getId() {
-        return inner.getId();
+        return this.inner.getId();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Serializable> T getAttribute(final String name) throws IllegalStateException, ClassCastException {
-        return (T) inner.getAttribute(name);
+        return (T) this.inner.getAttribute(name);
     }
 
     @Override
     public <T extends Serializable> T getAttribute(final String name, final Class<T> type) throws IllegalStateException, ClassCastException {
-        return type.cast(inner.getAttribute(name));
+        return type.cast(this.inner.getAttribute(name));
     }
 
     @Override
     public SignServiceContext getSignServiceContext() throws IllegalStateException {
-        return (SignServiceContext) inner.getAttribute(CONTEXT_NAME);
+        return (SignServiceContext) this.inner.getAttribute(CONTEXT_NAME);
     }
 
     @Override
     public void setSignServiceContext(final SignServiceContext context) throws IllegalStateException {
-        inner.setAttribute(CONTEXT_NAME, context);
+        this.inner.setAttribute(CONTEXT_NAME, context);
     }
 
     @Override
     public List<String> getAttributeNames() throws IllegalStateException {
-        return Collections.list(inner.getAttributeNames());
+        return Collections.list(this.inner.getAttributeNames());
     }
 
     @Override
     public <T extends Serializable> void setAttribute(final String name, final T attribute) throws IllegalStateException {
-        inner.setAttribute(name, attribute);
+        this.inner.setAttribute(name, attribute);
     }
 
     @Override
     public void removeAttribute(final String name) throws IllegalStateException {
-        inner.removeAttribute(name);
+        this.inner.removeAttribute(name);
     }
 
     @Override
     public void invalidate() {
-        inner.invalidate();
+        this.inner.invalidate();
     }
 
     @Override
     public Instant getCreationTime() throws IllegalStateException {
-        return Instant.ofEpochMilli(inner.getCreationTime());
+        return Instant.ofEpochMilli(this.inner.getCreationTime());
     }
 
     @Override
     public Instant getLastAccessedTime() throws IllegalStateException {
-        return Instant.ofEpochMilli(inner.getLastAccessedTime());
+        return Instant.ofEpochMilli(this.inner.getLastAccessedTime());
     }
 }

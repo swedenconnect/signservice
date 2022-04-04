@@ -1,10 +1,10 @@
 name: Code coverage
 
-on: [pull_request]
+on: [ pull_request ]
 
 jobs:
   build:
-    name: Build and run unit tests
+    name: Code coverage
     runs-on: ubuntu-latest
 
     steps:
