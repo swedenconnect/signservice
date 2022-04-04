@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -45,21 +45,21 @@
       <organization>IDsec Solutions AB</organization>
       <organizationUrl>https://www.idsec.se</organizationUrl>
     </developer>
-    
+
     <developer>
       <name>Magnus Hoflin</name>
       <email>magnus.hoflin@digg.se</email>
       <organization>DIGG</organization>
       <organizationUrl>https://www.digg.se</organizationUrl>
     </developer>
-    
+
     <developer>
       <name>Henric Norlander</name>
       <email>extern.henric.norlander@digg.se</email>
       <organization>DIGG</organization>
       <organizationUrl>https://www.digg.se</organizationUrl>
     </developer>
-    
+
   </developers>
 
   <properties>
@@ -96,7 +96,7 @@
   <dependencyManagement>
 
     <dependencies>
-    
+
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-bom</artifactId>
@@ -104,54 +104,54 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      
+
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-commons</artifactId>
         <version>1.2.1</version>
       </dependency>
-      
+
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-xml-commons</artifactId>
         <version>1.2.1</version>
-      </dependency>      
-      
+      </dependency>
+
       <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>javax.servlet-api</artifactId>
         <version>4.0.1</version>
         <scope>provided</scope>
       </dependency>
-      
+
     </dependencies>
 
   </dependencyManagement>
 
   <dependencies>
-  
+
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-    </dependency>    
+    </dependency>
 
-    <!-- We use JUnit 5 and Mockito for our tests -->  
+    <!-- We use JUnit 5 and Mockito for our tests -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
@@ -206,7 +206,7 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>3.3.2</version>
         </plugin>
-        
+
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
@@ -234,7 +234,7 @@
               <!-- Ignore coverage for exception classes -->
               <exclude>**/*Exception.class</exclude>
             </excludes>
-          </configuration>          
+          </configuration>
           <executions>
             <execution>
               <id>prepare-agent</id>
@@ -260,7 +260,7 @@
               <id>enforce</id>
               <configuration>
                 <rules>
-                  <dependencyConvergence />
+                  <dependencyConvergence/>
                 </rules>
               </configuration>
               <goals>
@@ -327,7 +327,7 @@
           <skip>true</skip>
         </configuration>
       </plugin>
-      
+
       <!-- run mvn jacoco:report -->
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -338,7 +338,7 @@
               <goal>prepare-agent</goal>
             </goals>
           </execution>
-        </executions>        
+        </executions>
       </plugin>
 
     </plugins>
@@ -471,7 +471,7 @@
                 <link>https://idsec-solutions.github.io/signservice-commons/javadoc/signservice-commons/</link>
                 <link>https://idsec-solutions.github.io/signservice-commons/javadoc/xml-commons/</link>
                 <!-- TODO: Add more links here -->
-              </links>              
+              </links>
               <detectJavaApiLink>true</detectJavaApiLink>
             </configuration>
           </plugin>
