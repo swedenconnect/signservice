@@ -38,7 +38,9 @@ import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
 import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
 import se.swedenconnect.signservice.protocol.ProtocolException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
+import se.swedenconnect.signservice.session.SessionHandler;
 import se.swedenconnect.signservice.session.SignServiceSession;
+import se.swedenconnect.signservice.storage.MessageReplayChecker;
 import se.swedenconnect.signservice.storage.MessageReplayException;
 
 /**
@@ -50,6 +52,12 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   /** The engine's configuration. */
   private final EngineConfiguration engineConfiguration;
 
+  /** The session handler. */
+  private final SessionHandler sessionHandler;
+
+  /** The message replay checker. */
+  private final MessageReplayChecker messageReplayChecker;
+
   /** The sign message verifier. */
   private SignRequestMessageVerifier signRequestMessageVerifier;
 
@@ -57,9 +65,14 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
    * Constructor.
    *
    * @param engineConfiguration the engine configuration
+   * @param sessionHandler the session handler to use
+   * @param messageReplayChecker the message replay checker
    */
-  public DefaultSignServiceEngine(final EngineConfiguration engineConfiguration) {
+  public DefaultSignServiceEngine(final EngineConfiguration engineConfiguration,
+      final SessionHandler sessionHandler, final MessageReplayChecker messageReplayChecker) {
     this.engineConfiguration = Objects.requireNonNull(engineConfiguration, "engineConfiguration must not be null");
+    this.sessionHandler = Objects.requireNonNull(sessionHandler, "sessionHandler must not be null");
+    this.messageReplayChecker = Objects.requireNonNull(messageReplayChecker, "messageReplayChecker must not be null");
   }
 
   /**
@@ -157,7 +170,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       // Make sure that this is not a replay attack ...
       //
       try {
-        this.engineConfiguration.getMessageReplayChecker().checkReplay(signRequestMessage.getRequestId());
+        this.messageReplayChecker.checkReplay(signRequestMessage.getRequestId());
       }
       catch (final MessageReplayException e) {
         log.warn("{}: Replay attack detected for message '{}' [id: '{}']",
@@ -296,7 +309,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
    * @return an engine context
    */
   protected EngineContext getContext(final HttpServletRequest httpRequest) {
-    final SignServiceSession session = this.engineConfiguration.getSessionHandler().getSession(httpRequest);
+    final SignServiceSession session = this.sessionHandler.getSession(httpRequest);
     return new EngineContext(session.getSignServiceContext());
   }
 

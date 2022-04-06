@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>signservice-demo</artifactId>
+  <packaging>jar</packaging>
+  
+  <parent>
+    <groupId>se.swedenconnect.signservice</groupId>
+    <artifactId>signservice-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>  
+  </parent>  
+
+  <name>Sweden Connect :: SignService :: Demo Application</name>
+  <description>SignService Demo application</description>
+  <url>https://github.com/swedenconnect/signservice</url>
+  
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:https://github.com/swedenconnect/signservice.git</connection>
+    <developerConnection>scm:git:https://github.com/swedenconnect/signservice.git</developerConnection>
+    <url>https://github.com/idsec/signservice/tree/master</url>
+  </scm>
+
+  <organization>
+    <name>Sweden Connect</name>
+    <url>https://www.swedenconnect.se</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <name>Martin Lindström</name>
+      <email>martin@idsec.se</email>
+      <organization>IDsec Solutions AB</organization>
+      <organizationUrl>https://www.idsec.se</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Stefan Santesson</name>
+      <email>stefan@idsec.se</email>
+      <organization>IDsec Solutions AB</organization>
+      <organizationUrl>https://www.idsec.se</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Magnus Hoflin</name>
+      <email>magnus.hoflin@digg.se</email>
+      <organization>DIGG</organization>
+      <organizationUrl>https://www.digg.se</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Henric Norlander</name>
+      <email>extern.henric.norlander@digg.se</email>
+      <organization>DIGG</organization>
+      <organizationUrl>https://www.digg.se</organizationUrl>
+    </developer>
+
+  </developers>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>11</java.version>
+    
+    <spring.boot.version>2.6.6</spring.boot.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>https://repo1.maven.org/maven2/</url>
+    </repository>
+    <repository>
+      <id>shibboleth</id>
+      <name>Shibboleth Maven Repo</name>
+      <url>https://build.shibboleth.net/nexus/content/repositories/releases</url>
+    </repository>
+  </repositories>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
+  <dependencyManagement>
+    
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring.boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>    
+
+  </dependencyManagement>
+
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>se.swedenconnect.signservice</groupId>
+      <artifactId>signservice-spring-boot-starter</artifactId>
+      <version>${project.version}</version>    
+    </dependency>
+
+    <dependency>
+      <groupId>org.webjars</groupId>
+      <artifactId>bootstrap</artifactId>
+      <version>4.6.1</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.webjars</groupId>
+          <artifactId>jquery</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.webjars</groupId>
+          <artifactId>popper.js</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.webjars</groupId>
+      <artifactId>popper.js</artifactId>
+      <version>1.16.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.webjars</groupId>
+      <artifactId>jquery</artifactId>
+      <version>3.6.0</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>${spring.boot.version}</version>
+        <executions>
+          <execution>
+            <id>repackage</id>
+            <configuration>
+              <classifier>exec</classifier>
+            </configuration>
+          </execution>
+          <execution>
+            <goals>
+              <goal>build-info</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Support for Docker -->
+      <plugin>
+        <groupId>com.spotify</groupId>
+        <artifactId>dockerfile-maven-plugin</artifactId>
+        <version>1.4.9</version>
+        <configuration>
+          <repository>${DOCKER_REPO}/${project.artifactId}</repository>
+          <tag>latest</tag>
+          <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce</id>
+            <configuration>
+              <rules>
+                <dependencyConvergence />
+              </rules>
+            </configuration>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+
+      <build>
+        <plugins>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.0.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>attach-test-sources</id>
+                <goals>
+                  <goal>test-jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+        </plugins>
+      </build>
+
+    </profile>
+  </profiles>
+
+</project>

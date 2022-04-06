@@ -91,6 +91,8 @@
     <module>authn</module>
     <module>protocol</module>
     <module>engine</module>
+    <module>spring-boot-starter</module>
+    <module>app</module>
   </modules>
 
   <dependencyManagement>

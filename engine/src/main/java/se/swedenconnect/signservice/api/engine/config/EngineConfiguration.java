@@ -24,8 +24,6 @@ import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.client.ClientConfiguration;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
-import se.swedenconnect.signservice.session.SessionHandler;
-import se.swedenconnect.signservice.storage.MessageReplayChecker;
 
 /**
  * Interface defining the configuration API for an engine instance.
@@ -59,20 +57,6 @@ public interface EngineConfiguration {
    * @return the processing path
    */
   String getProcessingPath();
-
-  /**
-   * Gets the session handler this instance uses.
-   *
-   * @return the session handler
-   */
-  SessionHandler getSessionHandler();
-
-  /**
-   * Gets the message replay checker to use by the engine instance.
-   *
-   * @return a message replay checker
-   */
-  MessageReplayChecker getMessageReplayChecker();
 
   /**
    * Gets the protocol handler to use when decoding and encoding messages.

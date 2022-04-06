@@ -18,8 +18,6 @@ package se.swedenconnect.signservice.audit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import se.swedenconnect.signservice.audit.AuditEventParameter;
-
 /**
  * Test cases for AuditEventParameter.
  */

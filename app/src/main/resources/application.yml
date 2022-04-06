@@ -1,0 +1,39 @@
+#
+# SignService configuration
+#
+
+server:
+  servlet:
+    context-path: /    
+
+signservice:
+  domain: localhost
+  base-url: http://${signservice.domain}:8080
+  default-credential:
+    name: SignService
+    resource: classpath:signservice.jks
+    alias: signservice
+    type: JKS
+    password: secret
+    key-password: secret
+  engines:
+  - name: "Sandbox"
+    processing-path: /sign/sandbox
+    sign-service-id: https://signservice.digg.se
+    client:
+      client-id: https://eid2cssp.3xasecurity.com/sign
+      certificates:
+      - classpath:clients/sandbox.crt
+    protocol-handler-bean: "signservice.DssProtocolHandler"  
+
+#
+# Logging
+#
+logging:
+  level:
+    se:
+      swedenconnect:
+        security: DEBUG
+        signservice: DEBUG
+      
+#logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter=DEBUG

@@ -18,11 +18,6 @@ package se.swedenconnect.signservice.audit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import se.swedenconnect.signservice.audit.AuditEvent;
-import se.swedenconnect.signservice.audit.AuditLogger;
-import se.swedenconnect.signservice.audit.AuditLoggerException;
-import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
-
 /**
  * Test cases for AuditLoggerSingleton.
  */

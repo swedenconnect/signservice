@@ -37,6 +37,16 @@ public interface ClientConfiguration {
    */
   List<X509Certificate> getTrustedCertificates();
 
-  // TODO: certificates, response URL:s, ...
+  /**
+   * Gets a list of registered response URL:s, i.e., URL:s which the SignService may use when sending back a signature
+   * response message.
+   * <p>
+   * Note that this method may return {@code null} if the protocol states that the response URL should be supplied in a
+   * signature request message.
+   * </p>
+   *
+   * @return a list of registered URL:s
+   */
+  List<String> getResponseUrls();
 
 }
