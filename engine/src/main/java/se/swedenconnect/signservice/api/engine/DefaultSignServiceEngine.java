@@ -115,6 +115,20 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       return this.processSignRequest(httpRequest, context);
     }
     else if (state == SignOperationState.AUTHN_ONGOING) {
+
+      // Before we go ahead and assume that this is an authentication response we need to handle the
+      // case where this scenario has happened:
+      //
+      // The user starts a signature operation and is directed to the authentication service for
+      // authentication. The user does not complete this authentication, but instead initiates a
+      // new signature operation (from within the same web session). This means that we will receive
+      // a request for a "sign request" in our already started session.
+      //
+      // So, let's check with the protocol handler if this seems to be a new sign request, and if so
+      // throw away the old context, and create a new ...
+
+      // TODO: Fix the above ...
+
       // Resume authentication ...
       return this.resumeAuthentication(httpRequest, context);
     }
