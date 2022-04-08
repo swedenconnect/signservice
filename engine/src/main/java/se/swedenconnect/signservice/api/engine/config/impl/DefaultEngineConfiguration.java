@@ -16,6 +16,7 @@
 package se.swedenconnect.signservice.api.engine.config.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -62,12 +63,12 @@ public class DefaultEngineConfiguration implements EngineConfiguration {
   private PkiCredential signServiceCredential;
 
   /**
-   * The processing path (relative to the application's context path).
+   * The processing paths (relative to the application's context path).
    *
-   * @param processingPath the processing path
+   * @param processingPaths the processing paths
    */
   @Setter
-  private String processingPath;
+  private List<String> processingPaths;
 
   /**
    * The protocol handler this engine uses.
@@ -131,8 +132,8 @@ public class DefaultEngineConfiguration implements EngineConfiguration {
     if (this.signServiceCredential == null) {
       throw new IllegalArgumentException("signServiceCredential must be set");
     }
-    if (StringUtils.isBlank(this.processingPath)) {
-      throw new IllegalArgumentException("processingPath must be set");
+    if (this.processingPaths == null || this.processingPaths.isEmpty()) {
+      throw new IllegalArgumentException("processingPaths must be set");
     }
     if (this.protocolHandler == null) {
       throw new IllegalArgumentException("protocolHandler must be set");
@@ -171,8 +172,8 @@ public class DefaultEngineConfiguration implements EngineConfiguration {
 
   /** {@inheritDoc} */
   @Override
-  public String getProcessingPath() {
-    return this.processingPath;
+  public List<String> getProcessingPaths() {
+    return this.processingPaths != null ? Collections.unmodifiableList(this.processingPaths) : null;
   }
 
   /** {@inheritDoc} */

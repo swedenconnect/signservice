@@ -26,7 +26,7 @@ public enum SignOperationState {
   /** State that tells that user authentication is ongoing. */
   AUTHN_ONGOING,
 
-  // TODO: more here
+  /** State that tells that the engine is in the process of performing the signing operation. */
+  SIGNING;
 
-  COMPLETED;
 }

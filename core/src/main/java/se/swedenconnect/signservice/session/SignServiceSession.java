@@ -94,7 +94,7 @@ public interface SignServiceSession {
    * Adds the {@link SignServiceContext} to the session.
    * <p>
    * This method is a convenience method that corresponds to the call
-   * {@code setSessionAttribute(SignServiceSession.CONTEXT_SESSION_NAME, context)}.
+   * {@code setAttribute(SignServiceSession.CONTEXT_SESSION_NAME, context)}.
    * </p>
    *
    * @param context the context to add
