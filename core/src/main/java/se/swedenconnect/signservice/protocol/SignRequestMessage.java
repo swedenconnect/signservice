@@ -120,10 +120,10 @@ public interface SignRequestMessage extends Serializable {
   AuthnRequirements getAuthnRequirements();
 
   /**
-   * Gets the raw "sign message". The sign message is a protocol specific extension that will be passed on to the
-   * authentication service.
+   * Gets the encoding of the "sign message". The sign message is a protocol specific extension that will be passed on
+   * to the authentication service.
    *
-   * @return the sign message, or null if none has been supplied
+   * @return the sign message encoding, or null if no sign message has been supplied
    */
   byte[] getSignMessage();
 

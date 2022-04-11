@@ -15,6 +15,8 @@
  */
 package se.swedenconnect.signservice.authn;
 
+import java.util.Objects;
+
 /**
  * Exception class for SignService user authentication exceptions.
  */
@@ -23,23 +25,36 @@ public class UserAuthenticationException extends Exception {
   /** For serializing. */
   private static final long serialVersionUID = -9190978864603043003L;
 
+  private final AuthenticationErrorCode errorCode;
+
   /**
    * Constructor setting the error message.
    *
+   * @param errorCode the authentication error code
    * @param message the error message
    */
-  public UserAuthenticationException(final String message) {
-    super(message);
+  public UserAuthenticationException(final AuthenticationErrorCode errorCode, final String message) {
+    this(errorCode, message, null);
   }
 
   /**
    * Constructor setting the error message and the cause of the error.
    *
+   * @param errorCode the authentication error code
    * @param message the error message
    * @param cause the cause of the error
    */
-  public UserAuthenticationException(final String message, final Throwable cause) {
+  public UserAuthenticationException(final AuthenticationErrorCode errorCode, final String message, final Throwable cause) {
     super(message, cause);
+    this.errorCode = Objects.requireNonNull(errorCode, "errorCode must not be null");
+  }
+
+  /**
+   * Gets the error code.
+   * @return the error code
+   */
+  public AuthenticationErrorCode getErrorCode() {
+    return this.errorCode;
   }
 
 }

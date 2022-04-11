@@ -55,13 +55,14 @@ public interface AuthenticationHandler {
    * the authentication result (assertion) or a request to direct the user to a remote service.
    *
    * @param authnRequirements the requested authentication requirements
+   * @param signMessage the protocol specific encoding of a sign message (optional)
    * @param context the SignService context
    * @return a choice object holding the authentication result or a HTTP request object (indicating that the user should
    *           be directed to an authentication service)
    * @throws UserAuthenticationException for authentication errors
    */
-  AuthenticationResultChoice authenticate(final AuthnRequirements authnRequirements, final SignServiceContext context)
-      throws UserAuthenticationException;
+  AuthenticationResultChoice authenticate(final AuthnRequirements authnRequirements, final byte[] signMessage,
+      final SignServiceContext context) throws UserAuthenticationException;
 
   /**
    * Resumes an authentication process.

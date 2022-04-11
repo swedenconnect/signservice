@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 
@@ -36,6 +37,9 @@ public class EngineContext {
   /** Key for storing the state. */
   private static final String CONTEXT_STATE_KEY = PREFIX + ".State";
 
+  /** Key for storing the SignRequest message. */
+  private static final String SIGN_REQUEST_STATE_KEY = PREFIX + ".SignRequest";
+
   /** The wrapped context. */
   private SignServiceContext context;
 
@@ -46,6 +50,20 @@ public class EngineContext {
    */
   public EngineContext(final SignServiceContext context) {
     this.context = Objects.requireNonNull(context, "context must not be null");
+  }
+
+  /**
+   * Creates and initializes a new {@link SignServiceContext} object.
+   *
+   * @return a SignServiceContext object
+   */
+  public static SignServiceContext createSignServiceContext() {
+    final SignServiceContext context = new DefaultSignServiceContext(UUID.randomUUID().toString());
+    log.debug("A SignServiceContext with ID '{}' was created", context.getId());
+
+    // Initialize
+    context.put(CONTEXT_STATE_KEY, SignOperationState.NEW);
+    return context;
   }
 
   /**
@@ -94,18 +112,12 @@ public class EngineContext {
     this.context.put(CONTEXT_STATE_KEY, Objects.requireNonNull(newState, "Supplied state must not be null"));
   }
 
-  /**
-   * Creates and initializes a new {@link SignServiceContext} object.
-   *
-   * @return a SignServiceContext object
-   */
-  public static SignServiceContext createSignServiceContext() {
-    final SignServiceContext context = new DefaultSignServiceContext(UUID.randomUUID().toString());
-    log.debug("A SignServiceContext with ID '{}' was created", context.getId());
+  public void putSignRequest(final SignRequestMessage signRequest) {
+    this.context.put(SIGN_REQUEST_STATE_KEY, signRequest);
+  }
 
-    // Initialize
-    context.put(CONTEXT_STATE_KEY, SignOperationState.NEW);
-    return context;
+  public SignRequestMessage getSignRequest() {
+    return this.context.get(SIGN_REQUEST_STATE_KEY, SignRequestMessage.class);
   }
 
 }
