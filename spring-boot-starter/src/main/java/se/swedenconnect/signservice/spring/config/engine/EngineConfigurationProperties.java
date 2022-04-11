@@ -15,6 +15,8 @@
  */
 package se.swedenconnect.signservice.spring.config.engine;
 
+import java.util.List;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
@@ -43,9 +45,9 @@ public class EngineConfigurationProperties implements InitializingBean {
   private PkiCredentialConfigurationProperties credential;
 
   /**
-   * The engine processing path.
+   * The engine processing path(s).
    */
-  private String processingPath;
+  private List<String> processingPaths;
 
   /**
    * The client configuration.
@@ -64,7 +66,7 @@ public class EngineConfigurationProperties implements InitializingBean {
   public void afterPropertiesSet() throws Exception {
     Assert.hasText(this.name, "name must be assigned");
     Assert.hasText(this.signServiceId, "sign-service-id must be assigned");
-    Assert.hasText(this.processingPath, "processing-path must be assigned");
+    Assert.notEmpty(this.processingPaths, "processing-paths must be assigned and non-empty");
 
     Assert.notNull(client, "client must be assigned");
     this.client.afterPropertiesSet();

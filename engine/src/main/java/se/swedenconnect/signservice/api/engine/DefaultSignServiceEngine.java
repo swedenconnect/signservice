@@ -39,6 +39,7 @@ import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
 import se.swedenconnect.signservice.protocol.ProtocolException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.session.SessionHandler;
+import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.SignServiceSession;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
 import se.swedenconnect.signservice.storage.MessageReplayException;
@@ -118,40 +119,42 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       }
     }
 
-    // Get the context and check our state ...
+    // Based on the context state and the URL on which we received the request do dispatching ...
     //
-    final EngineContext context = this.getContext(httpRequest);
-    final SignOperationState state = context.getState();
+    EngineContext context = this.getContext(httpRequest);
 
-    if (state == SignOperationState.NEW) {
-      // Initiate new operation ...
-      return this.processSignRequest(httpRequest, context);
+    if (this.isSignRequestEndpoint(httpRequest)) {
+      if (context.getState() == SignOperationState.NEW) {
+        // Initiate new operation ...
+        return this.processSignRequest(httpRequest, context);
+      }
+      else if (context.getState() == SignOperationState.AUTHN_ONGOING) {
+        // OK, it seems that we have received a SignRequest in a session that is not
+        // completed. This means that we abandon the previous context and start a new
+        // one. We can only serve one request per session, and it is more likely that
+        // a new SignRequest means that the user has terminated the previous operation
+        // before it is complete.
+        //
+        log.info("{}: Abandoning ongoing operation - A new SignRequest has been received in the same session [id: '{}']",
+            this.engineConfiguration.getName(), context.getId());
+
+        context = this.resetContext(httpRequest);
+        log.info("{}: New context has been created [id: '{}']", this.engineConfiguration.getName(), context.getId());
+
+        return this.processSignRequest(httpRequest, context);
+      }
+      // else: We are in state "SIGNING", and this is really odd. It must mean that the
+      // user after he/she has authenticated has opened a new web browser tab and initiated
+      // a new signature operation during the time the engine is performing the signature operation.
+      // In these cases we refuse to accept the new invocation and let the original operation finish.
     }
-    else if (state == SignOperationState.AUTHN_ONGOING) {
-
-      // Before we go ahead and assume that this is an authentication response we need to handle the
-      // case where this scenario has happened:
-      //
-      // The user starts a signature operation and is directed to the authentication service for
-      // authentication. The user does not complete this authentication, but instead initiates a
-      // new signature operation (from within the same web session). This means that we will receive
-      // a request for a "sign request" in our already started session.
-      //
-      // So, let's check with the protocol handler if this seems to be a new sign request, and if so
-      // throw away the old context, and create a new ...
-
-      // TODO: Fix the above ...
-
-      // Resume authentication ...
+    else if (context.getState() == SignOperationState.AUTHN_ONGOING) {
       return this.resumeAuthentication(httpRequest, context);
     }
-    else {
-      // State error
-      log.info("{}: State error - Can not process request '{}'",
-          this.engineConfiguration.getName(), httpRequest.getRequestURI());
+    log.info("{}: State error - Engine is is '{}' state. Can not process request '{}' [id: '{}']",
+        this.engineConfiguration.getName(), context.getState(), httpRequest.getRequestURI(), context.getId());
 
-      throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.STATE_ERROR, "State error");
-    }
+    throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.STATE_ERROR, "State error");
   }
 
   /**
@@ -164,17 +167,6 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
    */
   protected HttpRequestMessage processSignRequest(
       final HttpServletRequest httpRequest, final EngineContext context) throws UnrecoverableSignServiceException {
-
-    // Assert that the request was received on the expected endpoint ...
-    //
-    if (!httpRequest.getRequestURI().startsWith(this.engineConfiguration.getProcessingPath())) {
-      log.info("{}: Unexpected path '{}' - expected '{}'",
-          this.engineConfiguration.getName(), httpRequest.getRequestURI(),
-          this.engineConfiguration.getProcessingPath());
-
-      throw new UnrecoverableSignServiceException(
-          UnrecoverableErrorCodes.NOT_FOUND, "Not found - " + httpRequest.getRequestURI());
-    }
 
     try {
       // Decode the incoming request ...
@@ -299,7 +291,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   /** {@inheritDoc} */
   @Override
   public boolean canProcess(final HttpServletRequest httpRequest) {
-    if (httpRequest.getRequestURI().startsWith(this.engineConfiguration.getProcessingPath())) {
+    if (this.isSignRequestEndpoint(httpRequest)) {
       // Process SignRequest
       return true;
     }
@@ -317,6 +309,22 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   }
 
   /**
+   * Predicate that tells if the supplied HTTP request is sent to an endpoint where the engine expects to receive
+   * SignRequest messages on.
+   *
+   * @param httpRequest the HTTP request
+   * @return true if the request is sent to a SignRequest endpoint and false otherwise
+   */
+  protected boolean isSignRequestEndpoint(final HttpServletRequest httpRequest) {
+    for (final String path : this.engineConfiguration.getProcessingPaths()) {
+      if (httpRequest.getRequestURI().startsWith(path)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Given a HTTP request the method gets an {@link EngineContext}.
    *
    * @param httpRequest the HTTP request
@@ -324,7 +332,25 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
    */
   protected EngineContext getContext(final HttpServletRequest httpRequest) {
     final SignServiceSession session = this.sessionHandler.getSession(httpRequest);
-    return new EngineContext(session.getSignServiceContext());
+    SignServiceContext context = session.getSignServiceContext();
+    if (context == null) {
+      context = EngineContext.createSignServiceContext();
+    }
+    session.setSignServiceContext(context);
+    return new EngineContext(context);
+  }
+
+  /**
+   * Resets the SignService context. Needed if we abandon an already started context.
+   *
+   * @param httpRequest the HTTP request
+   * @return a new engine context
+   */
+  protected EngineContext resetContext(final HttpServletRequest httpRequest) {
+    final SignServiceContext context = EngineContext.createSignServiceContext();
+    final SignServiceSession session = this.sessionHandler.getSession(httpRequest);
+    session.setSignServiceContext(context);
+    return new EngineContext(context);
   }
 
   /**

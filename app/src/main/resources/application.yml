@@ -18,7 +18,8 @@ signservice:
     key-password: secret
   engines:
   - name: "Sandbox"
-    processing-path: /sign/sandbox
+    processing-paths:
+    - /sign/sandbox          
     sign-service-id: https://signservice.digg.se
     client:
       client-id: https://eid2cssp.3xasecurity.com/sign

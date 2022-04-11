@@ -52,11 +52,11 @@ public interface EngineConfiguration {
   PkiCredential getSignServiceCredential();
 
   /**
-   * Gets the path (relative the application root) for the SignRequest processing endpoint.
+   * Gets the path, or paths, relative the application root/context path for the SignRequest processing endpoint(s).
    *
-   * @return the processing path
+   * @return the processing path(s)
    */
-  String getProcessingPath();
+  List<String> getProcessingPaths();
 
   /**
    * Gets the protocol handler to use when decoding and encoding messages.

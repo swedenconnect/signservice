@@ -177,7 +177,7 @@ public class SignServiceConfiguration {
         conf.setSignServiceCredential(defaultCredential);
       }
 
-      conf.setProcessingPath(ecp.getProcessingPath());
+      conf.setProcessingPaths(ecp.getProcessingPaths());
 
       conf.setProtocolHandler(this.protocolHandler()); // TODO: change
       conf.setAuthenticationHandler(new MockAuthnHandler());  // TODO: change

@@ -37,15 +37,15 @@ public class EngineContext {
   private static final String CONTEXT_STATE_KEY = PREFIX + ".State";
 
   /** The wrapped context. */
-  private final SignServiceContext context;
+  private SignServiceContext context;
 
   /**
-   * Constructor. If the supplied context is {@code null} a new context will be set up.
+   * Constructor.
    *
-   * @param context the context that we wrap (may be null)
+   * @param context the context that we wrap
    */
   public EngineContext(final SignServiceContext context) {
-    this.context = Optional.ofNullable(context).orElse(createSignServiceContext());
+    this.context = Objects.requireNonNull(context, "context must not be null");
   }
 
   /**
@@ -84,13 +84,12 @@ public class EngineContext {
    */
   public void updateState(final SignOperationState newState) throws IllegalStateException {
     final SignOperationState currentState = this.getState();
-    if (currentState == SignOperationState.COMPLETED) {
-      throw new IllegalStateException("Illegal state transition");
-    }
-    // TODO: Check if the state transition is correct
 
     if (newState == SignOperationState.NEW) {
       throw new IllegalStateException("Illegal state transition - Cannot set state to NEW");
+    }
+    if (currentState == SignOperationState.SIGNING && newState == SignOperationState.AUTHN_ONGOING) {
+      throw new IllegalStateException("Illegal state transition - Cannot go backwards in state transitions");
     }
     this.context.put(CONTEXT_STATE_KEY, Objects.requireNonNull(newState, "Supplied state must not be null"));
   }
@@ -100,7 +99,7 @@ public class EngineContext {
    *
    * @return a SignServiceContext object
    */
-  private static SignServiceContext createSignServiceContext() {
+  public static SignServiceContext createSignServiceContext() {
     final SignServiceContext context = new DefaultSignServiceContext(UUID.randomUUID().toString());
     log.debug("A SignServiceContext with ID '{}' was created", context.getId());
 
