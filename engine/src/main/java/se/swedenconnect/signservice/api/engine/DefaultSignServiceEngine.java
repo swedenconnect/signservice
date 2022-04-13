@@ -16,6 +16,7 @@
 package se.swedenconnect.signservice.api.engine;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.PostConstruct;
@@ -31,6 +32,7 @@ import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
 import se.swedenconnect.signservice.authn.AuthenticationResult;
 import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
 import se.swedenconnect.signservice.authn.UserAuthenticationException;
+import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
@@ -41,6 +43,8 @@ import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
 import se.swedenconnect.signservice.protocol.ProtocolException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
+import se.swedenconnect.signservice.protocol.msg.CertificateAttributeMapping;
+import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.session.SessionHandler;
 import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.SignServiceSession;
@@ -138,8 +142,8 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
         // a new SignRequest means that the user has terminated the previous operation
         // before it is complete.
         //
-        log.info(
-            "{}: Abandoning ongoing operation - A new SignRequest has been received in the same session [id: '{}']",
+        log.info("{}: Abandoning ongoing operation - "
+            + "A new SignRequest has been received in the same session [id: '{}']",
             this.engineConfiguration.getName(), context.getId());
 
         context = this.resetContext(httpRequest);
@@ -167,7 +171,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   }
 
   /**
-   * Processes a new sign request message.
+   * Initializes the processing of a sign request message.
    *
    * @param httpRequest the HTTP servlet request
    * @param context the engine context
@@ -207,37 +211,59 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       //
       final AuthenticationResultChoice authnResult = this.initAuthentication(httpRequest, signRequestMessage, context);
       if (authnResult.getHttpRequestMessage() != null) {
-        log.debug("{}: Authentication handler ({}) directing user for authentication [id: '{}', request-id: '{}']",
+        log.debug(
+            "{}: Authentication handler '{}' re-directing user for authentication ... [id: '{}', request-id: '{}']",
             this.engineConfiguration.getName(), this.engineConfiguration.getAuthenticationHandler().getName(),
             context.getId(), signRequestMessage.getRequestId());
 
         return authnResult.getHttpRequestMessage();
       }
       else {
-        // Proceed
+        log.debug("{}: Authentication handler '{}' successfully authenticated user, "
+            + "proceeding with additional checks ... [id: '{}', request-id: '{}']",
+            this.engineConfiguration.getName(), this.engineConfiguration.getAuthenticationHandler().getName(),
+            context.getId(), signRequestMessage.getRequestId());
+
         return this.finalizeSignRequest(httpRequest, authnResult.getAuthenticationResult(), context);
       }
-
     }
     catch (final SignServiceErrorException e) {
-      // TODO: log
       return this.sendErrorResponse(httpRequest, context, e.getError());
     }
   }
 
+  /**
+   * The finalize step is invoked after the user authentication is finished and the method proceeds to complete the
+   * signature operation.
+   *
+   * @param httpRequest the HTTP request
+   * @param authnResult the authentication result
+   * @param context the engine context
+   * @return a HttpRequestMessage
+   * @throws UnrecoverableSignServiceException for unrecoverable errors
+   */
   protected HttpRequestMessage finalizeSignRequest(
       final HttpServletRequest httpRequest, final AuthenticationResult authnResult, final EngineContext context)
       throws UnrecoverableSignServiceException {
 
-    // Complete authentication
+    try {
+      // OK, we are called after the user has completed the authentication. However, we still have to
+      // check that the authentication step gave us the information we need to continue the signature
+      // operation. This is done in the "complete authentication" phase.
+      //
+      this.completeAuthentication(httpRequest, authnResult, context);
 
-    // Generate key and cert
+      // Generate key and cert
 
-    // Sign
+      // Sign
 
-    // Encode response
+      // Encode response
 
-    return null;
+      return null;
+    }
+    catch (final SignServiceErrorException e) {
+      return this.sendErrorResponse(httpRequest, context, e.getError());
+    }
   }
 
   /**
@@ -292,6 +318,8 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
 
     try {
       // TODO: The authentication requirements may also be controlled by a policy ...
+      // TODO: We need to extend the input to authenticate with a listing of all attributes
+      // required. We get those from the signing certificate requirements ...
       final AuthnRequirements reqs = signRequest.getAuthnRequirements();
 
       return this.engineConfiguration.getAuthenticationHandler().authenticate(
@@ -305,6 +333,17 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
     }
   }
 
+  /**
+   * Is called when the engine is invoked after the user has been directed to the authentication service. When the
+   * authentication is resumed it means that the issued authentication credentials (assertion) is being processed by the
+   * authentication handler. If everything is ok, the control is the passed back to the "finalize" phase.
+   *
+   * @param httpRequest the HTTP request
+   * @param context the engine context
+   * @return a HttpRequestMessage object
+   * @throws UnrecoverableSignServiceException for unrecoverable errors
+   * @throws SignServiceErrorException for errors that should be passed back to the client (as an error response)
+   */
   protected HttpRequestMessage resumeAuthentication(
       final HttpServletRequest httpRequest, final EngineContext context)
       throws UnrecoverableSignServiceException, SignServiceErrorException {
@@ -312,7 +351,8 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
     // Assert that the request was received on a correct endpoint ...
     //
     if (!this.engineConfiguration.getAuthenticationHandler().canProcess(httpRequest)) {
-      log.info("{}: Unexpected path '{}'", this.engineConfiguration.getName(), httpRequest.getRequestURI());
+      log.info("{}: Unexpected path '{}' [id: '{}']",
+          this.engineConfiguration.getName(), httpRequest.getRequestURI(), context.getId());
 
       throw new UnrecoverableSignServiceException(
           UnrecoverableErrorCodes.NOT_FOUND, "Not found - " + httpRequest.getRequestURI());
@@ -323,12 +363,11 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
           .resumeAuthentication(httpRequest, context.getContext());
 
       if (authnChoice.getHttpRequestMessage() != null) {
-        // OK, it seems like the authentication scheme redirects the user several time to an external service. Lets,
-        // direct the user again.
+        // OK, it seems like the authentication scheme redirects the user time to an external service (again).
         return authnChoice.getHttpRequestMessage();
       }
       else {
-        // Authentication is complete.
+        // Authentication is complete - proceed ...
         return this.finalizeSignRequest(httpRequest, authnChoice.getAuthenticationResult(), context);
       }
     }
@@ -340,6 +379,13 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
     }
   }
 
+  /**
+   * Maps an {@link UserAuthenticationException} to a {@link SignServiceErrorException} which controls how an error
+   * response is sent back to the client.
+   *
+   * @param e the expception to map
+   * @return a SignServiceErrorException
+   */
   private SignServiceErrorException mapAuthenticationError(final UserAuthenticationException e) {
     if (e.getErrorCode() == AuthenticationErrorCode.USER_CANCEL) {
       return new SignServiceErrorException(new SignServiceError(SignServiceErrorCode.AUTHN_USER_CANCEL));
@@ -359,13 +405,68 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
 
   protected void completeAuthentication(
       final HttpServletRequest httpRequest, final AuthenticationResult authnResult, final EngineContext context)
-      throws UnrecoverableSignServiceException {
+      throws SignServiceErrorException, UnrecoverableSignServiceException {
 
-    // Check if sign message was displayed ...
+    // First we need to assert that the sign message really was displayed by the authentication
+    // service (if this was requested).
+    //
+    final SignRequestMessage signRequest = context.getSignRequest();
+    if (signRequest.getMustShowSignMessage() && !authnResult.signMessageDisplayed()) {
+      log.info("{}: No sign message was displayed to the user during authentication - "
+          + "this was required by client [id: '{}', request-id: '{}']",
+          this.engineConfiguration.getName(), context.getId(), signRequest.getRequestId());
 
-    // Audit log
+      throw new SignServiceErrorException(new SignServiceError(SignServiceErrorCode.AUTHN_SIGNMESSAGE_NOT_DISPLAYED));
+    }
 
-    // Save user attributes for later ...
+    // Assert that we got all the attributes needed to create the certificate contents ...
+    //
+    final SigningCertificateRequirements certRequirements = signRequest.getSigningCertificateRequirements();
+    if (certRequirements != null) {
+      // Note: This implementation does not handle any pre-configured policies, so we assume that
+      // all mappings between certificate contents and attributes are provided in the request.
+
+      // These are the attributes that were issued during the authentication phase ...
+      final List<IdentityAttribute<?>> issuedAttributes = authnResult.getAssertion().getIdentityAttributes();
+
+      for (final CertificateAttributeMapping m : certRequirements.getAttributeMappings()) {
+        // We need to find an attribute for all mappings that are required and that do not
+        // have a default value ...
+        //
+        if (m.getDestination().isRequired() && m.getDestination().getDefaultValue() == null) {
+          // At least one of the source attributes must be among the issued identity attributes ...
+          //
+          final boolean exists = m.getSources().stream()
+            .filter(i -> {
+              for (final var attr : issuedAttributes) {
+                if (i.getIdentifier().equals(attr.getIdentifier())) {
+                  return true;
+                }
+              }
+              return false;
+            })
+            .findFirst()
+            .isPresent();
+          if (!exists) {
+            final String msg = String.format("None of the source attributes for certificate attribute '%s' "
+                + "was received from user authentication", m.getDestination().getIdentifier());
+            log.info("{}: {} [id: '{}', request-id: '{}']",
+                this.engineConfiguration.getName(), msg, context.getId(), signRequest.getRequestId());
+
+            // TODO: Which error code to use?
+            throw new SignServiceErrorException(new SignServiceError(
+                SignServiceErrorCode.REQUEST_INCORRECT, "Attribute missing", msg));
+          }
+        }
+      }
+    }
+
+    // TODO: Audit log
+
+    // Save authentication information for later ...
+    //
+    context.putIdentityAssertion(authnResult.getAssertion());
+    context.putSignMessageDisplayed(authnResult.signMessageDisplayed());
   }
 
   protected HttpRequestMessage sendErrorResponse(

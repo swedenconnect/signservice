@@ -48,6 +48,7 @@ import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
 import se.swedenconnect.signservice.protocol.dss.DssProtocolHandler;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
+import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.session.SessionHandler;
 import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.impl.DefaultSessionHandler;
@@ -218,7 +219,7 @@ public class SignServiceConfiguration {
     }
 
     @Override
-    public AuthenticationResultChoice authenticate(AuthnRequirements authnRequirements, byte[] signMessage,
+    public AuthenticationResultChoice authenticate(AuthnRequirements authnRequirements, SignMessage signMessage,
         SignServiceContext context) throws UserAuthenticationException {
       throw new UserAuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHN_ERROR, "Not implemented");
     }

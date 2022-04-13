@@ -18,6 +18,7 @@ package se.swedenconnect.signservice.authn;
 import javax.servlet.http.HttpServletRequest;
 
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
+import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
@@ -53,15 +54,22 @@ public interface AuthenticationHandler {
   /**
    * Initiates authentication of the user. Depending on the authentication scheme the return result object may contain
    * the authentication result (assertion) or a request to direct the user to a remote service.
+   * <p>
+   * It is the responsibility of {@code authenticate}, or {@code resumeAuthentication}, to assert that all requirements
+   * from the supplied {@link AuthnRequirements} are fulfilled. This means that the authentication must assert the
+   * supplied signer attributes ({@link AuthnRequirements#getRequestedSignerAttributes()}) and also check that the
+   * authentication is performed under an accepted authentication context
+   * ({@link AuthnRequirements#getAuthnContextIdentifiers()}).
+   * </p>
    *
    * @param authnRequirements the requested authentication requirements
-   * @param signMessage the protocol specific encoding of a sign message (optional)
+   * @param signMessage the sign message (optional)
    * @param context the SignService context
    * @return a choice object holding the authentication result or a HTTP request object (indicating that the user should
    *           be directed to an authentication service)
    * @throws UserAuthenticationException for authentication errors
    */
-  AuthenticationResultChoice authenticate(final AuthnRequirements authnRequirements, final byte[] signMessage,
+  AuthenticationResultChoice authenticate(final AuthnRequirements authnRequirements, final SignMessage signMessage,
       final SignServiceContext context) throws UserAuthenticationException;
 
   /**
