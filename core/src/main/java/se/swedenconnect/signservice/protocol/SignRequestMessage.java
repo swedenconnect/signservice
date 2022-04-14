@@ -26,7 +26,7 @@ import se.swedenconnect.signservice.protocol.msg.MessageConditions;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
-import se.swedenconnect.signservice.signature.SignatureTask;
+import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 
 /**
  * A generic representation of a signature request message.
@@ -155,7 +155,7 @@ public interface SignRequestMessage extends Serializable {
    *
    * @return a list of signature tasks
    */
-  List<SignatureTask> getSignatureTasks();
+  List<RequestedSignatureTask> getSignatureTasks();
 
   /**
    * Gets a string that can be used for logging.

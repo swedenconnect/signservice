@@ -28,7 +28,7 @@ public class UserAuthenticationException extends Exception {
   private final AuthenticationErrorCode errorCode;
 
   /**
-   * Constructor setting the error message.
+   * Constructor setting the error code and error message.
    *
    * @param errorCode the authentication error code
    * @param message the error message
@@ -38,7 +38,7 @@ public class UserAuthenticationException extends Exception {
   }
 
   /**
-   * Constructor setting the error message and the cause of the error.
+   * Constructor setting the error code, error message and the cause of the error.
    *
    * @param errorCode the authentication error code
    * @param message the error message

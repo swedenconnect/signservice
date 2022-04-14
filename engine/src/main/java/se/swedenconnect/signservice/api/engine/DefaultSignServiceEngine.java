@@ -16,6 +16,10 @@
 package se.swedenconnect.signservice.api.engine;
 
 import java.io.IOException;
+import java.security.KeyException;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.api.engine.config.EngineConfiguration;
 import se.swedenconnect.signservice.api.engine.impl.DefaultSignRequestMessageVerifier;
 import se.swedenconnect.signservice.api.engine.session.EngineContext;
@@ -35,6 +40,7 @@ import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
+import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.engine.SignServiceError;
 import se.swedenconnect.signservice.engine.SignServiceErrorCode;
@@ -48,6 +54,9 @@ import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.session.SessionHandler;
 import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.SignServiceSession;
+import se.swedenconnect.signservice.signature.CompletedSignatureTask;
+import se.swedenconnect.signservice.signature.RequestedSignatureTask;
+import se.swedenconnect.signservice.signature.SignatureHandler;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
 import se.swedenconnect.signservice.storage.MessageReplayException;
 
@@ -203,6 +212,20 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       //
       this.signRequestMessageVerifier.verifyMessage(signRequestMessage, this.engineConfiguration, context);
 
+      // Ask handlers if they will be able to process this request.
+      //
+      try {
+        this.engineConfiguration.getKeyAndCertificateHandler().checkRequirements(
+            signRequestMessage, context.getContext());
+        this.engineConfiguration.getSignatureHandler().checkRequirements(signRequestMessage, context.getContext());
+      }
+      catch (final InvalidRequestException e) {
+        log.info("{}: Cannot process request - {} [id: '{}', request-id: '{}']",
+            this.engineConfiguration.getName(), e.getMessage(), context.getId(), signRequestMessage.getRequestId());
+        throw new SignServiceErrorException(
+            new SignServiceError(SignServiceErrorCode.REQUEST_INCORRECT, "Can not process request", e.getMessage()), e);
+      }
+
       // OK, the SignRequest is accepted. Let's save it in the context for future use ...
       //
       context.putSignRequest(signRequestMessage);
@@ -253,12 +276,32 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       //
       this.completeAuthentication(httpRequest, authnResult, context);
 
-      // Generate key and cert
+      // Generate the signing credentials (private key and certificate) ...
+      //
+      final SignRequestMessage signRequestMessage = context.getSignRequest();
 
-      // Sign
+      final PkiCredential signingCredential =
+          this.engineConfiguration.getKeyAndCertificateHandler().generateSigningCredential(
+              signRequestMessage, authnResult.getAssertion(), context.getContext());
 
-      // Encode response
+      // Sign the requested tasks ...
+      //
+      final List<CompletedSignatureTask> tasks = new ArrayList<>();
+      final SignatureHandler signatureHandler = this.engineConfiguration.getSignatureHandler();
+      for (final RequestedSignatureTask task : signRequestMessage.getSignatureTasks()) {
+        tasks.add(signatureHandler.sign(task, signingCredential, signRequestMessage, context.getContext()));
+      }
 
+      // TODO: Encode response
+
+      return null;
+    }
+    catch (final SignatureException e) {
+      // TODO: Log and set correct error
+      return null;
+    }
+    catch (final KeyException | CertificateException e) {
+      // TODO: Log and set correct error
       return null;
     }
     catch (final SignServiceErrorException e) {
@@ -403,9 +446,26 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
     }
   }
 
+  /**
+   * The "complete authentication" method is invoked after the authentication handler has reported a successful user
+   * authentication. At this point we know that the handler has asserted that the required user attributes were
+   * presented during the authentication, but we still need to check some additional things. This includes asserting
+   * that the signature message was displayed (if required) and making sure that we received attributes from the
+   * authentication needed to create the certificate contents.
+   *
+   * @param httpRequest the HTTP request
+   * @param authnResult the authentication result
+   * @param context the engine context
+   * @throws UnrecoverableSignServiceException for unrecoverable errors
+   * @throws SignServiceErrorException for errors that should be passed back to the client (as an error response)
+   */
   protected void completeAuthentication(
       final HttpServletRequest httpRequest, final AuthenticationResult authnResult, final EngineContext context)
-      throws SignServiceErrorException, UnrecoverableSignServiceException {
+      throws UnrecoverableSignServiceException, SignServiceErrorException {
+
+    log.debug("{}: Authentication result: {} [id: '{}', request-id: '{}']",
+        this.engineConfiguration.getName(), authnResult,
+        context.getId(), context.getSignRequest().getRequestId());
 
     // First we need to assert that the sign message really was displayed by the authentication
     // service (if this was requested).
@@ -437,16 +497,10 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
           // At least one of the source attributes must be among the issued identity attributes ...
           //
           final boolean exists = m.getSources().stream()
-            .filter(i -> {
-              for (final var attr : issuedAttributes) {
-                if (i.getIdentifier().equals(attr.getIdentifier())) {
-                  return true;
-                }
-              }
-              return false;
-            })
-            .findFirst()
-            .isPresent();
+              .filter(i -> issuedAttributes.stream().filter(
+                  a -> a.getIdentifier().equals(i.getIdentifier())).findFirst().isPresent())
+              .findFirst()
+              .isPresent();
           if (!exists) {
             final String msg = String.format("None of the source attributes for certificate attribute '%s' "
                 + "was received from user authentication", m.getDestination().getIdentifier());
@@ -472,6 +526,8 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   protected HttpRequestMessage sendErrorResponse(
       final HttpServletRequest httpRequest, final EngineContext context, final SignServiceError error)
       throws UnrecoverableSignServiceException {
+
+    // TODO
 
     return null;
   }

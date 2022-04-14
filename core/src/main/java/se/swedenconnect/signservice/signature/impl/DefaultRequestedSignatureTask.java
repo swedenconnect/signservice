@@ -22,13 +22,13 @@ import java.util.Optional;
 import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
 import se.swedenconnect.signservice.signature.AdESObject;
 import se.swedenconnect.signservice.signature.AdESType;
-import se.swedenconnect.signservice.signature.SignatureTask;
+import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureType;
 
 /**
- * Default implementation of the {@link SignatureTask} interface.
+ * Default implementation of the {@link RequestedSignatureTask} interface.
  */
-public class DefaultSignatureTask implements SignatureTask {
+public class DefaultRequestedSignatureTask implements RequestedSignatureTask {
 
   /** For serializing. */
   private static final long serialVersionUID = -8961771197694209260L;
@@ -51,16 +51,10 @@ public class DefaultSignatureTask implements SignatureTask {
   /** The to-be-signed data. */
   private byte[] tbsData;
 
-  /** The signature bytes. */
-  private byte[] signature;
-
-  /** The signature algorithm URI. */
-  private String signatureAlgorithmUri;
-
   /**
    * Default constructor.
    */
-  public DefaultSignatureTask() {
+  public DefaultRequestedSignatureTask() {
   }
 
   /** {@inheritDoc} */
@@ -190,44 +184,13 @@ public class DefaultSignatureTask implements SignatureTask {
 
   /** {@inheritDoc} */
   @Override
-  public byte[] getSignature() {
-    return this.signature != null ? this.signature.clone() : null;
-  }
-
-  /**
-   * Assigns the signature bytes.
-   *
-   * @param signature the signature bytes
-   */
-  public void setSignature(final byte[] signature) {
-    this.signature = signature != null ? signature.clone() : null;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public String getSignatureAlgorithmUri() {
-    return this.signatureAlgorithmUri;
-  }
-
-  /**
-   * Assigns the signature algorithm URI.
-   *
-   * @param signatureAlgorithmUri the signature algorithm URI
-   */
-  public void setSignatureAlgorithmUri(final String signatureAlgorithmUri) {
-    this.signatureAlgorithmUri = signatureAlgorithmUri;
-  }
-
-  /** {@inheritDoc} */
-  @Override
   @GeneratedMethod
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + Arrays.hashCode(this.signature);
     result = prime * result + Arrays.hashCode(this.tbsData);
     result = prime * result
-        + Objects.hash(this.adesObject, this.adesType, this.processingRulesUri, this.signatureAlgorithmUri,
+        + Objects.hash(this.adesObject, this.adesType, this.processingRulesUri,
             this.signatureType, this.taskId);
     return result;
   }
@@ -239,14 +202,12 @@ public class DefaultSignatureTask implements SignatureTask {
     if (this == obj) {
       return true;
     }
-    if (!(obj instanceof SignatureTask)) {
+    if (!(obj instanceof RequestedSignatureTask)) {
       return false;
     }
-    final SignatureTask other = (SignatureTask) obj;
+    final RequestedSignatureTask other = (RequestedSignatureTask) obj;
     return Objects.equals(this.adesObject, other.getAdESObject()) && this.adesType == other.getAdESType()
         && Objects.equals(this.processingRulesUri, other.getProcessingRulesUri())
-        && Arrays.equals(this.signature, other.getSignature())
-        && Objects.equals(this.signatureAlgorithmUri, other.getSignatureAlgorithmUri())
         && this.signatureType == other.getSignatureType()
         && Objects.equals(this.taskId, other.getTaskId()) && Arrays.equals(this.tbsData, other.getTbsData());
   }
@@ -256,10 +217,9 @@ public class DefaultSignatureTask implements SignatureTask {
   public String toString() {
     return String.format(
         "task-id='%s', signature-type='%s', ades-type='%s', ades-object=[%s], processing-rules-uri='%s', "
-            + "tbs-data=[%d bytes], signature=[%d bytes], signature-algorithm-uri='%s'",
+            + "tbs-data=[%d bytes]",
         this.taskId, this.signatureType, Optional.ofNullable(this.adesType).map(AdESType::toString).orElse("None"),
-        this.adesObject, this.processingRulesUri, this.tbsData != null ? this.tbsData.length : 0,
-        this.signature != null ? this.signature.length : 0, this.signatureAlgorithmUri);
+        this.adesObject, this.processingRulesUri, this.tbsData != null ? this.tbsData.length : 0);
   }
 
 }

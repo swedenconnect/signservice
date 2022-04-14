@@ -77,9 +77,9 @@ import se.swedenconnect.signservice.protocol.msg.impl.DefaultMessageConditions;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificateAttribute;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultSignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultSigningCertificateRequirements;
-import se.swedenconnect.signservice.signature.SignatureTask;
+import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.impl.DefaultAdESObject;
-import se.swedenconnect.signservice.signature.impl.DefaultSignatureTask;
+import se.swedenconnect.signservice.signature.impl.DefaultRequestedSignatureTask;
 
 /**
  * An implementation of the {@link SignRequestMessage} interface for sign request messages according to <a href=
@@ -205,13 +205,13 @@ public class DssSignRequestMessage implements SignRequestMessage {
     // SignTasks ...
     //
     try {
-      final List<SignatureTask> signTasks = this.getSignatureTasks();
+      final List<RequestedSignatureTask> signTasks = this.getSignatureTasks();
       if (signTasks.isEmpty()) {
         final String msg = "Missing SignTasks - at least one SignTaskData is required";
         log.info("{} [request-id: '{}']", msg, this.signRequest.getRequestID());
         throw new ProtocolException(msg);
       }
-      for (final SignatureTask st : signTasks) {
+      for (final RequestedSignatureTask st : signTasks) {
         if (st.getTaskId() == null && signTasks.size() > 1) {
           final String msg = "Missing SignTaskId - this ID is required if more than one SignTaskData is set";
           log.info("{} [request-id: '{}']", msg, this.signRequest.getRequestID());
@@ -601,14 +601,14 @@ public class DssSignRequestMessage implements SignRequestMessage {
 
   /** {@inheritDoc} */
   @Override
-  public List<SignatureTask> getSignatureTasks() {
+  public List<RequestedSignatureTask> getSignatureTasks() {
     final SignTasks signTasks = this.signRequest.getSignTasks();
     if (signTasks == null || !signTasks.isSetSignTaskDatas()) {
       return Collections.emptyList();
     }
-    final List<SignatureTask> signatureTasks = new ArrayList<>();
+    final List<RequestedSignatureTask> signatureTasks = new ArrayList<>();
     for (final SignTaskData std : signTasks.getSignTaskDatas()) {
-      final DefaultSignatureTask task = new DefaultSignatureTask();
+      final DefaultRequestedSignatureTask task = new DefaultRequestedSignatureTask();
       task.setTaskId(std.getSignTaskId());
       if (std.isSetSigType()) {
         task.setSignatureType(std.getSigType());
