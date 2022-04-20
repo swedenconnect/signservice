@@ -24,6 +24,7 @@ import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.client.ClientConfiguration;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
+import se.swedenconnect.signservice.signature.SignatureHandler;
 
 /**
  * Interface defining the configuration API for an engine instance.
@@ -78,6 +79,13 @@ public interface EngineConfiguration {
    * @return the key and certificate handler
    */
   KeyAndCertificateHandler getKeyAndCertificateHandler();
+
+  /**
+   * Gets the signature handler that is responsible of constructing the signature(s).
+   *
+   * @return the signature handler
+   */
+  SignatureHandler getSignatureHandler();
 
   /**
    * Gets the configuration for the SignService client that is being serviced by this SignService engine.

@@ -13,26 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.certificate;
+package se.swedenconnect.signservice.signature;
 
-import java.security.KeyException;
-import java.security.cert.CertificateException;
+import java.security.SignatureException;
 
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
- * Defines the handler that is responsible of generating keys and issuing signing certificates.
+ * A {@code SignatureHandler} instance is responsible of signing a supplied signature task using the provided
+ * credential.
  */
-public interface KeyAndCertificateHandler {
+public interface SignatureHandler {
 
   /**
    * Gets the name of the handler.
    *
-   * @return the handler name
+   * @return handler name
    */
   String getName();
 
@@ -48,19 +47,16 @@ public interface KeyAndCertificateHandler {
       throws InvalidRequestException;
 
   /**
-   * Generates a signing (private) key and issues a signing certificate given the supplied parameters.
+   * Signs the supplied signature task with the given signing credential.
    *
-   * @param signRequest the SignRequest
-   * @param assertion the identity assertion (from the user authentication phase)
+   * @param signatureTask the task to sign
+   * @param signingCredential the signing credential
+   * @param signRequest the SignRequest (that may contain input for the signature process)
    * @param context the SignService context
-   * @return the generated private key and signing certificate packaged in a {@link PkiCredential}
-   * @throws KeyException for key generation errors
-   * @throws CertificateException for certificate issuance errors
+   * @return a completed signature task
+   * @throws SignatureException for signing errors
    */
-  PkiCredential generateSigningCredential(
-      final SignRequestMessage signRequest, final IdentityAssertion assertion, final SignServiceContext context)
-      throws KeyException, CertificateException;
-
-  // TODO: We may want to pass along some sort of client policy object as well.
+  CompletedSignatureTask sign(final RequestedSignatureTask signatureTask, final PkiCredential signingCredential,
+      final SignRequestMessage signRequest, final SignServiceContext context) throws SignatureException;
 
 }

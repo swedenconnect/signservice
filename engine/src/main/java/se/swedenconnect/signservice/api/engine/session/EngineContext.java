@@ -20,6 +20,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.signservice.authn.IdentityAssertion;
+import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 
@@ -34,7 +36,16 @@ public class EngineContext {
   private static final String PREFIX = EngineContext.class.getPackageName();
 
   /** Key for storing the state. */
-  private static final String CONTEXT_STATE_KEY = PREFIX + ".State";
+  private static final String STATE_KEY = PREFIX + ".State";
+
+  /** Key for storing the SignRequest message. */
+  private static final String SIGN_REQUEST_KEY = PREFIX + ".SignRequest";
+
+  /** Key for storing the identity assertion. */
+  private static final String ASSERTION_KEY = PREFIX + ".IdentityAssertion";
+
+  /** Key for storing whether a sign message was displayed. */
+  private static final String SIGN_MESSAGE_DISPLAYED_KEY = PREFIX + ".SignMessageDisplayed";
 
   /** The wrapped context. */
   private SignServiceContext context;
@@ -46,6 +57,20 @@ public class EngineContext {
    */
   public EngineContext(final SignServiceContext context) {
     this.context = Objects.requireNonNull(context, "context must not be null");
+  }
+
+  /**
+   * Creates and initializes a new {@link SignServiceContext} object.
+   *
+   * @return a SignServiceContext object
+   */
+  public static SignServiceContext createSignServiceContext() {
+    final SignServiceContext context = new DefaultSignServiceContext(UUID.randomUUID().toString());
+    log.debug("A SignServiceContext with ID '{}' was created", context.getId());
+
+    // Initialize
+    context.put(STATE_KEY, SignOperationState.NEW);
+    return context;
   }
 
   /**
@@ -72,7 +97,7 @@ public class EngineContext {
    * @return the state
    */
   public SignOperationState getState() {
-    return Optional.ofNullable(this.context.get(CONTEXT_STATE_KEY, SignOperationState.class))
+    return Optional.ofNullable(this.context.get(STATE_KEY, SignOperationState.class))
         .orElseThrow(() -> new IllegalStateException("No SignService state available"));
   }
 
@@ -91,21 +116,64 @@ public class EngineContext {
     if (currentState == SignOperationState.SIGNING && newState == SignOperationState.AUTHN_ONGOING) {
       throw new IllegalStateException("Illegal state transition - Cannot go backwards in state transitions");
     }
-    this.context.put(CONTEXT_STATE_KEY, Objects.requireNonNull(newState, "Supplied state must not be null"));
+    this.context.put(STATE_KEY, Objects.requireNonNull(newState, "Supplied state must not be null"));
   }
 
   /**
-   * Creates and initializes a new {@link SignServiceContext} object.
+   * Adds a {@link SignRequestMessage} to the context.
    *
-   * @return a SignServiceContext object
+   * @param signRequest the SignRequest to add
    */
-  public static SignServiceContext createSignServiceContext() {
-    final SignServiceContext context = new DefaultSignServiceContext(UUID.randomUUID().toString());
-    log.debug("A SignServiceContext with ID '{}' was created", context.getId());
+  public void putSignRequest(final SignRequestMessage signRequest) {
+    this.context.put(SIGN_REQUEST_KEY,
+        Objects.requireNonNull(signRequest, "signRequest must not be null"));
+  }
 
-    // Initialize
-    context.put(CONTEXT_STATE_KEY, SignOperationState.NEW);
-    return context;
+  /**
+   * Gets the {@link SignRequestMessage} from the context.
+   *
+   * @return the SignRequest
+   */
+  public SignRequestMessage getSignRequest() {
+    return this.context.get(SIGN_REQUEST_KEY, SignRequestMessage.class);
+  }
+
+  /**
+   * Adds a {@link IdentityAssertion} to the context.
+   *
+   * @param identityAssertion the identity assertion to add
+   */
+  public void putIdentityAssertion(final IdentityAssertion identityAssertion) {
+    this.context.put(ASSERTION_KEY,
+        Objects.requireNonNull(identityAssertion, "identityAssertion must not be null"));
+  }
+
+  /**
+   * Gets the {@link IdentityAssertion} from the context.
+   *
+   * @return the identity assertion
+   */
+  public IdentityAssertion getIdentityAssertion() {
+    return this.context.get(ASSERTION_KEY, IdentityAssertion.class);
+  }
+
+  /**
+   * Adds whether the SignMessage was displayed.
+   *
+   * @param signMessageDisplayed whether SignMessage was displayed
+   */
+  public void putSignMessageDisplayed(final Boolean signMessageDisplayed) {
+    this.context.put(SIGN_MESSAGE_DISPLAYED_KEY,
+        Objects.requireNonNull(signMessageDisplayed, "signMessageDisplayed must not be null"));
+  }
+
+  /**
+   * Gets whether the SignMessage was displayed.
+   *
+   * @return whether the SignMessage was displayed
+   */
+  public Boolean getSignMessageDisplayed() {
+    return this.context.get(SIGN_MESSAGE_DISPLAYED_KEY, Boolean.class);
   }
 
 }

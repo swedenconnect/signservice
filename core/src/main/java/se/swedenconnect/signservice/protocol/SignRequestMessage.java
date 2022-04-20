@@ -23,9 +23,10 @@ import java.util.List;
 
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.MessageConditions;
+import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
-import se.swedenconnect.signservice.signature.SignatureTask;
+import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 
 /**
  * A generic representation of a signature request message.
@@ -120,12 +121,12 @@ public interface SignRequestMessage extends Serializable {
   AuthnRequirements getAuthnRequirements();
 
   /**
-   * Gets the raw "sign message". The sign message is a protocol specific extension that will be passed on to the
-   * authentication service.
+   * Gets the "sign message". The sign message is a protocol specific extension that will be passed on
+   * to the authentication service.
    *
-   * @return the sign message, or null if none has been supplied
+   * @return the sign message, or null if no sign message has been supplied
    */
-  byte[] getSignMessage();
+  SignMessage getSignMessage();
 
   /**
    * Tells whether the requester requires that the "sign message" is displayed for the user during the signature
@@ -154,7 +155,7 @@ public interface SignRequestMessage extends Serializable {
    *
    * @return a list of signature tasks
    */
-  List<SignatureTask> getSignatureTasks();
+  List<RequestedSignatureTask> getSignatureTasks();
 
   /**
    * Gets a string that can be used for logging.

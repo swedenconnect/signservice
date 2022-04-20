@@ -16,9 +16,56 @@
 package se.swedenconnect.signservice.authn;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.util.List;
 
+import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
+
+/**
+ * Represents an identity assertion.
+ */
 public interface IdentityAssertion extends Serializable {
 
-  // TODO
+  /**
+   * Gets the issuer identity of the authentication assertion.
+   *
+   * @return the ID of the authentication service that authenticated the user
+   */
+  String getIssuer();
+
+  /**
+   * Gets the instant when this assertion was issued.
+   *
+   * @return the assertion issuance time
+   */
+  Instant getIssuanceInstant();
+
+  /**
+   * Gets the instant when the user was authenticated.
+   *
+   * @return the authentication instant
+   */
+  Instant getAuthnInstant();
+
+  /**
+   * Gets the authentication context under which the authentication was made.
+   *
+   * @return the authentication context
+   */
+  AuthnContextIdentifier getAuthnContext();
+
+  /**
+   * Gets the identity attributes.
+   *
+   * @return the identity attributes
+   */
+  List<IdentityAttribute<?>> getIdentityAttributes();
+
+  /**
+   * Gets the encoding of the assertion.
+   *
+   * @return the encoding of the assertion
+   */
+  byte[] getEncodedAssertion();
 
 }

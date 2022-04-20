@@ -42,6 +42,9 @@ public enum SignServiceErrorCode {
    */
   AUTHN_SIGNMESSAGE_NOT_DISPLAYED("Sign message was not displayed to the user which was required"),
 
+  /** General authentication error. */
+  AUTHN_FAILURE("The user failed to authenticate"),
+
   // TODO: Many more
 
   /** The catch-all case. Returned, if no other error is suitable. */

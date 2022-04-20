@@ -45,7 +45,6 @@ import se.idsec.signservice.xml.JAXBMarshaller;
 import se.swedenconnect.schemas.csig.dssext_1_1.CertRequestProperties;
 import se.swedenconnect.schemas.csig.dssext_1_1.MappedAttributeType;
 import se.swedenconnect.schemas.csig.dssext_1_1.PreferredSAMLAttributeNameType;
-import se.swedenconnect.schemas.csig.dssext_1_1.SignMessage;
 import se.swedenconnect.schemas.csig.dssext_1_1.SignRequestExtension;
 import se.swedenconnect.schemas.csig.dssext_1_1.SignTaskData;
 import se.swedenconnect.schemas.csig.dssext_1_1.SignTasks;
@@ -69,6 +68,7 @@ import se.swedenconnect.signservice.protocol.dss.jaxb.JaxbAttributeConverter;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.CertificateAttributeMapping;
 import se.swedenconnect.signservice.protocol.msg.MessageConditions;
+import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultAuthnRequirements;
@@ -77,9 +77,9 @@ import se.swedenconnect.signservice.protocol.msg.impl.DefaultMessageConditions;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificateAttribute;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultSignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultSigningCertificateRequirements;
-import se.swedenconnect.signservice.signature.SignatureTask;
+import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.impl.DefaultAdESObject;
-import se.swedenconnect.signservice.signature.impl.DefaultSignatureTask;
+import se.swedenconnect.signservice.signature.impl.DefaultRequestedSignatureTask;
 
 /**
  * An implementation of the {@link SignRequestMessage} interface for sign request messages according to <a href=
@@ -205,13 +205,13 @@ public class DssSignRequestMessage implements SignRequestMessage {
     // SignTasks ...
     //
     try {
-      final List<SignatureTask> signTasks = this.getSignatureTasks();
+      final List<RequestedSignatureTask> signTasks = this.getSignatureTasks();
       if (signTasks.isEmpty()) {
         final String msg = "Missing SignTasks - at least one SignTaskData is required";
         log.info("{} [request-id: '{}']", msg, this.signRequest.getRequestID());
         throw new ProtocolException(msg);
       }
-      for (final SignatureTask st : signTasks) {
+      for (final RequestedSignatureTask st : signTasks) {
         if (st.getTaskId() == null && signTasks.size() > 1) {
           final String msg = "Missing SignTaskId - this ID is required if more than one SignTaskData is set";
           log.info("{} [request-id: '{}']", msg, this.signRequest.getRequestID());
@@ -368,7 +368,7 @@ public class DssSignRequestMessage implements SignRequestMessage {
     // SignMessage is optional ...
     //
     if (extension.getSignMessage() != null) {
-      final SignMessage signMessage = extension.getSignMessage();
+      final se.swedenconnect.schemas.csig.dssext_1_1.SignMessage signMessage = extension.getSignMessage();
       if (signMessage.getMessage() == null && signMessage.getEncryptedMessage() == null) {
         final String msg = "Bad SignMessage provided - either Message or EncryptedMessage must be assigned";
         log.info("{} [request-id: '{}']", msg, this.signRequest.getRequestID());
@@ -404,7 +404,7 @@ public class DssSignRequestMessage implements SignRequestMessage {
   }
 
   /**
-   * Gets the version field of the SignMessage.
+   * Gets the version field of the SignRequest.
    *
    * @return the version
    */
@@ -527,19 +527,10 @@ public class DssSignRequestMessage implements SignRequestMessage {
 
   /** {@inheritDoc} */
   @Override
-  public byte[] getSignMessage() {
+  public SignMessage getSignMessage() {
     return Optional.ofNullable(this.signRequest.getSignRequestExtension())
         .map(SignRequestExtension::getSignMessage)
-        .map(m -> {
-          try {
-            return JAXBMarshaller.marshall(m);
-          }
-          catch (final JAXBException e) {
-            log.info("Invalid SignMessage - failed to marshall it", e);
-            return null;
-          }
-        })
-        .map(d -> DOMUtils.nodeToBytes(d))
+        .map(m -> new DssSignMessage(m))
         .orElse(null);
   }
 
@@ -548,7 +539,7 @@ public class DssSignRequestMessage implements SignRequestMessage {
   public boolean getMustShowSignMessage() {
     return Optional.ofNullable(this.signRequest.getSignRequestExtension())
         .map(SignRequestExtension::getSignMessage)
-        .map(SignMessage::isMustShow)
+        .map(se.swedenconnect.schemas.csig.dssext_1_1.SignMessage::isMustShow)
         .orElse(false);
   }
 
@@ -610,14 +601,14 @@ public class DssSignRequestMessage implements SignRequestMessage {
 
   /** {@inheritDoc} */
   @Override
-  public List<SignatureTask> getSignatureTasks() {
+  public List<RequestedSignatureTask> getSignatureTasks() {
     final SignTasks signTasks = this.signRequest.getSignTasks();
     if (signTasks == null || !signTasks.isSetSignTaskDatas()) {
       return Collections.emptyList();
     }
-    final List<SignatureTask> signatureTasks = new ArrayList<>();
+    final List<RequestedSignatureTask> signatureTasks = new ArrayList<>();
     for (final SignTaskData std : signTasks.getSignTaskDatas()) {
-      final DefaultSignatureTask task = new DefaultSignatureTask();
+      final DefaultRequestedSignatureTask task = new DefaultRequestedSignatureTask();
       task.setTaskId(std.getSignTaskId());
       if (std.isSetSigType()) {
         task.setSignatureType(std.getSigType());
