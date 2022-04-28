@@ -18,11 +18,21 @@ Framework specifications - https://docs.swedenconnect.se/technical-framework.
 
 This repository comprises of the following modules:
 
-* [Core](core) - Core API:s and classes.
+* [core](core) - Core API:s and classes.
 
-* [Engine](engine) - Signature Service processing logic engine.
+* [authn](authn) - Support for user authentication.
 
-* ...
+* [protocol](protocol) - Protocol support.
+
+* [signhandler](signhandler) - Implementation of a Signature Handler, responsible of creating signatures.
+
+* [keycert](keycert) - Modules for generating signature keys and certificates.
+
+* [engine](engine) - Signature Service processing logic engine.
+
+* [spring-boot-starter](spring-boot-starter) - A Spring Boot Starter module that is useful when building a Signature Service using Spring Boot.
+
+* [app](app) - A sample Signature Service application built using Spring Boot.
 
 ## Documentation
 

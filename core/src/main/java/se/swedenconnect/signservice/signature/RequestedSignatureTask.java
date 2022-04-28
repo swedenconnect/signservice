@@ -18,10 +18,9 @@ package se.swedenconnect.signservice.signature;
 import java.io.Serializable;
 
 /**
- * Representation of a "signature task". A task without a signature is used to represent the data to-be-signed and a
- * task containing a signature represents the result of a signature operation.
+ * Representation of a "request signature task". It represents the data to-be-signed.
  */
-public interface SignatureTask extends Serializable {
+public interface RequestedSignatureTask extends Serializable {
 
   /**
    * Gets the unique "sign task ID".
@@ -65,19 +64,5 @@ public interface SignatureTask extends Serializable {
    * @return to-be-signed data
    */
   byte[] getTbsData();
-
-  /**
-   * Gets the raw signature bytes. Only present when the task object is present in a response message.
-   *
-   * @return the signature bytes, or null if no signature is available
-   */
-  byte[] getSignature();
-
-  /**
-   * Gets the signature algorithm identifier (URI) that was used to produce the signature (see {@link #getSignature()}).
-   *
-   * @return the signature algorithm identifier, or null if no signature is present
-   */
-  String getSignatureAlgorithmUri();
 
 }

@@ -23,8 +23,19 @@ public enum AuthenticationErrorCode {
   /** The user cancelled the authentication. */
   USER_CANCEL,
 
-  /** The user failed to authenticate - general authentication error. */
-  FAILED_AUTHN;
+  /** The requested authentication service is not known/possible to use. */
+  UNKNOWN_AUTHENTICATION_SERVICE,
 
-  // TODO: More
+  /** The authentication did not present the required user identity attributes. */
+  MISMATCHING_IDENTITY_ATTRIBUTES,
+
+  /** The requested authentication context is not supported. */
+  UNSUPPORTED_AUTHNCONTEXT,
+
+  /** The user failed to authenticate - general authentication error. */
+  FAILED_AUTHN,
+
+  /** General error for bad authentication setup. For example, the IdP does not recognize the SP. */
+  INTERNAL_AUTHN_ERROR;
+
 }

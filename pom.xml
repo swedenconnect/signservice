@@ -91,6 +91,8 @@
     <module>audit</module>
     <module>authn</module>
     <module>protocol</module>
+    <module>signhandler</module>
+    <module>keycert</module>
     <module>engine</module>
     <module>spring-boot-starter</module>
     <module>app</module>

@@ -32,6 +32,7 @@ import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.client.ClientConfiguration;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
+import se.swedenconnect.signservice.signature.SignatureHandler;
 
 /**
  * Default implementation of the {@link EngineConfiguration} interface.
@@ -89,10 +90,18 @@ public class DefaultEngineConfiguration implements EngineConfiguration {
   /**
    * The key and certificate hander.
    *
-   * @param keyAndCertificateHandler key and cert handler
+   * @param keyAndCertificateHandler key-and-certificate handler
    */
   @Setter
   private KeyAndCertificateHandler keyAndCertificateHandler;
+
+  /**
+   * The signature handler.
+   *
+   * @param signatureHandler the signature handler
+   */
+  @Setter
+  private SignatureHandler signatureHandler;
 
   /**
    * The client configuration.
@@ -144,6 +153,9 @@ public class DefaultEngineConfiguration implements EngineConfiguration {
     if (this.keyAndCertificateHandler == null) {
       throw new IllegalArgumentException("keyAndCertificateHandler must be set");
     }
+    if (this.signatureHandler == null) {
+      throw new IllegalArgumentException("signatureHandler must be set");
+    }
     if (this.clientConfiguration == null) {
       throw new IllegalArgumentException("clientConfiguraton must be set");
     }
@@ -192,6 +204,12 @@ public class DefaultEngineConfiguration implements EngineConfiguration {
   @Override
   public KeyAndCertificateHandler getKeyAndCertificateHandler() {
     return this.keyAndCertificateHandler;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public SignatureHandler getSignatureHandler() {
+    return this.signatureHandler;
   }
 
   /** {@inheritDoc} */
