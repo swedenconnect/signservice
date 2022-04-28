@@ -15,13 +15,8 @@
  */
 package se.swedenconnect.signservice.spring.config;
 
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,14 +26,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
-
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean;
 import se.swedenconnect.security.credential.utils.X509Utils;
 import se.swedenconnect.signservice.api.engine.DefaultSignServiceEngine;
 import se.swedenconnect.signservice.api.engine.config.impl.DefaultEngineConfiguration;
+import se.swedenconnect.signservice.audit.AuditLogger;
+import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
+import se.swedenconnect.signservice.audit.actuator.ActuatorAuditLogger;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
 import se.swedenconnect.signservice.authn.UserAuthenticationException;
@@ -52,6 +47,12 @@ import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.impl.DefaultSessionHandler;
 import se.swedenconnect.signservice.spring.config.engine.EngineConfigurationProperties;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Main configuration for SignService.
@@ -142,6 +143,12 @@ public class SignServiceConfiguration {
     return null;
   }
 
+  @Bean
+  public AuditLogger auditLogger() {
+    AuditLoggerSingleton.init(new ActuatorAuditLogger());
+    return AuditLoggerSingleton.getAuditLogger();
+  }
+
   // Dummy
   @Bean
   public ProtocolHandler protocolHandler() {
@@ -182,6 +189,7 @@ public class SignServiceConfiguration {
       conf.setProtocolHandler(this.protocolHandler()); // TODO: change
       conf.setAuthenticationHandler(new MockAuthnHandler());  // TODO: change
       conf.setKeyAndCertificateHandler(null); // TODO: change
+      conf.setAuditLogger(this.auditLogger()); // TODO: change
 
       final DefaultClientConfiguration clientConf = new DefaultClientConfiguration(ecp.getClient().getClientId());
       if (ecp.getClient().getResponseUrls() != null) {
@@ -195,8 +203,6 @@ public class SignServiceConfiguration {
         clientConf.setTrustedCertificates(certs);
       }
       conf.setClientConfiguration(clientConf);
-
-      conf.setAuditLogger(null); // TODO: change
 
 //      conf.init();
 

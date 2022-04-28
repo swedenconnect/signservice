@@ -27,6 +27,8 @@ import se.swedenconnect.signservice.api.engine.config.EngineConfiguration;
 import se.swedenconnect.signservice.api.engine.impl.DefaultSignRequestMessageVerifier;
 import se.swedenconnect.signservice.api.engine.session.EngineContext;
 import se.swedenconnect.signservice.api.engine.session.SignOperationState;
+import se.swedenconnect.signservice.audit.AuditEvent;
+import se.swedenconnect.signservice.audit.AuditEventIds;
 import se.swedenconnect.signservice.authn.AuthenticationResult;
 import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
 import se.swedenconnect.signservice.authn.UserAuthenticationException;

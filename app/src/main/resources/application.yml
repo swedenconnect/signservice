@@ -36,5 +36,19 @@ logging:
       swedenconnect:
         security: DEBUG
         signservice: DEBUG
-      
+
+#
+# Management
+#
+management:
+  auditevents:
+    enabled: true
+  endpoint:
+    auditevents:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "auditevents"
+
 #logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter=DEBUG

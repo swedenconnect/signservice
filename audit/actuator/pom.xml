@@ -1,19 +1,19 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>signservice-spring-boot-starter</artifactId>
+  <artifactId>signservice-audit-actuator</artifactId>
   <packaging>jar</packaging>
 
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
-    <artifactId>signservice-parent</artifactId>
+    <artifactId>signservice-audit-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
 
-  <name>Sweden Connect :: SignService :: Spring Boot Starter</name>
-  <description>SignService Spring Boot Starter</description>
+  <name>Sweden Connect :: SignService :: Auditing :: Actuator</name>
+  <description>SignService Auditing Actuator</description>
   <url>https://github.com/swedenconnect/signservice</url>
 
   <licenses>
@@ -90,48 +90,14 @@
   <dependencies>
 
     <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-engine</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-protocol-dssext11</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-audit-actuator</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>se.swedenconnect.security</groupId>
-      <artifactId>credentials-support</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-autoconfigure</artifactId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-configuration-processor</artifactId>
-      <optional>true</optional>
+      <groupId>se.swedenconnect.signservice</groupId>
+      <artifactId>signservice-audit-base</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
   </dependencies>
@@ -144,14 +110,21 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
-          <doctitle>SignService Spring Boot Starter - ${project.version}</doctitle>
-          <windowtitle>SignService Spring Boot Starter - ${project.version}</windowtitle>
+          <doctitle>SignService Auditing Actuator - ${project.version}</doctitle>
+          <windowtitle>SignService Auditing Actuator - ${project.version}</windowtitle>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>11</source>
+          <target>11</target>
         </configuration>
       </plugin>
 
     </plugins>
 
   </build>
-
 
 </project>

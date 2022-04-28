@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>signservice-audit-base</artifactId>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
