@@ -71,13 +71,6 @@
 
   <dependencies>
 
-    <!-- Protocol base -->
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-protocol-base</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
     <!-- SignService commons -->
     <dependency>
       <groupId>se.idsec.signservice.commons</groupId>
