@@ -78,13 +78,6 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- Authn base -->
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-authn-base</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
     <!-- SignService commons -->
     <dependency>
       <groupId>se.idsec.signservice.commons</groupId>

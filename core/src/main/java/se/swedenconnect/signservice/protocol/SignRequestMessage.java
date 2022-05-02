@@ -129,14 +129,6 @@ public interface SignRequestMessage extends Serializable {
   SignMessage getSignMessage();
 
   /**
-   * Tells whether the requester requires that the "sign message" is displayed for the user during the signature
-   * operation.
-   *
-   * @return true if the sign message must be displayed, and false if it does not have to be displayed (or is not set)
-   */
-  boolean getMustShowSignMessage();
-
-  /**
    * Gets the specific signature requirements for this request.
    *
    * @return signature requirements
@@ -156,16 +148,5 @@ public interface SignRequestMessage extends Serializable {
    * @return a list of signature tasks
    */
   List<RequestedSignatureTask> getSignatureTasks();
-
-  /**
-   * Gets a string that can be used for logging.
-   * <p>
-   * The method must never throw an exception.
-   * </p>
-   *
-   * @param detailed flag indicating that a detailed log string is wanted
-   * @return a log string of the message
-   */
-  String getLogString(final boolean detailed);
 
 }

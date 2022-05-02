@@ -66,6 +66,14 @@ public class SignServiceError {
   }
 
   /**
+   * Gets the error code.
+   * @return the error code
+   */
+  public SignServiceErrorCode getErrorCode() {
+    return this.errorCode;
+  }
+
+  /**
    * Gets the error message.
    *
    * @return the error message
