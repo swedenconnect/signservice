@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
-import se.signservice.audit.base.events.SignServiceAuditEvent;
+import se.signservice.audit.base.events.AuditEventFactory;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditEventParameter;
 import se.swedenconnect.signservice.audit.AuditLogger;
@@ -43,15 +43,15 @@ public class ActuatorAuditLogger implements AuditLogger, ApplicationEventPublish
   /** {@inheritDoc} */
   @Override
   public void auditLog(final AuditEvent event) throws AuditLoggerException {
-    Objects.requireNonNull(event, "auditEvent may not be null");
+    Objects.requireNonNull(event, "event must not be null");
     log.info("Publish audit event [{}]", event.getId());
-    publisher.publishEvent(createActuateEvent(event));
+    publisher.publishEvent(createActuatorEvent(event));
   }
 
   /** {@inheritDoc} */
   @Override
-  public AuditEvent createAuditEvent(@NonNull final String eventId) {
-    return new SignServiceAuditEvent(eventId);
+  public AuditEvent createAuditEvent(final String eventId) {
+    return AuditEventFactory.createAuditEvent(eventId);
   }
 
   /** {@inheritDoc}*/
@@ -63,13 +63,13 @@ public class ActuatorAuditLogger implements AuditLogger, ApplicationEventPublish
   /**
    * Creates and actuate audit event
    * @param event - The SignService AuditEvent
-   * @return - An Actuate Audit Event
+   * @return - An Actuator Audit Event
    */
-  protected org.springframework.boot.actuate.audit.AuditEvent createActuateEvent(final AuditEvent event) {
+  protected org.springframework.boot.actuate.audit.AuditEvent createActuatorEvent(final AuditEvent event) {
+    Objects.requireNonNull(event, "event must not be null");
     final Map<String, Object> auditParameters = event.getParameters().stream()
       .collect(Collectors.toMap(AuditEventParameter::getName, AuditEventParameter::getValue));
-    // TODO: Should principal be an audit paramater?
-    return new org.springframework.boot.actuate.audit.AuditEvent("unknown", event.getId(), auditParameters);
+    return new org.springframework.boot.actuate.audit.AuditEvent(event.getPrincipal(), event.getId(), auditParameters);
   }
 
 }

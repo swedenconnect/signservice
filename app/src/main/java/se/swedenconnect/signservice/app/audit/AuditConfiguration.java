@@ -21,12 +21,13 @@ import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.actuate.audit.InMemoryAuditEventRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import se.signservice.audit.base.events.AuditEventFactory;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditEventIds;
 import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
 
 /**
- * Configuration for Audit
+ * Configuration for Auditing
  */
 @Configuration
 @Slf4j
@@ -41,10 +42,7 @@ public class AuditConfiguration {
 
   @Bean
   public SmartInitializingSingleton initialize() {
-    return () -> {
-      AuditEvent auditEvent = AuditLoggerSingleton.getAuditLogger().createAuditEvent(AuditEventIds.EVENT_SYSTEM_STARTED);
-      AuditLoggerSingleton.getAuditLogger().auditLog(auditEvent);
-    };
+    return () -> AuditLoggerSingleton.getAuditLogger().auditLog(AuditEventFactory.createAuditEvent(AuditEventIds.EVENT_SYSTEM_STARTED));
   }
 
 }

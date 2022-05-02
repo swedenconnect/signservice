@@ -18,30 +18,40 @@ package se.signservice.audit.base.events;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditEventParameter;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * The {@link AuditEvent} implementation SignService Audit Events
  */
 public class SignServiceAuditEvent implements AuditEvent {
 
-  /** The AuditEvent paramaters */
-  private final List<AuditEventParameter> parameters;
+  /** The AuditEvent id */
+  private final Instant timestamp;
 
   /** The AuditEvent id */
   private final String id;
 
+  /** The AuditEvent principal */
+  private final String principal;
+
+  /** The AuditEvent parameters */
+  private final List<AuditEventParameter> parameters;
+
   /**
-   * Constructor for SignServiceAuditEvent
+   * Instantiates a new Sign service audit event.
    *
-   * @param id must not be null
+   * @param id        the id, must not be null
+   * @param principal the principal
    */
-  public SignServiceAuditEvent(String id) {
+  public SignServiceAuditEvent(String id, String principal) {
     Objects.requireNonNull(id, "id must not be null");
+    Objects.requireNonNull(principal, "principal must not be null");
+    this.timestamp = Instant.now();
     this.id = id;
+    this.principal = principal;
     this.parameters = new ArrayList<>();
   }
 
@@ -49,6 +59,12 @@ public class SignServiceAuditEvent implements AuditEvent {
   @Override
   public String getId() {
     return id;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String getPrincipal() {
+    return principal;
   }
 
   /** {@inheritDoc} */
@@ -63,7 +79,7 @@ public class SignServiceAuditEvent implements AuditEvent {
     Objects.requireNonNull(parameter, "parameter must not be null");
     parameters.add(parameter);
   }
-
+  
   /** {@inheritDoc} */
   @Override
   public void addParameter(String name, String value) {
@@ -71,12 +87,7 @@ public class SignServiceAuditEvent implements AuditEvent {
     parameters.add(new AuditEventParameter(name, value));
   }
 
-  /** {@inheritDoc} */
-  @Override
   public String toString() {
-    final String paramsStr = parameters.stream()
-      .map(AuditEventParameter::toString)
-      .collect(Collectors.joining("\n"));
-    return String.format("%s\n%s", this.id, paramsStr);
+    return "AuditEvent [timestamp=" + this.timestamp + ", principal=" + this.principal + ", type=" + this.id + ", data=" + this.parameters + "]";
   }
 }
