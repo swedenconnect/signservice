@@ -70,7 +70,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>11</java.version>
-    
+
     <spring.boot.version>2.6.6</spring.boot.version>
   </properties>
 
@@ -108,7 +108,7 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-    </dependencies>    
+    </dependencies>
 
   </dependencyManagement>
 
@@ -146,6 +146,18 @@
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-spring-boot-starter</artifactId>
       <version>${project.version}</version>    
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback.contrib</groupId>
+      <artifactId>logback-json-classic</artifactId>
+      <version>0.1.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback.contrib</groupId>
+      <artifactId>logback-jackson</artifactId>
+      <version>0.1.5</version>
     </dependency>
 
     <dependency>

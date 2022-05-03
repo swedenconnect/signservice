@@ -114,6 +114,12 @@
     </dependency>
 
     <dependency>
+      <groupId>se.swedenconnect.signservice</groupId>
+      <artifactId>signservice-audit-file</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>se.swedenconnect.security</groupId>
       <artifactId>credentials-support</artifactId>
     </dependency>

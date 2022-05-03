@@ -90,4 +90,5 @@ public class SignServiceAuditEvent implements AuditEvent {
   public String toString() {
     return "AuditEvent [timestamp=" + this.timestamp + ", principal=" + this.principal + ", type=" + this.id + ", data=" + this.parameters + "]";
   }
+
 }

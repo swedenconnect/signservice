@@ -31,7 +31,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * The {@link AuditLogger} implementation for spring actuator
+ * The {@link AuditLogger} Spring actuator implementation
  */
 @Slf4j
 @Component
