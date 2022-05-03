@@ -59,9 +59,10 @@ public interface ProtocolHandler {
    * @param context the SignService context
    * @param signRequestMessage the corresponding request message
    * @return a SignResponseMessage
+   * @throws ProtocolException if a response message cannot be created
    */
   SignResponseMessage createSignResponseMessage(final SignServiceContext context,
-      final SignRequestMessage signRequestMessage);
+      final SignRequestMessage signRequestMessage) throws ProtocolException;
 
   /**
    * Encodes a response message so that it can be returned to the SignService application. The method will create a

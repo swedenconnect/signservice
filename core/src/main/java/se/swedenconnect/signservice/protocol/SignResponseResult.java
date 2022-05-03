@@ -22,8 +22,6 @@ import java.io.Serializable;
  */
 public interface SignResponseResult extends Serializable {
 
-  // TODO: Define generic error codes to be used by all protocol implementations ...
-
   /**
    * Predicate that tells if this message represents a successful operation.
    *

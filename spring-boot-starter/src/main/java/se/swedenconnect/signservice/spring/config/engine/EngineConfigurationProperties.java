@@ -19,14 +19,18 @@ import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationProperties;
+import se.swedenconnect.signservice.spring.config.protocol.ProtocolConfiguration;
 
 /**
  * Configuration properties for an engine configuration.
  */
 @Data
+@Slf4j
 public class EngineConfigurationProperties implements InitializingBean {
 
   /**
@@ -71,7 +75,11 @@ public class EngineConfigurationProperties implements InitializingBean {
     Assert.notNull(client, "client must be assigned");
     this.client.afterPropertiesSet();
 
-    Assert.hasText(this.protocolHandlerBean, "protocol-handler-bean must be assigned");
+    if (!StringUtils.hasText(this.protocolHandlerBean)) {
+      log.info("protocol-handler-bean has not been assigning, using {}",
+          ProtocolConfiguration.DSS_PROTOCOL_HANDLER_NAME);
+      this.protocolHandlerBean = ProtocolConfiguration.DSS_PROTOCOL_HANDLER_NAME;
+    }
   }
 
 }
