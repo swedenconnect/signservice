@@ -23,29 +23,41 @@ import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerException;
 
-import java.util.Objects;
-
 /**
  * The {@link AuditLogger} log file implementation
  */
 @Slf4j
 public class FileAuditLogger implements AuditLogger {
 
-  /** the audit log appender name */
-  private final static String AUDIT_LOG = "AUDIT_LOG";
+  /**
+   * The audit log name
+   */
+  protected final static String AUDIT_LOG = "AUDIT_LOG";
 
-  /** The audit log */
+  /**
+   * The audit log
+   */
   private final static Logger auditLog = LoggerFactory.getLogger(AUDIT_LOG);
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void auditLog(final AuditEvent event) throws AuditLoggerException {
-    Objects.requireNonNull(event, "event must not be null");
-    log.debug("Publish audit event [{}]", event.getId());
-    auditLog.info("{}", event);
+    if (event == null) {
+      throw new AuditLoggerException("event must not be null");
+    }
+    try {
+      log.debug("Publish audit event [{}]", event.getId());
+      auditLog.info("{}", event);
+    } catch (Throwable t) {
+      throw new AuditLoggerException("Couldn't log audit event", t);
+    }
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public AuditEvent createAuditEvent(final String eventId) {
     return AuditEventFactory.createAuditEvent(eventId);

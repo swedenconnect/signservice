@@ -19,9 +19,8 @@ import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditEventParameter;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The {@link AuditEvent} implementation SignService Audit Events
@@ -38,7 +37,7 @@ public class SignServiceAuditEvent implements AuditEvent {
   private final String principal;
 
   /** The AuditEvent parameters */
-  private final List<AuditEventParameter> parameters;
+  private final Map<String, AuditEventParameter> parameterMap;
 
   /**
    * Instantiates a new Sign service audit event.
@@ -52,7 +51,7 @@ public class SignServiceAuditEvent implements AuditEvent {
     this.timestamp = Instant.now();
     this.id = id;
     this.principal = principal;
-    this.parameters = new ArrayList<>();
+    this.parameterMap = new HashMap<>();
   }
 
   /** {@inheritDoc} */
@@ -70,25 +69,25 @@ public class SignServiceAuditEvent implements AuditEvent {
   /** {@inheritDoc} */
   @Override
   public List<AuditEventParameter> getParameters() {
-    return parameters;
+    return new ArrayList<>(parameterMap.values());
   }
 
   /** {@inheritDoc} */
   @Override
   public void addParameter(AuditEventParameter parameter) {
     Objects.requireNonNull(parameter, "parameter must not be null");
-    parameters.add(parameter);
+    parameterMap.put(parameter.getName(), parameter);
   }
   
   /** {@inheritDoc} */
   @Override
   public void addParameter(String name, String value) {
     Objects.requireNonNull(name, "name must not be null");
-    parameters.add(new AuditEventParameter(name, value));
+    parameterMap.put(name, new AuditEventParameter(name, value));
   }
 
   public String toString() {
-    return "AuditEvent [timestamp=" + this.timestamp + ", principal=" + this.principal + ", type=" + this.id + ", data=" + this.parameters + "]";
+    return "AuditEvent [timestamp=" + this.timestamp + ", principal=" + this.principal + ", type=" + this.id + ", data=" + this.parameterMap.values() + "]";
   }
 
 }

@@ -43,9 +43,15 @@ public class ActuatorAuditLogger implements AuditLogger, ApplicationEventPublish
   /** {@inheritDoc} */
   @Override
   public void auditLog(final AuditEvent event) throws AuditLoggerException {
-    Objects.requireNonNull(event, "event must not be null");
-    log.info("Publish audit event [{}]", event.getId());
-    publisher.publishEvent(createActuatorEvent(event));
+    if(event == null) {
+      throw new AuditLoggerException("event must not be null");
+    }
+    try {
+      log.info("Publish audit event [{}]", event.getId());
+      publisher.publishEvent(createActuatorEvent(event));
+    } catch (Throwable t) {
+      throw new AuditLoggerException("Couldn't publish audit event", t);
+    }
   }
 
   /** {@inheritDoc} */

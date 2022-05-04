@@ -93,9 +93,7 @@ public class DssSignRequestMessageTest {
 
     final DssSignRequestMessage request2 = new DssSignRequestMessage(signRequest2, doc, "relay-state");
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request2.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request2::assertCorrectMessage);
 
   }
 
