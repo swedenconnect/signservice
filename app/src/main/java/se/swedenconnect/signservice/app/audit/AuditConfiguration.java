@@ -21,8 +21,7 @@ import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.actuate.audit.InMemoryAuditEventRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import se.signservice.audit.base.events.AuditEventFactory;
-import se.swedenconnect.signservice.audit.AuditEvent;
+import se.swedenconnect.signservice.audit.base.events.AuditEventFactory;
 import se.swedenconnect.signservice.audit.AuditEventIds;
 import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
 

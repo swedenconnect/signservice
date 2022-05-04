@@ -35,6 +35,7 @@ import se.swedenconnect.signservice.api.engine.config.impl.DefaultEngineConfigur
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
 import se.swedenconnect.signservice.audit.actuator.ActuatorAuditLogger;
+import se.swedenconnect.signservice.audit.file.FileAuditLogger;
 import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
@@ -155,6 +156,7 @@ public class SignServiceConfiguration {
 
   @Bean
   public AuditLogger auditLogger() {
+    // TODO Change configuration logger type
     AuditLoggerSingleton.init(new ActuatorAuditLogger());
     return AuditLoggerSingleton.getAuditLogger();
   }

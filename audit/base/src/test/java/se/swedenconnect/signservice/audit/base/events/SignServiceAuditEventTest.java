@@ -1,6 +1,5 @@
-package se.signservice.audit.base.events;
+package se.swedenconnect.signservice.audit.base.events;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.signservice.audit.AuditEventParameter;
 

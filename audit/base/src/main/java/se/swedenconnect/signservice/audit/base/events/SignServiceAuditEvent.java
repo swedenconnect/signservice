@@ -13,19 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.signservice.audit.base.events;
+package se.swedenconnect.signservice.audit.base.events;
 
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditEventParameter;
 
 import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * The {@link AuditEvent} implementation SignService Audit Events
  */
 public class SignServiceAuditEvent implements AuditEvent {
+
+  private static final long serialVersionUID = -5389675099235412855L;
 
   /** The AuditEvent id */
   private final Instant timestamp;
@@ -46,8 +51,8 @@ public class SignServiceAuditEvent implements AuditEvent {
    * @param principal the principal
    */
   public SignServiceAuditEvent(String id, String principal) {
-    Objects.requireNonNull(id, "id must not be null");
-    Objects.requireNonNull(principal, "principal must not be null");
+    java.util.Objects.requireNonNull(id, "id must not be null");
+    java.util.Objects.requireNonNull(principal, "principal must not be null");
     this.timestamp = Instant.now();
     this.id = id;
     this.principal = principal;
@@ -78,7 +83,7 @@ public class SignServiceAuditEvent implements AuditEvent {
     Objects.requireNonNull(parameter, "parameter must not be null");
     parameterMap.put(parameter.getName(), parameter);
   }
-  
+
   /** {@inheritDoc} */
   @Override
   public void addParameter(String name, String value) {
@@ -86,8 +91,15 @@ public class SignServiceAuditEvent implements AuditEvent {
     parameterMap.put(name, new AuditEventParameter(name, value));
   }
 
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
-    return "AuditEvent [timestamp=" + this.timestamp + ", principal=" + this.principal + ", type=" + this.id + ", data=" + this.parameterMap.values() + "]";
+    final StringBuilder sb = new StringBuilder("Audit event [")
+            .append("timestamp=").append(this.timestamp)
+            .append("principal=").append(this.principal)
+            .append("id=").append(this.id)
+            .append("data=").append(this.parameterMap.values());
+    return sb.toString();
   }
 
 }

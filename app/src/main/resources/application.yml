@@ -36,6 +36,8 @@ logging:
       swedenconnect:
         security: DEBUG
         signservice: DEBUG
+  file:
+    path: app/target/logs
 
 #
 # Management

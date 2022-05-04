@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
-import se.signservice.audit.base.events.AuditEventFactory;
+import se.swedenconnect.signservice.audit.base.events.AuditEventFactory;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditEventParameter;
 import se.swedenconnect.signservice.audit.AuditLogger;
@@ -43,14 +43,16 @@ public class ActuatorAuditLogger implements AuditLogger, ApplicationEventPublish
   /** {@inheritDoc} */
   @Override
   public void auditLog(final AuditEvent event) throws AuditLoggerException {
-    if(event == null) {
+    if (event == null) {
       throw new AuditLoggerException("event must not be null");
     }
     try {
-      log.info("Publish audit event [{}]", event.getId());
+      log.debug("Publish audit event [{}]", event.getId());
       publisher.publishEvent(createActuatorEvent(event));
-    } catch (Throwable t) {
-      throw new AuditLoggerException("Couldn't publish audit event", t);
+    }
+    catch (Throwable t) {
+      final String msg = String.format("Couldn't publish audit event - %s", t.getMessage());
+      throw new AuditLoggerException(msg, t);
     }
   }
 
@@ -69,7 +71,7 @@ public class ActuatorAuditLogger implements AuditLogger, ApplicationEventPublish
   /**
    * Creates and actuate audit event
    * @param event - The SignService AuditEvent
-   * @return - An Actuator Audit Event
+   * @return - the audit event
    */
   protected org.springframework.boot.actuate.audit.AuditEvent createActuatorEvent(final AuditEvent event) {
     Objects.requireNonNull(event, "event must not be null");

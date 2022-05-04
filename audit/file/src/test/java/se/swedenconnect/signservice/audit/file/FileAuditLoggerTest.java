@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.slf4j.LoggerFactory;
-import se.signservice.audit.base.events.AuditEventFactory;
+import se.swedenconnect.signservice.audit.base.events.AuditEventFactory;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditLoggerException;
 
@@ -30,7 +30,7 @@ class FileAuditLoggerTest {
     memoryAppender = new MemoryAppender();
     memoryAppender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
 
-    final Logger auditLogger = (Logger) LoggerFactory.getLogger(FileAuditLogger.AUDIT_LOG);
+    final Logger auditLogger = (Logger) LoggerFactory.getLogger(FileAuditLogger.AUDIT_LOGGER_NAME);
     auditLogger.setLevel(Level.INFO);
     auditLogger.addAppender(memoryAppender);
 

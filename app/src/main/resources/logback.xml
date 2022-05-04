@@ -13,7 +13,7 @@
   </appender>
 
   <appender name="AUDIT_LOG_FILE" class="ch.qos.logback.core.FileAppender">
-    <file>audit.log</file>
+    <file>${LOG_PATH}/audit.log</file>
     <append>true</append>
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
       <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
