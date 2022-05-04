@@ -22,10 +22,10 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,17 +43,11 @@ import se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean;
 import se.swedenconnect.security.credential.utils.X509Utils;
 import se.swedenconnect.signservice.api.engine.DefaultSignServiceEngine;
 import se.swedenconnect.signservice.api.engine.config.impl.DefaultEngineConfiguration;
-import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
-import se.swedenconnect.signservice.authn.AuthenticationHandler;
-import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
-import se.swedenconnect.signservice.authn.UserAuthenticationException;
+import se.swedenconnect.signservice.authn.mock.MockedAuthenticationHandler;
 import se.swedenconnect.signservice.client.impl.DefaultClientConfiguration;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
-import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
-import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.session.SessionHandler;
-import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.impl.DefaultSessionHandler;
 import se.swedenconnect.signservice.spring.config.engine.EngineConfigurationProperties;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
@@ -184,7 +178,7 @@ public class SignServiceConfiguration {
       conf.setProcessingPaths(ecp.getProcessingPaths());
 
       conf.setProtocolHandler(this.createProtocolHandler(ecp.getProtocolHandlerBean()));
-      conf.setAuthenticationHandler(new MockAuthnHandler());  // TODO: change
+      conf.setAuthenticationHandler(new MockedAuthenticationHandler());  // TODO: change
       conf.setKeyAndCertificateHandler(null); // TODO: change
 
       final DefaultClientConfiguration clientConf = new DefaultClientConfiguration(ecp.getClient().getClientId());
@@ -222,6 +216,14 @@ public class SignServiceConfiguration {
    * @return a protocol handler proxy
    */
   private ProtocolHandler createProtocolHandler(final String beanName) {
+
+    try {
+      this.applicationContext.getBean(beanName, ProtocolHandler.class);
+    }
+    catch (final NoSuchBeanDefinitionException e) {
+      log.debug("The ProtocolHandler bean named '{}' is not yet created - creating a lazy proxy for the bean", beanName);
+    }
+
     return (ProtocolHandler) Proxy.newProxyInstance(
         this.getClass().getClassLoader(),
         new Class[] { ProtocolHandler.class },
@@ -237,32 +239,6 @@ public class SignServiceConfiguration {
             return method.invoke(this.handler, args);
           }
         });
-  }
-
-  public static class MockAuthnHandler implements AuthenticationHandler {
-
-    @Override
-    public String getName() {
-      return "MockAuthnHandler";
-    }
-
-    @Override
-    public AuthenticationResultChoice authenticate(AuthnRequirements authnRequirements, SignMessage signMessage,
-        SignServiceContext context) throws UserAuthenticationException {
-      throw new UserAuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHN_ERROR, "Not implemented");
-    }
-
-    @Override
-    public AuthenticationResultChoice resumeAuthentication(HttpServletRequest httpRequest, SignServiceContext context)
-        throws UserAuthenticationException {
-      throw new UserAuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHN_ERROR, "Not implemented");
-    }
-
-    @Override
-    public boolean canProcess(HttpServletRequest httpRequest) {
-      return false;
-    }
-
   }
 
 }
