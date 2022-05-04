@@ -58,6 +58,7 @@ how one engine instance is configured.
 | `credential.*` | The SignService engine credential. See section 3.3.2 in [credentials-support](https://github.com/swedenconnect/credentials-support#generic-pkicredentialfactorybean-for-springboot-users) for details. If not configured, the `signservice.DefaultCredential` will be used.|
 | `processing-path` | The engine processing path (relative to the application context path). |
 | `client.*` | Client configuration. See below. |
+| `protocol-handler-bean` | The bean name for the [ProtocolHandler](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/protocol/ProtocolHandler.java) instance that this engine uses. If not assigned, the `signservice.DssProtocolHandler` bean will be assumed (see [Protocol Handler Beans and Configuration](#protocol-handler-beans-and-configuration) below). |
 
 ##### Client Configuration
 
@@ -68,7 +69,24 @@ how one engine instance is configured.
 | `response-urls[]` | Zero or more URL:s. These are pre-registered URL:s on which the client receives sign response messages. |
 
 
-> TODO
+<a name="protocol-handler-beans-and-configuration"></a>
+### Protocol Handler Beans and Configuration
+
+A SignService may have several protocol handlers installed. Currently there is only one
+implementation - for the DSS extensions protocol, see https://docs.swedenconnect.se/technical-framework.
+
+#### Configuration
+
+| Property | Description | Default |
+| :--- | :--- | :--- |
+| `signservice.protocol.dss11.`<br/>`include-assertion` | Tells whether SAML assertions should be included in the response messages. | `true` |
+| `signservice.protocol.dss11.` <br />`include-request-message` | Tells whether to include the request message in the response messages created. For 1.1 version and below this will always be included, but in greater versions the field is optional (actually the specs dissuade from using it). | `false` |
+
+#### Beans
+
+| Bean name | Type | Description |
+| :--- | :--- | :--- |
+| `signservice.DssProtocolHandler` | [ProtocolHandler](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/protocol/ProtocolHandler.java) | A protocol handler that implements the DSS extension specifications and profiles - see https://docs.swedenconnect.se/technical-framework. |
 
 -----
 

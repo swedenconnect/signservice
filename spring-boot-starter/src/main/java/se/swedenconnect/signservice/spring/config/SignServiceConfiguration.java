@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
@@ -34,7 +35,6 @@ import se.swedenconnect.signservice.api.engine.config.impl.DefaultEngineConfigur
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
 import se.swedenconnect.signservice.audit.actuator.ActuatorAuditLogger;
-import se.swedenconnect.signservice.audit.file.FileAuditLogger;
 import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
@@ -42,7 +42,6 @@ import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.client.impl.DefaultClientConfiguration;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
-import se.swedenconnect.signservice.protocol.dss.DssProtocolHandler;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.session.SessionHandler;
@@ -53,6 +52,9 @@ import se.swedenconnect.signservice.storage.MessageReplayChecker;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +66,11 @@ import java.util.List;
 @EnableConfigurationProperties(SignServiceConfigurationProperties.class)
 @Slf4j
 public class SignServiceConfiguration {
+
+  /** The application context. */
+  @Setter
+  @Autowired
+  private ApplicationContext applicationContext;
 
   /** The SignService configuration properties. */
   @Setter
@@ -148,14 +155,8 @@ public class SignServiceConfiguration {
 
   @Bean
   public AuditLogger auditLogger() {
-    AuditLoggerSingleton.init(new FileAuditLogger());
+    AuditLoggerSingleton.init(new ActuatorAuditLogger());
     return AuditLoggerSingleton.getAuditLogger();
-  }
-
-  // Dummy
-  @Bean
-  public ProtocolHandler protocolHandler() {
-    return new DssProtocolHandler();
   }
 
   @ConditionalOnMissingBean(name = "signservice.Engines")
@@ -189,7 +190,7 @@ public class SignServiceConfiguration {
 
       conf.setProcessingPaths(ecp.getProcessingPaths());
 
-      conf.setProtocolHandler(this.protocolHandler()); // TODO: change
+      conf.setProtocolHandler(this.createProtocolHandler(ecp.getProtocolHandlerBean()));
       conf.setAuthenticationHandler(new MockAuthnHandler());  // TODO: change
       conf.setKeyAndCertificateHandler(null); // TODO: change
       conf.setAuditLogger(this.auditLogger()); // TODO: change
@@ -216,6 +217,32 @@ public class SignServiceConfiguration {
     }
 
     return engines;
+  }
+
+  /**
+   * The protocol handler is given to the engine configuration as a bean name. We can not be
+   * sure that the application context has loaded this bean yet. So we use a proxy to implement
+   * a lazy initialization.
+   *
+   * @param beanName the protocol handler bean name
+   * @return a protocol handler proxy
+   */
+  private ProtocolHandler createProtocolHandler(final String beanName) {
+    return (ProtocolHandler) Proxy.newProxyInstance(
+        this.getClass().getClassLoader(),
+        new Class[] { ProtocolHandler.class },
+        new InvocationHandler() {
+
+          private ProtocolHandler handler = null;
+
+          @Override
+          public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+            if (this.handler == null) {
+              this.handler = applicationContext.getBean(beanName, ProtocolHandler.class);
+            }
+            return method.invoke(this.handler, args);
+          }
+        });
   }
 
   public static class MockAuthnHandler implements AuthenticationHandler {

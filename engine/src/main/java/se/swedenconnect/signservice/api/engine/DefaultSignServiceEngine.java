@@ -22,6 +22,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -49,9 +50,14 @@ import se.swedenconnect.signservice.engine.SignServiceErrorCode;
 import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
 import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
 import se.swedenconnect.signservice.protocol.ProtocolException;
+import se.swedenconnect.signservice.protocol.ProtocolHandler;
+import se.swedenconnect.signservice.protocol.ProtocolProcessingRequirements.SignatureRequirement;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
+import se.swedenconnect.signservice.protocol.SignResponseMessage;
+import se.swedenconnect.signservice.protocol.SignResponseResult;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.CertificateAttributeMapping;
+import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.session.SessionHandler;
 import se.swedenconnect.signservice.session.SignServiceContext;
@@ -332,7 +338,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
           this.engineConfiguration.getName(), context.getId(), requestMessage.getRequestId());
       if (log.isTraceEnabled()) {
         log.trace("{}: [id: '{}'] {}",
-            this.engineConfiguration.getName(), context.getId(), requestMessage.getLogString(true));
+            this.engineConfiguration.getName(), context.getId(), requestMessage);
       }
 
       return requestMessage;
@@ -473,7 +479,8 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
     // service (if this was requested).
     //
     final SignRequestMessage signRequest = context.getSignRequest();
-    if (signRequest.getMustShowSignMessage() && !authnResult.signMessageDisplayed()) {
+    if (Optional.ofNullable(signRequest.getSignMessage()).map(SignMessage::getMustShow).orElse(false)
+        && !authnResult.signMessageDisplayed()) {
       log.info("{}: No sign message was displayed to the user during authentication - "
           + "this was required by client [id: '{}', request-id: '{}']",
           this.engineConfiguration.getName(), context.getId(), signRequest.getRequestId());
@@ -525,13 +532,55 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
     context.putSignMessageDisplayed(authnResult.signMessageDisplayed());
   }
 
+  /**
+   * Method that is invoked to create an error response message that is to be sent back to the client.
+   *
+   * @param httpRequest the servlet request
+   * @param context the engine context
+   * @param error the representation of the error to send
+   * @return a HttpRequestMessage to return back to the application
+   * @throws UnrecoverableSignServiceException for unrecoverable errors
+   */
   protected HttpRequestMessage sendErrorResponse(
       final HttpServletRequest httpRequest, final EngineContext context, final SignServiceError error)
       throws UnrecoverableSignServiceException {
 
-    // TODO
+    try {
+      final ProtocolHandler handler = this.engineConfiguration.getProtocolHandler();
 
-    return null;
+      // Translate the error into the protocol specific error representation.
+      //
+      final SignResponseResult errorResult = handler.translateError(error);
+
+      // Use the protocol handler to create a response message and assign the error.
+      //
+      final SignResponseMessage responseMessage = handler.createSignResponseMessage(
+          context.getContext(), context.getSignRequest());
+      responseMessage.setSignResponseResult(errorResult);
+
+      // Check if the error response needs to be signed, and if so, sign the message.
+      //
+      if (responseMessage.getProcessingRequirements()
+          .getResponseSignatureRequirement() == SignatureRequirement.REQUIRED) {
+        responseMessage.sign(this.engineConfiguration.getSignServiceCredential());
+      }
+
+      // Finally, let the protocol handler encode the return message.
+      //
+      return handler.encodeResponse(responseMessage, context.getContext());
+    }
+    catch (final SignatureException e) {
+      log.info("{}: Failed to sign error response message - {}. [id: '{}']",
+          this.engineConfiguration.getName(), e.getMessage(), context.getId(), e);
+      throw new UnrecoverableSignServiceException(
+          UnrecoverableErrorCodes.INTERNAL_ERROR, "Failed to sign response message", e);
+    }
+    catch (final ProtocolException e) {
+      log.info("{}: Failed to encode error response message - {}. [id: '{}']",
+          this.engineConfiguration.getName(), e.getMessage(), context.getId(), e);
+      throw new UnrecoverableSignServiceException(
+          UnrecoverableErrorCodes.INTERNAL_ERROR, "Failed to encode response message", e);
+    }
   }
 
   /** {@inheritDoc} */

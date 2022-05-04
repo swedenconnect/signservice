@@ -31,6 +31,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.xml.security.Init;
 import org.w3c.dom.Document;
 
@@ -87,7 +88,7 @@ import se.swedenconnect.signservice.signature.impl.DefaultRequestedSignatureTask
  * Extension for Federated Central Signing Services</a>.
  */
 @Slf4j
-public class DssSignRequestMessage implements SignRequestMessage {
+class DssSignRequestMessage implements SignRequestMessage {
 
   /** For serializing. */
   private static final long serialVersionUID = -5875475186053392826L;
@@ -130,20 +131,15 @@ public class DssSignRequestMessage implements SignRequestMessage {
   /** The XML document for the SignRequest. */
   private transient Document xml;
 
-  /** The message relay state. */
-  private final String relayState;
-
   /**
    * Constructor setting the SignRequest message that we handle.
    *
    * @param signRequest the sign request message
    * @param xml the XML document for the message
-   * @param relayState the relay state variable
    */
-  public DssSignRequestMessage(final SignRequest signRequest, final Document xml, final String relayState) {
+  public DssSignRequestMessage(final SignRequest signRequest, final Document xml) {
     this.signRequest = new SignRequestWrapper(signRequest);
     this.xml = xml;
-    this.relayState = relayState;
   }
 
   /** {@inheritDoc} */
@@ -183,7 +179,7 @@ public class DssSignRequestMessage implements SignRequestMessage {
 
     // RequestID
     //
-    if (this.getRequestId() == null) {
+    if (!this.signRequest.isSetRequestID()) {
       final String msg = "No RequestID in SignRequest message - this is required";
       log.info("{}", msg);
       throw new ProtocolException(msg);
@@ -191,7 +187,7 @@ public class DssSignRequestMessage implements SignRequestMessage {
 
     // Profile attribute
     //
-    if (this.signRequest.getProfile() == null) {
+    if (!this.signRequest.isSetProfile()) {
       log.info("Missing Profile attribute in request - assuming {} [request-id: '{}']",
           DssConstants.DSS_PROFILE, this.signRequest.getRequestID());
     }
@@ -359,7 +355,8 @@ public class DssSignRequestMessage implements SignRequestMessage {
     // RequestedSignatureAlgorithm
     //
     final SignatureRequirements signatureRequirements = this.getSignatureRequirements();
-    if (signatureRequirements == null || signatureRequirements.getSignatureAlgorithm() == null) {
+    if (!Optional.ofNullable(signatureRequirements).map(SignatureRequirements::getSignatureAlgorithm)
+        .filter(StringUtils::isNotBlank).isPresent()) {
       final String msg = "RequestedSignatureAlgorithm is missing - this field is required";
       log.info("{} [request-id: '{}']", msg, this.signRequest.getRequestID());
       throw new ProtocolException(msg);
@@ -394,7 +391,7 @@ public class DssSignRequestMessage implements SignRequestMessage {
   /** {@inheritDoc} */
   @Override
   public String getRelayState() {
-    return this.relayState;
+    return this.getRequestId();
   }
 
   /** {@inheritDoc} */
@@ -536,15 +533,6 @@ public class DssSignRequestMessage implements SignRequestMessage {
 
   /** {@inheritDoc} */
   @Override
-  public boolean getMustShowSignMessage() {
-    return Optional.ofNullable(this.signRequest.getSignRequestExtension())
-        .map(SignRequestExtension::getSignMessage)
-        .map(se.swedenconnect.schemas.csig.dssext_1_1.SignMessage::isMustShow)
-        .orElse(false);
-  }
-
-  /** {@inheritDoc} */
-  @Override
   public SignatureRequirements getSignatureRequirements() {
     return Optional.ofNullable(this.signRequest.getSignRequestExtension())
         .map(SignRequestExtension::getRequestedSignatureAlgorithm)
@@ -631,22 +619,25 @@ public class DssSignRequestMessage implements SignRequestMessage {
     return signatureTasks;
   }
 
+  /**
+   * Gets the JAXB representation of the SignRequest
+   *
+   * @return JAXB SignRequest
+   */
+  public SignRequest getJaxbObject() {
+    return this.signRequest.getWrappedSignRequest();
+  }
+
   /** {@inheritDoc} */
   @Override
-  public String getLogString(final boolean detailed) {
-    if (detailed) {
-      try {
-        final Document doc = JAXBMarshaller.marshall(this.signRequest.getWrappedSignRequest());
-        return DOMUtils.prettyPrint(doc);
-      }
-      catch (final Exception e) {
-        log.info("Failed to marshall SignRequest message", e);
-        return "";
-      }
+  public String toString() {
+    try {
+      final Document doc = JAXBMarshaller.marshall(this.signRequest.getWrappedSignRequest());
+      return DOMUtils.prettyPrint(doc);
     }
-    else {
-      // TODO: More here
-      return String.format("request-id='%s', client-id='%s'", this.getRequestId(), this.getClientId());
+    catch (final Exception e) {
+      log.info("Failed to marshall SignRequest message", e);
+      return "-- Marshalling error --";
     }
   }
 

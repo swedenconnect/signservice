@@ -22,7 +22,7 @@ import se.swedenconnect.signservice.protocol.ProtocolProcessingRequirements;
  * "https://docs.swedenconnect.se/technical-framework/latest/09_-_DSS_Extension_for_Federated_Signing_Services.html">DSS
  * Extension for Federated Central Signing Services</a>.
  */
-public class DssProtocolProcessingRequirements implements ProtocolProcessingRequirements {
+class DssProtocolProcessingRequirements implements ProtocolProcessingRequirements {
 
   /** For serializing. */
   private static final long serialVersionUID = -3320941124228836728L;

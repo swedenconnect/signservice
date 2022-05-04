@@ -38,6 +38,7 @@ public class DssSignMessageTest {
 
     Assertions.assertNotNull(dssSignMessage.getEncoding());
     Assertions.assertNotNull(dssSignMessage.getDssSignMessage());
+    Assertions.assertTrue(dssSignMessage.getMustShow());
 
     // Assert that we can create a SignMessage from the encoding
     final SignMessage fromEncoding = JAXBUnmarshaller.unmarshall(DOMUtils.bytesToDocument(dssSignMessage.getEncoding()),
@@ -49,7 +50,6 @@ public class DssSignMessageTest {
 
     Assertions.assertArrayEquals(dssSignMessage.getEncoding(), dssSignMessage2.getEncoding());
     Assertions.assertNotNull(dssSignMessage2.getDssSignMessage());
-
   }
 
 }

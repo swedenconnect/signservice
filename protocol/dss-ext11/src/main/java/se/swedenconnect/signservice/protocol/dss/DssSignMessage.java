@@ -30,7 +30,7 @@ import se.swedenconnect.signservice.protocol.msg.SignMessage;
  * Representation of a DSS SignMessage.
  */
 @Slf4j
-public class DssSignMessage implements SignMessage {
+class DssSignMessage implements SignMessage {
 
   /** For serializing. */
   private static final long serialVersionUID = -2976874546991075421L;
@@ -87,6 +87,12 @@ public class DssSignMessage implements SignMessage {
       }
     }
     return this.dssSignMessage;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean getMustShow() {
+    return this.getDssSignMessage().isMustShow();
   }
 
 }
