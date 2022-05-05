@@ -45,7 +45,7 @@ public class PkCrypto {
     }
 
     /**
-     * Sign data (encrypt) using RSA with PKCS#1 version 1.5 padding
+     * Sign data (encrypt) using RSA. Default method when signing data that is prepared according to PKCS#1 v1.5
      * @param data data to be encrypted (signed)
      * @param privateKey the private encryption key
      * @return encrypted RSA data
@@ -62,7 +62,7 @@ public class PkCrypto {
     }
 
     /**
-     * Raw RSA encryption of data that has been prepared with padding for RSA encryption
+     * Raw RSA encryption of data
      * @param data preformatted data to be encrypted as provided
      * @param privKey private RSA key
      * @return encrypted data
@@ -79,20 +79,40 @@ public class PkCrypto {
     }
 
     /**
-     *
-     * @param digest
-     * @param signature
-     * @param pubKey
-     * @return
-     * @throws InvalidKeyException
+     * Verify ECDSA signature value against a signed digest value
+     * @param digest signed digest value
+     * @param signature signature value
+     * @param pubKey public validation key
+     * @return true if the digest can be validated using the public validation key
+     * @throws InvalidKeyException the validation key is invalid
+     * @throws IOException invalid input data
      */
-    public static boolean ecdsaVerifyDigest(byte[] digest, EcdsaSigValue signature, PublicKey pubKey) throws InvalidKeyException {
-        ECDSASigner ecdsa = new ECDSASigner();
-        CipherParameters param = ECUtil.generatePublicKeyParameter(pubKey);
-        ecdsa.init(false, param);
-        return ecdsa.verifySignature(digest, signature.getR(), signature.getS());
+    public static boolean ecdsaVerifyDigest(byte[] digest, EcdsaSigValue signature, PublicKey pubKey) throws InvalidKeyException, IOException {
+        try {
+            ECDSASigner ecdsa = new ECDSASigner();
+            CipherParameters param = ECUtil.generatePublicKeyParameter(pubKey);
+            ecdsa.init(false, param);
+            return ecdsa.verifySignature(digest, signature.getR(), signature.getS());
+        } catch (InvalidKeyException ex) {
+            throw ex;
+        }
+        catch (Exception ex) {
+            throw new IOException(ex);
+        }
     }
 
+    /**
+     * Sign data using ECDSA
+     * @param data data to be signed
+     * @param privKey private signing key
+     * @param sigAlgo signature algorithm
+     * @return signature value
+     * @throws NoSuchAlgorithmException unsupported algorithm
+     * @throws NoSuchProviderException unsupported crypto provider
+     * @throws InvalidKeyException invalid key
+     * @throws SignatureException failure to generate signature value
+     * @throws IOException bad input data
+     */
     public static EcdsaSigValue ecdsaSignData(byte[] data, PrivateKey privKey, Algorithm sigAlgo) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         Signature ecdsaSigner = Signature.getInstance(sigAlgo.getJcaName(), "BC");
         ecdsaSigner.initSign(privKey, new SecureRandom(String.valueOf(System.currentTimeMillis()).getBytes()));
@@ -102,6 +122,20 @@ public class PkCrypto {
         return EcdsaSigValue.getInstance(asn1SignatureIs);
     }
 
+    /**
+     * Verify signed data against an ECDSA signature value
+     * @param data signed data
+     * @param signature signature value
+     * @param pubKey public verification key
+     * @param digestAlgo digest algorithm used in signing process
+     * @param algorithmRegistry algorithm registry holding supported algorithms
+     * @return true if the provided data can be verified by the proved signature using the provided public key
+     * @throws NoSuchAlgorithmException unsupported algorithm
+     * @throws NoSuchProviderException unsupported crypto provider
+     * @throws InvalidKeyException invalid key
+     * @throws SignatureException failure to generate signature value
+     * @throws IOException bad input data
+     */
     public static boolean ecdsaVerifySignedData(byte[] data, EcdsaSigValue signature, PublicKey pubKey, MessageDigestAlgorithm digestAlgo, AlgorithmRegistry algorithmRegistry) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
         Algorithm sigAlgo = getAlgorithmFromTypeAndDigestMethod(digestAlgo, "EC", algorithmRegistry);
         EcdsaSigValue sigVal = EcdsaSigValue.getInstance(signature);
@@ -112,6 +146,13 @@ public class PkCrypto {
         return ecdsaSigner.verify(asn1Signature);
     }
 
+    /**
+     * Get the signature algorithm supported by a specific key type and digest algorithm
+     * @param digestAlgo signature digest algorithm
+     * @param keyType key type
+     * @param algorithmRegistry algorithm registry holding supported algorithms
+     * @return signature algorithm, or null if no matching algorithm could be found
+     */
     public static Algorithm getAlgorithmFromTypeAndDigestMethod(MessageDigestAlgorithm digestAlgo, String keyType, AlgorithmRegistry algorithmRegistry) {
         return algorithmRegistry.getAlgorithms(algorithm -> algorithm instanceof SignatureAlgorithm)
           .stream()
