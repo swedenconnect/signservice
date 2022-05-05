@@ -42,15 +42,11 @@ import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean;
 import se.swedenconnect.security.credential.utils.X509Utils;
 import se.swedenconnect.signservice.api.engine.DefaultSignServiceEngine;
-import se.swedenconnect.signservice.api.engine.config.impl.DefaultEngineCon
+import se.swedenconnect.signservice.api.engine.config.impl.DefaultEngineConfiguration;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
 import se.swedenconnect.signservice.audit.actuator.ActuatorAuditLogger;
 import se.swedenconnect.signservice.authn.mock.MockedAuthenticationHandler;
-import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
-import se.swedenconnect.signservice.authn.AuthenticationHandler;
-import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
-import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.client.impl.DefaultClientConfiguration;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
