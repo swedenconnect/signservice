@@ -26,6 +26,9 @@ jobs:
           paths: >-
             ${{ github.workspace }}/core/target/site/jacoco/jacoco.xml,
             ${{ github.workspace }}/protocol/dss-ext11/target/site/jacoco/jacoco.xml
+            ${{ github.workspace }}/audit/base/target/site/jacoco/jacoco.xml
+            ${{ github.workspace }}/audit/actuator/target/site/jacoco/jacoco.xml
+            ${{ github.workspace }}/audit/file/target/site/jacoco/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 60
           min-coverage-changed-files: 60
