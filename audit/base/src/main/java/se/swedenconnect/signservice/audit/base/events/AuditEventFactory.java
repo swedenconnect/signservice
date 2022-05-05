@@ -18,7 +18,7 @@ package se.swedenconnect.signservice.audit.base.events;
 import se.swedenconnect.signservice.audit.AuditEvent;
 
 /**
- * A factory for audit events
+ * A factory for audit events.
  */
 public class AuditEventFactory {
 

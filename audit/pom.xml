@@ -72,7 +72,6 @@
   <modules>
     <module>base</module>
     <module>actuator</module>
-    <module>file</module>
   </modules>
 
   <dependencies>

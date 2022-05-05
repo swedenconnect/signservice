@@ -15,18 +15,19 @@
  */
 package se.swedenconnect.signservice.app.audit;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.actuate.audit.InMemoryAuditEventRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import se.swedenconnect.signservice.audit.base.events.AuditEventFactory;
+
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.audit.AuditEventIds;
 import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
+import se.swedenconnect.signservice.audit.base.events.AuditEventFactory;
 
 /**
- * Configuration for Auditing
+ * Configuration for Auditing.
  */
 @Configuration
 @Slf4j

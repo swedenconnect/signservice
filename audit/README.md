@@ -10,11 +10,9 @@
 The `audit` directory contains code for implementing the [AuditLogger](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/audit/AuditLogger.java)
 
 
-- [base](base) - Common code for all implementations.
+- [base](base) - Common code for all implementations. It also includes a file based audit implementation.
 
 - [actuator](actuator) - A Spring Actuator implementation 
-  
-- [file](file) - A file based implementation 
 
 > TODO: More
 

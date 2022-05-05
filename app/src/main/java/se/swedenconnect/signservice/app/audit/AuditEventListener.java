@@ -15,7 +15,6 @@
  */
 package se.swedenconnect.signservice.app.audit;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
@@ -23,10 +22,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Audit Event Listener
+ * Audit Event Listener.
  */
 @Component
-@Slf4j
 public class AuditEventListener {
 
   /**
@@ -36,11 +34,12 @@ public class AuditEventListener {
   private AuditEventRepository auditEventRepository;
 
   /**
-   * Add an audit event to the event repository
-   * @param event - The audit event
+   * Add an audit event to the event repository.
+   *
+   * @param event the audit event
    */
   @EventListener
-  public void onAuditEvent(AuditEvent event) {
+  public void onAuditEvent(final AuditEvent event) {
     auditEventRepository.add(event);
   }
 

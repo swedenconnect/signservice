@@ -109,13 +109,13 @@
 
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-audit-actuator</artifactId>
+      <artifactId>signservice-audit-base</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-audit-file</artifactId>
+      <artifactId>signservice-audit-actuator</artifactId>
       <version>${project.version}</version>
     </dependency>
 

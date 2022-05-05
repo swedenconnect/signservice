@@ -15,8 +15,16 @@
  */
 package se.swedenconnect.signservice.spring.config;
 
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,6 +35,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean;
 import se.swedenconnect.security.credential.utils.X509Utils;
@@ -35,7 +46,6 @@ import se.swedenconnect.signservice.api.engine.config.impl.DefaultEngineConfigur
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
 import se.swedenconnect.signservice.audit.actuator.ActuatorAuditLogger;
-import se.swedenconnect.signservice.audit.file.FileAuditLogger;
 import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
@@ -50,15 +60,6 @@ import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.impl.DefaultSessionHandler;
 import se.swedenconnect.signservice.spring.config.engine.EngineConfigurationProperties;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Main configuration for SignService.
