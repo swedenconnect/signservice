@@ -31,6 +31,13 @@ public interface AuditEvent extends Serializable {
   String getId();
 
   /**
+   * Gets the event principal
+   *
+   * @return the event principal
+   */
+  String getPrincipal();
+
+  /**
    * Gets a list of all audit parameters for this event.
    *
    * @return a (potentially empty) list of audit parameters

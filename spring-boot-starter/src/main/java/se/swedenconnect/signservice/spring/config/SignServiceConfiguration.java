@@ -42,8 +42,15 @@ import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean;
 import se.swedenconnect.security.credential.utils.X509Utils;
 import se.swedenconnect.signservice.api.engine.DefaultSignServiceEngine;
-import se.swedenconnect.signservice.api.engine.config.impl.DefaultEngineConfiguration;
+import se.swedenconnect.signservice.api.engine.config.impl.DefaultEngineCon
+import se.swedenconnect.signservice.audit.AuditLogger;
+import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
+import se.swedenconnect.signservice.audit.actuator.ActuatorAuditLogger;
 import se.swedenconnect.signservice.authn.mock.MockedAuthenticationHandler;
+import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
+import se.swedenconnect.signservice.authn.AuthenticationHandler;
+import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
+import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.client.impl.DefaultClientConfiguration;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
@@ -146,6 +153,13 @@ public class SignServiceConfiguration {
     return null;
   }
 
+  @Bean
+  public AuditLogger auditLogger() {
+    // TODO Change configuration logger type
+    AuditLoggerSingleton.init(new ActuatorAuditLogger());
+    return AuditLoggerSingleton.getAuditLogger();
+  }
+
   @ConditionalOnMissingBean(name = "signservice.Engines")
   @Bean("signservice.Engines")
   public List<SignServiceEngine> engines(
@@ -180,6 +194,7 @@ public class SignServiceConfiguration {
       conf.setProtocolHandler(this.createProtocolHandler(ecp.getProtocolHandlerBean()));
       conf.setAuthenticationHandler(new MockedAuthenticationHandler());  // TODO: change
       conf.setKeyAndCertificateHandler(null); // TODO: change
+      conf.setAuditLogger(this.auditLogger()); // TODO: change
 
       final DefaultClientConfiguration clientConf = new DefaultClientConfiguration(ecp.getClient().getClientId());
       if (ecp.getClient().getResponseUrls() != null) {
@@ -193,8 +208,6 @@ public class SignServiceConfiguration {
         clientConf.setTrustedCertificates(certs);
       }
       conf.setClientConfiguration(clientConf);
-
-      conf.setAuditLogger(null); // TODO: change
 
 //      conf.init();
 
