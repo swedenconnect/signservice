@@ -9,12 +9,13 @@ import se.swedenconnect.signservice.audit.AuditLoggerException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-class ActuatorAuditLoggerTest {
+public class ActuatorAuditLoggerTest {
 
   @Test
-  void testAuditLog() {
+  public void testAuditLog() {
     final ApplicationEventPublisher mockPublisher = mock(ApplicationEventPublisher.class);
 
     final ActuatorAuditLogger auditLogger = new ActuatorAuditLogger();
@@ -44,7 +45,7 @@ class ActuatorAuditLoggerTest {
   }
 
   @Test
-  void testAuditLog_whenEventIsNull_throwException() {
+  public void testAuditLogNullEvent() {
     final ActuatorAuditLogger auditLogger = new ActuatorAuditLogger();
     assertThatThrownBy(() -> {
       auditLogger.auditLog(null);

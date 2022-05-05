@@ -96,9 +96,9 @@ public class SignServiceAuditEvent implements AuditEvent {
   public String toString() {
     final StringBuilder sb = new StringBuilder("Audit event [")
             .append("timestamp=").append(this.timestamp)
-            .append("principal=").append(this.principal)
-            .append("id=").append(this.id)
-            .append("data=").append(this.parameterMap.values());
+            .append(" principal=").append(this.principal)
+            .append(" id=").append(this.id)
+            .append(" data=").append(this.parameterMap.values());
     return sb.toString();
   }
 

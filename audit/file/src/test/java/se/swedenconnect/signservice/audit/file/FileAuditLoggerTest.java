@@ -21,12 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class FileAuditLoggerTest {
+public class FileAuditLoggerTest {
 
   private MemoryAppender memoryAppender;
 
   @BeforeAll
-  void setup() {
+  public void setup() {
     memoryAppender = new MemoryAppender();
     memoryAppender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
 
@@ -42,7 +42,7 @@ class FileAuditLoggerTest {
   }
 
   @Test
-  void auditLog() {
+  public void auditLog() {
     final FileAuditLogger auditLogger = new FileAuditLogger();
 
     final AuditEvent event = AuditEventFactory.createAuditEvent("id");
@@ -56,11 +56,11 @@ class FileAuditLoggerTest {
     assertThat(memoryAppender.search(Level.INFO))
       .hasSize(1)
       .extracting(ILoggingEvent::toString)
-      .anySatisfy(message -> assertThat(message).contains("AuditEvent"));
+      .anySatisfy(message -> assertThat(message).contains("Audit event"));
   }
 
   @Test
-  void testAuditLog_whenEventIsNull_throwException() {
+  public void testAuditLogNullEvent() {
     final FileAuditLogger auditLogger = new FileAuditLogger();
     assertThatThrownBy(() -> {
       auditLogger.auditLog(null);
@@ -69,7 +69,7 @@ class FileAuditLoggerTest {
   }
 
   //TODO: Refactor to TestUtils?
-  public class MemoryAppender extends ListAppender<ILoggingEvent> {
+  class MemoryAppender extends ListAppender<ILoggingEvent> {
 
     public void reset() {
       this.list.clear();

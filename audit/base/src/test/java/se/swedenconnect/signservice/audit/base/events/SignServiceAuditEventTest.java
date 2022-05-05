@@ -6,17 +6,17 @@ import se.swedenconnect.signservice.audit.AuditEventParameter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class SignServiceAuditEventTest {
+public class SignServiceAuditEventTest {
 
   @Test
-  void testCreateEvent() {
+  public void testCreateEvent() {
     SignServiceAuditEvent event = new SignServiceAuditEvent("id", "principal");
     assertThat(event.getId()).isEqualTo("id");
     assertThat(event.getPrincipal()).isEqualTo("principal");
   }
 
   @Test
-  void testAddParameterValues() {
+  public void testAddParameterValues() {
     SignServiceAuditEvent event = new SignServiceAuditEvent("id", "principal");
     event.addParameter("param1", "value1");
     assertThat(event.getParameters())
@@ -26,7 +26,7 @@ class SignServiceAuditEventTest {
   }
 
   @Test
-  void testAddParameterValues_whenNameNull_throwException() {
+  public void testAddParameterValuesNullValue() {
     SignServiceAuditEvent event = new SignServiceAuditEvent("id", "principal");
     assertThatThrownBy(() -> {
       event.addParameter(null, "value1");
@@ -35,7 +35,7 @@ class SignServiceAuditEventTest {
   }
 
   @Test
-  void testAddParameter() {
+  public void testAddParameter() {
     SignServiceAuditEvent event = new SignServiceAuditEvent("id", "principal");
     event.addParameter(new AuditEventParameter("param1", "value1"));
     assertThat(event.getParameters())
@@ -45,7 +45,7 @@ class SignServiceAuditEventTest {
   }
 
   @Test
-  void testAddParameter_whenDuplicate_overwrite() {
+  public void testAddParameterDuplicate() {
     SignServiceAuditEvent event = new SignServiceAuditEvent("id", "principal");
     event.addParameter(new AuditEventParameter("param1", "value1"));
     event.addParameter(new AuditEventParameter("param1", "value2"));
@@ -56,7 +56,7 @@ class SignServiceAuditEventTest {
   }
 
   @Test
-  void testAddParameter_whenParamNull_throwException() {
+  public void testAddParameterNullParameter() {
     SignServiceAuditEvent event = new SignServiceAuditEvent("id", "principal");
     assertThatThrownBy(() -> {
       event.addParameter(null);
@@ -65,12 +65,12 @@ class SignServiceAuditEventTest {
   }
 
   @Test
-  void testToString() {
+  public void testToString() {
     SignServiceAuditEvent event = new SignServiceAuditEvent("id", "principal");
     event.addParameter(new AuditEventParameter("param1", "value1"));
 
     assertThat(event.toString())
-      .contains("type=id")
+      .contains("id=id")
       .contains("principal=principal")
       .contains("data=[param1='value1']");
   }
