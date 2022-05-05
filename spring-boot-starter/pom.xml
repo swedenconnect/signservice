@@ -106,7 +106,13 @@
       <artifactId>signservice-protocol-dssext11</artifactId>
       <version>${project.version}</version>
     </dependency>
-
+    
+    <dependency>
+      <groupId>se.swedenconnect.signservice</groupId>
+      <artifactId>signservice-authn-base</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-audit-base</artifactId>
@@ -118,7 +124,7 @@
       <artifactId>signservice-audit-actuator</artifactId>
       <version>${project.version}</version>
     </dependency>
-
+    
     <dependency>
       <groupId>se.swedenconnect.security</groupId>
       <artifactId>credentials-support</artifactId>
