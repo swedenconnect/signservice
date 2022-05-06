@@ -1,8 +1,19 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2022 Sweden Connect
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.impl.sign.process;
+package se.swedenconnect.signservice.signature.impl.sign.crypto;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.crypto.CipherParameters;
@@ -27,6 +38,23 @@ import java.util.Comparator;
 public class PkCrypto {
 
     /**
+     * Sign data (encrypt) using RSA. Default method when signing data that is prepared according to PKCS#1 v1.5
+     * @param data data to be encrypted (signed)
+     * @param privateKey the private encryption key
+     * @return encrypted RSA data
+     * @throws NoSuchAlgorithmException unsupported algorithm
+     * @throws NoSuchPaddingException unsupported padding
+     * @throws InvalidKeyException invalid key
+     * @throws IllegalBlockSizeException illegal block size
+     * @throws BadPaddingException bad padding
+     */
+    public static byte[] rsaSign(byte[] data, PrivateKey privateKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, privateKey);
+        return cipher.doFinal(data);
+    }
+
+    /**
      * Decrypts data with RSA using the RSA public key (used in signature verification process)
      * @param data RSA signature (RSA encrypted block) to be decrypted
      * @param pubKey public key for decryption
@@ -45,23 +73,6 @@ public class PkCrypto {
     }
 
     /**
-     * Sign data (encrypt) using RSA. Default method when signing data that is prepared according to PKCS#1 v1.5
-     * @param data data to be encrypted (signed)
-     * @param privateKey the private encryption key
-     * @return encrypted RSA data
-     * @throws NoSuchAlgorithmException unsupported algorithm
-     * @throws NoSuchPaddingException unsupported padding
-     * @throws InvalidKeyException invalid key
-     * @throws IllegalBlockSizeException illegal block size
-     * @throws BadPaddingException bad padding
-     */
-    public static byte[] rsaSign(byte[] data, PrivateKey privateKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, privateKey);
-        return cipher.doFinal(data);
-    }
-
-    /**
      * Raw RSA encryption of data
      * @param data preformatted data to be encrypted as provided
      * @param privKey private RSA key
@@ -76,6 +87,24 @@ public class PkCrypto {
         Cipher cipher = Cipher.getInstance("RSA/None/NoPadding");
         cipher.init(Cipher.ENCRYPT_MODE, privKey);
         return cipher.doFinal(data);
+    }
+
+    /**
+     * Raw decrypts data with RSA using the RSA public key disregaring any padding structrue
+     * @param data RSA signature (RSA encrypted block) to be decrypted
+     * @param pubKey public key for decryption
+     * @return decrypted data
+     * @throws NoSuchAlgorithmException unsupported algorithm
+     * @throws NoSuchPaddingException unsupported padding
+     * @throws InvalidKeyException invalid key
+     * @throws IllegalBlockSizeException illegal block size
+     * @throws BadPaddingException bad padding
+     */
+    public static byte[] rsaVerifyEncodedMessage(byte[] data, PublicKey pubKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        Cipher cipher = Cipher.getInstance("RSA/None/NoPadding");
+        cipher.init(Cipher.DECRYPT_MODE, pubKey);
+        byte[] cipherData = cipher.doFinal(data);
+        return cipherData;
     }
 
     /**

@@ -16,33 +16,37 @@
 package se.swedenconnect.signservice.signature.impl.sign.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.jcajce.provider.util.DigestFactory;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.impl.sign.SignServiceSigner;
-import se.swedenconnect.signservice.signature.impl.sign.crypto.PKCS1V15Padding;
+import se.swedenconnect.signservice.signature.impl.sign.crypto.PSSPadding;
 import se.swedenconnect.signservice.signature.impl.sign.crypto.PkCrypto;
 
-import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.SignatureException;
+import java.security.interfaces.RSAKey;
 
 /**
- * Signer for creating RSA signatures using PKCS#1 version 1.5
+ * Signer for creating RSA signatures using RSA-PSS (Probabilistic Signature Scheme) according to PKCS#1 v 2.1
  */
 @Slf4j
-public class SignServiceRSASigner implements SignServiceSigner {
+public class SignServiceRSAPSSSigner implements SignServiceSigner {
 
   /** {@inheritDoc} */
   @Override public byte[] sign(byte[] toBeSignedBytes, PrivateKey privateKey, SignatureAlgorithm signatureAlgorithm)
     throws SignatureException {
 
     try {
-      MessageDigest md = MessageDigest.getInstance(signatureAlgorithm.getMessageDigestAlgorithm().getJcaName(), "BC");
-      byte[] hashValue = md.digest(toBeSignedBytes);
-      return PkCrypto.rsaSign(PKCS1V15Padding.getRSAPkcs1DigestInfo(signatureAlgorithm.getMessageDigestAlgorithm(), hashValue), privateKey);
+      Digest messageDigestFunction = DigestFactory.getDigest(signatureAlgorithm.getMessageDigestAlgorithm().getJcaName());
+      int modLen = ((RSAKey) privateKey).getModulus().bitLength();
+      PSSPadding pssPadding = new PSSPadding(modLen, messageDigestFunction);
+      pssPadding.update(toBeSignedBytes);
+      byte[] emBytes = pssPadding.generateSignatureEncodedMessage();
+      return PkCrypto.rsaSignEncodedMessage(emBytes, privateKey);
     } catch (Exception ex) {
       log.debug("Error creating RSA signature with algorithm {}",signatureAlgorithm, ex);
       throw new SignatureException(ex);
     }
   }
-
 }

@@ -1,30 +1,81 @@
+/*
+ * Copyright 2022 Sweden Connect
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package se.swedenconnect.signservice.signature.impl.sign.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
-import se.swedenconnect.security.algorithms.impl.StaticAlgorithmRegistry;
+import se.swedenconnect.security.algorithms.RSAPSSSignatureAlgorithm;
+import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.impl.sign.SignServiceSigner;
 import se.swedenconnect.signservice.signature.impl.sign.SignServiceSignerProvider;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * Default implementation of the signer provider
  */
+@Slf4j
 public class DefaultSignServiceSignerProvider implements SignServiceSignerProvider {
+
+  /** The algorithm registry used to get information about supported algorithms */
+  private final AlgorithmRegistry algorithmRegistry;
+
   /**
-   * Get a sign service signer for a given signature algorithm and signature type
-   *
-   * @param signatureAlgorithm the signature algorithm to use
-   * @param signatureType      the type of signature that is being created (typically, XML, PDF or JSON)
-   * @return {@link SignServiceSigner} for the given algorithm and signature type
+   * Constructor
+   * @param algorithmRegistry the algorithm registry used to get information about supported algorithms
    */
+  public DefaultSignServiceSignerProvider(AlgorithmRegistry algorithmRegistry) {
+    this.algorithmRegistry = algorithmRegistry;
+  }
+
+  /** {@inheritDoc} */
   @Override public SignServiceSigner getSigner(String signatureAlgorithm, SignatureType signatureType) {
+    if (signatureAlgorithm == null) {
+      log.debug("Null signature algorithm is not allowed");
+      throw new IllegalArgumentException("Null signature algorithm i snot allowed");
+    }
+    if (signatureType == null) {
+      log.debug("Null signature type is not allowed");
+      throw new IllegalArgumentException("Null signature type is not allowed");
+    }
+    Algorithm algorithm = algorithmRegistry.getAlgorithm(signatureAlgorithm);
+    if (algorithm == null) {
+      log.debug("Algorithm {} is not supported", signatureAlgorithm);
+      throw new IllegalArgumentException("Algorithm " + signatureAlgorithm + " is not supported");
+    }
+    if (!(algorithm instanceof SignatureAlgorithm)) {
+      log.debug("Only signature algorithms are allowed");
+      throw new IllegalArgumentException("Non signature algorithm specified: " + signatureAlgorithm);
+    }
 
-    StaticAlgorithmRegistry.getDefaultSignatureAlgorithms();
+    SignatureAlgorithm sigAlgo = (SignatureAlgorithm) algorithm;
+    if (sigAlgo instanceof RSAPSSSignatureAlgorithm) {
+      return new SignServiceRSAPSSSigner();
+    }
 
-    return null;
+    if (sigAlgo.getKeyType().equalsIgnoreCase("EC")) {
+      return new SignServiceECSigner(signatureType);
+    }
+
+    if (sigAlgo.getKeyType().equalsIgnoreCase("RSA")) {
+      return new SignServiceRSASigner();
+    }
+
+    log.debug("Unsupported algorithm {}. This algorithm does not have a suitable signer", signatureAlgorithm);
+
+    throw new IllegalArgumentException("No suitable signer exists for algorithm: " + signatureAlgorithm);
   }
 }

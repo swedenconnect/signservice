@@ -17,6 +17,8 @@ package se.swedenconnect.signservice.signature.impl;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
+import se.swedenconnect.signservice.signature.impl.sign.impl.DefaultSignServiceSignerProvider;
 
 /**
  * Test cases for DefaultSignatureHandler.
@@ -25,7 +27,7 @@ public class DefaultSignatureHandlerTest {
 
   @Test
   public void testName() {
-    final DefaultSignatureHandler handler = new DefaultSignatureHandler();
+    final DefaultSignatureHandler handler = new DefaultSignatureHandler(AlgorithmRegistrySingleton.getInstance());
     Assertions.assertEquals(DefaultSignatureHandler.DEFAULT_NAME, handler.getName());
 
     handler.setName("the-name");

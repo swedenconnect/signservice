@@ -15,10 +15,9 @@
  */
 package se.swedenconnect.signservice.signature.impl;
 
-import java.security.SignatureException;
-import java.util.Optional;
-
 import lombok.Setter;
+import se.swedenconnect.security.algorithms.Algorithm;
+import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
@@ -26,6 +25,13 @@ import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.signature.CompletedSignatureTask;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureHandler;
+import se.swedenconnect.signservice.signature.SignatureType;
+import se.swedenconnect.signservice.signature.impl.sign.SignServiceSigner;
+import se.swedenconnect.signservice.signature.impl.sign.SignServiceSignerProvider;
+import se.swedenconnect.signservice.signature.impl.sign.impl.DefaultSignServiceSignerProvider;
+
+import java.security.SignatureException;
+import java.util.Optional;
 
 /**
  * Default implementation of the {@link SignatureHandler} interface.
@@ -35,6 +41,11 @@ public class DefaultSignatureHandler implements SignatureHandler {
   /** Default name of this handler. */
   public static final String DEFAULT_NAME = "DefaultSignatureHandler";
 
+  /** sign service signer provider */
+  public final SignServiceSignerProvider signServiceSignerProvider;
+  /** Algorithm registry */
+  public final AlgorithmRegistry algorithmRegistry;
+
   /**
    * The name of this handler.
    *
@@ -43,7 +54,9 @@ public class DefaultSignatureHandler implements SignatureHandler {
   @Setter
   private String name;
 
-  public DefaultSignatureHandler() {
+  public DefaultSignatureHandler(AlgorithmRegistry algorithmRegistry) {
+    this.signServiceSignerProvider = new DefaultSignServiceSignerProvider(algorithmRegistry);
+    this.algorithmRegistry = algorithmRegistry;
   }
 
   /** {@inheritDoc} */
@@ -65,6 +78,18 @@ public class DefaultSignatureHandler implements SignatureHandler {
   @Override
   public CompletedSignatureTask sign(final RequestedSignatureTask signatureTask, final PkiCredential signingCredential,
       final SignRequestMessage signRequest, final SignServiceContext context) throws SignatureException {
+
+    try {
+      SignatureType signatureType = signatureTask.getSignatureType();
+      SignServiceSigner signer = signServiceSignerProvider.getSigner(
+        signRequest.getSignatureRequirements().getSignatureAlgorithm(),
+        signatureType);
+
+      // TODO prepare data to be signed and use the signer to sign
+
+    } catch (Exception ex){
+      // TODO handle exceptions
+    }
 
     // TODO: Implement
     return null;
