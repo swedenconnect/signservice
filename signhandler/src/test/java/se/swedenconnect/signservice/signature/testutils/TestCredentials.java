@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.impl.testutils;
+package se.swedenconnect.signservice.signature.testutils;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.security.KeyStore;

@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.impl.sign.impl;
+package se.swedenconnect.signservice.signature.signhandler.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.SignatureType;
-import se.swedenconnect.signservice.signature.impl.sign.SignServiceSigner;
-import se.swedenconnect.signservice.signature.impl.sign.crypto.EcdsaSigValue;
-import se.swedenconnect.signservice.signature.impl.sign.crypto.PkCrypto;
+import se.swedenconnect.signservice.signature.signhandler.SignServiceSigner;
+import se.swedenconnect.signservice.signature.signhandler.crypto.EcdsaSigValue;
+import se.swedenconnect.signservice.signature.signhandler.crypto.PkCrypto;
 
 import java.security.PrivateKey;
 import java.security.SignatureException;

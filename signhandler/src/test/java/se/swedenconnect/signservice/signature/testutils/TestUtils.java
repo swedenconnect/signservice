@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.impl.testutils;
+package se.swedenconnect.signservice.signature.testutils;
 
 import org.bouncycastle.util.encoders.Base64;
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.impl.sign.impl;
+package se.swedenconnect.signservice.signature.signhandler.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
@@ -21,12 +21,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
-import se.swedenconnect.signservice.signature.impl.sign.SignServiceSigner;
-import se.swedenconnect.signservice.signature.impl.sign.crypto.PKCS1V15Padding;
-import se.swedenconnect.signservice.signature.impl.sign.crypto.PkCrypto;
-import se.swedenconnect.signservice.signature.impl.testutils.TestAlgorithms;
-import se.swedenconnect.signservice.signature.impl.testutils.TestCredentials;
-import se.swedenconnect.signservice.signature.impl.testutils.TestUtils;
+import se.swedenconnect.signservice.signature.signhandler.SignServiceSigner;
+import se.swedenconnect.signservice.signature.signhandler.crypto.PKCS1V15Padding;
+import se.swedenconnect.signservice.signature.signhandler.crypto.PkCrypto;
+import se.swedenconnect.signservice.signature.testutils.TestAlgorithms;
+import se.swedenconnect.signservice.signature.testutils.TestCredentials;
+import se.swedenconnect.signservice.signature.testutils.TestUtils;
 
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
