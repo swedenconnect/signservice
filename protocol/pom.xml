@@ -70,7 +70,6 @@
   </properties>
 
   <modules>
-    <module>base</module>
     <module>dss-ext11</module>
   </modules>
 

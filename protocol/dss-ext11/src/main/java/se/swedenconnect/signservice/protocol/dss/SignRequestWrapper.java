@@ -35,12 +35,13 @@ import se.swedenconnect.schemas.csig.dssext_1_1.SignTasks;
 import se.swedenconnect.schemas.dss_1_0.AnyType;
 import se.swedenconnect.schemas.dss_1_0.InputDocuments;
 import se.swedenconnect.schemas.dss_1_0.SignRequest;
+import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
 
 /**
  * A wrapper for easier access to the DSS extensions.
  */
 @Slf4j
-public class SignRequestWrapper extends SignRequest implements Serializable {
+class SignRequestWrapper extends SignRequest implements Serializable {
 
   /** For serialization. */
   private static final long serialVersionUID = 414996066434815557L;
@@ -117,24 +118,28 @@ public class SignRequestWrapper extends SignRequest implements Serializable {
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public AnyType getOptionalInputs() {
     return this.signRequest.getOptionalInputs();
   }
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public boolean isSetOptionalInputs() {
     return this.signRequest.isSetOptionalInputs();
   }
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public InputDocuments getInputDocuments() {
     return this.signRequest.getInputDocuments();
   }
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public void setInputDocuments(final InputDocuments value) {
     // Reset the signTasks variable. It may be set as an any type in the supplied value.
     this.signTasks = null;
@@ -179,6 +184,7 @@ public class SignRequestWrapper extends SignRequest implements Serializable {
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public boolean isSetInputDocuments() {
     return this.signRequest.isSetInputDocuments();
   }

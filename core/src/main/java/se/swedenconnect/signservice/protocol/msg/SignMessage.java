@@ -29,4 +29,12 @@ public interface SignMessage extends Serializable {
    */
   byte[] getEncoding();
 
+  /**
+   * Tells whether the requester requires that the "sign message" is displayed for the user during the signature
+   * operation.
+   *
+   * @return true if the sign message must be displayed, and false if it does not have to be displayed
+   */
+  boolean getMustShow();
+
 }

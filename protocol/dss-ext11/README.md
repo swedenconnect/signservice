@@ -3,13 +3,22 @@
 
 # signservice/protocol/dss-ext11
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-engine/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-engine)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-protocol-dssext11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-protocol-dssext11)
 
 -----
 
-Implementation according to the Swedish eID Framework specifications. 
+## SignService Protocol Handler for DSS 1.1 extensions
 
-> TODO: Links
+### Configuration
+
+The [DssProtocolHandler](https://github.com/swedenconnect/signservice/blob/main/protocol/dss-ext11/src/main/java/se/swedenconnect/signservice/protocol/dss/DssProtocolHandler.java) is configured using [DssConfiguration](https://github.com/swedenconnect/signservice/blob/main/protocol/dss-ext11/src/main/java/se/swedenconnect/signservice/protocol/dss/DssConfiguration.java). This class defines the following configuration settings:
+
+| Property | Description | Default |
+| :--- | :--- | :--- |
+| `includeAssertion` | Tells whether SAML assertions should be included in the response messages. | `true` |
+| `includeRequestMessage` | Tells whether to include the request message in the response messages created. For 1.1 version and below this will always be included, but in greater versions the field is optional (actually the specs dissuade from using it). | `false` |
+
+
 
 -----
 

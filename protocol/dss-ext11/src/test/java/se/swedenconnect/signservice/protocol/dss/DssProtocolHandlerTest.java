@@ -24,18 +24,37 @@ import javax.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.core.io.ClassPathResource;
 import org.w3c.dom.Document;
 
 import se.idsec.signservice.security.certificate.CertificateUtils;
+import se.idsec.signservice.utils.ProtocolVersion;
 import se.idsec.signservice.xml.DOMUtils;
+import se.swedenconnect.security.credential.KeyStoreCredential;
+import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.engine.SignServiceError;
+import se.swedenconnect.signservice.engine.SignServiceErrorCode;
 import se.swedenconnect.signservice.protocol.ProtocolException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
+import se.swedenconnect.signservice.protocol.SignResponseResult;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * Test cases for DssProtocolHandler
  */
 public class DssProtocolHandlerTest {
+
+  private static final String REQUEST_ID = "da655e67-1104-4ae0-994f-740811ece38d";
+
+  @Test
+  public void testName() {
+    final DssProtocolHandler protocolHandler = new DssProtocolHandler();
+    Assertions.assertEquals(DssProtocolHandler.DEFAULT_NAME, protocolHandler.getName());
+
+    protocolHandler.setName("dummy");
+    Assertions.assertEquals("dummy", protocolHandler.getName());
+  }
 
   @Test
   public void testDecodeRequest() throws Exception {
@@ -47,8 +66,8 @@ public class DssProtocolHandlerTest {
         DOMUtils.inputStreamToDocument(this.getClass().getResourceAsStream("/request.xml")));
 
     Mockito.when(request.getMethod()).thenReturn("POST");
-    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.EXPECTED_BINDING);
-    Mockito.when(request.getParameter("RelayState")).thenReturn("relay-state");
+    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.BINDING);
+    Mockito.when(request.getParameter("RelayState")).thenReturn(REQUEST_ID);
     Mockito.when(request.getParameter("EidSignRequest")).thenReturn(encodedRequest);
 
     final DssProtocolHandler protocolHandler = new DssProtocolHandler();
@@ -56,7 +75,8 @@ public class DssProtocolHandlerTest {
     final SignRequestMessage signRequestMessage = protocolHandler.decodeRequest(request, context);
 
     Assertions.assertTrue(signRequestMessage instanceof DssSignRequestMessage);
-    Assertions.assertEquals("relay-state", signRequestMessage.getRelayState());
+    Assertions.assertEquals(REQUEST_ID, signRequestMessage.getRelayState());
+    Assertions.assertEquals(REQUEST_ID, signRequestMessage.getRequestId());
     Assertions.assertTrue(signRequestMessage.isSigned());
 
     // Verify signature ...
@@ -75,8 +95,8 @@ public class DssProtocolHandlerTest {
         DOMUtils.inputStreamToDocument(this.getClass().getResourceAsStream("/request.xml")));
 
     Mockito.when(request.getMethod()).thenReturn("GET");
-    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.EXPECTED_BINDING);
-    Mockito.when(request.getParameter("RelayState")).thenReturn("relay-state");
+    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.BINDING);
+    Mockito.when(request.getParameter("RelayState")).thenReturn(REQUEST_ID);
     Mockito.when(request.getParameter("EidSignRequest")).thenReturn(encodedRequest);
 
     final DssProtocolHandler protocolHandler = new DssProtocolHandler();
@@ -97,7 +117,7 @@ public class DssProtocolHandlerTest {
 
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter("Binding")).thenReturn(null);
-    Mockito.when(request.getParameter("RelayState")).thenReturn("relay-state");
+    Mockito.when(request.getParameter("RelayState")).thenReturn(REQUEST_ID);
     Mockito.when(request.getParameter("EidSignRequest")).thenReturn(encodedRequest);
 
     final DssProtocolHandler protocolHandler = new DssProtocolHandler();
@@ -113,7 +133,7 @@ public class DssProtocolHandlerTest {
   }
 
   @Test
-  public void testDecodeRequestRelayStateOptional() throws Exception {
+  public void testDecodeRequestRelayStateMissing() throws Exception {
     final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
@@ -122,15 +142,36 @@ public class DssProtocolHandlerTest {
         DOMUtils.inputStreamToDocument(this.getClass().getResourceAsStream("/request.xml")));
 
     Mockito.when(request.getMethod()).thenReturn("POST");
-    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.EXPECTED_BINDING);
+    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.BINDING);
     Mockito.when(request.getParameter("RelayState")).thenReturn(null);
     Mockito.when(request.getParameter("EidSignRequest")).thenReturn(encodedRequest);
 
     final DssProtocolHandler protocolHandler = new DssProtocolHandler();
 
-    final SignRequestMessage signRequestMessage = protocolHandler.decodeRequest(request, context);
+    Assertions.assertThrows(ProtocolException.class, () -> {
+      protocolHandler.decodeRequest(request, context);
+    });
+  }
 
-    Assertions.assertNull(signRequestMessage.getRelayState());
+  @Test
+  public void testDecodeRequestRelayStateMismatch() throws Exception {
+    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final SignServiceContext context = Mockito.mock(SignServiceContext.class);
+
+    // Setup SignRequest
+    final String encodedRequest = DOMUtils.nodeToBase64(
+        DOMUtils.inputStreamToDocument(this.getClass().getResourceAsStream("/request.xml")));
+
+    Mockito.when(request.getMethod()).thenReturn("POST");
+    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.BINDING);
+    Mockito.when(request.getParameter("RelayState")).thenReturn("not-request-id");
+    Mockito.when(request.getParameter("EidSignRequest")).thenReturn(encodedRequest);
+
+    final DssProtocolHandler protocolHandler = new DssProtocolHandler();
+
+    Assertions.assertThrows(ProtocolException.class, () -> {
+      protocolHandler.decodeRequest(request, context);
+    });
   }
 
   @Test
@@ -139,7 +180,7 @@ public class DssProtocolHandlerTest {
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
     Mockito.when(request.getMethod()).thenReturn("POST");
-    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.EXPECTED_BINDING);
+    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.BINDING);
     Mockito.when(request.getParameter("RelayState")).thenReturn("relay-state");
     Mockito.when(request.getParameter("EidSignRequest")).thenReturn(null);
 
@@ -158,8 +199,8 @@ public class DssProtocolHandlerTest {
     final String xml = "<bad-xml>Hello</bad-xml>";
 
     Mockito.when(request.getMethod()).thenReturn("POST");
-    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.EXPECTED_BINDING);
-    Mockito.when(request.getParameter("RelayState")).thenReturn("relay-state");
+    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.BINDING);
+    Mockito.when(request.getParameter("RelayState")).thenReturn(REQUEST_ID);
     Mockito.when(request.getParameter("EidSignRequest")).thenReturn(Base64.getEncoder().encodeToString(xml.getBytes()));
 
     final DssProtocolHandler protocolHandler = new DssProtocolHandler();
@@ -175,7 +216,7 @@ public class DssProtocolHandlerTest {
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
     Mockito.when(request.getMethod()).thenReturn("POST");
-    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.EXPECTED_BINDING);
+    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.BINDING);
     Mockito.when(request.getParameter("RelayState")).thenReturn("relay-state");
     Mockito.when(request.getParameter("EidSignRequest")).thenReturn("NOT-BASE64-encoding");
 
@@ -198,8 +239,8 @@ public class DssProtocolHandlerTest {
     final String encodedRequest = DOMUtils.nodeToBase64(doc);
 
     Mockito.when(request.getMethod()).thenReturn("POST");
-    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.EXPECTED_BINDING);
-    Mockito.when(request.getParameter("RelayState")).thenReturn("relay-state");
+    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.BINDING);
+    Mockito.when(request.getParameter("RelayState")).thenReturn(REQUEST_ID);
     Mockito.when(request.getParameter("EidSignRequest")).thenReturn(encodedRequest);
 
     final DssProtocolHandler protocolHandler = new DssProtocolHandler();
@@ -207,6 +248,174 @@ public class DssProtocolHandlerTest {
     Assertions.assertThrows(ProtocolException.class, () -> {
       protocolHandler.decodeRequest(request, context);
     });
+  }
+
+  @Test
+  public void testCreateResponse() throws Exception {
+    final SignServiceContext context = Mockito.mock(SignServiceContext.class);
+    Mockito.when(context.get(DssProtocolHandler.CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class))
+        .thenReturn(new DssConfiguration());
+
+    final DssProtocolHandler protocolHandler = new DssProtocolHandler();
+    final DssSignRequestMessage request = this.getTestRequest();
+
+    final DssSignResponseMessage response =
+        (DssSignResponseMessage) protocolHandler.createSignResponseMessage(context, request);
+
+    Assertions.assertEquals(request.getRequestId(), response.getInResponseTo());
+    Assertions.assertEquals(request.getRelayState(), response.getRelayState());
+    Assertions.assertEquals(request.getVersion(), response.getVersion());
+    Assertions.assertEquals(request.getSignServiceId(), response.getIssuerId());
+    Assertions.assertEquals(request.getResponseUrl(), response.getDestinationUrl());
+  }
+
+  @Test
+  public void testCreateResponseMissingSignRequestField() throws Exception {
+    final SignServiceContext context = Mockito.mock(SignServiceContext.class);
+    Mockito.when(context.get(DssProtocolHandler.CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class))
+        .thenReturn(new DssConfiguration());
+
+    final DssSignRequestMessage request = Mockito.mock(DssSignRequestMessage.class);
+    Mockito.when(request.getVersion()).thenReturn(ProtocolVersion.valueOf("1.4"));
+    Mockito.when(request.getRequestId()).thenReturn("123456");
+    Mockito.when(request.getSignServiceId()).thenReturn(null);
+
+    final DssProtocolHandler protocolHandler = new DssProtocolHandler();
+
+    Assertions.assertThrows(ProtocolException.class, () -> {
+      protocolHandler.createSignResponseMessage(context, request);
+    });
+  }
+
+  @Test
+  public void testCreateResponseUnsupportedSignRequest() {
+    final SignServiceContext context = Mockito.mock(SignServiceContext.class);
+    final SignRequestMessage request = Mockito.mock(SignRequestMessage.class);
+
+    final DssProtocolHandler protocolHandler = new DssProtocolHandler();
+
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      protocolHandler.createSignResponseMessage(context, request);
+    });
+  }
+
+  @Test
+  public void testEncodeResponse() throws Exception {
+
+    final SignServiceContext context = Mockito.mock(SignServiceContext.class);
+    Mockito.when(context.get(DssProtocolHandler.CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class))
+        .thenReturn(null);
+
+    final DssProtocolHandler protocolHandler = new DssProtocolHandler();
+    protocolHandler.init();
+
+    final DssSignRequestMessage request = this.getTestRequest();
+    final DssSignResponseMessage response =
+        (DssSignResponseMessage) protocolHandler.createSignResponseMessage(context, request);
+
+    response.setSignResponseResult(new DssSignResponseResult());
+
+    response.sign(this.getTestCredential());
+
+    final HttpRequestMessage msg = protocolHandler.encodeResponse(response, context);
+
+    Assertions.assertNotNull(msg.getHttpParameters().get("EidSignResponse"));
+    Assertions.assertEquals(DssProtocolHandler.BINDING, msg.getHttpParameters().get("Binding"));
+    Assertions.assertEquals(response.getRelayState(), msg.getHttpParameters().get("RelayState"));
+  }
+
+  @Test
+  public void testSignNoResult() throws Exception {
+
+    final SignServiceContext context = Mockito.mock(SignServiceContext.class);
+    Mockito.when(context.get(DssProtocolHandler.CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class))
+        .thenReturn(null);
+
+    final DssProtocolHandler protocolHandler = new DssProtocolHandler();
+    protocolHandler.init();
+
+    final DssSignRequestMessage request = this.getTestRequest();
+    final DssSignResponseMessage response =
+        (DssSignResponseMessage) protocolHandler.createSignResponseMessage(context, request);
+
+    response.setSignResponseResult(null);
+
+    Assertions.assertThrows(DssProtocolException.class, () -> {
+      response.sign(this.getTestCredential());
+    });
+  }
+
+  @Test
+  public void testEncodeResponseNotSigned() throws Exception {
+
+    final SignServiceContext context = Mockito.mock(SignServiceContext.class);
+    Mockito.when(context.get(DssProtocolHandler.CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class))
+        .thenReturn(null);
+
+    final DssProtocolHandler protocolHandler = new DssProtocolHandler();
+    final DssSignRequestMessage request = this.getTestRequest();
+
+    final DssSignResponseMessage response =
+        (DssSignResponseMessage) protocolHandler.createSignResponseMessage(context, request);
+
+    Assertions.assertThrows(ProtocolException.class, () -> {
+      protocolHandler.encodeResponse(response, context);
+    });
+  }
+
+  @Test
+  public void testEncodeMissingDestination() throws Exception {
+    final SignServiceContext context = Mockito.mock(SignServiceContext.class);
+    Mockito.when(context.get(DssProtocolHandler.CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class))
+        .thenReturn(null);
+
+    final DssProtocolHandler protocolHandler = new DssProtocolHandler();
+    final DssSignRequestMessage request = this.getTestRequest();
+
+    final DssSignResponseMessage response =
+        (DssSignResponseMessage) protocolHandler.createSignResponseMessage(context, request);
+    response.setDestinationUrl(null);
+
+    Assertions.assertThrows(ProtocolException.class, () -> {
+      protocolHandler.encodeResponse(response, context);
+    });
+  }
+
+  @Test
+  public void testTranslateError() {
+    final DssProtocolHandler protocolHandler = new DssProtocolHandler();
+    final SignServiceError error = new SignServiceError(
+        SignServiceErrorCode.AUTHN_USER_CANCEL, "User cancel", "User didn't want to continue");
+
+    final SignResponseResult result = protocolHandler.translateError(error);
+    Assertions.assertTrue(DssSignResponseResult.class.isInstance(result));
+  }
+
+  private DssSignRequestMessage getTestRequest() throws Exception {
+    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final SignServiceContext context = Mockito.mock(SignServiceContext.class);
+
+    // Setup SignRequest
+    final String encodedRequest = DOMUtils.nodeToBase64(
+        DOMUtils.inputStreamToDocument(this.getClass().getResourceAsStream("/request.xml")));
+
+    Mockito.when(request.getMethod()).thenReturn("POST");
+    Mockito.when(request.getParameter("Binding")).thenReturn(DssProtocolHandler.BINDING);
+    Mockito.when(request.getParameter("RelayState")).thenReturn(REQUEST_ID);
+    Mockito.when(request.getParameter("EidSignRequest")).thenReturn(encodedRequest);
+
+    final DssProtocolHandler protocolHandler = new DssProtocolHandler();
+    protocolHandler.setConfiguration(new DssConfiguration());
+    protocolHandler.init();
+
+    return (DssSignRequestMessage) protocolHandler.decodeRequest(request, context);
+  }
+
+  private PkiCredential getTestCredential() throws Exception {
+    final KeyStoreCredential cred = new KeyStoreCredential(
+        new ClassPathResource("signservice.jks"), "secret".toCharArray(), "signservice", "secret".toCharArray());
+    cred.init();
+    return cred;
   }
 
 }

@@ -15,19 +15,23 @@
  */
 package se.swedenconnect.signservice.spring.config;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
@@ -39,18 +43,14 @@ import se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean;
 import se.swedenconnect.security.credential.utils.X509Utils;
 import se.swedenconnect.signservice.api.engine.DefaultSignServiceEngine;
 import se.swedenconnect.signservice.api.engine.config.impl.DefaultEngineConfiguration;
-import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
-import se.swedenconnect.signservice.authn.AuthenticationHandler;
-import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
-import se.swedenconnect.signservice.authn.UserAuthenticationException;
+import se.swedenconnect.signservice.audit.AuditLogger;
+import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
+import se.swedenconnect.signservice.audit.actuator.ActuatorAuditLogger;
+import se.swedenconnect.signservice.authn.mock.MockedAuthenticationHandler;
 import se.swedenconnect.signservice.client.impl.DefaultClientConfiguration;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
-import se.swedenconnect.signservice.protocol.dss.DssProtocolHandler;
-import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
-import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.session.SessionHandler;
-import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.impl.DefaultSessionHandler;
 import se.swedenconnect.signservice.spring.config.engine.EngineConfigurationProperties;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
@@ -62,6 +62,11 @@ import se.swedenconnect.signservice.storage.MessageReplayChecker;
 @EnableConfigurationProperties(SignServiceConfigurationProperties.class)
 @Slf4j
 public class SignServiceConfiguration {
+
+  /** The application context. */
+  @Setter
+  @Autowired
+  private ApplicationContext applicationContext;
 
   /** The SignService configuration properties. */
   @Setter
@@ -144,10 +149,11 @@ public class SignServiceConfiguration {
     return null;
   }
 
-  // Dummy
   @Bean
-  public ProtocolHandler protocolHandler() {
-    return new DssProtocolHandler();
+  public AuditLogger auditLogger() {
+    // TODO Change configuration logger type
+    AuditLoggerSingleton.init(new ActuatorAuditLogger());
+    return AuditLoggerSingleton.getAuditLogger();
   }
 
   @ConditionalOnMissingBean(name = "signservice.Engines")
@@ -181,9 +187,10 @@ public class SignServiceConfiguration {
 
       conf.setProcessingPaths(ecp.getProcessingPaths());
 
-      conf.setProtocolHandler(this.protocolHandler()); // TODO: change
-      conf.setAuthenticationHandler(new MockAuthnHandler());  // TODO: change
+      conf.setProtocolHandler(this.createProtocolHandler(ecp.getProtocolHandlerBean()));
+      conf.setAuthenticationHandler(new MockedAuthenticationHandler());  // TODO: change
       conf.setKeyAndCertificateHandler(null); // TODO: change
+      conf.setAuditLogger(this.auditLogger()); // TODO: change
 
       final DefaultClientConfiguration clientConf = new DefaultClientConfiguration(ecp.getClient().getClientId());
       if (ecp.getClient().getResponseUrls() != null) {
@@ -198,8 +205,6 @@ public class SignServiceConfiguration {
       }
       conf.setClientConfiguration(clientConf);
 
-      conf.setAuditLogger(null); // TODO: change
-
 //      conf.init();
 
       final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(conf, sessionHandler, messageReplayChecker);
@@ -211,30 +216,38 @@ public class SignServiceConfiguration {
     return engines;
   }
 
-  public static class MockAuthnHandler implements AuthenticationHandler {
+  /**
+   * The protocol handler is given to the engine configuration as a bean name. We can not be
+   * sure that the application context has loaded this bean yet. So we use a proxy to implement
+   * a lazy initialization.
+   *
+   * @param beanName the protocol handler bean name
+   * @return a protocol handler proxy
+   */
+  private ProtocolHandler createProtocolHandler(final String beanName) {
 
-    @Override
-    public String getName() {
-      return "MockAuthnHandler";
+    try {
+      this.applicationContext.getBean(beanName, ProtocolHandler.class);
+    }
+    catch (final NoSuchBeanDefinitionException e) {
+      log.debug("The ProtocolHandler bean named '{}' is not yet created - creating a lazy proxy for the bean", beanName);
     }
 
-    @Override
-    public AuthenticationResultChoice authenticate(AuthnRequirements authnRequirements, SignMessage signMessage,
-        SignServiceContext context) throws UserAuthenticationException {
-      throw new UserAuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHN_ERROR, "Not implemented");
-    }
+    return (ProtocolHandler) Proxy.newProxyInstance(
+        this.getClass().getClassLoader(),
+        new Class[] { ProtocolHandler.class },
+        new InvocationHandler() {
 
-    @Override
-    public AuthenticationResultChoice resumeAuthentication(HttpServletRequest httpRequest, SignServiceContext context)
-        throws UserAuthenticationException {
-      throw new UserAuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHN_ERROR, "Not implemented");
-    }
+          private ProtocolHandler handler = null;
 
-    @Override
-    public boolean canProcess(HttpServletRequest httpRequest) {
-      return false;
-    }
-
+          @Override
+          public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+            if (this.handler == null) {
+              this.handler = applicationContext.getBean(beanName, ProtocolHandler.class);
+            }
+            return method.invoke(this.handler, args);
+          }
+        });
   }
 
 }

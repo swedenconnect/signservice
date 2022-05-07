@@ -27,6 +27,13 @@ import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 public interface IdentityAssertion extends Serializable {
 
   /**
+   * Gets the identifier for the assertion.
+   *
+   * @return the assertion ID
+   */
+  String getIdentifier();
+
+  /**
    * Gets the issuer identity of the authentication assertion.
    *
    * @return the ID of the authentication service that authenticated the user
@@ -57,7 +64,7 @@ public interface IdentityAssertion extends Serializable {
   /**
    * Gets the identity attributes.
    *
-   * @return the identity attributes
+   * @return the identity attributes (may be an empty list)
    */
   List<IdentityAttribute<?>> getIdentityAttributes();
 

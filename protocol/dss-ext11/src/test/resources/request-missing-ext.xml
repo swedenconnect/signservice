@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dss:SignRequest xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+  xmlns:saml="urn:oasis:names:tc:SAML:1.0:assertion" Profile="http://id.elegnamnden.se/csig/1.1/dss-ext/profile"
+  RequestID="da655e67-1104-4ae0-994f-740811ece38d">
+  <dss:OptionalInputs>
+    <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+      <ds:SignedInfo>
+        <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+        <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
+        <ds:Reference URI="">
+          <ds:Transforms>
+            <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+            <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+          </ds:Transforms>
+          <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+          <ds:DigestValue>M6e9ACsJOiRyxc2vLGe4Sm01Z2xpyVpf3xe2RStK6v4=</ds:DigestValue>
+        </ds:Reference>
+      </ds:SignedInfo>
+      <ds:SignatureValue>TLHmLeI8GjUuDahlTaROhwP0VmT6QeDR0oY032a9PiCBiyOWYl6v13fW35dUQ2VOXgXtKn+wk/rhDXqGegGhAFX125Torx4M2fXXHM46C5BYzPeLMoHew7u4Jd+c2MSX9kTivQJP82JnEQOS/7u7aqUhQA1LgbnIsFvzLUmNopBTDwd7bdOOyVJssh5Od5EYNKFgZBZ++yiImpS6vN+16pDGu+urIxoglIvycQ3yo8A+PkT51zFreTX9BHpHtjUmTnTp/wqSmntbEiSlDp71DrIAX7LigJ8ALukoMjGYb4Eog/cr8wlc9MSu6NWBHxA/MuQuzLMXZUUlXt0HIhFqPA==
+      </ds:SignatureValue>
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>MIIC2TCCAcECBgFBl8ggBDANBgkqhkiG9w0BAQUFADAwMS4wLAYDVQQDDCVodHRwczovL2VpZDJjc3NwLjN4YXNlY3VyaXR5LmNvbS9zaWduMB4XDTEzMTAwODA5MTYxN1oXDTIzMTAwODExMTYxN1owMDEuMCwGA1UEAwwlaHR0cHM6Ly9laWQyY3NzcC4zeGFzZWN1cml0eS5jb20vc2lnbjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJhIPLueZLbvk86Vd/YoZu3HkWgD9x8cXYRgxs2OyPF+JyOA+eLe+05hyCU4MfubJtSWRmum8Fv0BdQconqakiMvOHxLCVKaBNggyn0CR8YgZg+O/+ttJQORPpXKyrHiVCGVIgOXELd8Hr74A5YK7rC8hTKROabFJTx1hpcGNXhRbN1tQZA+JaoPdQqrtMPE2NPO6TenoLNVssrqf1VNQvGN2bt7uX5RuIRBTPw/v1GLh1yW+ao6fKqisGl5MtKIgZ1qlRZQp74+fBp9HfDXbq/rKR0GeEgG8c4YAReQ1gqiPvudHFcyGNE6AFdLs2KnUeDVk53bxmwmtJRQS/69qlUCAwEAATANBgkqhkiG9w0BAQUFAAOCAQEANjzXH85HFIEThaRStDWFomObnE8eO7m3F1lFgeuja1vmalhfSQMxuLGOYpAtkFOyiJbcCRmaUdfuZbyOu5janIfX29DqPwRN9wqL7HpyvE4//Km/pU02Jh1LlqNMmYPZ+tXyWEqivIlquAZne2GAsWS3MwWlRA+XuMpReCfgBWGpfQK8amq27z8fqruMuLMQ3NAZaf6mm84W1YFkMvN3m+gIaZGOIR4+qQCPHbuLnLi5lJ25YldN5Rrkyf/zF67teBIneg5QFMA7O3iAkBJorom850kRMoQmhHGiKV6p90Crl38RIX83EJPsn9mR9DfLa7VpP/tzYO+Y+39IJzcwuw==
+          </ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </ds:Signature>
+  </dss:OptionalInputs>
+  <dss:InputDocuments>
+    <dss:Other>
+      <csig:SignTasks xmlns:csig="http://id.elegnamnden.se/csig/1.1/dss-ext/ns" xmlns:ns3="http://www.w3.org/2004/08/xop/include"
+        xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#">
+        <csig:SignTaskData AdESType="BES" SigType="XML" SignTaskId="tbsdoc-0.xml">
+          <csig:ToBeSignedBytes>PGRzOlNpZ25lZEluZm8geG1sbnM6ZHM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMiPjxkczpDYW5vbmljYWxpemF0aW9uTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIj48L2RzOkNhbm9uaWNhbGl6YXRpb25NZXRob2Q+PGRzOlNpZ25hdHVyZU1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZHNpZy1tb3JlI3JzYS1zaGEyNTYiPjwvZHM6U2lnbmF0dXJlTWV0aG9kPjxkczpSZWZlcmVuY2UgVVJJPSIiPjxkczpUcmFuc2Zvcm1zPjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjZW52ZWxvcGVkLXNpZ25hdHVyZSI+PC9kczpUcmFuc2Zvcm0+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyI+PC9kczpUcmFuc2Zvcm0+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnL1RSLzE5OTkvUkVDLXhwYXRoLTE5OTkxMTE2Ij4KPGRzOlhQYXRoPm5vdChhbmNlc3Rvci1vci1zZWxmOjoqW2xvY2FsLW5hbWUoKT0nU2lnbmF0dXJlJyBhbmQgbmFtZXNwYWNlLXVyaSgpPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjJ10pPC9kczpYUGF0aD4KPC9kczpUcmFuc2Zvcm0+PC9kczpUcmFuc2Zvcm1zPjxkczpEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGVuYyNzaGEyNTYiPjwvZHM6RGlnZXN0TWV0aG9kPjxkczpEaWdlc3RWYWx1ZT45MDd3cWdFQThVUmRMdmRPSXlpaEE0MXZSd1JTUWFmTXd6L1JONjdsWUNJPTwvZHM6RGlnZXN0VmFsdWU+PC9kczpSZWZlcmVuY2U+PC9kczpTaWduZWRJbmZvPg==
+          </csig:ToBeSignedBytes>
+          <csig:AdESObject>
+            <csig:SignatureId>id-59890091e01b5dd300826a34e35c3965</csig:SignatureId>
+          </csig:AdESObject>
+        </csig:SignTaskData>
+        <csig:SignTaskData AdESType="None" SigType="PDF" SignTaskId="2110_31_web_2019-1.pdf">
+          <csig:ToBeSignedBytes>MYGWMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIyMDMyOTExNDExMlowKwYJKoZIhvcNAQk0MR4wHDALBglghkgBZQMEAgGhDQYJKoZIhvcNAQELBQAwLwYJKoZIhvcNAQkEMSIEIC4c5ViirnA0s9oAHCFBWHZ4yT3WehQEnynGVzl+HC4j
+          </csig:ToBeSignedBytes>
+        </csig:SignTaskData>
+      </csig:SignTasks>
+    </dss:Other>
+  </dss:InputDocuments>
+</dss:SignRequest>
