@@ -16,7 +16,6 @@
 package se.swedenconnect.signservice.signature.impl;
 
 import lombok.Setter;
-import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
@@ -26,9 +25,9 @@ import se.swedenconnect.signservice.signature.CompletedSignatureTask;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureHandler;
 import se.swedenconnect.signservice.signature.SignatureType;
-import se.swedenconnect.signservice.signature.impl.sign.SignServiceSigner;
-import se.swedenconnect.signservice.signature.impl.sign.SignServiceSignerProvider;
-import se.swedenconnect.signservice.signature.impl.sign.impl.DefaultSignServiceSignerProvider;
+import se.swedenconnect.signservice.signature.signhandler.SignServiceSigner;
+import se.swedenconnect.signservice.signature.signhandler.SignServiceSignerProvider;
+import se.swedenconnect.signservice.signature.signhandler.impl.DefaultSignServiceSignerProvider;
 
 import java.security.SignatureException;
 import java.util.Optional;

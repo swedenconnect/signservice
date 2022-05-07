@@ -18,7 +18,6 @@ package se.swedenconnect.signservice.signature.impl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
-import se.swedenconnect.signservice.signature.impl.sign.impl.DefaultSignServiceSignerProvider;
 
 /**
  * Test cases for DefaultSignatureHandler.
