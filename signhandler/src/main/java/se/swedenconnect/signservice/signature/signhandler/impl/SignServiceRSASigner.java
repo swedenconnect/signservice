@@ -16,6 +16,7 @@
 package se.swedenconnect.signservice.signature.signhandler.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.security.algorithms.RSAPSSSignatureAlgorithm;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.signhandler.SignServiceSigner;
 import se.swedenconnect.signservice.signature.signhandler.crypto.PKCS1V15Padding;
@@ -34,6 +35,14 @@ public class SignServiceRSASigner implements SignServiceSigner {
   /** {@inheritDoc} */
   @Override public byte[] sign(final byte[] toBeSignedBytes, final PrivateKey privateKey, final SignatureAlgorithm signatureAlgorithm)
     throws SignatureException {
+
+    if (!signatureAlgorithm.getKeyType().equalsIgnoreCase("RSA")) {
+      throw new SignatureException("The algorithm is not an RSA algorithm");
+    }
+
+    if (signatureAlgorithm instanceof RSAPSSSignatureAlgorithm) {
+      throw new SignatureException("The specified algorithm is an RSA PSS algorithm - RSA with PKCS#1 1.5 is required");
+    }
 
     try {
       final MessageDigest md = MessageDigest.getInstance(signatureAlgorithm.getMessageDigestAlgorithm().getJcaName());

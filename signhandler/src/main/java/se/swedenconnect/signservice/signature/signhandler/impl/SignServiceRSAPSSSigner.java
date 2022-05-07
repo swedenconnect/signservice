@@ -18,6 +18,7 @@ package se.swedenconnect.signservice.signature.signhandler.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.jcajce.provider.util.DigestFactory;
+import se.swedenconnect.security.algorithms.RSAPSSSignatureAlgorithm;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.signhandler.SignServiceSigner;
 import se.swedenconnect.signservice.signature.signhandler.crypto.PSSPadding;
@@ -36,6 +37,10 @@ public class SignServiceRSAPSSSigner implements SignServiceSigner {
   /** {@inheritDoc} */
   @Override public byte[] sign(final byte[] toBeSignedBytes, final PrivateKey privateKey, final SignatureAlgorithm signatureAlgorithm)
     throws SignatureException {
+
+    if (!(signatureAlgorithm instanceof RSAPSSSignatureAlgorithm)) {
+      throw new SignatureException("The specified algorithm is not an RSA PSS algorithm");
+    }
 
     try {
       final Digest messageDigestFunction = DigestFactory.getDigest(signatureAlgorithm.getMessageDigestAlgorithm().getJcaName());

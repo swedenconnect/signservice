@@ -32,6 +32,8 @@ import se.swedenconnect.signservice.signature.signhandler.TestCredentials;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
 
 import java.security.MessageDigest;
+import java.security.PrivateKey;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -110,6 +112,28 @@ class SignServiceECSignerTest {
     signWithEcdsaAlgorithm(ecdsaSha256, SignatureType.PDF);
     signWithEcdsaAlgorithm(ecdsaSha384, SignatureType.PDF);
     signWithEcdsaAlgorithm(ecdsaSha512, SignatureType.PDF);
+  }
+
+  @Test
+  void errorTests() throws Exception {
+    log.info("EC signer error tests");
+
+    log.info("Error test null private key:");
+    specificErrorTest(tbsData, null, ecdsaSha256);
+    log.info("Error test rsa algorithm:");
+    specificErrorTest(tbsData, TestCredentials.privateECKey, TestAlgorithms.rsaPssSha256);
+    log.info("Error test rsa key:");
+    specificErrorTest(tbsData, TestCredentials.privateRSAKey, ecdsaSha256);
+    log.info("Error test null data:");
+    specificErrorTest(null, TestCredentials.privateECKey, ecdsaSha256);
+  }
+
+  void specificErrorTest(byte[] tbsData, PrivateKey privateKey, SignatureAlgorithm signatureAlgorithm) {
+    SignServiceSigner signer = new SignServiceECSigner(SignatureType.XML);
+    SignatureException signatureException = assertThrows(SignatureException.class, () -> {
+      signer.sign(tbsData, privateKey, signatureAlgorithm);
+    });
+    log.info("Exception: {}", signatureException.toString());
   }
 
   void signWithEcdsaAlgorithm(SignatureAlgorithm signatureAlgorithm, SignatureType signatureType) throws Exception {

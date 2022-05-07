@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
+import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.signhandler.SignServiceSigner;
 import se.swedenconnect.signservice.signature.signhandler.crypto.PSSPadding;
 import se.swedenconnect.signservice.signature.signhandler.crypto.PkCrypto;
@@ -30,9 +31,12 @@ import se.swedenconnect.signservice.signature.signhandler.TestAlgorithms;
 import se.swedenconnect.signservice.signature.signhandler.TestCredentials;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
 
+import java.security.PrivateKey;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAKey;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -116,6 +120,32 @@ class SignServiceRSAPSSSignerTest {
     signRsaPssWithAlgo(rsaPssSha384);
     signRsaPssWithAlgo(rsaPssSha512);
   }
+
+  @Test
+  void errorTests() throws Exception {
+    log.info("RSA PSS signer error tests");
+
+    log.info("Error test null private key:");
+    specificErrorTest(tbsData, null, rsaPssSha256);
+    log.info("Error test ecdsa algorithm:");
+    specificErrorTest(tbsData, TestCredentials.privateRSAKey, TestAlgorithms.ecdsaSha256);
+    log.info("Error test plain rsa algorithm:");
+    specificErrorTest(tbsData, TestCredentials.privateRSAKey, TestAlgorithms.rsaSha256);
+    log.info("Error test ecdsa key:");
+    specificErrorTest(tbsData, TestCredentials.privateECKey, rsaPssSha256);
+    log.info("Error test null data:");
+    specificErrorTest(null, TestCredentials.privateRSAKey, rsaPssSha256);
+  }
+
+  void specificErrorTest(byte[] tbsData, PrivateKey privateKey, SignatureAlgorithm signatureAlgorithm) {
+    SignServiceSigner signer = new SignServiceRSAPSSSigner();
+    SignatureException signatureException = assertThrows(SignatureException.class, () -> {
+      signer.sign(tbsData, privateKey, signatureAlgorithm);
+    });
+    log.info("Exception: {}", signatureException.toString());
+  }
+
+
 
   void signRsaPssWithAlgo(SignatureAlgorithm signatureAlgorithm) throws Exception {
     log.info("RSA PSS Signing test using algorithm {}", signatureAlgorithm);
