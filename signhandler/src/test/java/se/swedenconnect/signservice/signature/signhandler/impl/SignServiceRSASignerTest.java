@@ -24,8 +24,8 @@ import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.signhandler.SignServiceSigner;
 import se.swedenconnect.signservice.signature.signhandler.crypto.PKCS1V15Padding;
 import se.swedenconnect.signservice.signature.signhandler.crypto.PkCrypto;
-import se.swedenconnect.signservice.signature.testutils.TestAlgorithms;
-import se.swedenconnect.signservice.signature.testutils.TestCredentials;
+import se.swedenconnect.signservice.signature.signhandler.TestAlgorithms;
+import se.swedenconnect.signservice.signature.signhandler.TestCredentials;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
 
 import java.security.MessageDigest;

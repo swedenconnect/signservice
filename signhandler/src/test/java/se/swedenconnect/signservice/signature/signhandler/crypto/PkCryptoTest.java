@@ -23,8 +23,8 @@ import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
-import se.swedenconnect.signservice.signature.testutils.TestAlgorithms;
-import se.swedenconnect.signservice.signature.testutils.TestCredentials;
+import se.swedenconnect.signservice.signature.signhandler.TestAlgorithms;
+import se.swedenconnect.signservice.signature.signhandler.TestCredentials;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
 
 import java.nio.charset.StandardCharsets;

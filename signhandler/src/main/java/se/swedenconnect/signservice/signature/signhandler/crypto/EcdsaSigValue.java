@@ -46,7 +46,7 @@ public class EcdsaSigValue implements ASN1Encodable {
    * @return ECDSA signature value
    * @throws IOException invalid input
    */
-  public static EcdsaSigValue getInstance(ASN1TaggedObject obj, boolean explicit) throws IOException {
+  public static EcdsaSigValue getInstance(final ASN1TaggedObject obj, final boolean explicit) throws IOException {
     return getInstance(ASN1Sequence.getInstance(obj, explicit));
   }
 
@@ -57,7 +57,7 @@ public class EcdsaSigValue implements ASN1Encodable {
    * @return ECDSA signature value
    * @throws IOException invalid input
    */
-  public static EcdsaSigValue getInstance(Object obj) throws IOException {
+  public static EcdsaSigValue getInstance(final Object obj) throws IOException {
     if (obj instanceof EcdsaSigValue) {
       return (EcdsaSigValue) obj;
     }
@@ -78,10 +78,9 @@ public class EcdsaSigValue implements ASN1Encodable {
    * @return ECDSA signature value
    * @throws IOException invalid input
    */
-  public static EcdsaSigValue getInstance(byte[] concatenatedRS) throws IOException {
+  public static EcdsaSigValue getInstance(final byte[] concatenatedRS) throws IOException {
     try {
-      BigInteger[] rsVals = getRSFromConcatenatedBytes(concatenatedRS);
-      assert rsVals != null;
+      final BigInteger[] rsVals = getRSFromConcatenatedBytes(concatenatedRS);
       return new EcdsaSigValue(rsVals[0], rsVals[1]);
     }
     catch (Exception ex) {
@@ -96,7 +95,7 @@ public class EcdsaSigValue implements ASN1Encodable {
    * @return ECDSA signature value
    * @throws IOException invalid input
    */
-  public static EcdsaSigValue getInstance(ASN1Sequence a1s) throws IOException {
+  public static EcdsaSigValue getInstance(final ASN1Sequence a1s) throws IOException {
     return new EcdsaSigValue(a1s);
   }
 
@@ -106,11 +105,11 @@ public class EcdsaSigValue implements ASN1Encodable {
    * @param r R component of the ECDSA signature
    * @param s S component of the ECDSA signature
    */
-  public static EcdsaSigValue getInstance(BigInteger r, BigInteger s) throws IOException {
+  public static EcdsaSigValue getInstance(final BigInteger r, final BigInteger s) throws IOException {
     return new EcdsaSigValue(r, s);
   }
 
-  private EcdsaSigValue(BigInteger r, BigInteger s) throws IOException {
+  private EcdsaSigValue(final BigInteger r, final BigInteger s) throws IOException {
     if (r == null || s == null) {
       throw new IOException("R and S components must not be NULL");
     }
@@ -118,9 +117,9 @@ public class EcdsaSigValue implements ASN1Encodable {
     this.s = s;
   }
 
-  private EcdsaSigValue(ASN1Sequence obj) throws IOException {
+  private EcdsaSigValue(final ASN1Sequence obj) throws IOException {
     try {
-      Enumeration<?> e = obj.getObjects();
+      final Enumeration<?> e = obj.getObjects();
 
       r = ASN1Integer.getInstance(e.nextElement()).getValue();
       s = ASN1Integer.getInstance(e.nextElement()).getValue();
@@ -130,20 +129,20 @@ public class EcdsaSigValue implements ASN1Encodable {
     }
   }
 
-  private static BigInteger[] getRSFromConcatenatedBytes(byte[] concatenatedRS) throws IOException {
+  private static BigInteger[] getRSFromConcatenatedBytes(final byte[] concatenatedRS) throws IOException {
     try {
-      int rLen, sLen;
-      int len = concatenatedRS.length;
+      final int rLen, sLen;
+      final int len = concatenatedRS.length;
       rLen = len / 2;
       sLen = rLen;
 
-      byte[] rBytes = new byte[rLen];
-      byte[] sBytes = new byte[sLen];
+      final byte[] rBytes = new byte[rLen];
+      final byte[] sBytes = new byte[sLen];
 
       System.arraycopy(concatenatedRS, 0, rBytes, 0, rLen);
       System.arraycopy(concatenatedRS, rLen, sBytes, 0, sLen);
 
-      BigInteger[] srArray = new BigInteger[2];
+      final BigInteger[] srArray = new BigInteger[2];
       srArray[0] = getBigInt(rBytes);
       srArray[1] = getBigInt(sBytes);
 
@@ -159,7 +158,7 @@ public class EcdsaSigValue implements ASN1Encodable {
    * @return the ASN.1 object of the signature value
    */
   public DERSequence toASN1Object() {
-    ASN1EncodableVector v = new ASN1EncodableVector();
+    final ASN1EncodableVector v = new ASN1EncodableVector();
 
     v.add(new ASN1Integer(r));
     v.add(new ASN1Integer(s));
@@ -186,11 +185,11 @@ public class EcdsaSigValue implements ASN1Encodable {
    */
   public byte[] toByteArray() throws IOException {
     try {
-      int blockSize = getSigValueBlockSize();
+      final int blockSize = getSigValueBlockSize();
 
-      byte[] rBytes = trimByteArray(r.toByteArray(), blockSize);
-      byte[] sBytes = trimByteArray(s.toByteArray(), blockSize);
-      byte[] rsBytes = new byte[rBytes.length + sBytes.length];
+      final byte[] rBytes = trimByteArray(r.toByteArray(), blockSize);
+      final byte[] sBytes = trimByteArray(s.toByteArray(), blockSize);
+      final byte[] rsBytes = new byte[rBytes.length + sBytes.length];
       System.arraycopy(rBytes, 0, rsBytes, 0, rBytes.length);
       System.arraycopy(sBytes, 0, rsBytes, rBytes.length, sBytes.length);
 
@@ -217,17 +216,16 @@ public class EcdsaSigValue implements ASN1Encodable {
    * @throws IOException if the integer values does not fit the preset key lengths
    */
   private int getSigValueBlockSize() throws IOException {
-    int rByteLen = getDataLength(r);
-    int sByteLen = getDataLength(s);
+    final int rByteLen = getDataLength(r);
+    final int sByteLen = getDataLength(s);
 
-    int blockSizeByteLength = Arrays.stream(supportedKeyLengths)
+    return Arrays.stream(supportedKeyLengths)
       .map(bitLength -> (int) Math.ceil((double) bitLength / 8))
       .filter(byteLength -> byteLength >= rByteLen && byteLength >= sByteLen)
       .filter(byteLength -> (2 * byteLength - (rByteLen + sByteLen)) < 4)
       .findFirst()
       .orElseThrow(IOException::new);
 
-    return blockSizeByteLength;
   }
 
   /**
@@ -236,8 +234,8 @@ public class EcdsaSigValue implements ASN1Encodable {
    * @param integer integer value
    * @return number of data bytes representing the positive integer value
    */
-  private int getDataLength(BigInteger integer) {
-    byte[] integerBytes = integer.toByteArray();
+  private int getDataLength(final BigInteger integer) {
+    final byte[] integerBytes = integer.toByteArray();
     if (integerBytes.length == 0) {
       return 0;
     }
@@ -252,12 +250,12 @@ public class EcdsaSigValue implements ASN1Encodable {
    * @param blockSize block length in bytes
    * @return trimmed bytes
    */
-  private static byte[] trimByteArray(byte[] inpBytes, int blockSize) {
-    int len = inpBytes.length;
+  private static byte[] trimByteArray(final byte[] inpBytes, final int blockSize) {
+    final int len = inpBytes.length;
     if (len == blockSize) {
       return inpBytes;
     }
-    byte[] trimmed = new byte[blockSize];
+    final byte[] trimmed = new byte[blockSize];
 
     if (len < blockSize) {
       int padCnt = blockSize - len;
@@ -280,8 +278,8 @@ public class EcdsaSigValue implements ASN1Encodable {
    * @param source byte data of positive integer that may or may not have a leading padding byte
    * @return positive BigInteger value
    */
-  private static BigInteger getBigInt(byte[] source) {
-    byte[] padded = new byte[source.length + 1];
+  private static BigInteger getBigInt(final byte[] source) {
+    final byte[] padded = new byte[source.length + 1];
     padded[0] = 0x00;
     System.arraycopy(source, 0, padded, 1, source.length);
     return new BigInteger(padded);

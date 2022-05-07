@@ -32,12 +32,12 @@ import java.security.SignatureException;
 public class SignServiceRSASigner implements SignServiceSigner {
 
   /** {@inheritDoc} */
-  @Override public byte[] sign(byte[] toBeSignedBytes, PrivateKey privateKey, SignatureAlgorithm signatureAlgorithm)
+  @Override public byte[] sign(final byte[] toBeSignedBytes, final PrivateKey privateKey, final SignatureAlgorithm signatureAlgorithm)
     throws SignatureException {
 
     try {
-      MessageDigest md = MessageDigest.getInstance(signatureAlgorithm.getMessageDigestAlgorithm().getJcaName());
-      byte[] hashValue = md.digest(toBeSignedBytes);
+      final MessageDigest md = MessageDigest.getInstance(signatureAlgorithm.getMessageDigestAlgorithm().getJcaName());
+      final byte[] hashValue = md.digest(toBeSignedBytes);
       return PkCrypto.rsaSign(PKCS1V15Padding.getRSAPkcs1DigestInfo(signatureAlgorithm.getMessageDigestAlgorithm(), hashValue), privateKey);
     } catch (Exception ex) {
       log.debug("Error creating RSA signature with algorithm {}",signatureAlgorithm, ex);

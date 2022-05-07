@@ -34,15 +34,15 @@ import java.security.interfaces.RSAKey;
 public class SignServiceRSAPSSSigner implements SignServiceSigner {
 
   /** {@inheritDoc} */
-  @Override public byte[] sign(byte[] toBeSignedBytes, PrivateKey privateKey, SignatureAlgorithm signatureAlgorithm)
+  @Override public byte[] sign(final byte[] toBeSignedBytes, final PrivateKey privateKey, final SignatureAlgorithm signatureAlgorithm)
     throws SignatureException {
 
     try {
-      Digest messageDigestFunction = DigestFactory.getDigest(signatureAlgorithm.getMessageDigestAlgorithm().getJcaName());
-      int modLen = ((RSAKey) privateKey).getModulus().bitLength();
-      PSSPadding pssPadding = new PSSPadding(modLen, messageDigestFunction);
+      final Digest messageDigestFunction = DigestFactory.getDigest(signatureAlgorithm.getMessageDigestAlgorithm().getJcaName());
+      final int modLen = ((RSAKey) privateKey).getModulus().bitLength();
+      final PSSPadding pssPadding = new PSSPadding(modLen, messageDigestFunction);
       pssPadding.update(toBeSignedBytes);
-      byte[] emBytes = pssPadding.generateSignatureEncodedMessage();
+      final byte[] emBytes = pssPadding.generateSignatureEncodedMessage();
       return PkCrypto.rsaSignEncodedMessage(emBytes, privateKey);
     } catch (Exception ex) {
       log.debug("Error creating RSA signature with algorithm {}",signatureAlgorithm, ex);

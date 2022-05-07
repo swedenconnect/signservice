@@ -44,9 +44,9 @@ public class PKCS1V15Padding {
    * @return padded data to be signed hash
    * @throws IOException illegal input data
    */
-  public static byte[] getRSAPkcs1DigestInfo(MessageDigestAlgorithm digestAlgo, byte[] hashValue) throws IOException {
-    ASN1EncodableVector digestInfoSeq = new ASN1EncodableVector();
-    AlgorithmIdentifier algoId = digestAlgo.getAlgorithmIdentifier();
+  public static byte[] getRSAPkcs1DigestInfo(final MessageDigestAlgorithm digestAlgo, final byte[] hashValue) throws IOException {
+    final ASN1EncodableVector digestInfoSeq = new ASN1EncodableVector();
+    final AlgorithmIdentifier algoId = digestAlgo.getAlgorithmIdentifier();
     digestInfoSeq.add(algoId);
     digestInfoSeq.add(new DEROctetString(hashValue));
     return new DERSequence(digestInfoSeq).getEncoded("DER");
@@ -60,14 +60,14 @@ public class PKCS1V15Padding {
    * @return true on match otherwise false
    * @throws IOException error in input data
    */
-  public static boolean verifyMessageDigest(byte[] paddedDigest, byte[] digest, MessageDigestAlgorithm messageDigestAlgorithm) throws IOException {
+  public static boolean verifyMessageDigest(final byte[] paddedDigest, final byte[] digest, final MessageDigestAlgorithm messageDigestAlgorithm) throws IOException {
 
     try {
-      ASN1InputStream asn1InputStream = new ASN1InputStream(paddedDigest);
-      ASN1Sequence asn1Sequence = ASN1Sequence.getInstance(asn1InputStream.readObject());
-      AlgorithmIdentifier hashAlgorithmIdentifier = AlgorithmIdentifier.getInstance(asn1Sequence.getObjectAt(0));
-      ASN1ObjectIdentifier paddedDigestAlgoId = hashAlgorithmIdentifier.getAlgorithm();
-      ASN1OctetString octetString = ASN1OctetString.getInstance(asn1Sequence.getObjectAt(1));
+      final ASN1InputStream asn1InputStream = new ASN1InputStream(paddedDigest);
+      final ASN1Sequence asn1Sequence = ASN1Sequence.getInstance(asn1InputStream.readObject());
+      final AlgorithmIdentifier hashAlgorithmIdentifier = AlgorithmIdentifier.getInstance(asn1Sequence.getObjectAt(0));
+      final ASN1ObjectIdentifier paddedDigestAlgoId = hashAlgorithmIdentifier.getAlgorithm();
+      final ASN1OctetString octetString = ASN1OctetString.getInstance(asn1Sequence.getObjectAt(1));
       byte[] paddedDigestValue = octetString.getOctets();
 
       boolean digestMatch = Arrays.equals(paddedDigestValue, digest);

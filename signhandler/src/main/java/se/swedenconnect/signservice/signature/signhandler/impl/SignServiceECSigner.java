@@ -34,15 +34,15 @@ public class SignServiceECSigner implements SignServiceSigner {
   /** Signature type for signatures created by this signer */
   private final SignatureType signatureType;
 
-  public SignServiceECSigner(SignatureType signatureType) {
+  public SignServiceECSigner(final SignatureType signatureType) {
     this.signatureType = signatureType;
   }
 
   /** {@inheritDoc} */
-  @Override public byte[] sign(byte[] toBeSignedBytes, PrivateKey privateKey, SignatureAlgorithm signatureAlgorithm) throws SignatureException {
+  @Override public byte[] sign(final byte[] toBeSignedBytes, final PrivateKey privateKey, final SignatureAlgorithm signatureAlgorithm) throws SignatureException {
 
     try {
-      EcdsaSigValue ecdsaSigVal = PkCrypto.ecdsaSignData(toBeSignedBytes, privateKey, signatureAlgorithm);
+      final EcdsaSigValue ecdsaSigVal = PkCrypto.ecdsaSignData(toBeSignedBytes, privateKey, signatureAlgorithm);
       switch (signatureType) {
       case XML:
         return ecdsaSigVal.toByteArray();

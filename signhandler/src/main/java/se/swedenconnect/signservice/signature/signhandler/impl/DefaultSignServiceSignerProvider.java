@@ -37,19 +37,19 @@ public class DefaultSignServiceSignerProvider implements SignServiceSignerProvid
    * Constructor
    * @param algorithmRegistry the algorithm registry used to get information about supported algorithms
    */
-  public DefaultSignServiceSignerProvider(AlgorithmRegistry algorithmRegistry) {
+  public DefaultSignServiceSignerProvider(final AlgorithmRegistry algorithmRegistry) {
     this.algorithmRegistry = algorithmRegistry;
   }
 
   /** {@inheritDoc} */
-  @Override public SignServiceSigner getSigner(String signatureAlgorithm, SignatureType signatureType) {
+  @Override public SignServiceSigner getSigner(final String signatureAlgorithm, final SignatureType signatureType) {
     if (signatureAlgorithm == null) {
       throw new IllegalArgumentException("Null signature algorithm i snot allowed");
     }
     if (signatureType == null) {
       throw new IllegalArgumentException("Null signature type is not allowed");
     }
-    Algorithm algorithm = algorithmRegistry.getAlgorithm(signatureAlgorithm);
+    final Algorithm algorithm = algorithmRegistry.getAlgorithm(signatureAlgorithm);
     if (algorithm == null) {
       throw new IllegalArgumentException("Algorithm " + signatureAlgorithm + " is not supported");
     }
@@ -57,7 +57,7 @@ public class DefaultSignServiceSignerProvider implements SignServiceSignerProvid
       throw new IllegalArgumentException("Non signature algorithm specified: " + signatureAlgorithm);
     }
 
-    SignatureAlgorithm sigAlgo = (SignatureAlgorithm) algorithm;
+    final SignatureAlgorithm sigAlgo = (SignatureAlgorithm) algorithm;
     if (sigAlgo instanceof RSAPSSSignatureAlgorithm) {
       return new SignServiceRSAPSSSigner();
     }

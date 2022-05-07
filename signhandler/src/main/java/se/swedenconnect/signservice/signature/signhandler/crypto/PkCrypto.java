@@ -48,8 +48,8 @@ public class PkCrypto {
      * @throws IllegalBlockSizeException illegal block size
      * @throws BadPaddingException bad padding
      */
-    public static byte[] rsaSign(byte[] data, PrivateKey privateKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher = Cipher.getInstance("RSA");
+    public static byte[] rsaSign(final byte[] data, final PrivateKey privateKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        final Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.ENCRYPT_MODE, privateKey);
         return cipher.doFinal(data);
     }
@@ -65,11 +65,10 @@ public class PkCrypto {
      * @throws IllegalBlockSizeException illegal block size
      * @throws BadPaddingException bad padding
      */
-    public static byte[] rsaVerify(byte[] data, PublicKey pubKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher = Cipher.getInstance("RSA");
+    public static byte[] rsaVerify(final byte[] data, final PublicKey pubKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        final Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.DECRYPT_MODE, pubKey);
-        byte[] cipherData = cipher.doFinal(data);
-        return cipherData;
+        return cipher.doFinal(data);
     }
 
     /**
@@ -83,8 +82,8 @@ public class PkCrypto {
      * @throws IllegalBlockSizeException illegal block size
      * @throws BadPaddingException bad padding
      */
-    public static byte[] rsaSignEncodedMessage(byte[] data, PrivateKey privKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher = Cipher.getInstance("RSA/None/NoPadding");
+    public static byte[] rsaSignEncodedMessage(final byte[] data, final PrivateKey privKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        final Cipher cipher = Cipher.getInstance("RSA/None/NoPadding");
         cipher.init(Cipher.ENCRYPT_MODE, privKey);
         return cipher.doFinal(data);
     }
@@ -100,11 +99,10 @@ public class PkCrypto {
      * @throws IllegalBlockSizeException illegal block size
      * @throws BadPaddingException bad padding
      */
-    public static byte[] rsaVerifyEncodedMessage(byte[] data, PublicKey pubKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher = Cipher.getInstance("RSA/None/NoPadding");
+    public static byte[] rsaVerifyEncodedMessage(final byte[] data, final PublicKey pubKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        final Cipher cipher = Cipher.getInstance("RSA/None/NoPadding");
         cipher.init(Cipher.DECRYPT_MODE, pubKey);
-        byte[] cipherData = cipher.doFinal(data);
-        return cipherData;
+        return cipher.doFinal(data);
     }
 
     /**
@@ -116,10 +114,10 @@ public class PkCrypto {
      * @throws InvalidKeyException the validation key is invalid
      * @throws IOException invalid input data
      */
-    public static boolean ecdsaVerifyDigest(byte[] digest, EcdsaSigValue signature, PublicKey pubKey) throws InvalidKeyException, IOException {
+    public static boolean ecdsaVerifyDigest(final byte[] digest, final EcdsaSigValue signature, final PublicKey pubKey) throws InvalidKeyException, IOException {
         try {
-            ECDSASigner ecdsa = new ECDSASigner();
-            CipherParameters param = ECUtil.generatePublicKeyParameter(pubKey);
+            final ECDSASigner ecdsa = new ECDSASigner();
+            final CipherParameters param = ECUtil.generatePublicKeyParameter(pubKey);
             ecdsa.init(false, param);
             return ecdsa.verifySignature(digest, signature.getR(), signature.getS());
         } catch (InvalidKeyException ex) {
@@ -142,11 +140,11 @@ public class PkCrypto {
      * @throws SignatureException failure to generate signature value
      * @throws IOException bad input data
      */
-    public static EcdsaSigValue ecdsaSignData(byte[] data, PrivateKey privKey, Algorithm sigAlgo) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
-        Signature ecdsaSigner = Signature.getInstance(sigAlgo.getJcaName(), "BC");
+    public static EcdsaSigValue ecdsaSignData(final byte[] data, final PrivateKey privKey, final Algorithm sigAlgo) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
+        final Signature ecdsaSigner = Signature.getInstance(sigAlgo.getJcaName(), "BC");
         ecdsaSigner.initSign(privKey, new SecureRandom(String.valueOf(System.currentTimeMillis()).getBytes()));
         ecdsaSigner.update(data);
-        byte[] asn1SignatureBytes = ecdsaSigner.sign();
+        final byte[] asn1SignatureBytes = ecdsaSigner.sign();
         ASN1InputStream asn1SignatureIs = new ASN1InputStream(asn1SignatureBytes);
         return EcdsaSigValue.getInstance(asn1SignatureIs);
     }
@@ -165,11 +163,12 @@ public class PkCrypto {
      * @throws SignatureException failure to generate signature value
      * @throws IOException bad input data
      */
-    public static boolean ecdsaVerifySignedData(byte[] data, EcdsaSigValue signature, PublicKey pubKey, MessageDigestAlgorithm digestAlgo, AlgorithmRegistry algorithmRegistry) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
-        Algorithm sigAlgo = getAlgorithmFromTypeAndDigestMethod(digestAlgo, "EC", algorithmRegistry);
-        EcdsaSigValue sigVal = EcdsaSigValue.getInstance(signature);
-        byte[] asn1Signature = sigVal.toASN1Object().getEncoded();
-        Signature ecdsaSigner = Signature.getInstance(sigAlgo.getJcaName(), "BC");
+    public static boolean ecdsaVerifySignedData(final byte[] data, final EcdsaSigValue signature, final PublicKey pubKey,
+      final MessageDigestAlgorithm digestAlgo, final AlgorithmRegistry algorithmRegistry) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
+        final Algorithm sigAlgo = getAlgorithmFromTypeAndDigestMethod(digestAlgo, "EC", algorithmRegistry);
+        final EcdsaSigValue sigVal = EcdsaSigValue.getInstance(signature);
+        final byte[] asn1Signature = sigVal.toASN1Object().getEncoded();
+        final Signature ecdsaSigner = Signature.getInstance(sigAlgo.getJcaName(), "BC");
         ecdsaSigner.initVerify(pubKey);
         ecdsaSigner.update(data);
         return ecdsaSigner.verify(asn1Signature);
@@ -182,7 +181,7 @@ public class PkCrypto {
      * @param algorithmRegistry algorithm registry holding supported algorithms
      * @return signature algorithm, or null if no matching algorithm could be found
      */
-    public static Algorithm getAlgorithmFromTypeAndDigestMethod(MessageDigestAlgorithm digestAlgo, String keyType, AlgorithmRegistry algorithmRegistry) {
+    public static Algorithm getAlgorithmFromTypeAndDigestMethod(final MessageDigestAlgorithm digestAlgo, final String keyType, final AlgorithmRegistry algorithmRegistry) {
         return algorithmRegistry.getAlgorithms(algorithm -> algorithm instanceof SignatureAlgorithm)
           .stream()
           .map(algorithm -> (SignatureAlgorithm) algorithm)

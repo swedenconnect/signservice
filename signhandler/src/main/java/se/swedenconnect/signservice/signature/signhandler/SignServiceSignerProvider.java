@@ -28,6 +28,6 @@ public interface SignServiceSignerProvider {
    * @param signatureType the type of signature that is being created (typically, XML, PDF or JSON)
    * @return {@link SignServiceSigner} for the given algorithm and signature type
    */
-  SignServiceSigner getSigner(String signatureAlgorithm, SignatureType signatureType);
+  SignServiceSigner getSigner(final String signatureAlgorithm, final SignatureType signatureType);
 
 }

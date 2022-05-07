@@ -33,6 +33,6 @@ public interface SignServiceSigner {
    * @return signature value
    * @throws SignatureException on errors creating the signature
    */
-  byte[] sign(byte[] toBeSignedBytes, PrivateKey privateKey, SignatureAlgorithm signatureAlgorithm) throws SignatureException;
+  byte[] sign(final byte[] toBeSignedBytes, final PrivateKey privateKey, final SignatureAlgorithm signatureAlgorithm) throws SignatureException;
 
 }
