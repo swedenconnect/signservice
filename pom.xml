@@ -88,6 +88,7 @@
 
   <modules>
     <module>core</module>
+    <module>audit</module>
     <module>authn</module>
     <module>protocol</module>
     <module>signhandler</module>
@@ -160,6 +161,13 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <version>4.4.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.21.0</version>
       <scope>test</scope>
     </dependency>
 

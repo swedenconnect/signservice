@@ -17,6 +17,7 @@ package se.swedenconnect.signservice.protocol.dss;
 
 import java.util.Optional;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBException;
 
@@ -28,7 +29,9 @@ import se.idsec.signservice.xml.DOMUtils;
 import se.idsec.signservice.xml.InternalXMLException;
 import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.dss_1_0.SignRequest;
+import se.swedenconnect.signservice.client.ClientConfiguration;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.core.http.impl.DefaultHttpRequestMessage;
 import se.swedenconnect.signservice.engine.SignServiceError;
 import se.swedenconnect.signservice.protocol.ProtocolException;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
@@ -49,12 +52,34 @@ public class DssProtocolHandler implements ProtocolHandler {
   public static final String DEFAULT_NAME = "DSS extensions Protocol Handler";
 
   /** The only binding that we support. */
-  public static final String EXPECTED_BINDING = "POST/XML/1.0";
+  public static final String BINDING = "POST/XML/1.0";
+
+  /** The context key for finding a client specific DSS configuration. */
+  public static final String CLIENT_CONFIG_CONTEXT_KEY =
+      String.format("%s.%s.%s", ClientConfiguration.class.getPackageName(),
+          ClientConfiguration.class.getSimpleName(), DssConfiguration.class.getSimpleName());
 
   /** The handler name. */
   private String name;
 
+  /** The protocol handler configuration. */
+  private DssConfiguration configuration;
+
+  /**
+   * Default constructor.
+   */
   public DssProtocolHandler() {
+  }
+
+  /**
+   * Initializes the bean.
+   */
+  @PostConstruct
+  public void init() {
+    if (this.configuration == null) {
+      log.info("No DSS protocol configuration supplied, using default configuration");
+      this.configuration = new DssConfiguration();
+    }
   }
 
   /** {@inheritDoc} */
@@ -88,14 +113,18 @@ public class DssProtocolHandler implements ProtocolHandler {
     //
     final String binding = httpRequest.getParameter("Binding");
     if (StringUtils.isBlank(binding)) {
-      log.info("No Binding attribute in request, assuming {}", EXPECTED_BINDING);
+      log.info("No Binding attribute in request, assuming {}", BINDING);
     }
-    else if (!EXPECTED_BINDING.equals(binding)) {
-      log.info("Unsupported Binding attribute ({}) - expected {}", binding, EXPECTED_BINDING);
+    else if (!BINDING.equals(binding)) {
+      log.info("Unsupported Binding attribute ({}) - expected {}", binding, BINDING);
       throw new ProtocolException("Unsupported Binding - " + binding);
     }
     final String relayState = httpRequest.getParameter("RelayState");
-
+    if (StringUtils.isBlank(relayState)) {
+      final String msg = "No RelayState available in request message";
+      log.info(msg);
+      throw new ProtocolException(msg);
+    }
     final String requestMessage = httpRequest.getParameter("EidSignRequest");
     if (StringUtils.isBlank(requestMessage)) {
       final String msg = "No SignRequest available in request message";
@@ -113,8 +142,16 @@ public class DssProtocolHandler implements ProtocolHandler {
 
       final SignRequest dssSignRequest = JAXBUnmarshaller.unmarshall(node, SignRequest.class);
 
-      final DssSignRequestMessage signRequestMessage = new DssSignRequestMessage(dssSignRequest, node, relayState);
+      final DssSignRequestMessage signRequestMessage = new DssSignRequestMessage(dssSignRequest, node);
       signRequestMessage.assertCorrectMessage();
+
+      // Assert that the RelayState equals the request-id ...
+      //
+      if (!relayState.equals(signRequestMessage.getRequestId())) {
+        final String msg = "RelayState does not match RequestID";
+        log.info(msg);
+        throw new ProtocolException(msg);
+      }
 
       log.debug("Successfully received SignRequest message [client-id: '{}', request-id: '{}']",
           signRequestMessage.getClientId(), signRequestMessage.getRequestId());
@@ -128,23 +165,81 @@ public class DssProtocolHandler implements ProtocolHandler {
     }
   }
 
+  /** {@inheritDoc} */
   @Override
-  public SignResponseMessage createSignResponseMessage(SignServiceContext context,
-      SignRequestMessage signRequestMessage) {
-    // TODO Auto-generated method stub
-    return null;
+  public SignResponseMessage createSignResponseMessage(final SignServiceContext context,
+      final SignRequestMessage signRequestMessage) throws ProtocolException {
+
+    if (!DssSignRequestMessage.class.isInstance(signRequestMessage)) {
+      final String msg = "Invalid call - Supplied request message must be of type DssSignRequestMessage";
+      log.error("{}", msg);
+      throw new IllegalArgumentException(msg);
+    }
+    final DssSignRequestMessage request = DssSignRequestMessage.class.cast(signRequestMessage);
+
+    // Normally the handler is configured to function for all clients, but a client configuration
+    // may be setup so that the client has specific requirements on the protocol handler. In these
+    // cases this is assigned in the context.
+    //
+    DssConfiguration config = context.get(CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class);
+    if (config == null) {
+      config = this.getConfiguration();
+    }
+
+    try {
+      return new DssSignResponseMessage(config, request);
+    }
+    catch (final NullPointerException | IllegalArgumentException e) {
+      final String msg = String.format("Cannot create DssSignResponseMessage - %s", e.getMessage());
+      log.info("{}", msg, e);
+      throw new ProtocolException(msg);
+    }
   }
 
+  /** {@inheritDoc} */
   @Override
-  public HttpRequestMessage encodeResponse(SignResponseMessage responseMessage, SignServiceContext context)
+  public HttpRequestMessage encodeResponse(final SignResponseMessage responseMessage, final SignServiceContext context)
       throws ProtocolException {
-    return null;
+
+    if (responseMessage.getDestinationUrl() == null) {
+      throw new ProtocolException("Can not encode SignResponse - destination URL is unknown");
+    }
+    final String encodedMessage = responseMessage.encode();
+    final DefaultHttpRequestMessage httpMsg = new DefaultHttpRequestMessage(
+        responseMessage.getProcessingRequirements().getResponseSendMethod(), responseMessage.getDestinationUrl());
+    httpMsg.addHttpParameter("EidSignResponse", encodedMessage);
+    httpMsg.addHttpParameter("RelayState", responseMessage.getRelayState());
+    httpMsg.addHttpParameter("Binding", BINDING);
+
+    return httpMsg;
   }
 
   /** {@inheritDoc} */
   @Override
   public SignResponseResult translateError(final SignServiceError error) {
-    return null;
+    return new DssSignResponseResult(error);
+  }
+
+  /**
+   * Assigns the DSS protocol configuration.
+   *
+   * @param configuration the configuration
+   */
+  public void setConfiguration(final DssConfiguration configuration) {
+    this.configuration = configuration;
+  }
+
+  /**
+   * Gets the configuration to use.
+   *
+   * @return the configuration
+   */
+  private DssConfiguration getConfiguration() {
+    if (this.configuration == null) {
+      log.info("No DSS protocol configuration supplied, using default configuration");
+      this.configuration = new DssConfiguration();
+    }
+    return this.configuration;
   }
 
 }

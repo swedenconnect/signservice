@@ -1,4 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+se.swedenconnect.signservice.spring.config.protocol.ProtocolConfiguration,\
 se.swedenconnect.signservice.spring.config.SignServiceConfiguration
 
 
