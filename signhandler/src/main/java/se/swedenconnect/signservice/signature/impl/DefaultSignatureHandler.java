@@ -42,9 +42,10 @@ public class DefaultSignatureHandler implements SignatureHandler {
   public static final String DEFAULT_NAME = "DefaultSignatureHandler";
 
   /** sign service signer provider */
-  public final SignServiceSignerProvider signServiceSignerProvider;
+  private final SignServiceSignerProvider signServiceSignerProvider;
+
   /** Algorithm registry */
-  public final AlgorithmRegistry algorithmRegistry;
+  private final AlgorithmRegistry algorithmRegistry;
 
   /**
    * The name of this handler.
@@ -54,8 +55,22 @@ public class DefaultSignatureHandler implements SignatureHandler {
   @Setter
   private String name;
 
-  public DefaultSignatureHandler(AlgorithmRegistry algorithmRegistry) {
+  /**
+   * Constructor with default sign service signer provider
+   * @param algorithmRegistry algorithm registry
+   */
+  public DefaultSignatureHandler(final AlgorithmRegistry algorithmRegistry) {
     this.signServiceSignerProvider = new DefaultSignServiceSignerProvider(algorithmRegistry);
+    this.algorithmRegistry = algorithmRegistry;
+  }
+
+  /**
+   * Constructor
+   * @param algorithmRegistry algorithm registry
+   * @param signServiceSignerProvider sign service signer provider
+   */
+  public DefaultSignatureHandler(final AlgorithmRegistry algorithmRegistry, final SignServiceSignerProvider signServiceSignerProvider) {
+    this.signServiceSignerProvider = signServiceSignerProvider;
     this.algorithmRegistry = algorithmRegistry;
   }
 

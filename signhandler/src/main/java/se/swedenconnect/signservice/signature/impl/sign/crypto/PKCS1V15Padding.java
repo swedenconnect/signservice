@@ -71,7 +71,7 @@ public class PKCS1V15Padding {
       byte[] paddedDigestValue = octetString.getOctets();
 
       boolean digestMatch = Arrays.equals(paddedDigestValue, digest);
-      boolean hashAlgoMatch = messageDigestAlgorithm.equals(paddedDigestAlgoId);
+      boolean hashAlgoMatch = messageDigestAlgorithm.getAlgorithmIdentifier().getAlgorithm().equals(paddedDigestAlgoId);
 
       if (!digestMatch) {
         log.debug("Digest value does not match padded data");

@@ -36,7 +36,7 @@ public class SignServiceRSASigner implements SignServiceSigner {
     throws SignatureException {
 
     try {
-      MessageDigest md = MessageDigest.getInstance(signatureAlgorithm.getMessageDigestAlgorithm().getJcaName(), "BC");
+      MessageDigest md = MessageDigest.getInstance(signatureAlgorithm.getMessageDigestAlgorithm().getJcaName());
       byte[] hashValue = md.digest(toBeSignedBytes);
       return PkCrypto.rsaSign(PKCS1V15Padding.getRSAPkcs1DigestInfo(signatureAlgorithm.getMessageDigestAlgorithm(), hashValue), privateKey);
     } catch (Exception ex) {

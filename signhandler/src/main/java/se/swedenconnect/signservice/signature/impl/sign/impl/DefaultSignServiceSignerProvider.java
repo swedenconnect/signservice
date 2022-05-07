@@ -44,20 +44,16 @@ public class DefaultSignServiceSignerProvider implements SignServiceSignerProvid
   /** {@inheritDoc} */
   @Override public SignServiceSigner getSigner(String signatureAlgorithm, SignatureType signatureType) {
     if (signatureAlgorithm == null) {
-      log.debug("Null signature algorithm is not allowed");
       throw new IllegalArgumentException("Null signature algorithm i snot allowed");
     }
     if (signatureType == null) {
-      log.debug("Null signature type is not allowed");
       throw new IllegalArgumentException("Null signature type is not allowed");
     }
     Algorithm algorithm = algorithmRegistry.getAlgorithm(signatureAlgorithm);
     if (algorithm == null) {
-      log.debug("Algorithm {} is not supported", signatureAlgorithm);
       throw new IllegalArgumentException("Algorithm " + signatureAlgorithm + " is not supported");
     }
     if (!(algorithm instanceof SignatureAlgorithm)) {
-      log.debug("Only signature algorithms are allowed");
       throw new IllegalArgumentException("Non signature algorithm specified: " + signatureAlgorithm);
     }
 
