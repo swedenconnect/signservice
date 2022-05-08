@@ -22,6 +22,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import se.idsec.signservice.security.certificate.CertificateUtils;
+import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.signhandler.SignServiceSigner;
@@ -171,6 +172,12 @@ class SignServiceECSignerTest {
 
     boolean verifiedSignedData = PkCrypto.ecdsaVerifyDigest(messageDigest, EcdsaSigValue.getInstance(signature), signerCert.getPublicKey());
     assertTrue(verifiedSignedData);
+    log.info("Decrypted signature verifies the signed message digest");
+    boolean verifySignedData = PkCrypto.ecdsaVerifySignedData(tbsData, EcdsaSigValue.getInstance(signature), signerCert.getPublicKey(),
+      ecdsaSha256.getMessageDigestAlgorithm(),
+      AlgorithmRegistrySingleton.getInstance());
+    assertTrue(verifiedSignedData);
     log.info("Decrypted signature verifies the signed message");
+
   }
 }
