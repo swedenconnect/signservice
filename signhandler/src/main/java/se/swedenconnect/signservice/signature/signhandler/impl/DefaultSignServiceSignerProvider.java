@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.signservice.signature.signhandler.impl;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
@@ -35,6 +36,7 @@ public class DefaultSignServiceSignerProvider implements SignServiceSignerProvid
 
   /**
    * Constructor
+   *
    * @param algorithmRegistry the algorithm registry used to get information about supported algorithms
    */
   public DefaultSignServiceSignerProvider(final AlgorithmRegistry algorithmRegistry) {
@@ -42,13 +44,9 @@ public class DefaultSignServiceSignerProvider implements SignServiceSignerProvid
   }
 
   /** {@inheritDoc} */
-  @Override public SignServiceSigner getSigner(final String signatureAlgorithm, final SignatureType signatureType) {
-    if (signatureAlgorithm == null) {
-      throw new IllegalArgumentException("Null signature algorithm i snot allowed");
-    }
-    if (signatureType == null) {
-      throw new IllegalArgumentException("Null signature type is not allowed");
-    }
+  @Override public SignServiceSigner getSigner(@NonNull final String signatureAlgorithm,
+    @NonNull final SignatureType signatureType) {
+
     final Algorithm algorithm = algorithmRegistry.getAlgorithm(signatureAlgorithm);
     if (algorithm == null) {
       throw new IllegalArgumentException("Algorithm " + signatureAlgorithm + " is not supported");

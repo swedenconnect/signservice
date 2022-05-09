@@ -17,6 +17,7 @@ package se.swedenconnect.signservice.signature.signhandler;
 
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 
+import javax.annotation.Nonnull;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 
@@ -27,12 +28,15 @@ public interface SignServiceSigner {
 
   /**
    * Create a signature value
+   *
    * @param toBeSignedBytes the bytes to be hashed and signed by this signer
    * @param privateKey the private key used to sign
    * @param signatureAlgorithm the signature algorithm used for signing
    * @return signature value
    * @throws SignatureException on errors creating the signature
    */
-  byte[] sign(final byte[] toBeSignedBytes, final PrivateKey privateKey, final SignatureAlgorithm signatureAlgorithm) throws SignatureException;
+  byte[] sign(@Nonnull final byte[] toBeSignedBytes, @Nonnull final PrivateKey privateKey,
+    @Nonnull final SignatureAlgorithm signatureAlgorithm)
+    throws SignatureException;
 
 }

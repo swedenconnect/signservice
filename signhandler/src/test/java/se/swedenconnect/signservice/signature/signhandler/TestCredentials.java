@@ -43,7 +43,8 @@ public class TestCredentials {
       ecKs.load(TestCredentials.class.getResourceAsStream("/ec-signer.jks"), "Test1234".toCharArray());
       publicECKey = ecKs.getCertificate("sign").getPublicKey();
       privateECKey = (PrivateKey) ecKs.getKey("sign", "Test1234".toCharArray());
-    } catch (Exception ex) {
+    }
+    catch (Exception ex) {
       log.error("Unable to load test credentials");
     }
 

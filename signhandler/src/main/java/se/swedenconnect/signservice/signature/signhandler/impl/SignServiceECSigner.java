@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.signservice.signature.signhandler.impl;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.SignatureType;
@@ -22,8 +23,8 @@ import se.swedenconnect.signservice.signature.signhandler.SignServiceSigner;
 import se.swedenconnect.signservice.signature.signhandler.crypto.EcdsaSigValue;
 import se.swedenconnect.signservice.signature.signhandler.crypto.PkCrypto;
 
-import java.security.PrivateKey;
-import java.security.SignatureException;
+import java.io.IOException;
+import java.security.*;
 
 /**
  * Implementation of EC signer for calculating the EC signature values
@@ -39,7 +40,13 @@ public class SignServiceECSigner implements SignServiceSigner {
   }
 
   /** {@inheritDoc} */
-  @Override public byte[] sign(final byte[] toBeSignedBytes, final PrivateKey privateKey, final SignatureAlgorithm signatureAlgorithm) throws SignatureException {
+  @Override public byte[] sign(final byte[] toBeSignedBytes, @NonNull final PrivateKey privateKey,
+    @NonNull final SignatureAlgorithm signatureAlgorithm)
+    throws SignatureException {
+
+    if (toBeSignedBytes == null) {
+      throw new SignatureException("bytes to be signed must not be null");
+    }
 
     try {
       final EcdsaSigValue ecdsaSigVal = PkCrypto.ecdsaSignData(toBeSignedBytes, privateKey, signatureAlgorithm);
@@ -51,8 +58,9 @@ public class SignServiceECSigner implements SignServiceSigner {
       default:
         throw new IllegalArgumentException("Unsupported signature type " + signatureType);
       }
-    } catch (Exception ex) {
-      throw (ex instanceof SignatureException) ? (SignatureException) ex : new SignatureException(ex);
+    }
+    catch (IOException | InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException e) {
+      throw new SignatureException(e);
     }
   }
 }

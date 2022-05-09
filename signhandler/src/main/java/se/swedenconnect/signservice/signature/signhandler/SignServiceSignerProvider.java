@@ -17,6 +17,8 @@ package se.swedenconnect.signservice.signature.signhandler;
 
 import se.swedenconnect.signservice.signature.SignatureType;
 
+import javax.annotation.Nonnull;
+
 /**
  * Interface for sign service signer provider
  */
@@ -24,10 +26,11 @@ public interface SignServiceSignerProvider {
 
   /**
    * Get a sign service signer for a given signature algorithm and signature type
+   *
    * @param signatureAlgorithm the signature algorithm to use
    * @param signatureType the type of signature that is being created (typically, XML, PDF or JSON)
    * @return {@link SignServiceSigner} for the given algorithm and signature type
    */
-  SignServiceSigner getSigner(final String signatureAlgorithm, final SignatureType signatureType);
+  SignServiceSigner getSigner(@Nonnull final String signatureAlgorithm, @Nonnull final SignatureType signatureType);
 
 }

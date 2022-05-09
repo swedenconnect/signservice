@@ -38,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class PkCryptoTest {
 
-
   @Test
   void rsaSigningTest() throws Exception {
     log.info("RSA sign and verify test");
@@ -71,7 +70,8 @@ class PkCryptoTest {
   void ecdsaVerifyDigest() throws Exception {
     log.info("ECDSA sign and verify test");
     log.info("Signing string: \"Data to be signed\"");
-    EcdsaSigValue ecdsaSigValue = PkCrypto.ecdsaSignData("Data to be signed".getBytes(StandardCharsets.UTF_8), TestCredentials.privateECKey, TestAlgorithms.ecdsaSha256);
+    EcdsaSigValue ecdsaSigValue = PkCrypto.ecdsaSignData("Data to be signed".getBytes(StandardCharsets.UTF_8), TestCredentials.privateECKey,
+      TestAlgorithms.ecdsaSha256);
     log.info("Concatenated signature bytes: \n{}", TestUtils.base64Print(ecdsaSigValue.toByteArray(), 74));
     log.info("DER encoded signature value: \n{}", TestUtils.base64Print(ecdsaSigValue.getDEREncodedSigValue(), 74));
 
@@ -89,8 +89,9 @@ class PkCryptoTest {
   void getAlgorithmFromTypeAndDigestMethod() {
     log.info("Testing to derive algorithm from hash and key type");
     log.info("Getting algorithm for SHA-256 and EC");
-    Algorithm algorithm = PkCrypto.getAlgorithmFromTypeAndDigestMethod(TestAlgorithms.sha256, "EC", AlgorithmRegistrySingleton.getInstance());
+    Algorithm algorithm = PkCrypto.getAlgorithmFromTypeAndDigestMethod(TestAlgorithms.sha256, "EC",
+      AlgorithmRegistrySingleton.getInstance());
     log.info("Found algorithm: {}", algorithm.getUri());
-    assertEquals("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256" , algorithm.getUri());
+    assertEquals("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", algorithm.getUri());
   }
 }

@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.signservice.signature.signhandler.crypto;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -26,25 +27,33 @@ import java.util.Arrays;
 /**
  * Provides functions to create and verify RSA Padded data according to PKCS#1 version 1.5
  *
- * <p>Note that PKCS#1 padding includes the digest algorithm as BER encoded AlgorithmIdentifier.
- * This means that there are multiple ways to encode the same hash algorithm as 1) BER encoding is
- * not distinguished and 2) the encoding of certain hash algorithms may differ. One example of this
- * is whether the absent parameters of SHA256 that MUST be absent, in some cases are implemented
- * as a NULL value resulting in different encoding</p>
- * <p>For this reason, proper validation always require that the decrypted padded data is inspected
- * and parsed to extract the hash algorithm OID as well asn the encrypted hash value</p>
+ * <p>
+ * Note that PKCS#1 padding includes the digest algorithm as BER encoded
+ * AlgorithmIdentifier. This means that there are multiple ways to encode the same hash
+ * algorithm as 1) BER encoding is not distinguished and 2) the encoding of certain hash
+ * algorithms may differ. One example of this is whether the absent parameters of SHA256
+ * that MUST be absent, in some cases are implemented as a NULL value resulting in
+ * different encoding
+ * </p>
+ * <p>
+ * For this reason, proper validation always require that the decrypted padded data is
+ * inspected and parsed to extract the hash algorithm OID as well asn the encrypted hash
+ * value
+ * </p>
  */
 @Slf4j
 public class PKCS1V15Padding {
 
   /**
-   * Prepare the PKCS#1 version 1.5 padding of the hash of the data to be signed
+   * Prepare the PKCS#1 version 1.5 padding of the hash of the data to be signed.
+   *
    * @param digestAlgo signature hash algorithm
    * @param hashValue hash value of the data to be signed
    * @return padded data to be signed hash
    * @throws IOException illegal input data
    */
-  public static byte[] getRSAPkcs1DigestInfo(final MessageDigestAlgorithm digestAlgo, final byte[] hashValue) throws IOException {
+  public static byte[] getRSAPkcs1DigestInfo(@NonNull final MessageDigestAlgorithm digestAlgo,
+    @NonNull final byte[] hashValue) throws IOException {
     final ASN1EncodableVector digestInfoSeq = new ASN1EncodableVector();
     final AlgorithmIdentifier algoId = digestAlgo.getAlgorithmIdentifier();
     digestInfoSeq.add(algoId);
@@ -54,24 +63,30 @@ public class PKCS1V15Padding {
 
   /**
    * Verifies that message digest value match PKCS#1 padded data
+   *
    * @param paddedDigest PKCS#1 padded digest value
-   * @param digest the digest value that should be verified against the PKCS#1 padded digest
-   * @param messageDigestAlgorithm the message digest algorithm that was used to create the message digest value
+   * @param digest the digest value that should be verified against the PKCS#1 padded
+   * digest
+   * @param messageDigestAlgorithm the message digest algorithm that was used to create
+   * the message digest value
    * @return true on match otherwise false
    * @throws IOException error in input data
    */
-  public static boolean verifyMessageDigest(final byte[] paddedDigest, final byte[] digest, final MessageDigestAlgorithm messageDigestAlgorithm) throws IOException {
+  public static boolean verifyMessageDigest(@NonNull final byte[] paddedDigest, @NonNull final byte[] digest,
+    @NonNull final MessageDigestAlgorithm messageDigestAlgorithm) throws IOException {
 
     try {
       final ASN1InputStream asn1InputStream = new ASN1InputStream(paddedDigest);
       final ASN1Sequence asn1Sequence = ASN1Sequence.getInstance(asn1InputStream.readObject());
-      final AlgorithmIdentifier hashAlgorithmIdentifier = AlgorithmIdentifier.getInstance(asn1Sequence.getObjectAt(0));
+      final AlgorithmIdentifier hashAlgorithmIdentifier = AlgorithmIdentifier
+        .getInstance(asn1Sequence.getObjectAt(0));
       final ASN1ObjectIdentifier paddedDigestAlgoId = hashAlgorithmIdentifier.getAlgorithm();
       final ASN1OctetString octetString = ASN1OctetString.getInstance(asn1Sequence.getObjectAt(1));
       byte[] paddedDigestValue = octetString.getOctets();
 
       boolean digestMatch = Arrays.equals(paddedDigestValue, digest);
-      boolean hashAlgoMatch = messageDigestAlgorithm.getAlgorithmIdentifier().getAlgorithm().equals(paddedDigestAlgoId);
+      boolean hashAlgoMatch = messageDigestAlgorithm.getAlgorithmIdentifier().getAlgorithm()
+        .equals(paddedDigestAlgoId);
 
       if (!digestMatch) {
         log.debug("Digest value does not match padded data");
@@ -82,7 +97,8 @@ public class PKCS1V15Padding {
         return false;
       }
       return true;
-    } catch (Exception ex) {
+    }
+    catch (Exception ex) {
       throw new IOException("Failed to process padding verification data", ex);
     }
   }

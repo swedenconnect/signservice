@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.signservice.signature.signhandler.impl;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.jcajce.provider.util.DigestFactory;
@@ -35,22 +36,29 @@ import java.security.interfaces.RSAKey;
 public class SignServiceRSAPSSSigner implements SignServiceSigner {
 
   /** {@inheritDoc} */
-  @Override public byte[] sign(final byte[] toBeSignedBytes, final PrivateKey privateKey, final SignatureAlgorithm signatureAlgorithm)
+  @Override public byte[] sign(final byte[] toBeSignedBytes, @NonNull final PrivateKey privateKey,
+    @NonNull final SignatureAlgorithm signatureAlgorithm)
     throws SignatureException {
+
+    if (toBeSignedBytes == null) {
+      throw new SignatureException("bytes to be signed must not be null");
+    }
 
     if (!(signatureAlgorithm instanceof RSAPSSSignatureAlgorithm)) {
       throw new SignatureException("The specified algorithm is not an RSA PSS algorithm");
     }
 
     try {
-      final Digest messageDigestFunction = DigestFactory.getDigest(signatureAlgorithm.getMessageDigestAlgorithm().getJcaName());
+      final Digest messageDigestFunction = DigestFactory.getDigest(
+        signatureAlgorithm.getMessageDigestAlgorithm().getJcaName());
       final int modLen = ((RSAKey) privateKey).getModulus().bitLength();
       final PSSPadding pssPadding = new PSSPadding(modLen, messageDigestFunction);
       pssPadding.update(toBeSignedBytes);
       final byte[] emBytes = pssPadding.generateSignatureEncodedMessage();
       return PkCrypto.rsaSignEncodedMessage(emBytes, privateKey);
-    } catch (Exception ex) {
-      log.debug("Error creating RSA signature with algorithm {}",signatureAlgorithm, ex);
+    }
+    catch (Exception ex) {
+      log.debug("Error creating RSA signature with algorithm {}", signatureAlgorithm, ex);
       throw new SignatureException(ex);
     }
   }

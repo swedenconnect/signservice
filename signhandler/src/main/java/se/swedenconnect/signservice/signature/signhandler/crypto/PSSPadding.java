@@ -48,21 +48,23 @@ public class PSSPadding {
   private final byte trailer;
 
   /**
-   * Basic constructor
+   * Basic constructor.
+   *
    * @param modulusBits number of bits in RSA key modulus
    * @param digest the digest to use.
    */
   public PSSPadding(
     final int modulusBits,
     final Digest digest) {
-    this(modulusBits, digest, digest.getDigestSize() , TRAILER_IMPLICIT);
+    this(modulusBits, digest, digest.getDigestSize(), TRAILER_IMPLICIT);
   }
 
   /**
-   * Basic constructor
+   * Basic constructor.
+   *
    * @param modulusBits number of bits in RSA key modulus
    * @param digest the digest to use.
-   * @param sLen   the length of the salt to use (in bytes).
+   * @param sLen the length of the salt to use (in bytes)
    */
   public PSSPadding(
     final int modulusBits,
@@ -72,10 +74,11 @@ public class PSSPadding {
   }
 
   /**
-   * Constructor
+   * Constructor.
+   *
    * @param modulusBits number of bits in RSA key modulus
    * @param digest the digest to use.
-   * @param sLen   the length of the salt to use (in bytes).
+   * @param sLen the length of the salt to use (in bytes)
    * @param trailer the trailer byte to use
    */
   public PSSPadding(
@@ -87,11 +90,12 @@ public class PSSPadding {
   }
 
   /**
-   * Constructor
+   * Constructor.
+   *
    * @param modulusBits number of bits in RSA key modulus
-   * @param contentDigest the digest to use for content.
+   * @param contentDigest the digest to use for content
    * @param mgfDigest the digest to use for MGF
-   * @param sLen the length of the salt to use (in bytes).
+   * @param sLen the length of the salt to use (in bytes)
    */
   public PSSPadding(
     final int modulusBits,
@@ -103,10 +107,11 @@ public class PSSPadding {
 
   /**
    * Constructor
+   *
    * @param modulusBits number of bits in RSA key modulus
-   * @param contentDigest the digest to use for content.
+   * @param contentDigest the digest to use for content
    * @param mgfDigest the digest to use for MGF
-   * @param sLen the length of the salt to use (in bytes).
+   * @param sLen the length of the salt to use (in bytes)
    * @param trailer the trailer byte to use
    */
   public PSSPadding(
@@ -129,9 +134,10 @@ public class PSSPadding {
   }
 
   /**
-   * Constructor with explicit salt value
+   * Constructor with explicit salt value.
+   *
    * @param modulusBits number of bits in RSA key modulus
-   * @param digest the digest to use.
+   * @param digest the digest to use
    * @param salt salt value
    */
   public PSSPadding(
@@ -142,9 +148,10 @@ public class PSSPadding {
   }
 
   /**
-   * Constructor with explicit salt and MGF hash
+   * Constructor with explicit salt and MGF hash.
+   *
    * @param modulusBits number of bits in RSA key modulus
-   * @param contentDigest the digest to use for content.
+   * @param contentDigest the digest to use for content
    * @param mgfDigest the digest to use for MGF
    * @param salt salt value
    */
@@ -157,9 +164,10 @@ public class PSSPadding {
   }
 
   /**
-   * Constructor with explicit salt, MGF hash algorithm and trailer
+   * Constructor with explicit salt, MGF hash algorithm and trailer.
+   *
    * @param modulusBits number of bits in RSA key modulus
-   * @param contentDigest the digest to use for content.
+   * @param contentDigest the digest to use for content
    * @param mgfDigest the digest to use for MGF
    * @param salt salt value
    * @param trailer the trailer byte to use
@@ -184,7 +192,7 @@ public class PSSPadding {
   }
 
   /**
-   * Init pss padding
+   * Init pss padding.
    */
   private void init() {
 
@@ -201,7 +209,7 @@ public class PSSPadding {
   }
 
   /**
-   * clear possible sensitive data
+   * clear possible sensitive data.
    */
   private void clearBlock(final byte[] block) {
     Arrays.fill(block, (byte) 0);
@@ -215,14 +223,15 @@ public class PSSPadding {
   }
 
   /**
-   * update the internal digest with the byte array in
+   * update the internal digest with the byte array in.
    */
   public void update(final byte[] in) {
     contentDigest.update(in, 0, in.length);
   }
 
   /**
-   * update the internal digest
+   * update the internal digest.
+   *
    * @param in input
    * @param off offset from start
    * @param len length of data to copy from input
@@ -239,7 +248,7 @@ public class PSSPadding {
   }
 
   /**
-   * Generate a padded message for the data that has been loaded using the update() function
+   * Generate a padded message for the data that has been loaded using the update() function.
    */
   public byte[] generateSignatureEncodedMessage() throws DataLengthException {
     contentDigest.doFinal(mDash, mDash.length - hLen - sLen);
@@ -283,6 +292,7 @@ public class PSSPadding {
   /**
    * return true if the internal state matches the encodedMessage. The encodedMessage is a pss padded hash value and is typically the
    * value obtained when performing raw decryption of an RSA-PSS signature value.
+   *
    * @param encodedMessage encodedMessage to test
    * @return true if the encodedMessage is consistent with and verified by the PSS padding
    */

@@ -56,6 +56,7 @@ public class DefaultSignatureHandler implements SignatureHandler {
 
   /**
    * Constructor with default sign service signer provider
+   *
    * @param algorithmRegistry algorithm registry
    */
   public DefaultSignatureHandler(final AlgorithmRegistry algorithmRegistry) {
@@ -65,6 +66,7 @@ public class DefaultSignatureHandler implements SignatureHandler {
 
   /**
    * Constructor
+   *
    * @param algorithmRegistry algorithm registry
    * @param signServiceSignerProvider sign service signer provider
    */
@@ -82,7 +84,7 @@ public class DefaultSignatureHandler implements SignatureHandler {
   /** {@inheritDoc} */
   @Override
   public void checkRequirements(final SignRequestMessage signRequest, final SignServiceContext context)
-      throws InvalidRequestException {
+    throws InvalidRequestException {
 
     // TODO: Implement
 
@@ -91,7 +93,7 @@ public class DefaultSignatureHandler implements SignatureHandler {
   /** {@inheritDoc} */
   @Override
   public CompletedSignatureTask sign(final RequestedSignatureTask signatureTask, final PkiCredential signingCredential,
-      final SignRequestMessage signRequest, final SignServiceContext context) throws SignatureException {
+    final SignRequestMessage signRequest, final SignServiceContext context) throws SignatureException {
 
     try {
       SignatureType signatureType = signatureTask.getSignatureType();
@@ -101,7 +103,8 @@ public class DefaultSignatureHandler implements SignatureHandler {
 
       // TODO prepare data to be signed and use the signer to sign
 
-    } catch (Exception ex){
+    }
+    catch (Exception ex) {
       // TODO handle exceptions
     }
 

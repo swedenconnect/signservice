@@ -26,10 +26,10 @@ import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.signhandler.SignServiceSigner;
-import se.swedenconnect.signservice.signature.signhandler.crypto.EcdsaSigValue;
-import se.swedenconnect.signservice.signature.signhandler.crypto.PkCrypto;
 import se.swedenconnect.signservice.signature.signhandler.TestAlgorithms;
 import se.swedenconnect.signservice.signature.signhandler.TestCredentials;
+import se.swedenconnect.signservice.signature.signhandler.crypto.EcdsaSigValue;
+import se.swedenconnect.signservice.signature.signhandler.crypto.PkCrypto;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
 
 import java.security.MessageDigest;
@@ -37,7 +37,8 @@ import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for ECDSA signer
@@ -55,47 +56,50 @@ class SignServiceECSignerTest {
   @BeforeAll
   static void init() throws Exception {
 
-    tbsData = Base64.decode("PGRzOlNpZ25lZEluZm8geG1sbnM6ZHM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMiPjxkczpDYW5vbmljYWxpem"
-      + "F0aW9uTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIj48L2RzOkNhbm9uaWNhbGl6YXRpb25NZXRob2Q+PGRzOl"
-      + "NpZ25hdHVyZU1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZHNpZy1tb3JlI2VjZHNhLXNoYTI1NiI+PC9kczpTaWduYXR1cmVNZX"
-      + "Rob2Q+PGRzOlJlZmVyZW5jZSBVUkk9IiI+PGRzOlRyYW5zZm9ybXM+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZH"
-      + "NpZyNlbnZlbG9wZWQtc2lnbmF0dXJlIj48L2RzOlRyYW5zZm9ybT48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZX"
-      + "hjLWMxNG4jIj48L2RzOlRyYW5zZm9ybT48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvVFIvMTk5OS9SRUMteHBhdGgtMTk5OTExMTYiP"
-      + "go8ZHM6WFBhdGg+bm90KGFuY2VzdG9yLW9yLXNlbGY6OipbbG9jYWwtbmFtZSgpPSdTaWduYXR1cmUnIGFuZCBuYW1lc3BhY2UtdXJpKCk9J2h0dHA6Ly93d3cudzMub"
-      + "3JnLzIwMDAvMDkveG1sZHNpZyMnXSk8L2RzOlhQYXRoPgo8L2RzOlRyYW5zZm9ybT48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0d"
-      + "HA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiI+PC9kczpEaWdlc3RNZXRob2Q+PGRzOkRpZ2VzdFZhbHVlPjkwN3dxZ0VBOFVSZEx2ZE9JeWloQTQxd"
-      + "lJ3UlNRYWZNd3ovUk42N2xZQ0k9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+");
+    tbsData = Base64.decode(
+      "PGRzOlNpZ25lZEluZm8geG1sbnM6ZHM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMiPjxkczpDYW5vbmljYWxpem"
+        + "F0aW9uTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIj48L2RzOkNhbm9uaWNhbGl6YXRpb25NZXRob2Q+PGRzOl"
+        + "NpZ25hdHVyZU1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZHNpZy1tb3JlI2VjZHNhLXNoYTI1NiI+PC9kczpTaWduYXR1cmVNZX"
+        + "Rob2Q+PGRzOlJlZmVyZW5jZSBVUkk9IiI+PGRzOlRyYW5zZm9ybXM+PGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZH"
+        + "NpZyNlbnZlbG9wZWQtc2lnbmF0dXJlIj48L2RzOlRyYW5zZm9ybT48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZX"
+        + "hjLWMxNG4jIj48L2RzOlRyYW5zZm9ybT48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvVFIvMTk5OS9SRUMteHBhdGgtMTk5OTExMTYiP"
+        + "go8ZHM6WFBhdGg+bm90KGFuY2VzdG9yLW9yLXNlbGY6OipbbG9jYWwtbmFtZSgpPSdTaWduYXR1cmUnIGFuZCBuYW1lc3BhY2UtdXJpKCk9J2h0dHA6Ly93d3cudzMub"
+        + "3JnLzIwMDAvMDkveG1sZHNpZyMnXSk8L2RzOlhQYXRoPgo8L2RzOlRyYW5zZm9ybT48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0d"
+        + "HA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiI+PC9kczpEaWdlc3RNZXRob2Q+PGRzOkRpZ2VzdFZhbHVlPjkwN3dxZ0VBOFVSZEx2ZE9JeWloQTQxd"
+        + "lJ3UlNRYWZNd3ovUk42N2xZQ0k9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT48L2RzOlNpZ25lZEluZm8+");
 
-    signature = Base64.decode("iN04t3u5kTSfzkLMOtRXRXQLUBaSQX4HODZZ+1VODJibBBr+Ikzj2ci5rtVVpouVzeEOatDxsvXZHEgA6HeMHw==");
+    signature = Base64.decode(
+      "iN04t3u5kTSfzkLMOtRXRXQLUBaSQX4HODZZ+1VODJibBBr+Ikzj2ci5rtVVpouVzeEOatDxsvXZHEgA6HeMHw==");
 
-    byte[] certBytes = Base64.decode("MIIKBDCCCGygAwIBAgIQINAsb1T4uL80OEFBnTZ9ZTANBgkqhkiG9w0BAQsFADCBhzELMAkGA1UEBhMCU0UxFjAUBgNVB"
-      + "AoTDVN3ZWRlbkNvbm5lY3QxGDAWBgNVBAsTD1NpZ25pbmcgU2VydmljZTEVMBMGA1UEBRMMc2Mtb3JnTnVtYmVyMS8wLQYDVQQDEyZDQTAwMSBTd2VkZW4gQ29ubmVj"
-      + "dCBURVNUIFNpZ24gU2VydmljZTAeFw0yMjA1MDYxMjEyNTZaFw0yMzA1MDYxMjEyNTZaMFwxFTATBgNVBAUTDDE5NTIwNzMwNjg4NjELMAkGA1UEBhMCU0UxDzANBgN"
-      + "VBCoTBk1hamxpczEOMAwGA1UEBBMFTWVkaW4xFTATBgNVBAMTDE1hamxpcyBNZWRpbjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABIgCe9SmG8XUWWVWRZmOA0K6+bq"
-      + "volR9KoTFCPAsRzxveYWzq+tjQTcVa3VXQIaphqH4T4VAIMMvXWl9KV82alejggbfMIIG2zALBgNVHQ8EBAMCBkAwHQYDVR0OBBYEFJqblQ28FGEqYyN3fAAQEFc1u0U"
-      + "FMBMGA1UdIAQMMAowCAYGBACLMAEBMGEGA1UdHwRaMFgwVqBUoFKGUGh0dHBzOi8vc2lnLnNhbmRib3guc3dlZGVuY29ubmVjdC5zZS9zaWdzZXJ2aWNlL3B1Ymxpc2"
-      + "gvY3JsLzVlNzEyNjk2YWFjYTkwZTAuY3JsMIIGBwYHKoVwgUkFAQSCBfowggX2MIIF8gwraHR0cDovL2lkLmVsZWduYW1uZGVuLnNlL2F1dGgtY29udC8xLjAvc2Fja"
-      + "QyCBcE8c2FjaTpTQU1MQXV0aENvbnRleHQgeG1sbnM6c2FjaT0iaHR0cDovL2lkLmVsZWduYW1uZGVuLnNlL2F1dGgtY29udC8xLjAvc2FjaSI+PHNhY2k6QXV0aENv"
-      + "bnRleHRJbmZvIElkZW50aXR5UHJvdmlkZXI9Imh0dHA6Ly9kZXYudGVzdC5zd2VkZW5jb25uZWN0LnNlL2lkcCIgQXV0aGVudGljYXRpb25JbnN0YW50PSIyMDIyLTA"
-      + "1LTA2VDEyOjIyOjU2LjAwMFoiIFNlcnZpY2VJRD0iU2lnbmF0dXJlIFNlcnZpY2UiIEF1dGhuQ29udGV4dENsYXNzUmVmPSJodHRwOi8vaWQuZWxlZ25hbW5kZW4uc2"
-      + "UvbG9hLzEuMC9sb2EzIiBBc3NlcnRpb25SZWY9Il9iNTJlZTUwMDMzNmMzZmMwNDNlMmZlNTJkOTM0NjRkOSIvPjxzYWNpOklkQXR0cmlidXRlcz48c2FjaTpBdHRyaW"
-      + "J1dGVNYXBwaW5nIFR5cGU9InJkbiIgUmVmPSIyLjUuNC41Ij48c2FtbDpBdHRyaWJ1dGUgRnJpZW5kbHlOYW1lPSJTd2VkaXNoIFBlcnNvbm51bW1lciIgTmFtZT0idX"
-      + "JuOm9pZDoxLjIuNzUyLjI5LjQuMTMiIHhtbG5zOnNhbWw9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDphc3NlcnRpb24iPjxzYW1sOkF0dHJpYnV0ZVZhbHVlPj"
-      + "E5NTIwNzMwNjg4Njwvc2FtbDpBdHRyaWJ1dGVWYWx1ZT48L3NhbWw6QXR0cmlidXRlPjwvc2FjaTpBdHRyaWJ1dGVNYXBwaW5nPjxzYWNpOkF0dHJpYnV0ZU1hcHBpbm"
-      + "cgVHlwZT0icmRuIiBSZWY9IjIuNS40LjQyIj48c2FtbDpBdHRyaWJ1dGUgRnJpZW5kbHlOYW1lPSJHaXZlbiBOYW1lIiBOYW1lPSJ1cm46b2lkOjIuNS40LjQyIiB4bW"
-      + "xuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIj48c2FtbDpBdHRyaWJ1dGVWYWx1ZT5NYWpsaXM8L3NhbWw6QXR0cmlidXRlVmFsdW"
-      + "U+PC9zYW1sOkF0dHJpYnV0ZT48L3NhY2k6QXR0cmlidXRlTWFwcGluZz48c2FjaTpBdHRyaWJ1dGVNYXBwaW5nIFR5cGU9InJkbiIgUmVmPSIyLjUuNC40Ij48c2FtbD"
-      + "pBdHRyaWJ1dGUgRnJpZW5kbHlOYW1lPSJTdXJuYW1lIiBOYW1lPSJ1cm46b2lkOjIuNS40LjQiIHhtbG5zOnNhbWw9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMD"
-      + "phc3NlcnRpb24iPjxzYW1sOkF0dHJpYnV0ZVZhbHVlPk1lZGluPC9zYW1sOkF0dHJpYnV0ZVZhbHVlPjwvc2FtbDpBdHRyaWJ1dGU+PC9zYWNpOkF0dHJpYnV0ZU1hcH"
-      + "Bpbmc+PHNhY2k6QXR0cmlidXRlTWFwcGluZyBUeXBlPSJyZG4iIFJlZj0iMi41LjQuMyI+PHNhbWw6QXR0cmlidXRlIEZyaWVuZGx5TmFtZT0iRGlzcGxheSBOYW1lIi"
-      + "BOYW1lPSJ1cm46b2lkOjIuMTYuODQwLjEuMTEzNzMwLjMuMS4yNDEiIHhtbG5zOnNhbWw9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDphc3NlcnRpb24iPjxzYW"
-      + "1sOkF0dHJpYnV0ZVZhbHVlPk1hamxpcyBNZWRpbjwvc2FtbDpBdHRyaWJ1dGVWYWx1ZT48L3NhbWw6QXR0cmlidXRlPjwvc2FjaTpBdHRyaWJ1dGVNYXBwaW5nPjwvc2"
-      + "FjaTpJZEF0dHJpYnV0ZXM+PC9zYWNpOlNBTUxBdXRoQ29udGV4dD4wCQYDVR0TBAIwADAfBgNVHSMEGDAWgBSUvCNhmNvK475lngc4KV8VnpcIljANBgkqhkiG9w0BAQ"
-      + "sFAAOCAYEAEYQ2mwgk1dUNe94SS/ufeQ1gRYe/6xN5S6+I6HPRNUEJToSmwWIhxYEHazm1SqUTspb1p0DSQgkFkE/vm2LSJDt+J5qpbyrLnoiO/1jYJIBnoVW5CZhYXh"
-      + "m/XAoJc0SuHEXD9IJR18biipvDytEaJ9O0KYUZXRzSeMW99zx8eFjG36bZsRgVIvKTNgGUmqrpJjlkCnRO1qLkSwXm22sUT8y8UI2wrA44acYsgocOfObiwnWj5aRoKD"
-      + "ZUtm+H6XXj+rmpLdDy0gFDyp/VYABbyCbzC+QiXqqiNX5ysm7F2tXcyy0ruf2tFLDn9FsCaFbyjwBLmu+nwk+DQDe1yNqwVs6/IF1ZKi9QUDzkR7LWiVNP4yomo80PIg"
-      + "ZkgII/LmIOEK1FFb+i+rglP+Xm81DMaXMPCH+3VmYlLG67OrETYfhyheNipBqQZl/c+to3ZW6DctJquw2za2zKslD72znPS7K6UcpS9G/MbgbLXGijVHOpjES7HDLMy"
-      + "+vsFUJldba3");
+    byte[] certBytes = Base64.decode(
+      "MIIKBDCCCGygAwIBAgIQINAsb1T4uL80OEFBnTZ9ZTANBgkqhkiG9w0BAQsFADCBhzELMAkGA1UEBhMCU0UxFjAUBgNVB"
+        + "AoTDVN3ZWRlbkNvbm5lY3QxGDAWBgNVBAsTD1NpZ25pbmcgU2VydmljZTEVMBMGA1UEBRMMc2Mtb3JnTnVtYmVyMS8wLQYDVQQDEyZDQTAwMSBTd2VkZW4gQ29ubmVj"
+        + "dCBURVNUIFNpZ24gU2VydmljZTAeFw0yMjA1MDYxMjEyNTZaFw0yMzA1MDYxMjEyNTZaMFwxFTATBgNVBAUTDDE5NTIwNzMwNjg4NjELMAkGA1UEBhMCU0UxDzANBgN"
+        + "VBCoTBk1hamxpczEOMAwGA1UEBBMFTWVkaW4xFTATBgNVBAMTDE1hamxpcyBNZWRpbjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABIgCe9SmG8XUWWVWRZmOA0K6+bq"
+        + "volR9KoTFCPAsRzxveYWzq+tjQTcVa3VXQIaphqH4T4VAIMMvXWl9KV82alejggbfMIIG2zALBgNVHQ8EBAMCBkAwHQYDVR0OBBYEFJqblQ28FGEqYyN3fAAQEFc1u0U"
+        + "FMBMGA1UdIAQMMAowCAYGBACLMAEBMGEGA1UdHwRaMFgwVqBUoFKGUGh0dHBzOi8vc2lnLnNhbmRib3guc3dlZGVuY29ubmVjdC5zZS9zaWdzZXJ2aWNlL3B1Ymxpc2"
+        + "gvY3JsLzVlNzEyNjk2YWFjYTkwZTAuY3JsMIIGBwYHKoVwgUkFAQSCBfowggX2MIIF8gwraHR0cDovL2lkLmVsZWduYW1uZGVuLnNlL2F1dGgtY29udC8xLjAvc2Fja"
+        + "QyCBcE8c2FjaTpTQU1MQXV0aENvbnRleHQgeG1sbnM6c2FjaT0iaHR0cDovL2lkLmVsZWduYW1uZGVuLnNlL2F1dGgtY29udC8xLjAvc2FjaSI+PHNhY2k6QXV0aENv"
+        + "bnRleHRJbmZvIElkZW50aXR5UHJvdmlkZXI9Imh0dHA6Ly9kZXYudGVzdC5zd2VkZW5jb25uZWN0LnNlL2lkcCIgQXV0aGVudGljYXRpb25JbnN0YW50PSIyMDIyLTA"
+        + "1LTA2VDEyOjIyOjU2LjAwMFoiIFNlcnZpY2VJRD0iU2lnbmF0dXJlIFNlcnZpY2UiIEF1dGhuQ29udGV4dENsYXNzUmVmPSJodHRwOi8vaWQuZWxlZ25hbW5kZW4uc2"
+        + "UvbG9hLzEuMC9sb2EzIiBBc3NlcnRpb25SZWY9Il9iNTJlZTUwMDMzNmMzZmMwNDNlMmZlNTJkOTM0NjRkOSIvPjxzYWNpOklkQXR0cmlidXRlcz48c2FjaTpBdHRyaW"
+        + "J1dGVNYXBwaW5nIFR5cGU9InJkbiIgUmVmPSIyLjUuNC41Ij48c2FtbDpBdHRyaWJ1dGUgRnJpZW5kbHlOYW1lPSJTd2VkaXNoIFBlcnNvbm51bW1lciIgTmFtZT0idX"
+        + "JuOm9pZDoxLjIuNzUyLjI5LjQuMTMiIHhtbG5zOnNhbWw9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDphc3NlcnRpb24iPjxzYW1sOkF0dHJpYnV0ZVZhbHVlPj"
+        + "E5NTIwNzMwNjg4Njwvc2FtbDpBdHRyaWJ1dGVWYWx1ZT48L3NhbWw6QXR0cmlidXRlPjwvc2FjaTpBdHRyaWJ1dGVNYXBwaW5nPjxzYWNpOkF0dHJpYnV0ZU1hcHBpbm"
+        + "cgVHlwZT0icmRuIiBSZWY9IjIuNS40LjQyIj48c2FtbDpBdHRyaWJ1dGUgRnJpZW5kbHlOYW1lPSJHaXZlbiBOYW1lIiBOYW1lPSJ1cm46b2lkOjIuNS40LjQyIiB4bW"
+        + "xuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIj48c2FtbDpBdHRyaWJ1dGVWYWx1ZT5NYWpsaXM8L3NhbWw6QXR0cmlidXRlVmFsdW"
+        + "U+PC9zYW1sOkF0dHJpYnV0ZT48L3NhY2k6QXR0cmlidXRlTWFwcGluZz48c2FjaTpBdHRyaWJ1dGVNYXBwaW5nIFR5cGU9InJkbiIgUmVmPSIyLjUuNC40Ij48c2FtbD"
+        + "pBdHRyaWJ1dGUgRnJpZW5kbHlOYW1lPSJTdXJuYW1lIiBOYW1lPSJ1cm46b2lkOjIuNS40LjQiIHhtbG5zOnNhbWw9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMD"
+        + "phc3NlcnRpb24iPjxzYW1sOkF0dHJpYnV0ZVZhbHVlPk1lZGluPC9zYW1sOkF0dHJpYnV0ZVZhbHVlPjwvc2FtbDpBdHRyaWJ1dGU+PC9zYWNpOkF0dHJpYnV0ZU1hcH"
+        + "Bpbmc+PHNhY2k6QXR0cmlidXRlTWFwcGluZyBUeXBlPSJyZG4iIFJlZj0iMi41LjQuMyI+PHNhbWw6QXR0cmlidXRlIEZyaWVuZGx5TmFtZT0iRGlzcGxheSBOYW1lIi"
+        + "BOYW1lPSJ1cm46b2lkOjIuMTYuODQwLjEuMTEzNzMwLjMuMS4yNDEiIHhtbG5zOnNhbWw9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDphc3NlcnRpb24iPjxzYW"
+        + "1sOkF0dHJpYnV0ZVZhbHVlPk1hamxpcyBNZWRpbjwvc2FtbDpBdHRyaWJ1dGVWYWx1ZT48L3NhbWw6QXR0cmlidXRlPjwvc2FjaTpBdHRyaWJ1dGVNYXBwaW5nPjwvc2"
+        + "FjaTpJZEF0dHJpYnV0ZXM+PC9zYWNpOlNBTUxBdXRoQ29udGV4dD4wCQYDVR0TBAIwADAfBgNVHSMEGDAWgBSUvCNhmNvK475lngc4KV8VnpcIljANBgkqhkiG9w0BAQ"
+        + "sFAAOCAYEAEYQ2mwgk1dUNe94SS/ufeQ1gRYe/6xN5S6+I6HPRNUEJToSmwWIhxYEHazm1SqUTspb1p0DSQgkFkE/vm2LSJDt+J5qpbyrLnoiO/1jYJIBnoVW5CZhYXh"
+        + "m/XAoJc0SuHEXD9IJR18biipvDytEaJ9O0KYUZXRzSeMW99zx8eFjG36bZsRgVIvKTNgGUmqrpJjlkCnRO1qLkSwXm22sUT8y8UI2wrA44acYsgocOfObiwnWj5aRoKD"
+        + "ZUtm+H6XXj+rmpLdDy0gFDyp/VYABbyCbzC+QiXqqiNX5ysm7F2tXcyy0ruf2tFLDn9FsCaFbyjwBLmu+nwk+DQDe1yNqwVs6/IF1ZKi9QUDzkR7LWiVNP4yomo80PIg"
+        + "ZkgII/LmIOEK1FFb+i+rglP+Xm81DMaXMPCH+3VmYlLG67OrETYfhyheNipBqQZl/c+to3ZW6DctJquw2za2zKslD72znPS7K6UcpS9G/MbgbLXGijVHOpjES7HDLMy"
+        + "+vsFUJldba3");
 
     signerCert = CertificateUtils.decodeCertificate(certBytes);
 
@@ -103,7 +107,6 @@ class SignServiceECSignerTest {
     ecdsaSha384 = TestAlgorithms.getEcdsaSha384();
     ecdsaSha512 = TestAlgorithms.getEcdsaSha512();
   }
-
 
   @Test
   void signWithEcdsa() throws Exception {
@@ -120,21 +123,36 @@ class SignServiceECSignerTest {
     log.info("EC signer error tests");
 
     log.info("Error test null private key:");
-    specificErrorTest(tbsData, null, ecdsaSha256);
+    specificErrorTest(tbsData, null, ecdsaSha256, NullPointerException.class);
     log.info("Error test rsa algorithm:");
-    specificErrorTest(tbsData, TestCredentials.privateECKey, TestAlgorithms.rsaPssSha256);
+    specificErrorTest(tbsData, TestCredentials.privateECKey, TestAlgorithms.rsaPssSha256, SignatureException.class);
     log.info("Error test rsa key:");
-    specificErrorTest(tbsData, TestCredentials.privateRSAKey, ecdsaSha256);
+    specificErrorTest(tbsData, TestCredentials.privateRSAKey, ecdsaSha256, SignatureException.class);
     log.info("Error test null data:");
-    specificErrorTest(null, TestCredentials.privateECKey, ecdsaSha256);
+    specificErrorTest(null, TestCredentials.privateECKey, ecdsaSha256, SignatureException.class);
   }
 
-  void specificErrorTest(byte[] tbsData, PrivateKey privateKey, SignatureAlgorithm signatureAlgorithm) {
+  @Test
+  void errorSignerRequest() throws Exception {
+    assertThrows(IllegalArgumentException.class, () -> {
+      SignServiceECSigner ecSigner = new SignServiceECSigner(SignatureType.CMS);
+      ecSigner.sign(new byte[] { 0x00 }, TestCredentials.privateECKey, ecdsaSha256);
+    });
+
+    assertThrows(SignatureException.class, () -> {
+      SignServiceECSigner ecSigner = new SignServiceECSigner(SignatureType.XML);
+      ecSigner.sign(null, TestCredentials.privateECKey, ecdsaSha256);
+    });
+
+  }
+
+  void specificErrorTest(byte[] tbsData, PrivateKey privateKey, SignatureAlgorithm signatureAlgorithm,
+    Class<? extends Exception> exceptionClass) {
     SignServiceSigner signer = new SignServiceECSigner(SignatureType.XML);
-    SignatureException signatureException = assertThrows(SignatureException.class, () -> {
+    Exception exception = assertThrows(exceptionClass, () -> {
       signer.sign(tbsData, privateKey, signatureAlgorithm);
     });
-    log.info("Exception: {}", signatureException.toString());
+    log.info("Exception: {}", exception.toString());
   }
 
   void signWithEcdsaAlgorithm(SignatureAlgorithm signatureAlgorithm, SignatureType signatureType) throws Exception {
@@ -149,7 +167,7 @@ class SignServiceECSignerTest {
     log.info("Message hash {}", Hex.toHexString(messageHash));
 
     EcdsaSigValue ecdsaSigValue = null;
-    switch (signatureType){
+    switch (signatureType) {
 
     case XML:
       ecdsaSigValue = EcdsaSigValue.getInstance(signature);
@@ -170,10 +188,12 @@ class SignServiceECSignerTest {
     MessageDigest md = MessageDigest.getInstance(ecdsaSha256.getMessageDigestAlgorithm().getJcaName());
     byte[] messageDigest = md.digest(tbsData);
 
-    boolean verifiedSignedData = PkCrypto.ecdsaVerifyDigest(messageDigest, EcdsaSigValue.getInstance(signature), signerCert.getPublicKey());
+    boolean verifiedSignedData = PkCrypto.ecdsaVerifyDigest(messageDigest, EcdsaSigValue.getInstance(signature),
+      signerCert.getPublicKey());
     assertTrue(verifiedSignedData);
     log.info("Decrypted signature verifies the signed message digest");
-    boolean verifySignedData = PkCrypto.ecdsaVerifySignedData(tbsData, EcdsaSigValue.getInstance(signature), signerCert.getPublicKey(),
+    boolean verifySignedData = PkCrypto.ecdsaVerifySignedData(tbsData, EcdsaSigValue.getInstance(signature),
+      signerCert.getPublicKey(),
       ecdsaSha256.getMessageDigestAlgorithm(),
       AlgorithmRegistrySingleton.getInstance());
     assertTrue(verifiedSignedData);

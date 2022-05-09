@@ -22,12 +22,9 @@ import org.junit.jupiter.api.Test;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.signhandler.SignServiceSignerProvider;
-import se.swedenconnect.signservice.signature.signhandler.impl.DefaultSignServiceSignerProvider;
-import se.swedenconnect.signservice.signature.signhandler.impl.SignServiceECSigner;
-import se.swedenconnect.signservice.signature.signhandler.impl.SignServiceRSAPSSSigner;
-import se.swedenconnect.signservice.signature.signhandler.impl.SignServiceRSASigner;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for signer provider
@@ -102,14 +99,14 @@ class DefaultSignServiceSignerProviderTest {
   void errorTests() {
     log.info("Performing exception test for signer provider");
 
-    individualErrorTest(null, null);
-    individualErrorTest(null, SignatureType.XML);
-    individualErrorTest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, null);
-    individualErrorTest("http://id.example.com/this-algorithm-is-not-supported", SignatureType.PDF);
+    individualErrorTest(null, null, NullPointerException.class);
+    individualErrorTest(null, SignatureType.XML, NullPointerException.class);
+    individualErrorTest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, null, NullPointerException.class);
+    individualErrorTest("http://id.example.com/this-algorithm-is-not-supported", SignatureType.PDF, IllegalArgumentException.class);
   }
 
-  void individualErrorTest(String algo, SignatureType signatureType){
-    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+  void individualErrorTest(String algo, SignatureType signatureType, Class<? extends Exception> exceptionClass) {
+    Exception ex = assertThrows(exceptionClass, () -> {
       signServiceSignerProvider.getSigner(algo, signatureType);
     });
     log.info("Creating signer for algorithm {} and type {} failed with exception: {}", algo, signatureType, ex.toString());

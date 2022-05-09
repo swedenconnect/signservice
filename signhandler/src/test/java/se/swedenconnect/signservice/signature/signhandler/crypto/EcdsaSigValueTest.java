@@ -16,10 +16,10 @@
 package se.swedenconnect.signservice.signature.signhandler.crypto;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import se.swedenconnect.signservice.signature.signhandler.crypto.EcdsaSigValue;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -56,7 +56,7 @@ class EcdsaSigValueTest {
   @Test
   void testGetInstance() throws IOException {
     log.info("Testing key initiation");
-    for (byte[] sigValue : sigValueList){
+    for (byte[] sigValue : sigValueList) {
       EcdsaSigValue ecdsaSigValue = EcdsaSigValue.getInstance(sigValue);
       BigInteger r = ecdsaSigValue.getR();
       BigInteger s = ecdsaSigValue.getS();
@@ -72,6 +72,27 @@ class EcdsaSigValueTest {
     assertThrows(IOException.class, () -> {
       EcdsaSigValue.getInstance(r, BigInteger.TEN).toByteArray();
     });
+
+    assertThrows(NullPointerException.class, () -> {
+      EcdsaSigValue.getInstance((byte[]) null);
+    });
+    assertThrows(IOException.class, () -> {
+      EcdsaSigValue.getInstance(new Byte[] {});
+    });
+    assertThrows(IOException.class, () -> {
+      EcdsaSigValue.getInstance(new Byte[] { 0x00 });
+    });
+
+    assertThrows(NullPointerException.class, () -> {
+      EcdsaSigValue.getInstance((ASN1Sequence) null);
+    });
+    assertThrows(NullPointerException.class, () -> {
+      EcdsaSigValue.getInstance(BigInteger.ONE, null);
+    });
+    assertThrows(NullPointerException.class, () -> {
+      EcdsaSigValue.getInstance(null, BigInteger.ONE);
+    });
+
   }
 
   @Test
@@ -86,12 +107,14 @@ class EcdsaSigValueTest {
     assertEquals("30818802420127e0a5d11d54106db032ed8e5a34818da0a4794c2e382e603e458106ae78b0eee4005738a32b05f685bcafe59b8f5a8caa"
         + "17de6362d43323aba997ee4e26f644dc02420119a31084bb4986032dea95c2dc65fcbf8bc38779cd257c3bc1073a84681563ad6a33ec5bc3d2a26b0a9f0cc7"
         + "556ad5cdcd490154d3e95e8ff521b3469284773fa8"
-    , ec521DerHex);
+      , ec521DerHex);
     EcdsaSigValue ecSigVal256 = EcdsaSigValue.getInstance(Hex.decode("7945ca368e7b9d24cc5c363e9c0e5949137e53e5ed75c3c3c02ebcc89eb9c4a570"
       + "6a5cbb77eb8379152bca4eb0d49b25a44ea19701c6a6d62c70a1a211f62e16"));
 
     String ec256DerHex = Hex.toHexString(ecSigVal256.getDEREncodedSigValue());
-    assertEquals("304402207945ca368e7b9d24cc5c363e9c0e5949137e53e5ed75c3c3c02ebcc89eb9c4a50220706a5cbb77eb8379152bca4eb0d49b25a44ea19701c6a6d62c70a1a211f62e16", ec256DerHex);
+    assertEquals(
+      "304402207945ca368e7b9d24cc5c363e9c0e5949137e53e5ed75c3c3c02ebcc89eb9c4a50220706a5cbb77eb8379152bca4eb0d49b25a44ea19701c6a6d62c70a1a211f62e16",
+      ec256DerHex);
   }
 
   @Test
@@ -106,7 +129,6 @@ class EcdsaSigValueTest {
     }
   }
 
-
   @Test
   void getSupportedKeyLengths() {
     assertArrayEquals(new int[] { 160, 224, 256, 384, 521 }, EcdsaSigValue.getSupportedKeyLengths());
@@ -114,8 +136,8 @@ class EcdsaSigValueTest {
 
   @Test
   void setSupportedKeyLengths() {
-    EcdsaSigValue.setSupportedKeyLengths(new int[]{256,384,521});
-    assertArrayEquals(new int[]{256,384,521}, EcdsaSigValue.getSupportedKeyLengths());
+    EcdsaSigValue.setSupportedKeyLengths(new int[] { 256, 384, 521 });
+    assertArrayEquals(new int[] { 256, 384, 521 }, EcdsaSigValue.getSupportedKeyLengths());
   }
 
 }
