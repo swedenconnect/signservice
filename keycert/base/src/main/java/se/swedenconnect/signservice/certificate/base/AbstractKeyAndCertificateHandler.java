@@ -30,6 +30,17 @@ import se.swedenconnect.signservice.session.SignServiceContext;
  */
 public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertificateHandler {
 
+  private final SignServiceSigningKeyProvider signingKeyProvider;
+
+  /**
+   * Constructor for the key and certificate handler
+   * @param signingKeyProvider provider for providing signing keys
+   */
+  public AbstractKeyAndCertificateHandler(
+    SignServiceSigningKeyProvider signingKeyProvider) {
+    this.signingKeyProvider = signingKeyProvider;
+  }
+
   /** {@inheritDoc} */
   @Override
   public String getName() {
@@ -40,6 +51,8 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
   @Override
   public void checkRequirements(final SignRequestMessage signRequest, final SignServiceContext context)
       throws InvalidRequestException {
+
+    
 
   }
 
