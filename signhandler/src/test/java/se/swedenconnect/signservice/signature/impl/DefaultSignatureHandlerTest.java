@@ -15,17 +15,21 @@
  */
 package se.swedenconnect.signservice.signature.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 
 /**
  * Test cases for DefaultSignatureHandler.
  */
+@Slf4j
 public class DefaultSignatureHandlerTest {
 
   @Test
   public void testName() {
-    final DefaultSignatureHandler handler = new DefaultSignatureHandler();
+    log.info("DefaultSignatureHandler tests");
+    final DefaultSignatureHandler handler = new DefaultSignatureHandler(AlgorithmRegistrySingleton.getInstance());
     Assertions.assertEquals(DefaultSignatureHandler.DEFAULT_NAME, handler.getName());
 
     handler.setName("the-name");

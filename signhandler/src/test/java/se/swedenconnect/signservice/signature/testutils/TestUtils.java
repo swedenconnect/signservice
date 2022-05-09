@@ -13,7 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package se.swedenconnect.signservice.signature.testutils;
+
+import org.bouncycastle.util.encoders.Base64;
+
 /**
- * Default implementation of the SignService SignatureHandler.
+ * Utilities for tests
  */
-package se.swedenconnect.signservice.signature.impl;
+public class TestUtils {
+
+  public static String base64Print(byte[] data, int width) {
+    // Create a String with linebreaks
+    String b64String = Base64.toBase64String(data).replaceAll("(.{" + width + "})", "$1\n");
+    // Ident string with 6 spaces
+    return b64String.replaceAll("(?m)^", "      ");
+  }
+
+}
