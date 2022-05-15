@@ -15,15 +15,22 @@
  */
 package se.swedenconnect.signservice.certificate.base;
 
-import java.security.KeyException;
-import java.security.cert.CertificateException;
-
+import lombok.NonNull;
+import se.swedenconnect.security.algorithms.AlgorithmRegistry;
+import se.swedenconnect.security.algorithms.SignatureAlgorithm;
+import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
+import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
+
+import java.security.KeyException;
+import java.security.KeyPair;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 /**
  * Abstract base class for the {@link KeyAndCertificateHandler} interface.
@@ -31,14 +38,17 @@ import se.swedenconnect.signservice.session.SignServiceContext;
 public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertificateHandler {
 
   private final SignServiceSigningKeyProvider signingKeyProvider;
+  private final AlgorithmRegistry algorithmRegistry;
 
   /**
    * Constructor for the key and certificate handler
+   *
    * @param signingKeyProvider provider for providing signing keys
    */
-  public AbstractKeyAndCertificateHandler(
-    SignServiceSigningKeyProvider signingKeyProvider) {
+  public AbstractKeyAndCertificateHandler(final @NonNull SignServiceSigningKeyProvider signingKeyProvider,
+    final @NonNull AlgorithmRegistry algorithmRegistry) {
     this.signingKeyProvider = signingKeyProvider;
+    this.algorithmRegistry = algorithmRegistry;
   }
 
   /** {@inheritDoc} */
@@ -50,18 +60,32 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
   /** {@inheritDoc} */
   @Override
   public void checkRequirements(final SignRequestMessage signRequest, final SignServiceContext context)
-      throws InvalidRequestException {
-
-    
+    throws InvalidRequestException {
 
   }
 
   /** {@inheritDoc} */
   @Override
   public PkiCredential generateSigningCredential(final SignRequestMessage signRequest,
-      final IdentityAssertion assertion, final SignServiceContext context) throws KeyException, CertificateException {
+    final IdentityAssertion assertion, final SignServiceContext context) throws KeyException, CertificateException {
 
-    return null;
+    String signatureAlgorithm = signRequest.getSignatureRequirements().getSignatureAlgorithm();
+    SignatureAlgorithm algorithm = (SignatureAlgorithm) algorithmRegistry.getAlgorithm(signatureAlgorithm);
+    KeyPair signingKeyPair = signingKeyProvider.getSigningKeyPair(algorithm.getKeyType(), context);
+    X509Certificate signerCertificate = obtainSigningCertificate(signingKeyPair, signRequest, assertion, context);
+    return new BasicCredential(signerCertificate, signingKeyPair.getPrivate());
   }
 
+  /**
+   * Obtaining the signing certificate for the signing credentials
+   *
+   * @param signingKeyPair signing key pair
+   * @param signRequest sign request
+   * @param assertion assertion providing asserted user identity
+   * @param context signature context providing additional information
+   * @return {@link PkiCredential} holding the private key and certificate of the signer
+   * @throws CertificateException error obtaining a certificate for the signer
+   */
+  protected abstract X509Certificate obtainSigningCertificate(KeyPair signingKeyPair, SignRequestMessage signRequest,
+    IdentityAssertion assertion, SignServiceContext context) throws CertificateException;
 }

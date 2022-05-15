@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.certificate.base;
+package se.swedenconnect.signservice.certificate.base.utils;
 
-import se.swedenconnect.security.algorithms.Algorithm;
-import se.swedenconnect.security.algorithms.SignatureAlgorithm;
-
-import java.security.KeyException;
-import java.security.KeyPair;
+import org.bouncycastle.util.encoders.Base64;
 
 /**
- * Interface for a signing key provider that provides signing keys to the signing service.
+ * Utilities for tests
  */
-public interface SignServiceSigningKeyProvider {
+public class TestUtils {
 
-  KeyPair getSigningKeyPair(final SignatureAlgorithm signatureAlgorithm) throws KeyException;
+  public static String base64Print(byte[] data, int width) {
+    // Create a String with linebreaks
+    String b64String = Base64.toBase64String(data).replaceAll("(.{" + width + "})", "$1\n");
+    // Ident string with 6 spaces
+    return b64String.replaceAll("(?m)^", "      ");
+  }
 
 }
