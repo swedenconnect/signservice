@@ -1,0 +1,215 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>signservice-authn-saml</artifactId>
+  <packaging>jar</packaging>
+
+  <parent>
+    <groupId>se.swedenconnect.signservice</groupId>
+    <artifactId>signservice-authn-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <name>Sweden Connect :: SignService :: Authentication :: SAML</name>
+  <description>SignService Authentication SAML SP</description>
+  <url>https://github.com/swedenconnect/signservice</url>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:https://github.com/swedenconnect/signservice.git</connection>
+    <developerConnection>scm:git:https://github.com/swedenconnect/signservice.git</developerConnection>
+    <url>https://github.com/idsec/signservice/tree/master</url>
+  </scm>
+
+  <organization>
+    <name>Sweden Connect</name>
+    <url>https://www.swedenconnect.se</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <name>Martin Lindström</name>
+      <email>martin@idsec.se</email>
+      <organization>IDsec Solutions AB</organization>
+      <organizationUrl>https://www.idsec.se</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Stefan Santesson</name>
+      <email>stefan@idsec.se</email>
+      <organization>IDsec Solutions AB</organization>
+      <organizationUrl>https://www.idsec.se</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Magnus Hoflin</name>
+      <email>magnus.hoflin@digg.se</email>
+      <organization>DIGG</organization>
+      <organizationUrl>https://www.digg.se</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Henric Norlander</name>
+      <email>extern.henric.norlander@digg.se</email>
+      <organization>DIGG</organization>
+      <organizationUrl>https://www.digg.se</organizationUrl>
+    </developer>
+
+  </developers>
+  
+  <repositories>
+
+    <repository>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>https://repo1.maven.org/maven2/</url>
+    </repository>
+
+    <repository>
+      <id>shibboleth</id>
+      <name>Shibboleth Maven Repo</name>
+      <url>https://build.shibboleth.net/nexus/content/repositories/releases</url>
+    </repository>
+
+  </repositories>  
+
+  <properties>
+    <opensaml.version>4.2.0</opensaml.version>
+  </properties>
+  
+  <dependencyManagement>
+  
+    <dependencies>
+    
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk15on</artifactId>
+        <version>1.70</version>
+      </dependency>
+      
+      <!-- OpenSAML -->
+      <dependency>
+        <groupId>org.opensaml</groupId>
+        <artifactId>opensaml-core</artifactId>
+        <version>${opensaml.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.opensaml</groupId>
+        <artifactId>opensaml-saml-api</artifactId>
+        <version>${opensaml.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.opensaml</groupId>
+        <artifactId>opensaml-saml-impl</artifactId>
+        <version>${opensaml.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.opensaml</groupId>
+        <artifactId>opensaml-security-api</artifactId>
+        <version>${opensaml.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.opensaml</groupId>
+        <artifactId>opensaml-security-impl</artifactId>
+        <version>${opensaml.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.opensaml</groupId>
+        <artifactId>opensaml-storage-api</artifactId>
+        <version>${opensaml.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.opensaml</groupId>
+        <artifactId>opensaml-storage-impl</artifactId>
+        <version>${opensaml.version}</version>
+      </dependency>
+      
+      <dependency>
+          <groupId>org.opensaml</groupId>
+          <artifactId>opensaml-xmlsec-api</artifactId>
+          <version>${opensaml.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.opensaml</groupId>
+        <artifactId>opensaml-xmlsec-impl</artifactId>
+        <version>${opensaml.version}</version>
+      </dependency>      
+        
+    </dependencies>
+    
+  </dependencyManagement>  
+
+  <dependencies>
+
+    <dependency>
+      <groupId>se.swedenconnect.signservice</groupId>
+      <artifactId>signservice-authn-base</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+        
+    <dependency>
+      <groupId>se.swedenconnect.opensaml</groupId>
+      <artifactId>opensaml-security-ext</artifactId>
+    </dependency>    
+    
+    <dependency>
+      <groupId>se.swedenconnect.opensaml</groupId>
+      <artifactId>opensaml-addons</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>se.swedenconnect.opensaml</groupId>
+      <artifactId>opensaml-swedish-eid</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>se.swedenconnect.opensaml</groupId>
+          <artifactId>opensaml-addons</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    
+
+    <!-- Test -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <doctitle>SignService SAML Authentication Handler - ${project.version}</doctitle>
+          <windowtitle>SignService SAML Authentication Handler - ${project.version}</windowtitle>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+
+</project>

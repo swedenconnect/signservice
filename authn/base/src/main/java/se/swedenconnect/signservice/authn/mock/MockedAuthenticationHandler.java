@@ -75,7 +75,7 @@ public class MockedAuthenticationHandler implements AuthenticationHandler {
   public AuthenticationResultChoice authenticate(final AuthnRequirements authnRequirements,
       final SignMessage signMessage, final SignServiceContext context) throws UserAuthenticationException {
 
-    log.warn("{}: Handler called to authenticate user - DO NOT USE IN PRODUCTION", this.getName());
+    log.warn("{}: Handler '{}' called to authenticate user - DO NOT USE IN PRODUCTION", context.getId(), this.getName());
 
     final DefaultIdentityAssertion assertion = new DefaultIdentityAssertion();
     assertion.setIdentifier(UUID.randomUUID().toString());
@@ -100,7 +100,7 @@ public class MockedAuthenticationHandler implements AuthenticationHandler {
         }
       }
       catch (final Exception e) {
-        log.info("Invalid SignMessage supplied", e);
+        log.info("{}: Invalid SignMessage supplied", context.getId(), e);
       }
     }
     assertion.setIdentityAttributes(attributes);
@@ -158,8 +158,7 @@ public class MockedAuthenticationHandler implements AuthenticationHandler {
 
   /** {@inheritDoc} */
   @Override
-  public boolean canProcess(final HttpServletRequest httpRequest) {
-    // This handler does not support resuming authentication, so we always return false.
+  public boolean canProcess(final HttpServletRequest httpRequest, final SignServiceContext context) {
     return false;
   }
 

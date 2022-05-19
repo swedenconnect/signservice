@@ -26,6 +26,7 @@ jobs:
           paths: >-
             ${{ github.workspace }}/core/target/site/jacoco/jacoco.xml,
             ${{ github.workspace }}/authn/base/target/site/jacoco/jacoco.xml,
+            ${{ github.workspace }}/authn/saml/target/site/jacoco/jacoco.xml,
             ${{ github.workspace }}/protocol/dss-ext11/target/site/jacoco/jacoco.xml,
             ${{ github.workspace }}/audit/base/target/site/jacoco/jacoco.xml,
             ${{ github.workspace }}/audit/actuator/target/site/jacoco/jacoco.xml

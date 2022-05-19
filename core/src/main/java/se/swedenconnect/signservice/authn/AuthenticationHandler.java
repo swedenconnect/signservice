@@ -15,6 +15,8 @@
  */
 package se.swedenconnect.signservice.authn;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
@@ -49,6 +51,7 @@ public interface AuthenticationHandler {
    *
    * @return the handler name
    */
+  @Nonnull
   String getName();
 
   /**
@@ -69,8 +72,10 @@ public interface AuthenticationHandler {
    *           be directed to an authentication service)
    * @throws UserAuthenticationException for authentication errors
    */
-  AuthenticationResultChoice authenticate(final AuthnRequirements authnRequirements, final SignMessage signMessage,
-      final SignServiceContext context) throws UserAuthenticationException;
+  @Nonnull
+  AuthenticationResultChoice authenticate(@Nonnull final AuthnRequirements authnRequirements,
+      @Nullable final SignMessage signMessage, @Nonnull final SignServiceContext context)
+      throws UserAuthenticationException;
 
   /**
    * Resumes an authentication process.
@@ -82,15 +87,18 @@ public interface AuthenticationHandler {
    *           be directed to an authentication service)
    * @throws UserAuthenticationException for authentication errors
    */
-  AuthenticationResultChoice resumeAuthentication(final HttpServletRequest httpRequest,
-      final SignServiceContext context) throws UserAuthenticationException;
+  @Nonnull
+  AuthenticationResultChoice resumeAuthentication(@Nonnull final HttpServletRequest httpRequest,
+      @Nonnull final SignServiceContext context) throws UserAuthenticationException;
 
   /**
    * A predicate that given a request tells whether this handler can process the request. This method must be invoked
    * before {@link #resumeAuthentication(HttpServletRequest, SignServiceContext)} is called.
    *
    * @param httpRequest the HTTP request
+   * @param context the SignService context (may be null depending on whether the invoking engine has set up a session
+   *          or not)
    * @return true if the handler can process the request and false otherwise
    */
-  boolean canProcess(final HttpServletRequest httpRequest);
+  boolean canProcess(@Nonnull final HttpServletRequest httpRequest, @Nullable final SignServiceContext context);
 }
