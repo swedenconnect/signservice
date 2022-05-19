@@ -15,11 +15,12 @@
  */
 package se.swedenconnect.signservice.authn.saml.config;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * URL configuration settings for a SAML SP.
@@ -29,22 +30,18 @@ public class SpUrlConfiguration {
   /**
    * The application base URL. Must not end with a slash.
    *
-   * @param baseUrl the application base URL
    * @return the application base URL
    */
   @Getter
-  @Setter
   @Nonnull
   private String baseUrl;
 
   /**
    * The path to where the SP receives SAML responses. Relative to {@code baseUrl}.
    *
-   * @param assertionConsumerPath the path for receiving SAML responses
    * @return the path for receiving SAML responses
    */
   @Getter
-  @Setter
   @Nonnull
   private String assertionConsumerPath;
 
@@ -52,31 +49,86 @@ public class SpUrlConfiguration {
    * Optional additional path for receiving SAML responses. Relative to {@code baseUrl}. May be useful when testing and
    * debugging.
    *
-   * @param additionalAssertionConsumerPath additional path for receiving SAML responses
    * @return additional path for receiving SAML responses
    */
   @Getter
-  @Setter
   @Nullable
   private String additionalAssertionConsumerPath;
 
   /**
    * The path to where the SP exposes its metadata. Relative to {@code baseUrl}.
    *
-   * @param metadataPublishingPath the metadata publishing path
    * @return the metadata publishing path
    */
   @Getter
-  @Setter
   @Nonnull
   private String metadataPublishingPath;
+
+  /**
+   * Assigns the application base URL. Must not end with a slash.
+   *
+   * @param baseUrl the application base URL
+   */
+  public void setBaseUrl(@Nonnull final String baseUrl) {
+    this.baseUrl = Objects.requireNonNull(baseUrl, "baseUrl must not be null");
+    if (this.baseUrl.endsWith("/")) {
+      throw new IllegalArgumentException("The baseUrl must not end with a '/'");
+    }
+  }
+
+  /**
+   * Assigns the path to where the SP receives SAML responses. Relative to {@code baseUrl}.
+   *
+   * @param assertionConsumerPath the path for receiving SAML responses
+   */
+  public void setAssertionConsumerPath(@Nonnull final String assertionConsumerPath) {
+    this.assertionConsumerPath =
+        Objects.requireNonNull(assertionConsumerPath, "assertionConsumerPath must not be null");
+    if (!this.assertionConsumerPath.startsWith("/")) {
+      throw new IllegalArgumentException("The assertionConsumerPath must begin with a '/'");
+    }
+  }
+
+  /**
+   * Assigns an additional path for receiving SAML responses. Relative to {@code baseUrl}. May be useful when testing
+   * and debugging.
+   *
+   * @param additionalAssertionConsumerPath additional path for receiving SAML responses
+   */
+  public void setAdditionalAssertionConsumerPath(@Nullable final String additionalAssertionConsumerPath) {
+    this.additionalAssertionConsumerPath = additionalAssertionConsumerPath;
+    if (this.additionalAssertionConsumerPath != null && !this.additionalAssertionConsumerPath.startsWith("/")) {
+      throw new IllegalArgumentException("The additionalAssertionConsumerPath must begin with a '/'");
+    }
+  }
+
+  /**
+   * Assigns the path to where the SP exposes its metadata. Relative to {@code baseUrl}.
+   *
+   * @param metadataPublishingPath the metadata publishing path
+   */
+  public void setMetadataPublishingPath(@Nonnull final String metadataPublishingPath) {
+    this.metadataPublishingPath = Objects.requireNonNull(metadataPublishingPath, "metadataPublishingPath must not be null");
+    if (!this.metadataPublishingPath.startsWith("/")) {
+      throw new IllegalArgumentException("The metadataPublishingPath must begin with a '/'");
+    }
+  }
 
   /** {@inheritDoc} */
   @Override
   public String toString() {
-    return String.format(
-        "base-url='%s', assertion-consumerpath='%s', additional-assertion-consumer-path='%s', metadata-publishing-path='%s'",
-        this.baseUrl, this.assertionConsumerPath, this.additionalAssertionConsumerPath, this.metadataPublishingPath);
+    StringBuffer sb = new StringBuffer("base-url='")
+        .append(this.baseUrl)
+        .append("', assertion-consumer-path='")
+        .append(this.assertionConsumerPath);
+    if (this.additionalAssertionConsumerPath != null) {
+      sb.append("', additional-assertion-consumer-path='")
+      .append(this.additionalAssertionConsumerPath);
+    }
+    sb.append("', metadata-publishing-path='")
+      .append(this.metadataPublishingPath)
+      .append("'");
+    return sb.toString();
   }
 
 }
