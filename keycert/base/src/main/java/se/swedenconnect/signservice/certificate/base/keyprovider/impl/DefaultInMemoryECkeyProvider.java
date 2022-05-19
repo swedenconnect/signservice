@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;

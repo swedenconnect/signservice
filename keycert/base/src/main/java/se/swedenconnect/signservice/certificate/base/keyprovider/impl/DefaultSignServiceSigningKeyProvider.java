@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
 import lombok.NonNull;
-import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.session.SignServiceContext;
@@ -25,6 +23,7 @@ import se.swedenconnect.signservice.session.SignServiceContext;
 import java.security.KeyException;
 import java.security.KeyPair;
 import java.security.spec.ECGenParameterSpec;
+import java.util.List;
 
 /**
  * Implementation of a default key provider
@@ -43,7 +42,7 @@ public class DefaultSignServiceSigningKeyProvider implements SignServiceSigningK
    *   <li>EC curve NIST P-256</li>
    * </ul>
    */
-  public DefaultSignServiceSigningKeyProvider(){
+  public DefaultSignServiceSigningKeyProvider() {
     RSAKeyProviderSingleton.setInstance(new DefaultInMemoryRSAKeyProvider(3072, 100));
     rsaKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
     ecKeyProvider = new DefaultInMemoryECkeyProvider(new ECGenParameterSpec("P-256"));
@@ -56,14 +55,15 @@ public class DefaultSignServiceSigningKeyProvider implements SignServiceSigningK
    * @param rsaStackSize number of pre-produced RSA keys kept in the key generator
    * @param ecParameterSpec the EC curve to use for generating EC keys
    */
-  public DefaultSignServiceSigningKeyProvider(int rsaKeyLen, int rsaStackSize, ECGenParameterSpec ecParameterSpec){
+  public DefaultSignServiceSigningKeyProvider(int rsaKeyLen, int rsaStackSize, ECGenParameterSpec ecParameterSpec) {
     RSAKeyProviderSingleton.setInstance(new DefaultInMemoryRSAKeyProvider(rsaKeyLen, rsaStackSize));
     rsaKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
     ecKeyProvider = new DefaultInMemoryECkeyProvider(ecParameterSpec);
   }
 
   /** {@inheritDoc} */
-  @Override public KeyPair getSigningKeyPair(final @NonNull String keyType, final SignServiceContext context) throws KeyException {
+  @Override public KeyPair getSigningKeyPair(final @NonNull String keyType, final SignServiceContext context)
+    throws KeyException {
 
     switch (keyType.toUpperCase()) {
     case "RSA":
@@ -74,5 +74,9 @@ public class DefaultSignServiceSigningKeyProvider implements SignServiceSigningK
       throw new KeyException("Unsupported key type");
     }
 
+  }
+
+  @Override public List<String> getSupportedKeyTypes() {
+    return List.of("EC", "RSA");
   }
 }

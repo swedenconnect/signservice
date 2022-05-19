@@ -30,8 +30,13 @@ import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 @Slf4j
 public class RSAKeyProviderSingleton {
 
+  /** The singleton instance of the RSA key provider */
   private static volatile KeyProvider instance = null;
 
+  /**
+   * Gets the singleton instance of the RSA key provider
+   * @return RSA key provider singleton
+   */
   public static KeyProvider getSingletonInstance() {
     if (instance == null) {
       log.info("No RSA key provider singleton instance is set. Setting default in memory key provider with key size 3072 and stack size 100");
@@ -40,6 +45,10 @@ public class RSAKeyProviderSingleton {
     return instance;
   }
 
+  /**
+   * Set a new singleton instance to be returned by this singleton provider
+   * @param rsaKeyProvider
+   */
   public static synchronized void setInstance(@NonNull final KeyProvider rsaKeyProvider) {
     instance = rsaKeyProvider;
     log.info("Setting RSA key provider rsaKeyProvider of class {}", rsaKeyProvider.getClass().getName());

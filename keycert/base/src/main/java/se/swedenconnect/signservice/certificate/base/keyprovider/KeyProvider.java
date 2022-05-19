@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.base.keyprovider;
-
-import se.swedenconnect.security.algorithms.Algorithm;
 
 import java.security.KeyException;
 import java.security.KeyPair;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * Interface for a key provider
  */
 public interface KeyProvider {
 
+  /**
+   * Get a new key pair
+   * @return a key pair
+   * @throws KeyException on error obtaining a key pair
+   */
   KeyPair getKeyPair() throws KeyException;
 
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,23 +22,18 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Base64;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 
-import java.security.KeyException;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.spec.ECGenParameterSpec;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * DefaultInMemoryECkeyProviderTests
  */
 @Slf4j
 class DefaultInMemoryECkeyProviderTest {
@@ -47,7 +41,7 @@ class DefaultInMemoryECkeyProviderTest {
   @BeforeAll
   private static void init() {
     if (Security.getProvider("BC") == null) {
-      Security.insertProviderAt(new BouncyCastleProvider(),2);
+      Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
   }
 

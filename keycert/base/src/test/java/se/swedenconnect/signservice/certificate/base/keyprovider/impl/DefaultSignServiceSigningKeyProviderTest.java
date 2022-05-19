@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +20,6 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 
@@ -30,14 +28,13 @@ import java.security.Security;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECGenParameterSpec;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * DefaultSignServiceSigningKeyProviderTests
  */
 @Slf4j
 class DefaultSignServiceSigningKeyProviderTest {
@@ -45,17 +42,23 @@ class DefaultSignServiceSigningKeyProviderTest {
   @BeforeAll
   private static void init() {
     if (Security.getProvider("BC") == null) {
-      Security.insertProviderAt(new BouncyCastleProvider(),2);
+      Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
   }
 
   @Test
   void testSigningKeyProvider() throws Exception {
     SignServiceSigningKeyProvider defaultKeyProvider = new DefaultSignServiceSigningKeyProvider();
+    List<String> supportedKeyTypes = defaultKeyProvider.getSupportedKeyTypes();
+    assertEquals(2, supportedKeyTypes.size());
+    assertTrue(supportedKeyTypes.contains("EC"));
+    assertTrue(supportedKeyTypes.contains("RSA"));
+
     testEcKey(defaultKeyProvider.getSigningKeyPair("EC", null), SECObjectIdentifiers.secp256r1);
     testRSAKey(defaultKeyProvider.getSigningKeyPair("RSA", null), 3072);
 
-    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(2048,5, new ECGenParameterSpec("P-521"));
+    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(2048, 5,
+      new ECGenParameterSpec("P-521"));
     testEcKey(keyProvider.getSigningKeyPair("EC", null), SECObjectIdentifiers.secp521r1);
     testRSAKey(keyProvider.getSigningKeyPair("RSA", null), 2048);
   }

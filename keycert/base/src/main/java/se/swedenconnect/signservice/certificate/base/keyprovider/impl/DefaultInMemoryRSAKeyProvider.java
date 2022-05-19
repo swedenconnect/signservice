@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
 import lombok.Getter;
@@ -112,13 +111,14 @@ public class DefaultInMemoryRSAKeyProvider implements KeyProvider {
     keyGenerationThread.start();
   }
 
-  private KeyPair generateKeyPair() throws KeyException{
+  private KeyPair generateKeyPair() throws KeyException {
     try {
       KeyPairGenerator generator;
       generator = KeyPairGenerator.getInstance("RSA");
       generator.initialize(keySize);
       return generator.generateKeyPair();
-    } catch (NoSuchAlgorithmException e) {
+    }
+    catch (NoSuchAlgorithmException e) {
       throw new KeyException("Error generating RSA key pair", e);
     }
   }

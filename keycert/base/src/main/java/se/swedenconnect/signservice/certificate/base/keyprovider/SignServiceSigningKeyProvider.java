@@ -15,12 +15,11 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider;
 
-import se.swedenconnect.security.algorithms.Algorithm;
-import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
 import java.security.KeyException;
 import java.security.KeyPair;
+import java.util.List;
 
 /**
  * Interface for a signing key provider that provides signing keys to the signing service.
@@ -36,5 +35,12 @@ public interface SignServiceSigningKeyProvider {
    * @throws KeyException if key generation was unsuccessful or the intended key could not be obtained
    */
   KeyPair getSigningKeyPair(final String keytype, final SignServiceContext context) throws KeyException;
+
+  /**
+   * Return a list of key type identifiers supported by this key provider
+   *
+   * @return list of supported key types
+   */
+  List<String> getSupportedKeyTypes();
 
 }

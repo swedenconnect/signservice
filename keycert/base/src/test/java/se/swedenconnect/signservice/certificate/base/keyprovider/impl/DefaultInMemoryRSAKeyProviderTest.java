@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +24,7 @@ import java.security.KeyPair;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * DefaultInMemoryRSAKeyProviderTests
  */
 @Slf4j
 class DefaultInMemoryRSAKeyProviderTest {

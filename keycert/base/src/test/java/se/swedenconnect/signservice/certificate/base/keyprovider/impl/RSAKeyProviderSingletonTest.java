@@ -18,7 +18,6 @@ package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
-import se.swedenconnect.signservice.certificate.base.utils.TestKeyProviders;
 
 import java.security.KeyException;
 import java.security.KeyPair;
@@ -26,18 +25,14 @@ import java.security.KeyPair;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * RSAKeyProviderSingletonTests
  */
 class RSAKeyProviderSingletonTest {
 
+  public static KeyProvider defaultKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
+
   @Test
   void testGetInstance() throws Exception {
-    // Make sure the singleton key provider is instantiated first
-    KeyProvider defaultKeyProvider = TestKeyProviders.rsaKeyProvider;
-
     // Get the key provider from the same source
     KeyProvider rsaKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
     assertEquals(defaultKeyProvider.getClass(), rsaKeyProvider.getClass());
