@@ -84,7 +84,7 @@
     <dependency>
       <groupId>se.idsec.utils</groupId>
       <artifactId>print-cert</artifactId>
-      <version>[1.0.4,)</version>
+      <version>[1.0.3,)</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
