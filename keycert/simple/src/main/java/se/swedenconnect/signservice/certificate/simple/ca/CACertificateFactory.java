@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509CertificateHolder;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
@@ -38,6 +36,7 @@ public interface CACertificateFactory {
    * @return CA certificate
    * @throws CertificateException error creating the certificate
    */
-  X509CertificateHolder getCACertificate(final CertificateIssuerModel certificateIssuerModel, final CertNameModel<?> name,
+  X509CertificateHolder getCACertificate(final CertificateIssuerModel certificateIssuerModel,
+    final CertNameModel<?> name,
     final KeyPair caKeyPair) throws CertificateException;
 }

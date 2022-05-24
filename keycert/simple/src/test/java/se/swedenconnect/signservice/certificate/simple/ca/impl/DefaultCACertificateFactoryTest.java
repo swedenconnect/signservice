@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.simple.ca.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import se.idsec.utils.printcert.PrintCertificate;
@@ -33,21 +31,15 @@ import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSign
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.CACertificateFactory;
 
-import java.io.IOException;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
 import java.security.Security;
-import java.security.cert.CertificateException;
 import java.security.spec.ECGenParameterSpec;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * CA certificate factory test
  */
 @Slf4j
 class DefaultCACertificateFactoryTest {
@@ -57,7 +49,7 @@ class DefaultCACertificateFactoryTest {
   @BeforeAll
   private static void init() {
     caCertificateFactory = new DefaultCACertificateFactory();
-    if (Security.getProvider("BC") == null){
+    if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
   }

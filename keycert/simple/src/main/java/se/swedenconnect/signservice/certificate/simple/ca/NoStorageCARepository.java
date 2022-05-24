@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.simple.ca;
 
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.asn1.x509.CRLNumber;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
@@ -38,17 +39,31 @@ import java.util.List;
 /**
  * This CA repository does not store any certificates at all.
  * It may be useful for simple deployments where no revocation of certificates is provided
- *
+ * <p>
  * A crl file is however created in order to facilitate creation of an empty CRL
  */
-public class NoStorageCARepository implements CARepository, CRLRevocationDataProvider{
+public class NoStorageCARepository implements CARepository, CRLRevocationDataProvider {
 
+  /** The current CRL number */
   private BigInteger crlNumber;
+
+  /** CRL file for storing the latest CRL */
   private final File crlFile;
 
-  public NoStorageCARepository(File crlFile) {
+  public NoStorageCARepository(File crlFile) throws IOException {
     this.crlFile = crlFile;
     this.crlNumber = BigInteger.ZERO;
+    if (crlFile.canRead()) {
+      // If published CRL exists. Get CRL number from current CRL
+      crlNumber = getCRLNumberFromCRL();
+    }
+  }
+
+  private BigInteger getCRLNumberFromCRL() throws IOException {
+    X509CRLHolder crlHolder = new X509CRLHolder(new FileInputStream(crlFile));
+    Extension crlNumberExtension = crlHolder.getExtension(Extension.cRLNumber);
+    CRLNumber crlNumberFromCrl = CRLNumber.getInstance(crlNumberExtension.getParsedValue());
+    return crlNumberFromCrl.getCRLNumber();
   }
 
   /** {@inheritDoc} */

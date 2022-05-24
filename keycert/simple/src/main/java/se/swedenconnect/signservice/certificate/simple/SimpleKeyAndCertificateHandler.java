@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import se.idsec.signservice.security.certificate.CertificateUtils;
-import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
@@ -42,8 +41,6 @@ import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHa
 import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMappingData;
 import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMappingException;
-import se.swedenconnect.signservice.certificate.base.attributemapping.DefaultValuePolicy;
-import se.swedenconnect.signservice.certificate.base.attributemapping.impl.DefaultSAMLAttributeMapper;
 import se.swedenconnect.signservice.certificate.base.configuration.DefaultConfiguration;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
@@ -63,19 +60,26 @@ import java.util.*;
 public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHandler {
 
   /** CA service used to issue certificates */
-  private CAService caService;
+  private final CAService caService;
+
   /** name of this certificate handler */
-  private String name;
+  private final String name;
+
   /** Attribute mapper mapping attribute data from assertion to Certificates */
-  AttributeMapper attributeMapper;
+  private final AttributeMapper attributeMapper;
 
   /**
    * Optional certificate policy to be included in issued certificates.
    *
-   * @param certificate policy to be included in issued certificates
+   * @param certificatePolicy policy to be included in issued certificates
    */
   @Setter private CertificatePolicyModel certificatePolicy;
 
+  /**
+   * Service name placed in AuthnContextExtensions
+   *
+   * @param serviceName service name for inclusion in AuthnContextExtensions
+   */
   @Setter private String serviceName = "sign-service";
 
   /**
@@ -180,43 +184,69 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
     }
   }
 
-  private void addSubjDirAttributesToCertModel(DefaultCertificateModelBuilder certificateModelBuilder, List<AttributeMappingData> mappedCertAttributes)
+  /**
+   * Add subject directory attributes to the certificate model
+   *
+   * @param certificateModelBuilder certificate model builder
+   * @param mappedCertAttributes mapped attributes from authentication source with mapping information
+   * @throws CertificateException on error processing subject directory attribute data
+   */
+  private void addSubjDirAttributesToCertModel(final DefaultCertificateModelBuilder certificateModelBuilder,
+    final List<AttributeMappingData> mappedCertAttributes)
     throws CertificateException {
     List<AttributeModel> sanAttributeList = new ArrayList<>();
     for (AttributeMappingData mappedAttribute : mappedCertAttributes) {
-      if (mappedAttribute.getCertificateAttributeType().equals(CertificateAttributeType.SDA)){
+      if (mappedAttribute.getCertificateAttributeType().equals(CertificateAttributeType.SDA)) {
         try {
           sanAttributeList.add(AttributeModel.builder()
-              .attributeType(new ASN1ObjectIdentifier(mappedAttribute.getReference()))
-              .valueList(List.of(mappedAttribute.getValue()))
+            .attributeType(new ASN1ObjectIdentifier(mappedAttribute.getReference()))
+            .valueList(List.of(mappedAttribute.getValue()))
             .build());
-        } catch (Exception ex) {
-          throw new CertificateException("Illegal Subject Directory Attribute attribute data - aborting certificate issuance");
+        }
+        catch (Exception ex) {
+          throw new CertificateException(
+            "Illegal Subject Directory Attribute attribute data - aborting certificate issuance");
         }
       }
     }
-    if (!sanAttributeList.isEmpty()){
+    if (!sanAttributeList.isEmpty()) {
+      // Subject dir attribute was found. Add it.
       certificateModelBuilder.subjectDirectoryAttributes(new SubjDirectoryAttributesModel(sanAttributeList));
     }
   }
 
-  private void addSANToCertModel(DefaultCertificateModelBuilder certificateModelBuilder, List<AttributeMappingData> mappedCertAttributes)
+  /**
+   * Add subject alternative name to certificate model
+   *
+   * @param certificateModelBuilder certificate model builder
+   * @param mappedCertAttributes mapped attributes from authentication source with mapping information
+   * @throws CertificateException error parsing subject alt name data
+   */
+  private void addSANToCertModel(DefaultCertificateModelBuilder certificateModelBuilder,
+    List<AttributeMappingData> mappedCertAttributes)
     throws CertificateException {
     Map<Integer, String> subjectAltNameMap = new HashMap<>();
     for (AttributeMappingData mappedAttribute : mappedCertAttributes) {
-      if (mappedAttribute.getCertificateAttributeType().equals(CertificateAttributeType.SAN)){
+      if (mappedAttribute.getCertificateAttributeType().equals(CertificateAttributeType.SAN)) {
         try {
           subjectAltNameMap.put(Integer.valueOf(mappedAttribute.getReference()), mappedAttribute.getValue());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
           throw new CertificateException("Illegal SAN attribute data - aborting certificate issuance");
         }
       }
     }
-    if (!subjectAltNameMap.isEmpty()){
+    if (!subjectAltNameMap.isEmpty()) {
       certificateModelBuilder.subjectAltNames(subjectAltNameMap);
     }
   }
 
+  /**
+   * Get attribute mapping data for the AuthnContextExtension
+   *
+   * @param mappedCertAttributes mapped attributes from authentication source with mapping information
+   * @return attribute mapping data for the AuthnContextExtension
+   */
   private List<AttributeMapping> getAuthContextExtAttributeMappings(List<AttributeMappingData> mappedCertAttributes) {
     List<AttributeMapping> extAttrMappingList = new ArrayList<>();
     for (AttributeMappingData attributeMappingData : mappedCertAttributes) {
@@ -235,9 +265,17 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
     return extAttrMappingList;
   }
 
-  private CertNameModel<?> getCertNameModel(List<AttributeMappingData> attributeMappings) throws CertificateException {
+  /**
+   * Get subject name model
+   *
+   * @param mappedCertAttributes mapped attributes from authentication source with mapping information
+   * @return subject name model
+   * @throws CertificateException error parsing subject name information
+   */
+  private CertNameModel<?> getCertNameModel(List<AttributeMappingData> mappedCertAttributes)
+    throws CertificateException {
     List<AttributeTypeAndValueModel> attributeList = new ArrayList<>();
-    for (AttributeMappingData attributeMapping : attributeMappings) {
+    for (AttributeMappingData attributeMapping : mappedCertAttributes) {
       CertificateAttributeType attributeType = attributeMapping.getCertificateAttributeType();
       if (attributeType.equals(CertificateAttributeType.RDN)) {
         try {
@@ -246,8 +284,10 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
             .value(attributeMapping.getValue())
             .build()
           );
-        } catch (Exception ex) {
-          throw new CertificateException("Certificate attribute from authentication contains illegal data - aborting certificate issuance");
+        }
+        catch (Exception ex) {
+          throw new CertificateException(
+            "Certificate attribute from authentication contains illegal data - aborting certificate issuance");
         }
       }
     }

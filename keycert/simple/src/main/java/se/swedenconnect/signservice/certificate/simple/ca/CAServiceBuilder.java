@@ -23,6 +23,7 @@ import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.Calendar;
@@ -117,7 +118,7 @@ public class CAServiceBuilder {
    */
   public static CAServiceBuilder getInstance(final PrivateKey privateKey,
     final List<X509CertificateHolder> caCertificateChain, final String crlDpUrl, final String algorithm,
-    final @NonNull File crlFile) {
+    final @NonNull File crlFile) throws IOException {
     return new CAServiceBuilder(privateKey, caCertificateChain, crlDpUrl, algorithm,
       new NoStorageCARepository(crlFile));
   }

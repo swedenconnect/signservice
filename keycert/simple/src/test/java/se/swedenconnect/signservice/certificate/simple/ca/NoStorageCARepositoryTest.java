@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.simple.ca;
 
 import lombok.extern.slf4j.Slf4j;
@@ -42,10 +41,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * No storage repository test
  */
 @Slf4j
 class NoStorageCARepositoryTest {

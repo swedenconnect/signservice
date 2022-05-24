@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.simple.ca.impl;
 
 import lombok.NonNull;
-import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.cert.X509CertificateHolder;
 import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
@@ -28,7 +26,6 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
-import se.swedenconnect.ca.engine.ca.models.cert.impl.EncodedCertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.SelfIssuedCertificateModelBuilder;
 import se.swedenconnect.ca.engine.utils.CAUtils;
 import se.swedenconnect.signservice.certificate.simple.ca.CACertificateFactory;
@@ -53,8 +50,10 @@ public class DefaultCACertificateFactory implements CACertificateFactory {
     final @NonNull CertNameModel<?> name,
     final @NonNull KeyPair caKeyPair) throws CertificateException {
     try {
-      BasicCertificateIssuer issuer = new BasicCertificateIssuer(certificateIssuerModel, CAUtils.getX500Name(name, new AttributeValueEncoder()), caKeyPair.getPrivate());
-      CertificateModel certificateModel = SelfIssuedCertificateModelBuilder.getInstance(caKeyPair, certificateIssuerModel)
+      BasicCertificateIssuer issuer = new BasicCertificateIssuer(certificateIssuerModel,
+        CAUtils.getX500Name(name, new AttributeValueEncoder()), caKeyPair.getPrivate());
+      CertificateModel certificateModel = SelfIssuedCertificateModelBuilder.getInstance(caKeyPair,
+          certificateIssuerModel)
         .subject(name)
         .basicConstraints(new BasicConstraintsModel(true, true))
         .keyUsage(new KeyUsageModel(KeyUsage.keyCertSign + KeyUsage.cRLSign, true))

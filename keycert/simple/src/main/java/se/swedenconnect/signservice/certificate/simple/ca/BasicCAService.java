@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import lombok.Setter;
 import org.bouncycastle.cert.X509CertificateHolder;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
@@ -27,10 +25,8 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
-import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuer;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
-import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 
@@ -38,8 +34,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -69,44 +63,68 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
     }
   }
 
+  /** {@inheritDoc} */
   @Override public CertificateIssuer getCertificateIssuer() {
     return certificateIssuer;
   }
 
+  /** {@inheritDoc} */
   @Override protected CRLIssuer getCrlIssuer() {
     return crlIssuer;
   }
 
+  /** {@inheritDoc} */
   @Override
-  public X509CertificateHolder getOCSPResponderCertificate(){
+  public X509CertificateHolder getOCSPResponderCertificate() {
     return ocspResponderCertificate;
   }
 
-  @Override public String getCaAlgorithm() {
+  /** {@inheritDoc} */
+  @Override
+  public String getCaAlgorithm() {
     return certificateIssuer.getCertificateIssuerModel().getAlgorithm();
   }
 
-  @Override public List<String> getCrlDpURLs() {
+  /** {@inheritDoc} */
+  @Override
+  public List<String> getCrlDpURLs() {
     return crlDistributionPoints;
   }
 
-  @Override public String getOCSPResponderURL() {
+  /** {@inheritDoc} */
+  @Override
+  public String getOCSPResponderURL() {
     return ocspResponderUrl;
   }
 
-  public void setOcspResponder(OCSPResponder ocspResponder, String ocspResponderUrl, X509CertificateHolder ocspResponderCertificate) {
+  /**
+   * Set OCSP responder for this CA service
+   *
+   * @param ocspResponder ocsp responder implementation
+   * @param ocspResponderUrl URL for sending requests to the OCSP responder
+   * @param ocspResponderCertificate OCSP responder certificate
+   */
+  public void setOcspResponder(OCSPResponder ocspResponder, String ocspResponderUrl,
+    X509CertificateHolder ocspResponderCertificate) {
     this.ocspResponder = ocspResponder;
     this.ocspResponderUrl = ocspResponderUrl;
     this.ocspResponderCertificate = ocspResponderCertificate;
   }
 
-  @Override public OCSPResponder getOCSPResponder() {
+  /** {@inheritDoc} */
+  @Override
+  public OCSPResponder getOCSPResponder() {
     return ocspResponder;
   }
 
-  @Override protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel subject, PublicKey publicKey,
-    X509CertificateHolder issuerCertificate, CertificateIssuerModel certificateIssuerModel) throws CertificateIssuanceException {
-    DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(publicKey, getCaCertificate(),
+  /** {@inheritDoc} */
+  @Override
+  protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel subject,
+    PublicKey publicKey,
+    X509CertificateHolder issuerCertificate, CertificateIssuerModel certificateIssuerModel)
+    throws CertificateIssuanceException {
+    DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(publicKey,
+      getCaCertificate(),
       certificateIssuerModel);
     certModelBuilder
       .subject(subject)

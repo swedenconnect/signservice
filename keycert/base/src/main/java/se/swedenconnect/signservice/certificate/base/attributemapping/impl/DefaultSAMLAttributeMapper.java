@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.base.attributemapping.impl;
 
 import lombok.NonNull;
@@ -130,7 +129,8 @@ public class DefaultSAMLAttributeMapper implements AttributeMapper {
     String valueStr = getStringValue(matchingAttribute);
     if (StringUtils.isBlank(valueStr)) {
       if (requestedCertificateAttribute.isRequired()) {
-        throw new AttributeMappingException("Null value in mapped attribute for required attribute: " + requestedCertificateAttribute.getIdentifier());
+        throw new AttributeMappingException(
+          "Null value in mapped attribute for required attribute: " + requestedCertificateAttribute.getIdentifier());
       }
       log.debug("Null value in mapped attribute for non-required attribute - skipping");
       return null;
@@ -164,7 +164,7 @@ public class DefaultSAMLAttributeMapper implements AttributeMapper {
     List<IdentityAttributeIdentifier> sources, IdentityAssertion assertion) {
 
     List<IdentityAttribute<?>> identityAttributes = assertion.getIdentityAttributes();
-    if (identityAttributes == null || identityAttributes.isEmpty()){
+    if (identityAttributes == null || identityAttributes.isEmpty()) {
       return null;
     }
 
@@ -173,7 +173,7 @@ public class DefaultSAMLAttributeMapper implements AttributeMapper {
       Optional<IdentityAttribute<?>> matchAttributeOptional = identityAttributes.stream()
         .filter(identityAttribute -> identityAttribute.getIdentifier().equalsIgnoreCase(identifier))
         .findFirst();
-      if (matchAttributeOptional.isPresent()){
+      if (matchAttributeOptional.isPresent()) {
         // We found a match. use it
         return matchAttributeOptional.get();
       }

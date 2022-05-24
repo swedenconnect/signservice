@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.base.attributemapping;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 
 /**
@@ -28,11 +30,22 @@ import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 @Builder
 public class AttributeMappingData {
 
+  /** The type of certificate attribute (RDN in subject name, Subject Alt Name (SAN) or Subject Directory Attributes (SDA) */
   CertificateAttributeType certificateAttributeType;
+
+  /** The certificate attribute reference. This is an index of a SAN or the OID string for an attribute */
   String reference;
+
+  /** The attribute ID of the source assertion attribute */
   String sourceId;
+
+  /** The friendly name of the assertion attribute */
   String sourceFriendlyName;
+
+  /** An optional default value if no other trusted source is available */
   boolean defaultValue;
+
+  /** Attribute value */
   String value;
 
 }

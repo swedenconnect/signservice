@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.base.attributemapping;
 
 import lombok.NonNull;
@@ -35,6 +34,7 @@ public interface AttributeMapper {
    * @return certificate attribute mappings
    * @throws AttributeMappingException error processing attribute mapping data
    */
-  List<AttributeMappingData> getMappedCertAttributes(@NonNull SignRequestMessage signRequest, @NonNull IdentityAssertion assertion) throws AttributeMappingException;
+  List<AttributeMappingData> getMappedCertAttributes(@NonNull SignRequestMessage signRequest,
+    @NonNull IdentityAssertion assertion) throws AttributeMappingException;
 
 }

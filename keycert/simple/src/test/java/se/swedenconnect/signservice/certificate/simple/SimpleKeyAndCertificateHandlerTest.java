@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.simple;
 
 import lombok.Data;
@@ -93,12 +92,15 @@ class SimpleKeyAndCertificateHandlerTest {
 
   @Test
   void simpleKeyAndCertificateHandlerTest() throws Exception {
-
+    log.info("Simple key and certificate handler tests");
     SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(2048, 5,
       new ECGenParameterSpec("P-256"));
+    log.info("Created key provider");
     DefaultConfiguration defaultConfiguration = DefaultConfigurationSingleton.getSingletonInstance();
+    log.info("Get default configuration");
     AlgorithmRegistrySingleton algorithmRegistry = AlgorithmRegistrySingleton.getInstance();
     KeyPair caKeyPair = keyProvider.getSigningKeyPair("EC");
+    log.info("CA key pair generated");
     CACertificateFactory caCertificateFactory = new DefaultCACertificateFactory();
     X509CertificateHolder caCertificate = caCertificateFactory.getCACertificate(
       new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10),
@@ -109,6 +111,8 @@ class SimpleKeyAndCertificateHandlerTest {
       )),
       caKeyPair
     );
+    log.info("CA Certificate generated\n{}", new PrintCertificate(caCertificate).toString(true, true, true));
+
     BasicCAService caService = CAServiceBuilder.getInstance(caKeyPair.getPrivate(), List.of(caCertificate),
       "http://localholst://crldp",
       XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, new File(caDir, "kht-ca.crl")).build();
@@ -169,9 +173,10 @@ class SimpleKeyAndCertificateHandlerTest {
 
   }
 
-  void testKeyAndCertGeneration(String message, KeyAndCertificateHandler keyAndCertificateHandler, String signServiceSignAlo,
+  void testKeyAndCertGeneration(String message, KeyAndCertificateHandler keyAndCertificateHandler,
+    String signServiceSignAlo,
     String clientId, CertificateType certificateType, String profile,
-    List<CertificateAttributeMapping> attributeMappings, Class<? extends Exception> exceptionClass) throws  Exception{
+    List<CertificateAttributeMapping> attributeMappings, Class<? extends Exception> exceptionClass) throws Exception {
 
     if (exceptionClass == null) {
       SignRequestMessage signRequest = getSignRequest(
@@ -180,7 +185,8 @@ class SimpleKeyAndCertificateHandlerTest {
       SignServiceContext context = new DefaultSignServiceContext("context-id");
       keyAndCertificateHandler.checkRequirements(signRequest, context);
       log.info("Checked requirements for sign request OK");
-      PkiCredential pkiCredential = keyAndCertificateHandler.generateSigningCredential(signRequest, TestData.stdAssertion,
+      PkiCredential pkiCredential = keyAndCertificateHandler.generateSigningCredential(signRequest,
+        TestData.stdAssertion,
         context);
 
       log.info("Issued certificate from CA:\n{}\n{}",
@@ -196,7 +202,8 @@ class SimpleKeyAndCertificateHandlerTest {
       SignServiceContext context = new DefaultSignServiceContext("context-id");
       keyAndCertificateHandler.checkRequirements(signRequest, context);
       log.info("Checked requirements for sign request OK");
-      PkiCredential pkiCredential = keyAndCertificateHandler.generateSigningCredential(signRequest, TestData.stdAssertion,
+      PkiCredential pkiCredential = keyAndCertificateHandler.generateSigningCredential(signRequest,
+        TestData.stdAssertion,
         context);
     });
     log.info("Caught appropriate exception: {}", exception.toString());
