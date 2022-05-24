@@ -30,6 +30,10 @@ import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 @Slf4j
 public class RSAKeyProviderSingleton {
 
+  /** private constructor */
+  private RSAKeyProviderSingleton() {
+  }
+
   /** The singleton instance of the RSA key provider */
   private static volatile KeyProvider instance = null;
 

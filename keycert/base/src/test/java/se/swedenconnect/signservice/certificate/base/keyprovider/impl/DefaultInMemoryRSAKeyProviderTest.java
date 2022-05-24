@@ -36,6 +36,9 @@ class DefaultInMemoryRSAKeyProviderTest {
     log.info("Default in memory RSA Key provider tests");
     DefaultInMemoryRSAKeyProvider keyProvider = new DefaultInMemoryRSAKeyProvider(keySize, 5);
     log.info("Created new key provider");
+    assertEquals(5, keyProvider.getKeyStackSize());
+    log.info("Confirmed key stack size");
+
     Thread keyGenerationThread = keyProvider.getKeyGenerationThread();
     log.info("keygen thread alive: {}", keyGenerationThread.isAlive());
     assertNotNull(keyGenerationThread);

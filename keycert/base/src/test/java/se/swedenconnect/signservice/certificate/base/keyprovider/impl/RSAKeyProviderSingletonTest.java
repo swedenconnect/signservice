@@ -16,6 +16,7 @@
 
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 
@@ -29,7 +30,12 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class RSAKeyProviderSingletonTest {
 
-  public static KeyProvider defaultKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
+  public static KeyProvider defaultKeyProvider;
+
+  @BeforeAll
+  public static void init(){
+    defaultKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
+  }
 
   @Test
   void testGetInstance() throws Exception {

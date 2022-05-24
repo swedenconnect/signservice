@@ -29,12 +29,21 @@ public interface SignServiceSigningKeyProvider {
   /**
    * Generates or obtains a key pair for the signer
    *
-   * @param keytype the key type to obtain or create
+   * @param keyType the key type to obtain or create
+   * @return key pair
+   * @throws KeyException if key generation was unsuccessful or the intended key could not be obtained
+   */
+  KeyPair getSigningKeyPair(final String keyType) throws KeyException;
+
+  /**
+   * Generates or obtains a key pair for the signer
+   *
+   * @param keyType the key type to obtain or create
    * @param context optional context data that may provide additional information on the source of the key or on how to generate it
    * @return key pair
    * @throws KeyException if key generation was unsuccessful or the intended key could not be obtained
    */
-  KeyPair getSigningKeyPair(final String keytype, final SignServiceContext context) throws KeyException;
+  KeyPair getSigningKeyPair(final String keyType, final SignServiceContext context) throws KeyException;
 
   /**
    * Return a list of key type identifiers supported by this key provider

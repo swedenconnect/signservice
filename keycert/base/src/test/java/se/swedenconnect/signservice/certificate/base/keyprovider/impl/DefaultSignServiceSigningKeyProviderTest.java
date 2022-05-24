@@ -54,13 +54,13 @@ class DefaultSignServiceSigningKeyProviderTest {
     assertTrue(supportedKeyTypes.contains("EC"));
     assertTrue(supportedKeyTypes.contains("RSA"));
 
-    testEcKey(defaultKeyProvider.getSigningKeyPair("EC", null), SECObjectIdentifiers.secp256r1);
+    testEcKey(defaultKeyProvider.getSigningKeyPair("EC"), SECObjectIdentifiers.secp256r1);
     testRSAKey(defaultKeyProvider.getSigningKeyPair("RSA", null), 3072);
 
     SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(2048, 5,
       new ECGenParameterSpec("P-521"));
     testEcKey(keyProvider.getSigningKeyPair("EC", null), SECObjectIdentifiers.secp521r1);
-    testRSAKey(keyProvider.getSigningKeyPair("RSA", null), 2048);
+    testRSAKey(keyProvider.getSigningKeyPair("RSA"), 2048);
   }
 
   private void testRSAKey(KeyPair keyPair, int keyLen) {

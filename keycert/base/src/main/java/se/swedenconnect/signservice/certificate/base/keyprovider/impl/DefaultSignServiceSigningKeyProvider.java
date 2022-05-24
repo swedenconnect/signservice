@@ -62,6 +62,11 @@ public class DefaultSignServiceSigningKeyProvider implements SignServiceSigningK
   }
 
   /** {@inheritDoc} */
+  @Override public KeyPair getSigningKeyPair(String keyType) throws KeyException {
+    return getSigningKeyPair(keyType, null);
+  }
+
+  /** {@inheritDoc} */
   @Override public KeyPair getSigningKeyPair(final @NonNull String keyType, final SignServiceContext context)
     throws KeyException {
 
