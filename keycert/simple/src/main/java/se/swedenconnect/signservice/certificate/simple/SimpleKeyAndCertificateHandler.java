@@ -86,8 +86,11 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
    * Constructor for the key and certificate handler
    *
    * @param signingKeyProvider provider for providing signing keys
-   * @param defaultConfiguration
-   * @param algorithmRegistry
+   * @param defaultConfiguration default configuration
+   * @param algorithmRegistry algorithm registry
+   * @param caService ca service
+   * @param attributeMapper attribute mapper
+   * @param name name of this handler
    */
   public SimpleKeyAndCertificateHandler(
     final @NonNull SignServiceSigningKeyProvider signingKeyProvider,

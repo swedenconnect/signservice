@@ -115,6 +115,7 @@ public class CAServiceBuilder {
    * @param algorithm the signature algorithm of this CA
    * @param crlFile the file that will be used to write the latest CRL published by this CA
    * @return instance of this CA service builder
+   * @throws IOException error getting instance
    */
   public static CAServiceBuilder getInstance(final PrivateKey privateKey,
     final List<X509CertificateHolder> caCertificateChain, final String crlDpUrl, final String algorithm,
@@ -188,7 +189,7 @@ public class CAServiceBuilder {
   /**
    * Setter for type of certificate start offset time units as Calendar unit type integers. E.g. set as Calendar.MINUTE
    *
-   * @param certificateStartOffsetAmountType
+   * @param certificateStartOffsetAmountType type of time offset
    * @return this builder
    */
   public CAServiceBuilder certificateStartOffsetAmountType(int certificateStartOffsetAmountType) {

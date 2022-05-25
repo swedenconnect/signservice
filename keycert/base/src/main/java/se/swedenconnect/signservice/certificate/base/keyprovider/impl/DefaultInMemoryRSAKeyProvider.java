@@ -56,6 +56,12 @@ public class DefaultInMemoryRSAKeyProvider implements KeyProvider {
    */
   @Getter private Thread keyGenerationThread;
 
+  /**
+   * Constructor
+   *
+   * @param keySize key size
+   * @param keyStackSize key stack size
+   */
   public DefaultInMemoryRSAKeyProvider(int keySize, int keyStackSize) {
     this.keySize = keySize;
     this.keyStackSize = keyStackSize;
@@ -63,7 +69,9 @@ public class DefaultInMemoryRSAKeyProvider implements KeyProvider {
     fillUpKeyStack();
   }
 
-  @Override public synchronized KeyPair getKeyPair() throws KeyException {
+  /** {@inheritDoc} */
+  @Override
+  public synchronized KeyPair getKeyPair() throws KeyException {
     KeyPair keyPair = Optional.ofNullable(addOrRetrieveStackedKey(null)).orElse(generateKeyPair());
     fillUpKeyStack();
     return keyPair;

@@ -48,6 +48,16 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
   private X509CertificateHolder ocspResponderCertificate;
   private String ocspResponderUrl;
 
+  /**
+   * Constructor
+   *
+   * @param privateKey private key of the CA service
+   * @param caCertificateChain Certificate chain representing this CA with the ca certificate of this CA being the first certificate
+   * @param caRepository repository for storing issued certificates
+   * @param issuerModel model for issuing certificates
+   * @param crlIssuerModel model for publishing CRL:s
+   * @throws NoSuchAlgorithmException algorithm is not supported
+   */
   public BasicCAService(PrivateKey privateKey, List<X509CertificateHolder> caCertificateChain,
     CARepository caRepository, CertificateIssuerModel issuerModel, CRLIssuerModel crlIssuerModel)
     throws NoSuchAlgorithmException {

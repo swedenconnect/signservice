@@ -51,7 +51,7 @@ public class RSAKeyProviderSingleton {
 
   /**
    * Set a new singleton instance to be returned by this singleton provider
-   * @param rsaKeyProvider
+   * @param rsaKeyProvider key provider
    */
   public static synchronized void setInstance(@NonNull final KeyProvider rsaKeyProvider) {
     instance = rsaKeyProvider;

@@ -21,17 +21,37 @@ import java.io.IOException;
  * Exception for errors during certificate attribute mapping from authn data
  */
 public class AttributeMappingException extends IOException {
+
+  /**
+   * Constructor
+   */
   public AttributeMappingException() {
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   */
   public AttributeMappingException(String message) {
     super(message);
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   * @param cause cause
+   */
   public AttributeMappingException(String message, Throwable cause) {
     super(message, cause);
   }
 
+  /**
+   * Constructor
+   *
+   * @param cause cause
+   */
   public AttributeMappingException(Throwable cause) {
     super(cause);
   }

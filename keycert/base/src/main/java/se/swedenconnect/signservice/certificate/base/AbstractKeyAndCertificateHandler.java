@@ -56,6 +56,8 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
    * Constructor for the key and certificate handler
    *
    * @param signingKeyProvider provider for providing signing keys
+   * @param defaultConfiguration default value configuration data
+   * @param algorithmRegistry algorithm registry
    */
   public AbstractKeyAndCertificateHandler(final @NonNull SignServiceSigningKeyProvider signingKeyProvider,
     final @NonNull DefaultConfiguration defaultConfiguration, final @NonNull AlgorithmRegistry algorithmRegistry) {

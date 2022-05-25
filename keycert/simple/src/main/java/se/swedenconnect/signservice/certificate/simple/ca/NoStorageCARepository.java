@@ -50,6 +50,12 @@ public class NoStorageCARepository implements CARepository, CRLRevocationDataPro
   /** CRL file for storing the latest CRL */
   private final File crlFile;
 
+  /**
+   * Constructor
+   *
+   * @param crlFile CRL file
+   * @throws IOException error creating repository
+   */
   public NoStorageCARepository(File crlFile) throws IOException {
     this.crlFile = crlFile;
     this.crlNumber = BigInteger.ZERO;
