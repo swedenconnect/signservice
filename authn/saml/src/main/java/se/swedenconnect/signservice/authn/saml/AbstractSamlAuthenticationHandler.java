@@ -157,6 +157,7 @@ public abstract class AbstractSamlAuthenticationHandler implements Authenticatio
    * Gets the handler name. Returns the class name if the name has not explicitly been set.
    */
   @Override
+  @Nonnull
   public String getName() {
     return Optional.ofNullable(this.name).orElse(this.getClass().getSimpleName());
   }
@@ -166,7 +167,7 @@ public abstract class AbstractSamlAuthenticationHandler implements Authenticatio
    *
    * @param name the handler name
    */
-  public void setName(final String name) {
+  public void setName(@Nonnull final String name) {
     this.name = name;
   }
 
@@ -218,7 +219,7 @@ public abstract class AbstractSamlAuthenticationHandler implements Authenticatio
       final DefaultHttpRequestMessage message =
           new DefaultHttpRequestMessage(requestObject.getMethod(), requestObject.getSendUrl());
       if (requestObject.getRequestParameters() != null) {
-        requestObject.getRequestParameters().entrySet().stream()
+        requestObject.getRequestParameters().entrySet()
             .forEach(e -> message.addHttpParameter(e.getKey(), e.getValue()));
       }
       requestObject.getHttpHeaders().entrySet().stream()

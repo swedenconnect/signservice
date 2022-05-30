@@ -108,6 +108,8 @@ public class MockedAuthenticationHandler implements AuthenticationHandler {
 
     final AuthenticationResult result = new AuthenticationResult() {
 
+      private static final long serialVersionUID = 5094209594471602113L;
+
       @Override
       public boolean signMessageDisplayed() {
         return assertion.getIdentityAttributes().stream()
