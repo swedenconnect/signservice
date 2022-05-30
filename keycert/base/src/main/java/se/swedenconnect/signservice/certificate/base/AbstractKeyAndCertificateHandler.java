@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
+import se.swedenconnect.security.credential.AbstractPkiCredential;
 import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
@@ -179,12 +180,17 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
     context.put(DefaultParameter.certificateProfile.getParameterName(), certificateProfile);
 
     final SignatureAlgorithm algorithm = (SignatureAlgorithm) this.algorithmRegistry.getAlgorithm(signatureAlgorithm);
-    final PkiCredential signingKeyPair = this.signingKeyProvider.getSigningKeyPair(algorithm.getKeyType(), context);
+    // Obtain the raw key pair (public and private key
+    final PkiCredential signingKeCredentials = this.signingKeyProvider.getSigningKeyPair(algorithm.getKeyType(), context);
+    // Get the signer certificate for the public key
     final X509Certificate signerCertificate =
-        this.obtainSigningCertificate(signingKeyPair, signRequest, assertion, context);
-
-    // TODO change this to add certificate to existing PkiCredential
-    return new BasicCredential(signerCertificate, signingKeyPair.getPrivateKey());
+        this.obtainSigningCertificate(signingKeCredentials, signRequest, assertion, context);
+    // Add signer certificate to key credentials
+    if (!(signingKeCredentials instanceof AbstractPkiCredential)){
+      throw new KeyException("Signing key pair must be instance of AbstractPkiCredential");
+    }
+    ((AbstractPkiCredential)signingKeCredentials).setCertificate(signerCertificate);
+    return signingKeCredentials;
   }
 
   /**
