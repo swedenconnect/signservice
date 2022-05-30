@@ -38,6 +38,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.impl.DefaultCACertificateFactory;
@@ -61,7 +62,7 @@ class CAServiceBuilderTest {
   @Test
   void getInstance() throws Exception {
     SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(2048, 5, new ECGenParameterSpec("P-256"));
-    KeyPair keyPair = keyProvider.getSigningKeyPair("EC");
+    PkiCredential keyPair = keyProvider.getSigningKeyPair("EC");
     CACertificateFactory caCertificateFactory = new DefaultCACertificateFactory();
     X509CertificateHolder caCertificate = caCertificateFactory.getCACertificate(
       new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10),
@@ -74,7 +75,7 @@ class CAServiceBuilderTest {
     );
     log.info("CA Certificate:\n{}", (new PrintCertificate(caCertificate)).toString(true, true, true));
 
-    assertThrows(IllegalArgumentException.class, () -> CAServiceBuilder.getInstance(keyPair.getPrivate(), List.of(),
+    assertThrows(IllegalArgumentException.class, () -> CAServiceBuilder.getInstance(keyPair.getPrivateKey(), List.of(),
         "http://localhost/testCa.crl",
         XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
         new File(caDir, "testCa.crl"))
@@ -88,42 +89,42 @@ class CAServiceBuilderTest {
       .build());
     log.info("Test acceptance of empty CA certificate list");
 
-    assertThrows(NullPointerException.class, () -> CAServiceBuilder.getInstance(keyPair.getPrivate(), null,
+    assertThrows(NullPointerException.class, () -> CAServiceBuilder.getInstance(keyPair.getPrivateKey(), null,
         "http://localhost/testCa.crl",
         XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
         new File(caDir, "testCa.crl"))
       .build());
     log.info("Test acceptance of empty CA certificate list");
 
-    assertThrows(NullPointerException.class, () -> CAServiceBuilder.getInstance(keyPair.getPrivate(), List.of(caCertificate),
+    assertThrows(NullPointerException.class, () -> CAServiceBuilder.getInstance(keyPair.getPrivateKey(), List.of(caCertificate),
         null,
         XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
         new File(caDir, "testCa.crl"))
       .build());
     log.info("Test acceptance of empty CA certificate list");
 
-    assertThrows(NullPointerException.class, () -> CAServiceBuilder.getInstance(keyPair.getPrivate(), List.of(caCertificate),
+    assertThrows(NullPointerException.class, () -> CAServiceBuilder.getInstance(keyPair.getPrivateKey(), List.of(caCertificate),
         "http://localhost/testCa.crl",
         null,
         new File(caDir, "testCa.crl"))
       .build());
     log.info("Test acceptance of empty CA certificate list");
 
-    assertThrows(NullPointerException.class, () -> CAServiceBuilder.getInstance(keyPair.getPrivate(), List.of(caCertificate),
+    assertThrows(NullPointerException.class, () -> CAServiceBuilder.getInstance(keyPair.getPrivateKey(), List.of(caCertificate),
         "http://localhost/testCa.crl",
         XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
       (File) null)
       .build());
     log.info("Test acceptance of empty CA certificate list");
 
-    assertThrows(NullPointerException.class, () -> CAServiceBuilder.getInstance(keyPair.getPrivate(), List.of(caCertificate),
+    assertThrows(NullPointerException.class, () -> CAServiceBuilder.getInstance(keyPair.getPrivateKey(), List.of(caCertificate),
         "http://localhost/testCa.crl",
         XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
       (CARepository) null)
       .build());
     log.info("Test acceptance of empty CA certificate list");
 
-    CAServiceBuilder.getInstance(keyPair.getPrivate(), List.of(caCertificate),
+    CAServiceBuilder.getInstance(keyPair.getPrivateKey(), List.of(caCertificate),
         "http://localhost/testCa.crl",
         XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
         new File(caDir, "testCa.crl"))
@@ -134,17 +135,17 @@ class CAServiceBuilderTest {
       .build();
     log.info("created instance with default CA repository");
 
-    BasicCAService caService = CAServiceBuilder.getInstance(keyPair.getPrivate(), List.of(caCertificate),
+    BasicCAService caService = CAServiceBuilder.getInstance(keyPair.getPrivateKey(), List.of(caCertificate),
         "http://localhost/testCa.crl",
         XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
         new NoStorageCARepository(new File(caDir, "testCa.crl")))
       .build();
     log.info("CA service created with provided CA repository");
 
-    KeyPair subjectKeys = keyProvider.getSigningKeyPair("EC");
+    PkiCredential subjectKeys = keyProvider.getSigningKeyPair("EC");
     DefaultCertificateModelBuilder certificateModelBuilder = caService.getBaseCertificateModelBuilder(
       new ExplicitCertNameModel(List.of()),
-      subjectKeys.getPublic(),
+      subjectKeys.getPublicKey(),
       caService.getCaCertificate(), caService.getCertificateIssuer().getCertificateIssuerModel());
     X509CertificateHolder issuedCert = caService.issueCertificate(certificateModelBuilder.build());
     PrintCertificate printCert = new PrintCertificate(issuedCert);

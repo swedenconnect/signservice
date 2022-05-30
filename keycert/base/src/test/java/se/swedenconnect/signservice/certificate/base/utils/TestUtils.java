@@ -40,6 +40,7 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.util.encoders.Base64;
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * Utilities for tests
@@ -53,7 +54,7 @@ public class TestUtils {
     return b64String.replaceAll("(?m)^", "      ");
   }
 
-  public static X509Certificate generateCertificate(KeyPair pair, X500Name subjectDN, String algorithmJcaName) throws
+  public static X509Certificate generateCertificate(PkiCredential pair, X500Name subjectDN, String algorithmJcaName) throws
     OperatorCreationException, IOException, CertificateException, KeyStoreException {
     BigInteger certSerial = BigInteger.valueOf(System.currentTimeMillis());
     Calendar startTime = Calendar.getInstance();
@@ -64,10 +65,10 @@ public class TestUtils {
     expiryTime.add(1, 5);
     Date notBefore = startTime.getTime();
     Date notAfter = expiryTime.getTime();
-    PublicKey pubKey = pair.getPublic();
+    PublicKey pubKey = pair.getPublicKey();
     JcaX509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(subjectDN, certSerial, notBefore, notAfter,
       subjectDN, pubKey);
-    ContentSigner signer = (new JcaContentSignerBuilder(algorithmJcaName)).build(pair.getPrivate());
+    ContentSigner signer = (new JcaContentSignerBuilder(algorithmJcaName)).build(pair.getPrivateKey());
     byte[] encoded = certGen.build(signer).getEncoded();
     CertificateFactory fact = CertificateFactory.getInstance("X.509");
     InputStream is = new ByteArrayInputStream(encoded);

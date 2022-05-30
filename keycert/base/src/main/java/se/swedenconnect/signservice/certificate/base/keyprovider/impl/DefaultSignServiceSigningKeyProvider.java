@@ -16,13 +16,13 @@
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
 import java.security.KeyException;
-import java.security.KeyPair;
 import java.security.spec.ECGenParameterSpec;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.session.SignServiceContext;
@@ -45,8 +45,8 @@ public class DefaultSignServiceSigningKeyProvider implements SignServiceSigningK
    * </ul>
    */
   public DefaultSignServiceSigningKeyProvider() {
-    RSAKeyProviderSingleton.setInstance(new DefaultInMemoryRSAKeyProvider(3072, 100));
-    this.rsaKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
+    StackedRSAKeyProviderSingleton.setInstance(new DefaultStackedInMemoryRSAKeyProvider(3072, 100));
+    this.rsaKeyProvider = StackedRSAKeyProviderSingleton.getSingletonInstance();
     this.ecKeyProvider = new DefaultInMemoryECkeyProvider(new ECGenParameterSpec("P-256"));
   }
 
@@ -59,22 +59,22 @@ public class DefaultSignServiceSigningKeyProvider implements SignServiceSigningK
    */
   public DefaultSignServiceSigningKeyProvider(final int rsaKeyLen, final int rsaStackSize,
       @Nonnull final ECGenParameterSpec ecParameterSpec) {
-    RSAKeyProviderSingleton.setInstance(new DefaultInMemoryRSAKeyProvider(rsaKeyLen, rsaStackSize));
-    this.rsaKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
+    StackedRSAKeyProviderSingleton.setInstance(new DefaultStackedInMemoryRSAKeyProvider(rsaKeyLen, rsaStackSize));
+    this.rsaKeyProvider = StackedRSAKeyProviderSingleton.getSingletonInstance();
     this.ecKeyProvider = new DefaultInMemoryECkeyProvider(ecParameterSpec);
   }
 
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public KeyPair getSigningKeyPair(@Nonnull final String keyType) throws KeyException {
+  public PkiCredential getSigningKeyPair(@Nonnull final String keyType) throws KeyException {
     return this.getSigningKeyPair(keyType, null);
   }
 
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public KeyPair getSigningKeyPair(@Nonnull final String keyType, @Nullable final SignServiceContext context)
+  public PkiCredential getSigningKeyPair(@Nonnull final String keyType, @Nullable final SignServiceContext context)
       throws KeyException {
 
     switch (keyType.toUpperCase()) {

@@ -27,6 +27,7 @@ import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.CACertificateFactory;
@@ -105,7 +106,7 @@ class DefaultCACertificateFactoryTest {
 
   }
 
-  private void testCACertFactory(String desc, KeyPair keyPair, CertificateIssuerModel certificateIssuerModel,
+  private void testCACertFactory(String desc, PkiCredential keyPair, CertificateIssuerModel certificateIssuerModel,
     ExplicitCertNameModel caNameModel, Class<? extends Exception> exceptionClass) throws Exception {
     log.info(desc);
     if (exceptionClass == null) {

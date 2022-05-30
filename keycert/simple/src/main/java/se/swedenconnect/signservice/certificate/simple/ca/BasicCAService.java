@@ -133,7 +133,7 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
 
   /** {@inheritDoc} */
   @Override
-  protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(final CertNameModel<?> subject,
+  protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(final CertNameModel subject,
       final PublicKey publicKey, final X509CertificateHolder issuerCertificate,
       final CertificateIssuerModel certificateIssuerModel)
       throws CertificateIssuanceException {

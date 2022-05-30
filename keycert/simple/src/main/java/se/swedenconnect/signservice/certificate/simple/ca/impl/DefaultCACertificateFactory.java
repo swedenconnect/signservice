@@ -33,6 +33,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicCons
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.SelfIssuedCertificateModelBuilder;
 import se.swedenconnect.ca.engine.utils.CAUtils;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.simple.ca.CACertificateFactory;
 
 /**
@@ -49,12 +50,13 @@ public class DefaultCACertificateFactory implements CACertificateFactory {
   /** {@inheritDoc} */
   @Override
   public X509CertificateHolder getCACertificate(@NonNull final CertificateIssuerModel certificateIssuerModel,
-      @NonNull final CertNameModel<?> name, @NonNull final KeyPair caKeyPair) throws CertificateException {
+      @NonNull final CertNameModel<?> name, @NonNull final PkiCredential caKeyPair) throws CertificateException {
     try {
       final BasicCertificateIssuer issuer = new BasicCertificateIssuer(certificateIssuerModel,
           CAUtils.getX500Name(name, new AttributeValueEncoder()),
-          caKeyPair.getPrivate());
-      final CertificateModel certificateModel = SelfIssuedCertificateModelBuilder.getInstance(caKeyPair,
+          caKeyPair.getPrivateKey());
+      final CertificateModel certificateModel = SelfIssuedCertificateModelBuilder.getInstance(new KeyPair(
+            caKeyPair.getPublicKey(), caKeyPair.getPrivateKey()),
           certificateIssuerModel)
           .subject(name)
           .basicConstraints(new BasicConstraintsModel(true, true))

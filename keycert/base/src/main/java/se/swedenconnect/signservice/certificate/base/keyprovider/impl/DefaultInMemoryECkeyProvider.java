@@ -27,6 +27,8 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import se.swedenconnect.security.credential.BasicCredential;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 
 /**
@@ -49,11 +51,12 @@ public class DefaultInMemoryECkeyProvider implements KeyProvider {
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public KeyPair getKeyPair() throws KeyException {
+  public PkiCredential getKeyPair() throws KeyException {
     try {
       final KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
       g.initialize(this.ecSpec, new SecureRandom());
-      return g.generateKeyPair();
+      KeyPair keyPair = g.generateKeyPair();
+      return new BasicCredential(keyPair.getPublic(), keyPair.getPrivate());
     }
     catch (final InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchProviderException e) {
       throw new KeyException("Error generating EC key", e);

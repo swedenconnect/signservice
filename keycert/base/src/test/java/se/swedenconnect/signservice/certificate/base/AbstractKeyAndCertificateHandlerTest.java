@@ -233,7 +233,7 @@ class AbstractKeyAndCertificateHandlerTest {
     }
 
     /** {@inheritDoc} */
-    @Override protected X509Certificate obtainSigningCertificate(KeyPair signingKeyPair, SignRequestMessage signRequest,
+    @Override protected X509Certificate obtainSigningCertificate(PkiCredential signingKeyPair, SignRequestMessage signRequest,
       IdentityAssertion assertion, SignServiceContext context) throws CertificateException {
 
       CertificateType certificateType = Optional.ofNullable(context.get(DefaultParameter.certificateType.getParameterName(),

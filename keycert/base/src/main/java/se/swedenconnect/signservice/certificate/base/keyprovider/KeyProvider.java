@@ -15,20 +15,26 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider;
 
+import se.swedenconnect.security.credential.PkiCredential;
+
 import java.security.KeyException;
 import java.security.KeyPair;
 
 /**
  * Interface for a key provider.
+ *
+ * The key pair is returned as a {@link PkiCredential} to accommodate for the situation
+ * where the key may be provided as a key from an HSM where the access to the key need special support
+ * in order to assure that the key is till available etc.
  */
 public interface KeyProvider {
 
   /**
    * Get a new key pair.
    *
-   * @return a key pair
+   * @return a key pair delivered as {@link PkiCredential}
    * @throws KeyException on error obtaining a key pair
    */
-  KeyPair getKeyPair() throws KeyException;
+  PkiCredential getKeyPair() throws KeyException;
 
 }

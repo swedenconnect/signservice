@@ -31,6 +31,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 
 /**
@@ -57,7 +58,7 @@ class DefaultInMemoryECkeyProviderTest {
   private void testECKeyProvider(String curveName, ASN1ObjectIdentifier expectedNamedCurve) throws Exception {
     KeyProvider keyProvider = new DefaultInMemoryECkeyProvider(new ECGenParameterSpec(curveName));
     long startTime = System.currentTimeMillis();
-    KeyPair keyPair = keyProvider.getKeyPair();
+    PkiCredential keyPair = keyProvider.getKeyPair();
     long generationTime = System.currentTimeMillis() - startTime;
     log.info("EC key with curve {} generated in {} ms", curveName, generationTime);
 
@@ -66,9 +67,9 @@ class DefaultInMemoryECkeyProviderTest {
     log.info("Found expected named curve: {}", namedCurve);
   }
 
-  public static ASN1ObjectIdentifier getNamedCurve(KeyPair keyPair) throws Exception {
+  public static ASN1ObjectIdentifier getNamedCurve(PkiCredential keyPair) throws Exception {
 
-    try (ASN1InputStream ais = new ASN1InputStream(keyPair.getPublic().getEncoded())) {
+    try (ASN1InputStream ais = new ASN1InputStream(keyPair.getPublicKey().getEncoded())) {
       ASN1Sequence pubKeySeq = ASN1Sequence.getInstance(ais.readObject());
       AlgorithmIdentifier ecAlgorithmId = AlgorithmIdentifier.getInstance(pubKeySeq.getObjectAt(0));
       ASN1ObjectIdentifier namedCurve = ASN1ObjectIdentifier.getInstance(ecAlgorithmId.getParameters());

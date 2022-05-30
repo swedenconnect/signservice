@@ -30,10 +30,10 @@ import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
  * all processes use the same instance of the RSA key provider.
  */
 @Slf4j
-public class RSAKeyProviderSingleton {
+public class StackedRSAKeyProviderSingleton {
 
   // private constructor
-  private RSAKeyProviderSingleton() {
+  private StackedRSAKeyProviderSingleton() {
   }
 
   /** The singleton instance of the RSA key provider */
@@ -47,7 +47,7 @@ public class RSAKeyProviderSingleton {
   public static KeyProvider getSingletonInstance() {
     if (instance == null) {
       log.info("No RSA key provider singleton instance is set. Setting default in memory key provider with key size 3072 and stack size 100");
-      setInstance(new DefaultInMemoryRSAKeyProvider(3072, 100));
+      setInstance(new DefaultStackedInMemoryRSAKeyProvider(3072, 100));
     }
     return instance;
   }

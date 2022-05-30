@@ -48,6 +48,7 @@ import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.ObjectFactory;
 import se.swedenconnect.schemas.saml_2_0.assertion.Attribute;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.CertificateType;
@@ -130,7 +131,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
 
   /** {@inheritDoc} */
   @Override
-  protected X509Certificate obtainSigningCertificate(@Nonnull final KeyPair signingKeyPair,
+  protected X509Certificate obtainSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
       @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
       @Nonnull final SignServiceContext context) throws CertificateException {
 
@@ -164,7 +165,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
     final DefaultCertificateModelBuilder certificateModelBuilder =
         (DefaultCertificateModelBuilder) this.caService.getCertificateModelBuilder(
             certNameModel,
-            signingKeyPair.getPublic());
+            signingKeyPair.getPublicKey());
 
     // Obtain attribute mapping for the AuthContextExtension
     final List<AttributeMapping> attributeMappings = this.getAuthContextExtAttributeMappings(mappedCertAttributes);

@@ -24,6 +24,7 @@ import org.bouncycastle.cert.X509CertificateHolder;
 
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * Factory for creating self issued CA certificates.
@@ -40,5 +41,5 @@ public interface CACertificateFactory {
    * @throws CertificateException error creating the certificate
    */
   X509CertificateHolder getCACertificate(@Nonnull final CertificateIssuerModel certificateIssuerModel,
-    @Nonnull final CertNameModel<?> name, @Nonnull final KeyPair caKeyPair) throws CertificateException;
+    @Nonnull final CertNameModel<?> name, @Nonnull final PkiCredential caKeyPair) throws CertificateException;
 }

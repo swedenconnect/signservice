@@ -28,6 +28,8 @@ import javax.annotation.Nullable;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.security.credential.BasicCredential;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 
 /**
@@ -38,7 +40,7 @@ import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
  * </p>
  */
 @Slf4j
-public class DefaultInMemoryRSAKeyProvider implements KeyProvider {
+public class DefaultStackedInMemoryRSAKeyProvider implements KeyProvider {
 
   /**
    * The RSA key size served by this key provider.
@@ -57,7 +59,7 @@ public class DefaultInMemoryRSAKeyProvider implements KeyProvider {
   private final int keyStackSize;
 
   /** The key stack holding stored keys. */
-  private final List<KeyPair> keyStack;
+  private final List<PkiCredential> keyStack;
 
   /**
    * The thread responsible for filling up the key stack in the background. The purpose of making it possible to get
@@ -75,7 +77,7 @@ public class DefaultInMemoryRSAKeyProvider implements KeyProvider {
    * @param keySize key size
    * @param keyStackSize key stack size
    */
-  public DefaultInMemoryRSAKeyProvider(final int keySize, final int keyStackSize) {
+  public DefaultStackedInMemoryRSAKeyProvider(final int keySize, final int keyStackSize) {
     this.keySize = keySize;
     this.keyStackSize = keyStackSize;
     this.keyStack = new ArrayList<>();
@@ -85,34 +87,34 @@ public class DefaultInMemoryRSAKeyProvider implements KeyProvider {
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public synchronized KeyPair getKeyPair() throws KeyException {
-    final KeyPair keyPair = Optional.ofNullable(this.addOrRetrieveStackedKey(null)).orElse(this.generateKeyPair());
+  public synchronized PkiCredential getKeyPair() throws KeyException {
+    final PkiCredential pkiCredential = Optional.ofNullable(this.addOrRetrieveStackedKey(null)).orElse(this.generateKeyPair());
     this.fillUpKeyStack();
-    return keyPair;
+    return pkiCredential;
   }
 
   /**
    * Add or remove a key from the key stack. This single synchronized function handles all changes to the key stack to
    * avoid conflicts.
    *
-   * @param keyPair adds this key to the stack if this parameter is not null
+   * @param pkiCredential adds this key to the stack if this parameter is not null
    * @return A key pair if the stack was not empty and the provided key pair is null
    */
   @Nullable
-  private synchronized KeyPair addOrRetrieveStackedKey(@Nullable final KeyPair keyPair) {
+  private synchronized PkiCredential addOrRetrieveStackedKey(@Nullable final PkiCredential pkiCredential) {
 
-    if (keyPair == null) {
+    if (pkiCredential == null) {
       // retrieve key
       if (this.keyStack.isEmpty()) {
         return null;
       }
-      final KeyPair keyPairFromStack = this.keyStack.get(0);
+      final PkiCredential keyPairFromStack = this.keyStack.get(0);
       this.keyStack.remove(0);
       return keyPairFromStack;
     }
 
     // Add key
-    this.keyStack.add(keyPair);
+    this.keyStack.add(pkiCredential);
     return null;
 
   }
@@ -134,12 +136,13 @@ public class DefaultInMemoryRSAKeyProvider implements KeyProvider {
     this.keyGenerationThread.start();
   }
 
-  private KeyPair generateKeyPair() throws KeyException {
+  private PkiCredential generateKeyPair() throws KeyException {
     try {
       KeyPairGenerator generator;
       generator = KeyPairGenerator.getInstance("RSA");
       generator.initialize(this.keySize);
-      return generator.generateKeyPair();
+      KeyPair keyPair = generator.generateKeyPair();
+      return new BasicCredential(keyPair.getPublic(), keyPair.getPrivate());
     }
     catch (final NoSuchAlgorithmException e) {
       throw new KeyException("Error generating RSA key pair", e);
@@ -153,11 +156,11 @@ public class DefaultInMemoryRSAKeyProvider implements KeyProvider {
      */
     @Override
     public void run() {
-      while (DefaultInMemoryRSAKeyProvider.this.keyStack.size() < DefaultInMemoryRSAKeyProvider.this.keyStackSize) {
+      while (DefaultStackedInMemoryRSAKeyProvider.this.keyStack.size() < DefaultStackedInMemoryRSAKeyProvider.this.keyStackSize) {
         final long startTime = System.currentTimeMillis();
         try {
-          DefaultInMemoryRSAKeyProvider.this
-              .addOrRetrieveStackedKey(DefaultInMemoryRSAKeyProvider.this.generateKeyPair());
+          DefaultStackedInMemoryRSAKeyProvider.this
+              .addOrRetrieveStackedKey(DefaultStackedInMemoryRSAKeyProvider.this.generateKeyPair());
         }
         catch (final KeyException e) {
           log.error("Error creating RSA key", e);
@@ -165,10 +168,10 @@ public class DefaultInMemoryRSAKeyProvider implements KeyProvider {
         }
         final long keyGenTime = System.currentTimeMillis() - startTime;
         log.debug("Generated new RSA key with key size {} in {} ms. Keys in stack: {}",
-            DefaultInMemoryRSAKeyProvider.this.keySize, keyGenTime,
-            DefaultInMemoryRSAKeyProvider.this.keyStack.size());
+            DefaultStackedInMemoryRSAKeyProvider.this.keySize, keyGenTime,
+            DefaultStackedInMemoryRSAKeyProvider.this.keyStack.size());
       }
-      log.debug("Completed RSA key generation at stick size {}", DefaultInMemoryRSAKeyProvider.this.keyStackSize);
+      log.debug("Completed RSA key generation at stick size {}", DefaultStackedInMemoryRSAKeyProvider.this.keyStackSize);
     }
   }
 

@@ -100,7 +100,7 @@ class SimpleKeyAndCertificateHandlerTest {
     DefaultConfiguration defaultConfiguration = DefaultConfigurationSingleton.getSingletonInstance();
     log.info("Get default configuration");
     AlgorithmRegistrySingleton algorithmRegistry = AlgorithmRegistrySingleton.getInstance();
-    KeyPair caKeyPair = keyProvider.getSigningKeyPair("EC");
+    PkiCredential caKeyPair = keyProvider.getSigningKeyPair("EC");
     log.info("CA key pair generated");
     CACertificateFactory caCertificateFactory = new DefaultCACertificateFactory();
     X509CertificateHolder caCertificate = caCertificateFactory.getCACertificate(
@@ -114,7 +114,7 @@ class SimpleKeyAndCertificateHandlerTest {
     );
     log.info("CA Certificate generated\n{}", new PrintCertificate(caCertificate).toString(true, true, true));
 
-    BasicCAService caService = CAServiceBuilder.getInstance(caKeyPair.getPrivate(), List.of(caCertificate),
+    BasicCAService caService = CAServiceBuilder.getInstance(caKeyPair.getPrivateKey(), List.of(caCertificate),
       "http://localholst://crldp",
       XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, new File(caDir, "kht-ca.crl")).build();
 

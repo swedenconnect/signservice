@@ -17,9 +17,8 @@ package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.utils.TestUtils;
-
-import java.security.KeyPair;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,14 +26,14 @@ import static org.junit.jupiter.api.Assertions.*;
  * DefaultInMemoryRSAKeyProviderTests
  */
 @Slf4j
-class DefaultInMemoryRSAKeyProviderTest {
+class DefaultStackedInMemoryRSAKeyProviderTest {
 
   @Test
   void getKeyPair() throws Exception {
     int keySize = 2048;
 
     log.info("Default in memory RSA Key provider tests");
-    DefaultInMemoryRSAKeyProvider keyProvider = new DefaultInMemoryRSAKeyProvider(keySize, 5);
+    DefaultStackedInMemoryRSAKeyProvider keyProvider = new DefaultStackedInMemoryRSAKeyProvider(keySize, 5);
     log.info("Created new key provider");
     assertEquals(5, keyProvider.getKeyStackSize());
     log.info("Confirmed key stack size");
@@ -59,13 +58,13 @@ class DefaultInMemoryRSAKeyProviderTest {
     assertFalse(keyGenerationThread.isAlive());
 
     log.info("Reading 2 keys from full stack");
-    KeyPair keyPair1 = keyProvider.getKeyPair();
-    KeyPair keyPair2 = keyProvider.getKeyPair();
+    PkiCredential keyPair1 = keyProvider.getKeyPair();
+    PkiCredential keyPair2 = keyProvider.getKeyPair();
 
-    log.info("Got key1 from RSA key provider\n" + TestUtils.base64Print(keyPair1.getPublic().getEncoded(), 80));
-    log.info("Got key2 from RSA key provider\n" + TestUtils.base64Print(keyPair2.getPublic().getEncoded(), 80));
+    log.info("Got key1 from RSA key provider\n" + TestUtils.base64Print(keyPair1.getPublicKey().getEncoded(), 80));
+    log.info("Got key2 from RSA key provider\n" + TestUtils.base64Print(keyPair2.getPublicKey().getEncoded(), 80));
 
-    assertNotEquals(keyPair1.getPublic(), keyPair2.getPublic());
+    assertNotEquals(keyPair1.getPublicKey(), keyPair2.getPublicKey());
 
     log.info("Wait for key generation thread to become alive. Is alive = {}", keyGenerationThread.isAlive());
     // Wait to see if the keyGeneration thread becomes alive

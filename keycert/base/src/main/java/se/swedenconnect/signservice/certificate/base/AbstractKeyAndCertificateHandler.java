@@ -179,11 +179,12 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
     context.put(DefaultParameter.certificateProfile.getParameterName(), certificateProfile);
 
     final SignatureAlgorithm algorithm = (SignatureAlgorithm) this.algorithmRegistry.getAlgorithm(signatureAlgorithm);
-    final KeyPair signingKeyPair = this.signingKeyProvider.getSigningKeyPair(algorithm.getKeyType(), context);
+    final PkiCredential signingKeyPair = this.signingKeyProvider.getSigningKeyPair(algorithm.getKeyType(), context);
     final X509Certificate signerCertificate =
         this.obtainSigningCertificate(signingKeyPair, signRequest, assertion, context);
 
-    return new BasicCredential(signerCertificate, signingKeyPair.getPrivate());
+    // TODO change this to add certificate to existing PkiCredential
+    return new BasicCredential(signerCertificate, signingKeyPair.getPrivateKey());
   }
 
   /**
@@ -198,7 +199,7 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
    * @return the certificate of the signer
    * @throws CertificateException error obtaining a certificate for the signer
    */
-  protected abstract X509Certificate obtainSigningCertificate(@Nonnull final KeyPair signingKeyPair,
+  protected abstract X509Certificate obtainSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
       @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
       @Nonnull final SignServiceContext context) throws CertificateException;
 

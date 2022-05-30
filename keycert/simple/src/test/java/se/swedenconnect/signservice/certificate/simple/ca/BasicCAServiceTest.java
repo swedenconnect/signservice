@@ -40,6 +40,7 @@ import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.impl.DefaultCACertificateFactory;
@@ -64,7 +65,7 @@ class BasicCAServiceTest {
   void caServiceTest() throws Exception {
     SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(2048, 5,
       new ECGenParameterSpec("P-256"));
-    KeyPair keyPair = keyProvider.getSigningKeyPair("EC");
+    PkiCredential keyPair = keyProvider.getSigningKeyPair("EC");
     CACertificateFactory caCertificateFactory = new DefaultCACertificateFactory();
     X509CertificateHolder caCertificate = caCertificateFactory.getCACertificate(
       new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10),
@@ -78,7 +79,7 @@ class BasicCAServiceTest {
     log.info("CA Certificate:\n{}", (new PrintCertificate(caCertificate)).toString(true, true, true));
 
     BasicCAService caService = CAServiceBuilder.getInstance(
-      keyPair.getPrivate(), List.of(caCertificate), "http://localhost/test",
+      keyPair.getPrivateKey(), List.of(caCertificate), "http://localhost/test",
       XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, new File(caDir, "ca.crl")
     ).build();
 

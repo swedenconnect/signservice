@@ -21,6 +21,7 @@ import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 
 import java.security.KeyPair;
@@ -63,16 +64,16 @@ class DefaultSignServiceSigningKeyProviderTest {
     testRSAKey(keyProvider.getSigningKeyPair("RSA"), 2048);
   }
 
-  private void testRSAKey(KeyPair keyPair, int keyLen) {
-    assertTrue(keyPair.getPublic() instanceof RSAPublicKey);
+  private void testRSAKey(PkiCredential keyPair, int keyLen) {
+    assertTrue(keyPair.getPublicKey() instanceof RSAPublicKey);
     log.info("Key is an RSA key");
-    RSAPublicKey rsaPublicKey = (RSAPublicKey) keyPair.getPublic();
+    RSAPublicKey rsaPublicKey = (RSAPublicKey) keyPair.getPublicKey();
     assertEquals(keyLen, rsaPublicKey.getModulus().bitLength());
     log.info("Generated expected RSA key with key length {}", keyLen);
   }
 
-  private void testEcKey(KeyPair keyPair, ASN1ObjectIdentifier curveOID) throws Exception {
-    assertTrue(keyPair.getPublic() instanceof ECPublicKey);
+  private void testEcKey(PkiCredential keyPair, ASN1ObjectIdentifier curveOID) throws Exception {
+    assertTrue(keyPair.getPublicKey() instanceof ECPublicKey);
     log.info("Key is an EC key");
     ASN1ObjectIdentifier namedCurve = DefaultInMemoryECkeyProviderTest.getNamedCurve(keyPair);
     assertEquals(curveOID, namedCurve);

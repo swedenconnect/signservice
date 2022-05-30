@@ -25,6 +25,10 @@ import se.swedenconnect.signservice.certificate.base.configuration.DefaultConfig
 @Slf4j
 public class DefaultConfigurationSingleton {
 
+  /** Prevent instantiation. */
+  private DefaultConfigurationSingleton() {
+  }
+
   /**
    * Default configuration class singleton instance.
    *

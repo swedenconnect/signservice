@@ -18,40 +18,40 @@ package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 
 import java.security.KeyException;
-import java.security.KeyPair;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * RSAKeyProviderSingletonTests
  */
-class RSAKeyProviderSingletonTest {
+class StackedRSAKeyProviderSingletonTest {
 
   public static KeyProvider defaultKeyProvider;
 
   @BeforeAll
   public static void init(){
-    defaultKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
+    defaultKeyProvider = StackedRSAKeyProviderSingleton.getSingletonInstance();
   }
 
   @Test
   void testGetInstance() throws Exception {
     // Get the key provider from the same source
-    KeyProvider rsaKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
+    KeyProvider rsaKeyProvider = StackedRSAKeyProviderSingleton.getSingletonInstance();
     assertEquals(defaultKeyProvider.getClass(), rsaKeyProvider.getClass());
-    RSAKeyProviderSingleton.setInstance(new DummyRSAKeyProvider());
-    assertEquals(DummyRSAKeyProvider.class , RSAKeyProviderSingleton.getSingletonInstance().getClass());
-    assertThrows(NullPointerException.class, () -> RSAKeyProviderSingleton.setInstance(null));
-    RSAKeyProviderSingleton.setInstance(new DefaultInMemoryRSAKeyProvider(3072, 100));
-    assertEquals(defaultKeyProvider.getClass(), RSAKeyProviderSingleton.getSingletonInstance().getClass());
+    StackedRSAKeyProviderSingleton.setInstance(new DummyRSAKeyProvider());
+    assertEquals(DummyRSAKeyProvider.class , StackedRSAKeyProviderSingleton.getSingletonInstance().getClass());
+    assertThrows(NullPointerException.class, () -> StackedRSAKeyProviderSingleton.setInstance(null));
+    StackedRSAKeyProviderSingleton.setInstance(new DefaultStackedInMemoryRSAKeyProvider(3072, 100));
+    assertEquals(defaultKeyProvider.getClass(), StackedRSAKeyProviderSingleton.getSingletonInstance().getClass());
   }
 
   class DummyRSAKeyProvider implements KeyProvider{
 
-    @Override public KeyPair getKeyPair() throws KeyException {
+    @Override public PkiCredential getKeyPair() throws KeyException {
       return null;
     }
   }

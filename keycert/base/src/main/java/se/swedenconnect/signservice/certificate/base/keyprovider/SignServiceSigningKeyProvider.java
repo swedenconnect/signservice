@@ -22,10 +22,15 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * Interface for a signing key provider that provides signing keys to the signing service.
+ *
+ * The key pair is returned as a {@link PkiCredential} to accommodate for the situation
+ * where the key may be provided as a key from an HSM where the access to the key need special support
+ * in order to assure that the key is till available etc.
  */
 public interface SignServiceSigningKeyProvider {
 
@@ -37,7 +42,7 @@ public interface SignServiceSigningKeyProvider {
    * @throws KeyException if key generation was unsuccessful or the intended key could not be obtained
    */
   @Nonnull
-  KeyPair getSigningKeyPair(@Nonnull final String keyType) throws KeyException;
+  PkiCredential getSigningKeyPair(@Nonnull final String keyType) throws KeyException;
 
   /**
    * Generates or obtains a key pair for the signer.
@@ -49,7 +54,7 @@ public interface SignServiceSigningKeyProvider {
    * @throws KeyException if key generation was unsuccessful or the intended key could not be obtained
    */
   @Nonnull
-  KeyPair getSigningKeyPair(@Nonnull final String keyType, @Nullable final SignServiceContext context) throws KeyException;
+  PkiCredential getSigningKeyPair(@Nonnull final String keyType, @Nullable final SignServiceContext context) throws KeyException;
 
   /**
    * Return a list of key type identifiers supported by this key provider.
