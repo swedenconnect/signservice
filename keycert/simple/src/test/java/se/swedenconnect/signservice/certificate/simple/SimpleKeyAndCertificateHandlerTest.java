@@ -178,6 +178,7 @@ class SimpleKeyAndCertificateHandlerTest {
     String clientId, CertificateType certificateType, String profile,
     List<CertificateAttributeMapping> attributeMappings, Class<? extends Exception> exceptionClass) throws Exception {
 
+    log.info(message);
     if (exceptionClass == null) {
       SignRequestMessage signRequest = getSignRequest(
         signServiceSignAlo, clientId, certificateType, profile, attributeMappings);
