@@ -19,9 +19,9 @@ import java.io.Serializable;
 
 /**
  * This is a temporary design of an interface for storing and retrieving configured default values for various
- * protocol parameters. The naming of parameters is outside the scope of this interface
+ * protocol parameters. The naming of parameters is outside the scope of this interface.
  * <p>
- * This interface should be moved to a common area of this project
+ * This interface should be moved to a common area of this project.
  */
 public interface DefaultConfiguration {
 

@@ -15,14 +15,24 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.File;
+import java.security.KeyPair;
+import java.security.Security;
+import java.security.spec.ECGenParameterSpec;
+import java.util.List;
+
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
+
+import lombok.extern.slf4j.Slf4j;
 import se.idsec.utils.printcert.PrintCertificate;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
@@ -33,14 +43,6 @@ import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.impl.DefaultCACertificateFactory;
-
-import java.io.File;
-import java.security.KeyPair;
-import java.security.Security;
-import java.security.spec.ECGenParameterSpec;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Basic CA service test

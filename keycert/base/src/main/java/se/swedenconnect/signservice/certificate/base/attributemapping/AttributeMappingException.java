@@ -18,41 +18,36 @@ package se.swedenconnect.signservice.certificate.base.attributemapping;
 import java.io.IOException;
 
 /**
- * Exception for errors during certificate attribute mapping from authn data
+ * Exception for errors during certificate attribute mapping from authentication data.
  */
 public class AttributeMappingException extends IOException {
 
+  /** For serializing. */
+  private static final long serialVersionUID = -6971144323765283836L;
+
   /**
-   * Constructor
+   * Constructor.
    */
   public AttributeMappingException() {
   }
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param message message
    */
-  public AttributeMappingException(String message) {
+  public AttributeMappingException(final String message) {
     super(message);
   }
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param message message
    * @param cause cause
    */
-  public AttributeMappingException(String message, Throwable cause) {
+  public AttributeMappingException(final String message, final Throwable cause) {
     super(message, cause);
   }
 
-  /**
-   * Constructor
-   *
-   * @param cause cause
-   */
-  public AttributeMappingException(Throwable cause) {
-    super(cause);
-  }
 }

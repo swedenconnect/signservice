@@ -15,7 +15,12 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.security.KeyPair;
+import java.security.Security;
+import java.security.spec.ECGenParameterSpec;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -24,13 +29,9 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
-
-import java.security.KeyPair;
-import java.security.Security;
-import java.security.spec.ECGenParameterSpec;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * DefaultInMemoryECkeyProviderTests
@@ -67,10 +68,11 @@ class DefaultInMemoryECkeyProviderTest {
 
   public static ASN1ObjectIdentifier getNamedCurve(KeyPair keyPair) throws Exception {
 
-    ASN1InputStream ais = new ASN1InputStream(keyPair.getPublic().getEncoded());
-    ASN1Sequence pubKeySeq = ASN1Sequence.getInstance(ais.readObject());
-    AlgorithmIdentifier ecAlgorithmId = AlgorithmIdentifier.getInstance(pubKeySeq.getObjectAt(0));
-    ASN1ObjectIdentifier namedCurve = ASN1ObjectIdentifier.getInstance(ecAlgorithmId.getParameters());
-    return namedCurve;
+    try (ASN1InputStream ais = new ASN1InputStream(keyPair.getPublic().getEncoded())) {
+      ASN1Sequence pubKeySeq = ASN1Sequence.getInstance(ais.readObject());
+      AlgorithmIdentifier ecAlgorithmId = AlgorithmIdentifier.getInstance(pubKeySeq.getObjectAt(0));
+      ASN1ObjectIdentifier namedCurve = ASN1ObjectIdentifier.getInstance(ecAlgorithmId.getParameters());
+      return namedCurve;
+    }
   }
 }

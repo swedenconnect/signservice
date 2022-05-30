@@ -15,13 +15,22 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.spec.ECGenParameterSpec;
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
+
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 
-import java.security.*;
-import java.security.spec.ECGenParameterSpec;
-
 /**
- * Default in memory Elliptic Curve key provider
+ * Default in memory Elliptic Curve key provider.
  */
 public class DefaultInMemoryECkeyProvider implements KeyProvider {
 
@@ -33,18 +42,20 @@ public class DefaultInMemoryECkeyProvider implements KeyProvider {
    *
    * @param ecSpec parameter specification for EC keys to generate
    */
-  public DefaultInMemoryECkeyProvider(ECGenParameterSpec ecSpec) {
-    this.ecSpec = ecSpec;
+  public DefaultInMemoryECkeyProvider(@Nonnull final ECGenParameterSpec ecSpec) {
+    this.ecSpec = Objects.requireNonNull(ecSpec, "ecSpec must not be null");
   }
 
   /** {@inheritDoc} */
-  @Override public KeyPair getKeyPair() throws KeyException {
+  @Override
+  @Nonnull
+  public KeyPair getKeyPair() throws KeyException {
     try {
-      KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
-      g.initialize(ecSpec, new SecureRandom());
+      final KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+      g.initialize(this.ecSpec, new SecureRandom());
       return g.generateKeyPair();
     }
-    catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchProviderException e) {
+    catch (final InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchProviderException e) {
       throw new KeyException("Error generating EC key", e);
     }
   }

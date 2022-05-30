@@ -15,26 +15,28 @@
  */
 package se.swedenconnect.signservice.certificate.base.attributemapping;
 
-import lombok.NonNull;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 
-import java.util.List;
-
 /**
- * Attribute mapper interface
+ * Attribute mapper interface.
  */
 public interface AttributeMapper {
 
   /**
-   * Get certificate mapping data from authentication result and sign request
+   * Get certificate mapping data from authentication result and sign request.
    *
    * @param signRequest sign request
    * @param assertion assertion data
    * @return certificate attribute mappings
    * @throws AttributeMappingException error processing attribute mapping data
    */
-  List<AttributeMappingData> getMappedCertAttributes(@NonNull SignRequestMessage signRequest,
-    @NonNull IdentityAssertion assertion) throws AttributeMappingException;
+  @Nonnull
+  List<AttributeMappingData> getMappedCertAttributes(@Nonnull SignRequestMessage signRequest,
+    @Nonnull IdentityAssertion assertion) throws AttributeMappingException;
 
 }

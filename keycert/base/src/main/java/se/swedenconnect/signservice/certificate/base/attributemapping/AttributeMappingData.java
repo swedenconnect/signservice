@@ -30,22 +30,53 @@ import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 @Builder
 public class AttributeMappingData {
 
-  /** The type of certificate attribute (RDN in subject name, Subject Alt Name (SAN) or Subject Directory Attributes (SDA) */
-  CertificateAttributeType certificateAttributeType;
+  /**
+   * The type of certificate attribute (RDN in subject name, Subject Alt Name (SAN) or Subject Directory Attributes
+   * (SDA).
+   *
+   * @param certificateAttributeType the cert attribute type
+   * @return the cert attribute type
+   */
+  private CertificateAttributeType certificateAttributeType;
 
-  /** The certificate attribute reference. This is an index of a SAN or the OID string for an attribute */
-  String reference;
+  /**
+   * The certificate attribute reference. This is an index of a SAN or the OID string for an attribute.
+   *
+   * @param reference the certificate attribute reference
+   * @return the certificate attribute reference
+   */
+  private String reference;
 
-  /** The attribute ID of the source assertion attribute */
-  String sourceId;
+  /**
+   * The attribute ID of the source assertion attribute.
+   *
+   * @param sourceId attribute ID for the source assertion attribute
+   * @return attribute ID for the source assertion attribute
+   */
+  private String sourceId;
 
-  /** The friendly name of the assertion attribute */
-  String sourceFriendlyName;
+  /**
+   * The friendly name of the assertion attribute.
+   *
+   * @param sourceFriendlyName friendly name of attribute
+   * @return friendly name of attribute
+   */
+  private String sourceFriendlyName;
 
-  /** An optional default value if no other trusted source is available */
-  boolean defaultValue;
+  /**
+   * An optional default value if no other trusted source is available.
+   *
+   * @param defaultValue default value
+   * @return default value
+   */
+  private boolean defaultValue;
 
-  /** Attribute value */
+  /**
+   * The attribute value.
+   *
+   * @param value the attribute value
+   * @retur the attribute value
+   */
   String value;
 
 }

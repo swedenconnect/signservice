@@ -15,11 +15,14 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider;
 
-import se.swedenconnect.signservice.session.SignServiceContext;
-
 import java.security.KeyException;
 import java.security.KeyPair;
 import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * Interface for a signing key provider that provides signing keys to the signing service.
@@ -27,29 +30,33 @@ import java.util.List;
 public interface SignServiceSigningKeyProvider {
 
   /**
-   * Generates or obtains a key pair for the signer
+   * Generates or obtains a key pair for the signer.
    *
    * @param keyType the key type to obtain or create
    * @return key pair
    * @throws KeyException if key generation was unsuccessful or the intended key could not be obtained
    */
-  KeyPair getSigningKeyPair(final String keyType) throws KeyException;
+  @Nonnull
+  KeyPair getSigningKeyPair(@Nonnull final String keyType) throws KeyException;
 
   /**
-   * Generates or obtains a key pair for the signer
+   * Generates or obtains a key pair for the signer.
    *
    * @param keyType the key type to obtain or create
-   * @param context optional context data that may provide additional information on the source of the key or on how to generate it
+   * @param context optional context data that may provide additional information on the source of the key or on how to
+   *          generate it
    * @return key pair
    * @throws KeyException if key generation was unsuccessful or the intended key could not be obtained
    */
-  KeyPair getSigningKeyPair(final String keyType, final SignServiceContext context) throws KeyException;
+  @Nonnull
+  KeyPair getSigningKeyPair(@Nonnull final String keyType, @Nullable final SignServiceContext context) throws KeyException;
 
   /**
-   * Return a list of key type identifiers supported by this key provider
+   * Return a list of key type identifiers supported by this key provider.
    *
    * @return list of supported key types
    */
+  @Nonnull
   List<String> getSupportedKeyTypes();
 
 }

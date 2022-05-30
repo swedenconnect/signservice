@@ -15,18 +15,20 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
-import lombok.NonNull;
-import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
-import se.swedenconnect.signservice.session.SignServiceContext;
-
 import java.security.KeyException;
 import java.security.KeyPair;
 import java.security.spec.ECGenParameterSpec;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
+import se.swedenconnect.signservice.session.SignServiceContext;
+
 /**
- * Implementation of a default key provider
+ * Implementation of a default key provider.
  */
 public class DefaultSignServiceSigningKeyProvider implements SignServiceSigningKeyProvider {
 
@@ -37,51 +39,59 @@ public class DefaultSignServiceSigningKeyProvider implements SignServiceSigningK
    * Constructor for a default sign service key provider using the following preset parameters:
    *
    * <ul>
-   *   <li>RSA key length 3072 bits</li>
-   *   <li>RSA pre-produced key stack size = 100 keys</li>
-   *   <li>EC curve NIST P-256</li>
+   * <li>RSA key length 3072 bits</li>
+   * <li>RSA pre-produced key stack size = 100 keys</li>
+   * <li>EC curve NIST P-256</li>
    * </ul>
    */
   public DefaultSignServiceSigningKeyProvider() {
     RSAKeyProviderSingleton.setInstance(new DefaultInMemoryRSAKeyProvider(3072, 100));
-    rsaKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
-    ecKeyProvider = new DefaultInMemoryECkeyProvider(new ECGenParameterSpec("P-256"));
+    this.rsaKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
+    this.ecKeyProvider = new DefaultInMemoryECkeyProvider(new ECGenParameterSpec("P-256"));
   }
 
   /**
-   * Constructor for default key provider
+   * Constructor for default key provider.
    *
    * @param rsaKeyLen key size of the generated RSA keys
    * @param rsaStackSize number of pre-produced RSA keys kept in the key generator
    * @param ecParameterSpec the EC curve to use for generating EC keys
    */
-  public DefaultSignServiceSigningKeyProvider(int rsaKeyLen, int rsaStackSize, ECGenParameterSpec ecParameterSpec) {
+  public DefaultSignServiceSigningKeyProvider(final int rsaKeyLen, final int rsaStackSize,
+      @Nonnull final ECGenParameterSpec ecParameterSpec) {
     RSAKeyProviderSingleton.setInstance(new DefaultInMemoryRSAKeyProvider(rsaKeyLen, rsaStackSize));
-    rsaKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
-    ecKeyProvider = new DefaultInMemoryECkeyProvider(ecParameterSpec);
+    this.rsaKeyProvider = RSAKeyProviderSingleton.getSingletonInstance();
+    this.ecKeyProvider = new DefaultInMemoryECkeyProvider(ecParameterSpec);
   }
 
   /** {@inheritDoc} */
-  @Override public KeyPair getSigningKeyPair(String keyType) throws KeyException {
-    return getSigningKeyPair(keyType, null);
+  @Override
+  @Nonnull
+  public KeyPair getSigningKeyPair(@Nonnull final String keyType) throws KeyException {
+    return this.getSigningKeyPair(keyType, null);
   }
 
   /** {@inheritDoc} */
-  @Override public KeyPair getSigningKeyPair(final @NonNull String keyType, final SignServiceContext context)
-    throws KeyException {
+  @Override
+  @Nonnull
+  public KeyPair getSigningKeyPair(@Nonnull final String keyType, @Nullable final SignServiceContext context)
+      throws KeyException {
 
     switch (keyType.toUpperCase()) {
     case "RSA":
-      return rsaKeyProvider.getKeyPair();
+      return this.rsaKeyProvider.getKeyPair();
     case "EC":
-      return ecKeyProvider.getKeyPair();
+      return this.ecKeyProvider.getKeyPair();
     default:
       throw new KeyException("Unsupported key type");
     }
 
   }
 
-  @Override public List<String> getSupportedKeyTypes() {
+  /** {@inheritDoc} '*/
+  @Override
+  @Nonnull
+  public List<String> getSupportedKeyTypes() {
     return List.of("EC", "RSA");
   }
 }

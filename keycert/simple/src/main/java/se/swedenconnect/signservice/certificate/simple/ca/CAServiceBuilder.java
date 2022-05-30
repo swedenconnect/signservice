@@ -15,26 +15,43 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import lombok.NonNull;
-import org.bouncycastle.cert.X509CertificateHolder;
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
-import se.swedenconnect.ca.engine.ca.repository.CARepository;
-import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
-import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
-
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.time.Duration;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
+
+import org.bouncycastle.cert.X509CertificateHolder;
+
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
+import se.swedenconnect.ca.engine.ca.repository.CARepository;
+import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
+import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 
 /**
  * CA service builder
  */
 public class CAServiceBuilder {
 
-  //Mandatory fields that must be set by the constructor
+  /** Default certificate validity. */
+  public static final Duration DEFAULT_CERTIFICATE_VALIDITY = Duration.ofDays(365);
+
+  /** The default start time offset from current time for certificate validity. */
+  public static final Duration DEFAULT_CERTIFICATE_START_OFFSET = Duration.ofMinutes(-15);
+
+  /** Default CRL validity. */
+  public static final Duration DEFAULT_CRL_VALIDITY = Duration.ofHours(2);
+
+  /** The default start time offset from current time for CRL validity. */
+  public static final Duration DEFAULT_CRL_START_OFFSET = Duration.ofMinutes(-15);
+
+  // Mandatory fields that must be set by the constructor.
+
   /** The private key of the CA */
   private final PrivateKey privateKey;
 
@@ -51,47 +68,36 @@ public class CAServiceBuilder {
   private final CARepository caRepository;
 
   // Fields that can be set by the builder setters
-  /** The amount type specifying certificate validity (Default Year) */
-  private int certificateValidityAmountType = Calendar.YEAR;
 
-  /** The number of units a certificate should be valid (Default 1) */
-  private int certificateValidityAmount = 1;
+  /** The certificate validity period. */
+  private Duration certificateValidity = DEFAULT_CERTIFICATE_VALIDITY;
 
-  /** The start time offset unit type from current time for certificate validity (Default Minute) */
-  private int certificateStartOffsetAmountType = Calendar.MINUTE;
+  /** The start time offset from current time for certificate validity. */
+  private Duration certificateStartOffset = DEFAULT_CERTIFICATE_START_OFFSET;
 
-  /** The start time offset unit amount from current time for certificate validity (Default -15) */
-  private int certificateStartOffsetAmount = -15;
+  /** The CRL validity period. */
+  private Duration crlValidity = DEFAULT_CRL_VALIDITY;
 
-  /** The amount type specifying CRL validity (Default Hour) */
-  private int crlValidityAmountType = Calendar.HOUR;
+  /** The start time offset from current time for CRL validity. */
+  private Duration crlStartOffset = DEFAULT_CRL_START_OFFSET;
 
-  /** The number of units a CRL should be valid (Default 2) */
-  private int crlValidityAmount = 2;
+  // Private constructor
+  private CAServiceBuilder(@Nonnull final PrivateKey privateKey,
+      @Nonnull final List<X509CertificateHolder> caCertificateChain, @Nonnull final String crlDpUrl,
+      @Nonnull final String algorithm, @Nonnull final CARepository caRepository) {
 
-  /** The start time offset unit type from current time for CRL validity (Default Minute) */
-  private int crlStartOffsetType = Calendar.MINUTE;
-
-  /** The start time offset unit amount from current time for CRL validity (Default -15) */
-  private int crlStartOffsetAmount = -15;
-
-  /** private constructor */
-  private CAServiceBuilder(@NonNull final PrivateKey privateKey,
-    @NonNull final List<X509CertificateHolder> caCertificateChain,
-    @NonNull final String crlDpUrl, @NonNull final String algorithm,
-    final @NonNull CARepository caRepository) {
-    if (caCertificateChain.size() < 1) {
+    this.privateKey = Objects.requireNonNull(privateKey, "privateKey must not be null");
+    this.caCertificateChain = Objects.requireNonNull(caCertificateChain, "caCertificateChain must noy be null");
+    if (this.caCertificateChain.isEmpty()) {
       throw new IllegalArgumentException("CA certificate chain must not be empty");
     }
-    this.privateKey = privateKey;
-    this.caCertificateChain = caCertificateChain;
-    this.crlDpUrl = crlDpUrl;
-    this.algorithm = algorithm;
-    this.caRepository = caRepository;
+    this.crlDpUrl = Objects.requireNonNull(crlDpUrl, "crlDpUrl must not be null");
+    this.algorithm = Objects.requireNonNull(algorithm, "algorithm must noy be empty");
+    this.caRepository = Objects.requireNonNull(caRepository, "caRepository must not be empty");
   }
 
   /**
-   * Gets an instance of the CA service builder
+   * Gets an instance of the CA service builder.
    *
    * @param privateKey private CA key
    * @param caCertificateChain the certificate chain of the CA with the ca certificate as the first certificate
@@ -100,14 +106,15 @@ public class CAServiceBuilder {
    * @param caRepository the repository for storing issued certificates and their status
    * @return instance of this CA service builder
    */
-  public static CAServiceBuilder getInstance(final PrivateKey privateKey,
-    final List<X509CertificateHolder> caCertificateChain, final String crlDpUrl, final String algorithm,
-    final CARepository caRepository) {
+  @Nonnull
+  public static CAServiceBuilder getInstance(@Nonnull final PrivateKey privateKey,
+      @Nonnull final List<X509CertificateHolder> caCertificateChain, @Nonnull final String crlDpUrl,
+      @Nonnull final String algorithm, @Nonnull final CARepository caRepository) {
     return new CAServiceBuilder(privateKey, caCertificateChain, crlDpUrl, algorithm, caRepository);
   }
 
   /**
-   * Gets an instance of the CA service builder using the default NO data storage repository
+   * Gets an instance of the CA service builder using the default NO data storage repository.
    *
    * @param privateKey private CA key
    * @param caCertificateChain the certificate chain of the CA with the ca certificate as the first certificate
@@ -117,138 +124,104 @@ public class CAServiceBuilder {
    * @return instance of this CA service builder
    * @throws IOException error getting instance
    */
-  public static CAServiceBuilder getInstance(final PrivateKey privateKey,
-    final List<X509CertificateHolder> caCertificateChain, final String crlDpUrl, final String algorithm,
-    final @NonNull File crlFile) throws IOException {
+  @Nonnull
+  public static CAServiceBuilder getInstance(@Nonnull final PrivateKey privateKey,
+      @Nonnull final List<X509CertificateHolder> caCertificateChain, @Nonnull final String crlDpUrl,
+      @Nonnull final String algorithm, @Nonnull final File crlFile) throws IOException {
     return new CAServiceBuilder(privateKey, caCertificateChain, crlDpUrl, algorithm,
-      new NoStorageCARepository(crlFile));
+        new NoStorageCARepository(crlFile));
   }
 
   /**
-   * Build the CA service
+   * Build the CA service.
    *
    * @return CA service
    * @throws NoSuchAlgorithmException if the specified algorithm was not supported
    */
+  @Nonnull
   public BasicCAService build() throws NoSuchAlgorithmException {
-    return new BasicCAService(privateKey, caCertificateChain, caRepository,
-      getCertificateIssuerModel(), getCrlIssuerModel());
+    return new BasicCAService(this.privateKey, this.caCertificateChain, this.caRepository,
+        this.getCertificateIssuerModel(), this.getCrlIssuerModel());
   }
 
   /**
-   * Gets a certificate issuer model
+   * Gets a certificate issuer model.
    *
    * @return certificate issuer model
    * @throws NoSuchAlgorithmException algorithm is not supported
    */
+  @Nonnull
   private CertificateIssuerModel getCertificateIssuerModel() throws NoSuchAlgorithmException {
-    CertificateIssuerModel issuerModel = new CertificateIssuerModel(algorithm, certificateValidityAmount);
-    issuerModel.setExpiryOffsetType(certificateValidityAmountType);
-    issuerModel.setStartOffsetType(certificateStartOffsetAmountType);
-    issuerModel.setStartOffsetAmount(certificateStartOffsetAmount);
+    final CertificateIssuerModel issuerModel =
+        new CertificateIssuerModel(this.algorithm, (int) this.certificateValidity.getSeconds(), Calendar.SECOND);
+
+    issuerModel.setStartOffsetType(Calendar.SECOND);
+    issuerModel.setStartOffsetAmount((int) this.certificateStartOffset.getSeconds());
     return issuerModel;
   }
 
   /**
-   * Gets a CRL issuer model
+   * Gets a CRL issuer model.
    *
    * @return CRL issuer model
    */
+  @Nonnull
   private CRLIssuerModel getCrlIssuerModel() {
-    CRLRevocationDataProvider crlRevocationDataProvider = caRepository.getCRLRevocationDataProvider();
-    CRLIssuerModel crlIssuerModel = new CRLIssuerModel(caCertificateChain.get(0), algorithm,
-      crlValidityAmount, crlRevocationDataProvider, crlDpUrl);
-    crlIssuerModel.setExpiryOffsetType(crlValidityAmountType);
-    crlIssuerModel.setStartOffsetType(crlStartOffsetType);
-    crlIssuerModel.setStartOffsetAmount(crlStartOffsetAmount);
+    final CRLRevocationDataProvider crlRevocationDataProvider = this.caRepository.getCRLRevocationDataProvider();
+    final CRLIssuerModel crlIssuerModel = new CRLIssuerModel(this.caCertificateChain.get(0), this.algorithm,
+        (int) this.crlValidity.getSeconds(), crlRevocationDataProvider, this.crlDpUrl);
+    crlIssuerModel.setExpiryOffsetType(Calendar.SECOND);
+    crlIssuerModel.setStartOffsetType(Calendar.SECOND);
+    crlIssuerModel.setStartOffsetAmount((int) this.crlStartOffset.getSeconds());
     return crlIssuerModel;
   }
 
   /**
-   * Setter for type of certificate validity units as Calendar unit type integers. E.g. set as Calendar.YEAR
+   * Setter for certificate validity.
    *
-   * @param certificateValidityAmountType the amount type for certificate validity period
+   * @param certificateValidity the certificate validity period
    * @return this builder
    */
-  public CAServiceBuilder certificateValidityAmountType(int certificateValidityAmountType) {
-    this.certificateValidityAmountType = certificateValidityAmountType;
+  @Nonnull
+  public CAServiceBuilder certificateValidity(@Nonnull final Duration certificateValidity) {
+    this.certificateValidity = Objects.requireNonNull(certificateValidity, "certificateValidity must not be null");
     return this;
   }
 
   /**
-   * Setter for the number of units for certificate validity of the specified type. E.g. the number of years or days
+   * Setter for certificate start offset time.
    *
-   * @param certificateValidityAmount number of validity units
+   * @param certificateStartOffset certificate start offset time
    * @return this builder
    */
-  public CAServiceBuilder certificateValidityAmount(int certificateValidityAmount) {
-    this.certificateValidityAmount = certificateValidityAmount;
+  @Nonnull
+  public CAServiceBuilder certificateStartOffset(@Nonnull final Duration certificateStartOffset) {
+    this.certificateStartOffset =
+        Objects.requireNonNull(certificateStartOffset, "certificateStartOffset must not be null");
     return this;
   }
 
   /**
-   * Setter for type of certificate start offset time units as Calendar unit type integers. E.g. set as Calendar.MINUTE
+   * Setter for CRL validity.
    *
-   * @param certificateStartOffsetAmountType type of time offset
+   * @param crlValidity CRL validity
    * @return this builder
    */
-  public CAServiceBuilder certificateStartOffsetAmountType(int certificateStartOffsetAmountType) {
-    this.certificateStartOffsetAmountType = certificateStartOffsetAmountType;
+  @Nonnull
+  public CAServiceBuilder crlValidity(@Nonnull final Duration crlValidity) {
+    this.crlValidity = Objects.requireNonNull(crlValidity, "crlValidity must not be null");
     return this;
   }
 
   /**
-   * Setter for the number of time units for start validity time offset. A negative amount specifies time in the past.
+   * Setter for CRL start offset time.
    *
-   * @param certificateStartOffsetAmount number of time units to offset start time from current time
+   * @param crlStartOffset start time offset for CRL validity
    * @return this builder
    */
-  public CAServiceBuilder certificateStartOffsetAmount(int certificateStartOffsetAmount) {
-    this.certificateStartOffsetAmount = certificateStartOffsetAmount;
-    return this;
-  }
-
-  /**
-   * Setter for type of CRL validity units as Calendar unit type integers. E.g. set as Calendar.YEAR
-   *
-   * @param crlValidityAmountType type of time units the CRL should be valid
-   * @return this builder
-   */
-  public CAServiceBuilder crlValidityAmountType(int crlValidityAmountType) {
-    this.crlValidityAmountType = crlValidityAmountType;
-    return this;
-  }
-
-  /**
-   * Setter for the number of time units for CRL validity of the specified type. E.g. the number of years or days
-   *
-   * @param crlValidityAmount amount of time units the CRL should be valid
-   * @return this builder
-   */
-  public CAServiceBuilder crlValidityAmount(int crlValidityAmount) {
-    this.crlValidityAmount = crlValidityAmount;
-    return this;
-  }
-
-  /**
-   * Setter for type of CRL start offset time units as Calendar unit type integers. E.g. set as Calendar.MINUTE
-   *
-   * @param crlStartOffsetType start time offset unit types for CRL validity
-   * @return this builder
-   */
-  public CAServiceBuilder crlStartOffsetType(int crlStartOffsetType) {
-    this.crlStartOffsetType = crlStartOffsetType;
-    return this;
-  }
-
-  /**
-   * Setter for the number of time units for start validity time offset. A negative amount specifies time in the past.
-   *
-   * @param crlStartOffsetAmount start time unit offset for CRL validity
-   * @return this builder
-   */
-  public CAServiceBuilder crlStartOffsetAmount(int crlStartOffsetAmount) {
-    this.crlStartOffsetAmount = crlStartOffsetAmount;
+  @Nonnull
+  public CAServiceBuilder crlStartOffset(@Nonnull final Duration crlStartOffset) {
+    this.crlStartOffset = Objects.requireNonNull(crlStartOffset, "crlStartOffset must not be null");
     return this;
   }
 

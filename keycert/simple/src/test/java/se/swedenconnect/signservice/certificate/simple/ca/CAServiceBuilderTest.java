@@ -15,12 +15,22 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.io.File;
+import java.security.KeyPair;
+import java.security.Security;
+import java.security.spec.ECGenParameterSpec;
+import java.time.Duration;
+import java.util.List;
+
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
 import se.idsec.utils.printcert.PrintCertificate;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -31,15 +41,6 @@ import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.impl.DefaultCACertificateFactory;
-
-import java.io.File;
-import java.security.KeyPair;
-import java.security.Security;
-import java.security.spec.ECGenParameterSpec;
-import java.util.Calendar;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * CA service builder test
@@ -126,14 +127,10 @@ class CAServiceBuilderTest {
         "http://localhost/testCa.crl",
         XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
         new File(caDir, "testCa.crl"))
-      .certificateStartOffsetAmountType(Calendar.SECOND)
-      .certificateStartOffsetAmount(60)
-      .certificateValidityAmountType(Calendar.YEAR)
-      .certificateValidityAmount(2)
-      .crlStartOffsetType(Calendar.MINUTE)
-      .crlStartOffsetAmount(20)
-      .crlValidityAmountType(Calendar.MONTH)
-      .crlValidityAmount(2)
+      .certificateStartOffset(Duration.ofSeconds(60))
+      .certificateValidity(Duration.ofDays(730))
+      .crlStartOffset(Duration.ofMinutes(20))
+      .crlValidity(Duration.ofDays(60))
       .build();
     log.info("created instance with default CA repository");
 
@@ -152,7 +149,6 @@ class CAServiceBuilderTest {
     X509CertificateHolder issuedCert = caService.issueCertificate(certificateModelBuilder.build());
     PrintCertificate printCert = new PrintCertificate(issuedCert);
     log.info("issued certificate:\n{}", printCert.toString(true,true, true));
-    int sdf = 0;
-
+    //int sdf = 0;
   }
 }

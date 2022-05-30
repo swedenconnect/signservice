@@ -20,20 +20,21 @@ import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.certificate.base.configuration.DefaultConfiguration;
 
 /**
- * Class providing a singleton instance of default configuration parameters
+ * Class providing a singleton instance of default configuration parameters.
  */
 @Slf4j
 public class DefaultConfigurationSingleton {
 
   /**
-   * Default configuration class singleton instance
+   * Default configuration class singleton instance.
    *
    * @param instance the instance of default configuration data to use as singleton
    */
-  @Setter private static volatile DefaultConfiguration instance;
+  @Setter
+  private static volatile DefaultConfiguration instance;
 
   /**
-   * Get a singleton instance of the default configuration
+   * Get a singleton instance of the default configuration.
    *
    * @return default configuration
    */

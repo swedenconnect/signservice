@@ -16,12 +16,14 @@
 
 package se.swedenconnect.signservice.certificate.base.attributemapping;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.Test;
-import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 
-import static org.junit.jupiter.api.Assertions.*;
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 
 /**
  * AttributeMappingData test
@@ -45,7 +47,7 @@ class AttributeMappingDataTest {
     assertEquals("value", attributeMappingData.getValue());
     assertEquals("friendlyName", attributeMappingData.getSourceFriendlyName());
     assertTrue(attributeMappingData.isDefaultValue());
-    assertEquals(CertificateAttributeType.RDN, attributeMappingData.certificateAttributeType);
+    assertEquals(CertificateAttributeType.RDN, attributeMappingData.getCertificateAttributeType());
     assertEquals("ref", attributeMappingData.getReference());
 
 
@@ -61,7 +63,7 @@ class AttributeMappingDataTest {
     assertEquals("value", noArgsConstructed.getValue());
     assertEquals("friendlyName", noArgsConstructed.getSourceFriendlyName());
     assertTrue(noArgsConstructed.isDefaultValue());
-    assertEquals(CertificateAttributeType.RDN, noArgsConstructed.certificateAttributeType);
+    assertEquals(CertificateAttributeType.RDN, noArgsConstructed.getCertificateAttributeType());
     assertEquals("ref", noArgsConstructed.getReference());
 
 
@@ -71,7 +73,7 @@ class AttributeMappingDataTest {
     assertEquals("value", allArgsConstructed.getValue());
     assertEquals("friendlyName", allArgsConstructed.getSourceFriendlyName());
     assertTrue(allArgsConstructed.isDefaultValue());
-    assertEquals(CertificateAttributeType.RDN, allArgsConstructed.certificateAttributeType);
+    assertEquals(CertificateAttributeType.RDN, allArgsConstructed.getCertificateAttributeType());
     assertEquals("ref", allArgsConstructed.getReference());
 
     assertTrue(StringUtils.isNotBlank(allArgsConstructed.toString()));

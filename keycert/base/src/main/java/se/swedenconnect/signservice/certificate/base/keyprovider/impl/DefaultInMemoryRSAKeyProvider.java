@@ -15,11 +15,6 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
-
-import javax.annotation.Nullable;
 import java.security.KeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -28,105 +23,125 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
+
 /**
  * Default in memory RSA key provider.
  *
  * <p>
- * This key provider produces and holds a stock of pre produced RSA keys.
+ * This key provider produces and holds a stock of pre-produced RSA keys.
  * </p>
  */
 @Slf4j
 public class DefaultInMemoryRSAKeyProvider implements KeyProvider {
 
-  /** @return RSA key size served by this key provider */
-  @Getter private final int keySize;
-
-  /** @return the number of keys stored in this key stack */
-  @Getter private final int keyStackSize;
-
-  /** The key stack holding stored keys */
-  private List<KeyPair> keyStack;
+  /**
+   * The RSA key size served by this key provider.
+   *
+   * @return RSA key size served by this key provider
+   */
+  @Getter
+  private final int keySize;
 
   /**
-   * The thread responsible for filling up the key stack in the background. The purpose of making it possible
-   * to get this thread is to allow an external process to join with this thread to wait until the stack is
-   * filled up, or to simply test if a current process to fill up the stack is in active.
+   * The number of keys stored in this key stack.
+   *
+   * @return the number of keys stored in this key stack
+   */
+  @Getter
+  private final int keyStackSize;
+
+  /** The key stack holding stored keys. */
+  private final List<KeyPair> keyStack;
+
+  /**
+   * The thread responsible for filling up the key stack in the background. The purpose of making it possible to get
+   * this thread is to allow an external process to join with this thread to wait until the stack is filled up, or to
+   * simply test if a current process to fill up the stack is in active.
    *
    * @return the key generation thread
    */
-  @Getter private Thread keyGenerationThread;
+  @Getter
+  private Thread keyGenerationThread;
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param keySize key size
    * @param keyStackSize key stack size
    */
-  public DefaultInMemoryRSAKeyProvider(int keySize, int keyStackSize) {
+  public DefaultInMemoryRSAKeyProvider(final int keySize, final int keyStackSize) {
     this.keySize = keySize;
     this.keyStackSize = keyStackSize;
-    keyStack = new ArrayList<>();
-    fillUpKeyStack();
+    this.keyStack = new ArrayList<>();
+    this.fillUpKeyStack();
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public synchronized KeyPair getKeyPair() throws KeyException {
-    KeyPair keyPair = Optional.ofNullable(addOrRetrieveStackedKey(null)).orElse(generateKeyPair());
-    fillUpKeyStack();
+    final KeyPair keyPair = Optional.ofNullable(this.addOrRetrieveStackedKey(null)).orElse(this.generateKeyPair());
+    this.fillUpKeyStack();
     return keyPair;
   }
 
   /**
-   * Add or remove a key from the key stack. This single synchronized function handles all changes to the key stack
-   * to avoid conflicts.
+   * Add or remove a key from the key stack. This single synchronized function handles all changes to the key stack to
+   * avoid conflicts.
    *
    * @param keyPair adds this key to the stack if this parameter is not null
    * @return A key pair if the stack was not empty and the provided key pair is null
    */
-  private synchronized KeyPair addOrRetrieveStackedKey(@Nullable KeyPair keyPair) {
+  @Nullable
+  private synchronized KeyPair addOrRetrieveStackedKey(@Nullable final KeyPair keyPair) {
 
     if (keyPair == null) {
       // retrieve key
-      if (keyStack.isEmpty()) {
+      if (this.keyStack.isEmpty()) {
         return null;
       }
-      KeyPair keyPairFromStack = keyStack.get(0);
-      keyStack.remove(0);
+      final KeyPair keyPairFromStack = this.keyStack.get(0);
+      this.keyStack.remove(0);
       return keyPairFromStack;
     }
 
     // Add key
-    keyStack.add(keyPair);
+    this.keyStack.add(keyPair);
     return null;
 
   }
 
   /**
-   * Get the current key stack size
+   * Get the current key stack size.
    *
    * @return the current key stack size
    */
   public int getCurrentStackSize() {
-    return keyStack.size();
+    return this.keyStack.size();
   }
 
   private void fillUpKeyStack() {
-    if (keyGenerationThread != null && keyGenerationThread.isAlive()) {
+    if (this.keyGenerationThread != null && this.keyGenerationThread.isAlive()) {
       return;
     }
-    keyGenerationThread = new Thread(new KeyBuilder());
-    keyGenerationThread.start();
+    this.keyGenerationThread = new Thread(new KeyBuilder());
+    this.keyGenerationThread.start();
   }
 
   private KeyPair generateKeyPair() throws KeyException {
     try {
       KeyPairGenerator generator;
       generator = KeyPairGenerator.getInstance("RSA");
-      generator.initialize(keySize);
+      generator.initialize(this.keySize);
       return generator.generateKeyPair();
     }
-    catch (NoSuchAlgorithmException e) {
+    catch (final NoSuchAlgorithmException e) {
       throw new KeyException("Error generating RSA key pair", e);
     }
   }
@@ -134,23 +149,26 @@ public class DefaultInMemoryRSAKeyProvider implements KeyProvider {
   class KeyBuilder implements Runnable {
 
     /**
-     * Generating RSA keys to fill the in memory stack to the set key stack size
+     * Generating RSA keys to fill the in memory stack to the set key stack size.
      */
-    @Override public void run() {
-      while (keyStack.size() < keyStackSize) {
-        long startTime = System.currentTimeMillis();
+    @Override
+    public void run() {
+      while (DefaultInMemoryRSAKeyProvider.this.keyStack.size() < DefaultInMemoryRSAKeyProvider.this.keyStackSize) {
+        final long startTime = System.currentTimeMillis();
         try {
-          addOrRetrieveStackedKey(generateKeyPair());
+          DefaultInMemoryRSAKeyProvider.this
+              .addOrRetrieveStackedKey(DefaultInMemoryRSAKeyProvider.this.generateKeyPair());
         }
-        catch (KeyException e) {
+        catch (final KeyException e) {
           log.error("Error creating RSA key", e);
           return;
         }
-        long keyGenTime = System.currentTimeMillis() - startTime;
-        log.debug("Generated new RSA key with key size {} in {} ms. Keys in stack: {}", keySize, keyGenTime,
-          keyStack.size());
+        final long keyGenTime = System.currentTimeMillis() - startTime;
+        log.debug("Generated new RSA key with key size {} in {} ms. Keys in stack: {}",
+            DefaultInMemoryRSAKeyProvider.this.keySize, keyGenTime,
+            DefaultInMemoryRSAKeyProvider.this.keyStack.size());
       }
-      log.debug("Completed RSA key generation at stick size {}", keyStackSize);
+      log.debug("Completed RSA key generation at stick size {}", DefaultInMemoryRSAKeyProvider.this.keyStackSize);
     }
   }
 

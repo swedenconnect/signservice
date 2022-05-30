@@ -15,22 +15,25 @@
  */
 package se.swedenconnect.signservice.certificate.base.attributemapping;
 
+import javax.annotation.Nonnull;
+
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 
 /**
- * Interface for checking if a default value for a certificate attribute is acceptable
+ * Interface for checking if a default value for a certificate attribute is acceptable.
  */
 public interface DefaultValuePolicy {
 
   /**
-   * Checks if a default certificate value taken from the sign request is allowed according to the policy of
-   * the sign service
+   * Checks if a default certificate value taken from the sign request is allowed according to the policy of the sign
+   * service.
    *
    * @param attributeType type of certificate attribute or subject alt name
    * @param ref id reference of the certificate attribute or subject alt name
    * @param value attribute value
    * @return true if this value is approved for inclusion in the certificate
    */
-  boolean isDefaultValueAllowed(CertificateAttributeType attributeType, String ref, String value);
+  boolean isDefaultValueAllowed(
+      @Nonnull final CertificateAttributeType attributeType, @Nonnull final String ref, @Nonnull final String value);
 
 }

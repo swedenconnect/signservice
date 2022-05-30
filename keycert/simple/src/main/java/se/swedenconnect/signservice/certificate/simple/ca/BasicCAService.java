@@ -15,7 +15,14 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bouncycastle.cert.X509CertificateHolder;
+
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -30,14 +37,8 @@ import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Basic CA service implementation equipped to issue certificates to signers
+ * Basic CA service implementation equipped to issue certificates to signers.
  */
 public class BasicCAService extends AbstractCAService<DefaultCertificateModelBuilder> {
 
@@ -49,64 +50,65 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
   private String ocspResponderUrl;
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param privateKey private key of the CA service
-   * @param caCertificateChain Certificate chain representing this CA with the ca certificate of this CA being the first certificate
+   * @param caCertificateChain Certificate chain representing this CA with the ca certificate of this CA being the first
+   *          certificate
    * @param caRepository repository for storing issued certificates
    * @param issuerModel model for issuing certificates
    * @param crlIssuerModel model for publishing CRL:s
    * @throws NoSuchAlgorithmException algorithm is not supported
    */
-  public BasicCAService(PrivateKey privateKey, List<X509CertificateHolder> caCertificateChain,
-    CARepository caRepository, CertificateIssuerModel issuerModel, CRLIssuerModel crlIssuerModel)
-    throws NoSuchAlgorithmException {
+  public BasicCAService(final PrivateKey privateKey, final List<X509CertificateHolder> caCertificateChain,
+      final CARepository caRepository, final CertificateIssuerModel issuerModel, final CRLIssuerModel crlIssuerModel)
+      throws NoSuchAlgorithmException {
     super(caCertificateChain, caRepository);
 
     // Setup service
-    this.certificateIssuer = new BasicCertificateIssuer(issuerModel, getCaCertificate().getSubject(), privateKey);
+    this.certificateIssuer = new BasicCertificateIssuer(issuerModel, this.getCaCertificate().getSubject(), privateKey);
     this.crlDistributionPoints = new ArrayList<>();
     if (crlIssuerModel != null) {
       this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, privateKey);
       this.crlDistributionPoints = List.of(crlIssuerModel.getDistributionPointUrl());
-      publishNewCrl();
+      this.publishNewCrl();
     }
   }
 
   /** {@inheritDoc} */
   @Override
   public CertificateIssuer getCertificateIssuer() {
-    return certificateIssuer;
+    return this.certificateIssuer;
   }
 
   /** {@inheritDoc} */
   @Override
   protected CRLIssuer getCrlIssuer() {
-    return crlIssuer;
+    return this.crlIssuer;
   }
 
   /** {@inheritDoc} */
   @Override
   public X509CertificateHolder getOCSPResponderCertificate() {
-    return ocspResponderCertificate;
+    return this.ocspResponderCertificate;
   }
 
   /** {@inheritDoc} */
   @Override
   public String getCaAlgorithm() {
-    return certificateIssuer.getCertificateIssuerModel().getAlgorithm();
+    return this.certificateIssuer.getCertificateIssuerModel().getAlgorithm();
   }
 
   /** {@inheritDoc} */
   @Override
   public List<String> getCrlDpURLs() {
-    return crlDistributionPoints;
+    return this.crlDistributionPoints;
   }
 
   /** {@inheritDoc} */
   @Override
   public String getOCSPResponderURL() {
-    return ocspResponderUrl;
+    return this.ocspResponderUrl;
   }
 
   /**
@@ -116,8 +118,8 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
    * @param ocspResponderUrl URL for sending requests to the OCSP responder
    * @param ocspResponderCertificate OCSP responder certificate
    */
-  public void setOcspResponder(OCSPResponder ocspResponder, String ocspResponderUrl,
-    X509CertificateHolder ocspResponderCertificate) {
+  public void setOcspResponder(final OCSPResponder ocspResponder, final String ocspResponderUrl,
+      final X509CertificateHolder ocspResponderCertificate) {
     this.ocspResponder = ocspResponder;
     this.ocspResponderUrl = ocspResponderUrl;
     this.ocspResponderCertificate = ocspResponderCertificate;
@@ -126,25 +128,26 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
   /** {@inheritDoc} */
   @Override
   public OCSPResponder getOCSPResponder() {
-    return ocspResponder;
+    return this.ocspResponder;
   }
 
   /** {@inheritDoc} */
   @Override
-  protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel subject,
-    PublicKey publicKey,
-    X509CertificateHolder issuerCertificate, CertificateIssuerModel certificateIssuerModel)
-    throws CertificateIssuanceException {
-    DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(publicKey,
-      getCaCertificate(),
-      certificateIssuerModel);
+  protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(final CertNameModel<?> subject,
+      final PublicKey publicKey, final X509CertificateHolder issuerCertificate,
+      final CertificateIssuerModel certificateIssuerModel)
+      throws CertificateIssuanceException {
+
+    final DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(publicKey,
+        this.getCaCertificate(),
+        certificateIssuerModel);
     certModelBuilder
-      .subject(subject)
-      .includeAki(true)
-      .includeSki(true)
-      .basicConstraints(new BasicConstraintsModel(false, true))
-      .crlDistributionPoints(crlDistributionPoints.isEmpty() ? null : crlDistributionPoints)
-      .ocspServiceUrl(ocspResponder != null ? ocspResponderUrl : null);
+        .subject(subject)
+        .includeAki(true)
+        .includeSki(true)
+        .basicConstraints(new BasicConstraintsModel(false, true))
+        .crlDistributionPoints(this.crlDistributionPoints.isEmpty() ? null : this.crlDistributionPoints)
+        .ocspServiceUrl(this.ocspResponder != null ? this.ocspResponderUrl : null);
     return certModelBuilder;
   }
 

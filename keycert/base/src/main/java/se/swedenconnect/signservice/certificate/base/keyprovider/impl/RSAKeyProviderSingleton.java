@@ -15,9 +15,11 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
-import lombok.NonNull;
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
+
 import lombok.extern.slf4j.Slf4j;
-import org.apache.xml.security.signature.XMLSignature;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 
 /**
@@ -30,7 +32,7 @@ import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 @Slf4j
 public class RSAKeyProviderSingleton {
 
-  /** private constructor */
+  // private constructor
   private RSAKeyProviderSingleton() {
   }
 
@@ -41,6 +43,7 @@ public class RSAKeyProviderSingleton {
    * Gets the singleton instance of the RSA key provider
    * @return RSA key provider singleton
    */
+  @Nonnull
   public static KeyProvider getSingletonInstance() {
     if (instance == null) {
       log.info("No RSA key provider singleton instance is set. Setting default in memory key provider with key size 3072 and stack size 100");
@@ -53,8 +56,8 @@ public class RSAKeyProviderSingleton {
    * Set a new singleton instance to be returned by this singleton provider
    * @param rsaKeyProvider key provider
    */
-  public static synchronized void setInstance(@NonNull final KeyProvider rsaKeyProvider) {
-    instance = rsaKeyProvider;
-    log.info("Setting RSA key provider rsaKeyProvider of class {}", rsaKeyProvider.getClass().getName());
+  public static synchronized void setInstance(@Nonnull final KeyProvider rsaKeyProvider) {
+    instance = Objects.requireNonNull(rsaKeyProvider, "rsaKeyProvider must not be null");
+    log.debug("Setting RSA key provider rsaKeyProvider of class {}", rsaKeyProvider.getClass().getName());
   }
 }

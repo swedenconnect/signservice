@@ -15,9 +15,14 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca.impl;
 
-import lombok.NonNull;
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.cert.CertificateException;
+
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.cert.X509CertificateHolder;
+
+import lombok.NonNull;
 import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.issuer.impl.BasicCertificateIssuer;
@@ -30,12 +35,8 @@ import se.swedenconnect.ca.engine.ca.models.cert.impl.SelfIssuedCertificateModel
 import se.swedenconnect.ca.engine.utils.CAUtils;
 import se.swedenconnect.signservice.certificate.simple.ca.CACertificateFactory;
 
-import java.io.IOException;
-import java.security.KeyPair;
-import java.security.cert.CertificateException;
-
 /**
- * Default CA certificate factory
+ * Default CA certificate factory.
  */
 public class DefaultCACertificateFactory implements CACertificateFactory {
 
@@ -46,23 +47,24 @@ public class DefaultCACertificateFactory implements CACertificateFactory {
   }
 
   /** {@inheritDoc} */
-  @Override public X509CertificateHolder getCACertificate(final @NonNull CertificateIssuerModel certificateIssuerModel,
-    final @NonNull CertNameModel<?> name,
-    final @NonNull KeyPair caKeyPair) throws CertificateException {
+  @Override
+  public X509CertificateHolder getCACertificate(@NonNull final CertificateIssuerModel certificateIssuerModel,
+      @NonNull final CertNameModel<?> name, @NonNull final KeyPair caKeyPair) throws CertificateException {
     try {
-      BasicCertificateIssuer issuer = new BasicCertificateIssuer(certificateIssuerModel,
-        CAUtils.getX500Name(name, new AttributeValueEncoder()), caKeyPair.getPrivate());
-      CertificateModel certificateModel = SelfIssuedCertificateModelBuilder.getInstance(caKeyPair,
+      final BasicCertificateIssuer issuer = new BasicCertificateIssuer(certificateIssuerModel,
+          CAUtils.getX500Name(name, new AttributeValueEncoder()),
+          caKeyPair.getPrivate());
+      final CertificateModel certificateModel = SelfIssuedCertificateModelBuilder.getInstance(caKeyPair,
           certificateIssuerModel)
-        .subject(name)
-        .basicConstraints(new BasicConstraintsModel(true, true))
-        .keyUsage(new KeyUsageModel(KeyUsage.keyCertSign + KeyUsage.cRLSign, true))
-        .includeSki(true)
-        .certificatePolicy(new CertificatePolicyModel(true))
-        .build();
+          .subject(name)
+          .basicConstraints(new BasicConstraintsModel(true, true))
+          .keyUsage(new KeyUsageModel(KeyUsage.keyCertSign + KeyUsage.cRLSign, true))
+          .includeSki(true)
+          .certificatePolicy(new CertificatePolicyModel(true))
+          .build();
       return issuer.issueCertificate(certificateModel);
     }
-    catch (IOException e) {
+    catch (final IOException e) {
       throw new CertificateException("Error creating ca certificate", e);
     }
   }

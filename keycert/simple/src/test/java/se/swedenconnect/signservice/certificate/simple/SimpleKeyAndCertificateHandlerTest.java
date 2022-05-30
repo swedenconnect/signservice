@@ -15,13 +15,30 @@
  */
 package se.swedenconnect.signservice.certificate.simple;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.security.KeyPair;
+import java.security.Security;
+import java.security.cert.CertificateException;
+import java.security.spec.ECGenParameterSpec;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import se.idsec.utils.printcert.PrintCertificate;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -57,22 +74,6 @@ import se.swedenconnect.signservice.protocol.msg.impl.DefaultCertificateAttribut
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificateAttribute;
 import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
-
-import java.io.File;
-import java.security.KeyPair;
-import java.security.Security;
-import java.security.cert.CertificateException;
-import java.security.spec.ECGenParameterSpec;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Tests for the simple key and certificate handler
@@ -203,7 +204,7 @@ class SimpleKeyAndCertificateHandlerTest {
       SignServiceContext context = new DefaultSignServiceContext("context-id");
       keyAndCertificateHandler.checkRequirements(signRequest, context);
       log.info("Checked requirements for sign request OK");
-      PkiCredential pkiCredential = keyAndCertificateHandler.generateSigningCredential(signRequest,
+      keyAndCertificateHandler.generateSigningCredential(signRequest,
         TestData.stdAssertion,
         context);
     });
@@ -310,6 +311,8 @@ class SimpleKeyAndCertificateHandlerTest {
 
   @Data
   static class MappedAttrSouce implements IdentityAttributeIdentifier {
+
+    private static final long serialVersionUID = 1201012063745204703L;
 
     public MappedAttrSouce(String identifier) {
       this.identifier = identifier;

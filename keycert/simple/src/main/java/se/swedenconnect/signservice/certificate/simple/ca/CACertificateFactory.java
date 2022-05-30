@@ -15,20 +15,23 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import org.bouncycastle.cert.X509CertificateHolder;
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
-import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
-
 import java.security.KeyPair;
 import java.security.cert.CertificateException;
 
+import javax.annotation.Nonnull;
+
+import org.bouncycastle.cert.X509CertificateHolder;
+
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
+import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
+
 /**
- * Factory for creating self issued CA certificates
+ * Factory for creating self issued CA certificates.
  */
 public interface CACertificateFactory {
 
   /**
-   * Create CA certificate
+   * Create CA certificate.
    *
    * @param certificateIssuerModel parameters determining type and validity of issued certificate
    * @param name the subject and issuer name of the CA
@@ -36,7 +39,6 @@ public interface CACertificateFactory {
    * @return CA certificate
    * @throws CertificateException error creating the certificate
    */
-  X509CertificateHolder getCACertificate(final CertificateIssuerModel certificateIssuerModel,
-    final CertNameModel<?> name,
-    final KeyPair caKeyPair) throws CertificateException;
+  X509CertificateHolder getCACertificate(@Nonnull final CertificateIssuerModel certificateIssuerModel,
+    @Nonnull final CertNameModel<?> name, @Nonnull final KeyPair caKeyPair) throws CertificateException;
 }

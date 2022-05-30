@@ -19,19 +19,32 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Enumeration of default value parameters
+ * Enumeration of default value parameters.
  */
 @AllArgsConstructor
 @Getter
 public enum DefaultParameter {
-  /** Default value for the signature algorithm in the sign request */
+
+  /**
+   * Default value for the signature algorithm in the sign request.
+   */
   signatureAlgorithm("signatureAlgorithm"),
-  /** Default certificate type */
+
+  /**
+   * Default certificate type.
+   */
   certificateType("certificateTYpe"),
-  /** Default certificate profile */
+
+  /**
+   * Default certificate profile.
+   */
   certificateProfile("certificateProfile");
 
-  /** The identifier name of the parameter used to store and retrieve parameter values */
+  /**
+   * The identifier name of the parameter used to store and retrieve parameter values.
+   *
+   * @return the parameter name
+   */
   private final String parameterName;
 
 }

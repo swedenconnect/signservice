@@ -15,19 +15,6 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import lombok.SneakyThrows;
-import org.apache.commons.io.FileUtils;
-import org.bouncycastle.asn1.x509.CRLNumber;
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.cert.X509CRLHolder;
-import org.bouncycastle.cert.X509CertificateHolder;
-import se.swedenconnect.ca.engine.ca.repository.CARepository;
-import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
-import se.swedenconnect.ca.engine.ca.repository.SortBy;
-import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
-import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
-import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,12 +22,30 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
+
+import org.apache.commons.io.FileUtils;
+import org.bouncycastle.asn1.x509.CRLNumber;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.cert.X509CRLHolder;
+import org.bouncycastle.cert.X509CertificateHolder;
+
+import lombok.SneakyThrows;
+import se.swedenconnect.ca.engine.ca.repository.CARepository;
+import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
+import se.swedenconnect.ca.engine.ca.repository.SortBy;
+import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
+import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
+import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
 
 /**
- * This CA repository does not store any certificates at all.
- * It may be useful for simple deployments where no revocation of certificates is provided
+ * This CA repository does not store any certificates at all. It may be useful for simple deployments where no
+ * revocation of certificates is provided.
  * <p>
- * A crl file is however created in order to facilitate creation of an empty CRL
+ * A crl file is however created in order to facilitate creation of an empty CRL.
+ * </p>
  */
 public class NoStorageCARepository implements CARepository, CRLRevocationDataProvider {
 
@@ -51,85 +56,99 @@ public class NoStorageCARepository implements CARepository, CRLRevocationDataPro
   private final File crlFile;
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param crlFile CRL file
    * @throws IOException error creating repository
    */
-  public NoStorageCARepository(File crlFile) throws IOException {
-    this.crlFile = crlFile;
+  public NoStorageCARepository(@Nonnull final File crlFile) throws IOException {
+    this.crlFile = Objects.requireNonNull(crlFile, "crlFile must not be null");
     this.crlNumber = BigInteger.ZERO;
-    if (crlFile.canRead()) {
+    if (this.crlFile.canRead()) {
       // If published CRL exists. Get CRL number from current CRL
-      crlNumber = getCRLNumberFromCRL();
+      this.crlNumber = this.getCRLNumberFromCRL();
     }
   }
 
   private BigInteger getCRLNumberFromCRL() throws IOException {
-    X509CRLHolder crlHolder = new X509CRLHolder(new FileInputStream(crlFile));
-    Extension crlNumberExtension = crlHolder.getExtension(Extension.cRLNumber);
-    CRLNumber crlNumberFromCrl = CRLNumber.getInstance(crlNumberExtension.getParsedValue());
+    final X509CRLHolder crlHolder = new X509CRLHolder(new FileInputStream(this.crlFile));
+    final Extension crlNumberExtension = crlHolder.getExtension(Extension.cRLNumber);
+    final CRLNumber crlNumberFromCrl = CRLNumber.getInstance(crlNumberExtension.getParsedValue());
     return crlNumberFromCrl.getCRLNumber();
   }
 
   /** {@inheritDoc} */
-  @Override public List<BigInteger> getAllCertificates() {
+  @Override
+  public List<BigInteger> getAllCertificates() {
     return new ArrayList<>();
   }
 
   /** {@inheritDoc} */
-  @Override public CertificateRecord getCertificate(BigInteger serialNumber) {
+  @Override
+  public CertificateRecord getCertificate(final BigInteger serialNumber) {
     return null;
   }
 
   /** {@inheritDoc} */
-  @Override public void addCertificate(X509CertificateHolder certificate) throws IOException {
+  @Override
+  public void addCertificate(final X509CertificateHolder certificate) throws IOException {
   }
 
   /** {@inheritDoc} */
-  @Override public void revokeCertificate(BigInteger serialNumber, int reason, Date revocationTime)
-    throws CertificateRevocationException {
+  @Override
+  public void revokeCertificate(final BigInteger serialNumber, final int reason, final Date revocationTime)
+      throws CertificateRevocationException {
   }
 
   /** {@inheritDoc} */
-  @Override public CRLRevocationDataProvider getCRLRevocationDataProvider() {
+  @Override
+  public CRLRevocationDataProvider getCRLRevocationDataProvider() {
     return this;
   }
 
   /** {@inheritDoc} */
-  @Override public int getCertificateCount(boolean notRevoked) {
+  @Override
+  public int getCertificateCount(final boolean notRevoked) {
     return 0;
   }
 
   /** {@inheritDoc} */
-  @Override public List<CertificateRecord> getCertificateRange(int page, int pageSize, boolean notRevoked,
-    SortBy sortBy, boolean descending) {
+  @Override
+  public List<CertificateRecord> getCertificateRange(final int page, final int pageSize, final boolean notRevoked,
+      final SortBy sortBy, final boolean descending) {
     return new ArrayList<>();
   }
 
   /** {@inheritDoc} */
-  @Override public List<BigInteger> removeExpiredCerts(int gracePeriodSeconds) throws IOException {
+  @Override
+  public List<BigInteger> removeExpiredCerts(final int gracePeriodSeconds) throws IOException {
     return new ArrayList<>();
   }
 
   /** {@inheritDoc} */
-  @Override public List<RevokedCertificate> getRevokedCertificates() {
+  @Override
+  public List<RevokedCertificate> getRevokedCertificates() {
     return new ArrayList<>();
   }
 
   /** {@inheritDoc} */
-  @Override public BigInteger getNextCrlNumber() {
-    crlNumber = crlNumber.add(BigInteger.ONE);
-    return crlNumber;
+  @Override
+  public BigInteger getNextCrlNumber() {
+    this.crlNumber = this.crlNumber.add(BigInteger.ONE);
+    return this.crlNumber;
   }
 
   /** {@inheritDoc} */
-  @SneakyThrows @Override public void publishNewCrl(X509CRLHolder crl) {
-    FileUtils.writeByteArrayToFile(crlFile, crl.getEncoded());
+  @SneakyThrows
+  @Override
+  public void publishNewCrl(final X509CRLHolder crl) {
+    FileUtils.writeByteArrayToFile(this.crlFile, crl.getEncoded());
   }
 
   /** {@inheritDoc} */
-  @SneakyThrows @Override public X509CRLHolder getCurrentCrl() {
-    return new X509CRLHolder(new FileInputStream(crlFile));
+  @SneakyThrows
+  @Override
+  public X509CRLHolder getCurrentCrl() {
+    return new X509CRLHolder(new FileInputStream(this.crlFile));
   }
 }

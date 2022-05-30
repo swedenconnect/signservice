@@ -1,19 +1,17 @@
 package se.swedenconnect.signservice.certificate.base.utils;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
 public enum X509DnNameType {

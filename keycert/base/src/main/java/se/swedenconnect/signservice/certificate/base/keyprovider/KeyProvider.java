@@ -19,12 +19,13 @@ import java.security.KeyException;
 import java.security.KeyPair;
 
 /**
- * Interface for a key provider
+ * Interface for a key provider.
  */
 public interface KeyProvider {
 
   /**
-   * Get a new key pair
+   * Get a new key pair.
+   *
    * @return a key pair
    * @throws KeyException on error obtaining a key pair
    */

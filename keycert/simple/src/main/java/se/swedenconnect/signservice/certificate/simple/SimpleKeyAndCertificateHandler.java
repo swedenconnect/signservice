@@ -15,11 +15,25 @@
  */
 package se.swedenconnect.signservice.certificate.simple;
 
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
+
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeModel;
@@ -47,12 +61,6 @@ import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
-import java.io.IOException;
-import java.security.KeyPair;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.*;
-
 /**
  * A simple key and certificate handler.
  */
@@ -73,14 +81,16 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
    *
    * @param certificatePolicy policy to be included in issued certificates
    */
-  @Setter private CertificatePolicyModel certificatePolicy;
+  @Setter
+  private CertificatePolicyModel certificatePolicy;
 
   /**
    * Service name placed in AuthnContextExtensions
    *
    * @param serviceName service name for inclusion in AuthnContextExtensions
    */
-  @Setter private String serviceName = "sign-service";
+  @Setter
+  private String serviceName = "sign-service";
 
   /**
    * Constructor for the key and certificate handler
@@ -93,34 +103,39 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
    * @param name name of this handler
    */
   public SimpleKeyAndCertificateHandler(
-    final @NonNull SignServiceSigningKeyProvider signingKeyProvider,
-    final @NonNull DefaultConfiguration defaultConfiguration,
-    final @NonNull AlgorithmRegistry algorithmRegistry, final @NonNull CAService caService,
-    final @NonNull AttributeMapper attributeMapper,
-    final @NonNull String name) {
+      final @Nonnull SignServiceSigningKeyProvider signingKeyProvider,
+      final @Nonnull DefaultConfiguration defaultConfiguration,
+      final @Nonnull AlgorithmRegistry algorithmRegistry,
+      final @Nonnull CAService caService,
+      final @Nonnull AttributeMapper attributeMapper,
+      final @Nonnull String name) {
     super(signingKeyProvider, defaultConfiguration, algorithmRegistry);
-    this.caService = caService;
-    this.attributeMapper = attributeMapper;
-    this.name = name;
+    this.caService = Objects.requireNonNull(caService, "caService must not be null");
+    this.attributeMapper = Objects.requireNonNull(attributeMapper, "attributeMapper must not be null");
+    this.name = Objects.requireNonNull(name, "name must not be null");
   }
 
   /** {@inheritDoc} */
-  @Override public String getName() {
+  @Override
+  @Nonnull
+  public String getName() {
     return this.name;
   }
 
   /** {@inheritDoc} */
-  @Override protected void specificRequirementTests(SignRequestMessage signRequest,
-    SignServiceContext context) throws InvalidRequestException {
+  @Override
+  protected void specificRequirementTests(final SignRequestMessage signRequest, final SignServiceContext context) throws InvalidRequestException {
     // No additional tests
   }
 
   /** {@inheritDoc} */
-  @Override protected X509Certificate obtainSigningCertificate(@NonNull KeyPair signingKeyPair,
-    @NonNull SignRequestMessage signRequest, @NonNull IdentityAssertion assertion,
-    SignServiceContext context) throws CertificateException {
+  @Override
+  protected X509Certificate obtainSigningCertificate(@Nonnull final KeyPair signingKeyPair,
+      @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
+      @Nonnull final SignServiceContext context) throws CertificateException {
 
-    log.debug("Issuing certificate from internal CA");
+    log.debug("Issuing certificate from internal CA ...");
+
     // Test basic availability of essential data
     if (assertion.getIdentifier() == null) {
       throw new CertificateException("Assertion identifier must not be null");
@@ -134,81 +149,83 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
 
     List<AttributeMappingData> mappedCertAttributes;
     try {
-      log.debug("Get mapping data from configured attribute mapper {}", attributeMapper.getClass());
-      mappedCertAttributes = attributeMapper.getMappedCertAttributes(signRequest, assertion);
+      log.debug("Get mapping data from configured attribute mapper {}", this.attributeMapper.getClass());
+      mappedCertAttributes = this.attributeMapper.getMappedCertAttributes(signRequest, assertion);
     }
-    catch (AttributeMappingException e) {
+    catch (final AttributeMappingException e) {
       log.debug("Attribute mapping failed: {}", e.toString());
-      throw new CertificateException("Attribute mapping failed");
+      throw new CertificateException("Attribute mapping failed", e);
     }
 
     log.debug("Creating certificate model");
     // Get certificate subject name
-    CertNameModel<?> certNameModel = getCertNameModel(mappedCertAttributes);
+    final CertNameModel<?> certNameModel = this.getCertNameModel(mappedCertAttributes);
     // Get the certificate model builder
-    DefaultCertificateModelBuilder certificateModelBuilder = (DefaultCertificateModelBuilder) caService.getCertificateModelBuilder(
-      certNameModel,
-      signingKeyPair.getPublic());
+    final DefaultCertificateModelBuilder certificateModelBuilder =
+        (DefaultCertificateModelBuilder) this.caService.getCertificateModelBuilder(
+            certNameModel,
+            signingKeyPair.getPublic());
 
     // Obtain attribute mapping for the AuthContextExtension
-    List<AttributeMapping> attributeMappings = getAuthContextExtAttributeMappings(mappedCertAttributes);
+    final List<AttributeMapping> attributeMappings = this.getAuthContextExtAttributeMappings(mappedCertAttributes);
     // Add AuthContextExtension
     certificateModelBuilder
-      .authenticationContext(SAMLAuthContextBuilder.instance()
-        .serviceID(serviceName)
-        .assertionRef(assertion.getIdentifier())
-        .authnContextClassRef(assertion.getAuthnContext().getIdentifier())
-        .authenticationInstant(new Date(assertion.getAuthnInstant().toEpochMilli()))
-        .identityProvider(assertion.getIssuer())
-        .attributeMappings(attributeMappings)
-        .build());
+        .authenticationContext(SAMLAuthContextBuilder.instance()
+            .serviceID(this.serviceName)
+            .assertionRef(assertion.getIdentifier())
+            .authnContextClassRef(assertion.getAuthnContext().getIdentifier())
+            .authenticationInstant(new Date(assertion.getAuthnInstant().toEpochMilli()))
+            .identityProvider(assertion.getIssuer())
+            .attributeMappings(attributeMappings)
+            .build());
 
     // Add policy if available
-    if (certificatePolicy != null) {
-      certificateModelBuilder.certificatePolicy(certificatePolicy);
-      log.debug("Adding certificate policy {}", certificatePolicy.toString());
+    if (this.certificatePolicy != null) {
+      certificateModelBuilder.certificatePolicy(this.certificatePolicy);
+      log.debug("Adding certificate policy {}", this.certificatePolicy.toString());
     }
 
     // Add Subject Alt Name if present
-    addSANToCertModel(certificateModelBuilder, mappedCertAttributes);
+    this.addSANToCertModel(certificateModelBuilder, mappedCertAttributes);
     // Add Subject Directory Attributes if present
-    addSubjDirAttributesToCertModel(certificateModelBuilder, mappedCertAttributes);
+    this.addSubjDirAttributesToCertModel(certificateModelBuilder, mappedCertAttributes);
 
     // Issue certificate
     log.debug("Issuing certificate from certificate model");
-    X509CertificateHolder certificateHolder = caService.issueCertificate(certificateModelBuilder.build());
+    final X509CertificateHolder certificateHolder = this.caService.issueCertificate(certificateModelBuilder.build());
     try {
       // Return X509 Certificate
       return CertificateUtils.decodeCertificate(certificateHolder.getEncoded());
     }
-    catch (IOException e) {
-      log.error("Failed to encode X509Certificate from X509CertificateModel", e);
-      throw new CertificateException(e);
+    catch (final IOException e) {
+      final String msg = "Failed to encode X509Certificate from X509CertificateModel";
+      log.info("{}", e);
+      throw new CertificateException(msg, e);
     }
   }
 
   /**
-   * Add subject directory attributes to the certificate model
+   * Add subject directory attributes to the certificate model.
    *
    * @param certificateModelBuilder certificate model builder
    * @param mappedCertAttributes mapped attributes from authentication source with mapping information
    * @throws CertificateException on error processing subject directory attribute data
    */
   private void addSubjDirAttributesToCertModel(final DefaultCertificateModelBuilder certificateModelBuilder,
-    final List<AttributeMappingData> mappedCertAttributes)
-    throws CertificateException {
-    List<AttributeModel> sanAttributeList = new ArrayList<>();
-    for (AttributeMappingData mappedAttribute : mappedCertAttributes) {
+      final List<AttributeMappingData> mappedCertAttributes)
+      throws CertificateException {
+    final List<AttributeModel> sanAttributeList = new ArrayList<>();
+    for (final AttributeMappingData mappedAttribute : mappedCertAttributes) {
       if (mappedAttribute.getCertificateAttributeType().equals(CertificateAttributeType.SDA)) {
         try {
           sanAttributeList.add(AttributeModel.builder()
-            .attributeType(new ASN1ObjectIdentifier(mappedAttribute.getReference()))
-            .valueList(List.of(mappedAttribute.getValue()))
-            .build());
+              .attributeType(new ASN1ObjectIdentifier(mappedAttribute.getReference()))
+              .valueList(List.of(mappedAttribute.getValue()))
+              .build());
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
           throw new CertificateException(
-            "Illegal Subject Directory Attribute attribute data - aborting certificate issuance");
+              "Illegal Subject Directory Attribute attribute data - aborting certificate issuance");
         }
       }
     }
@@ -219,23 +236,23 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
   }
 
   /**
-   * Add subject alternative name to certificate model
+   * Add subject alternative name to certificate model.
    *
    * @param certificateModelBuilder certificate model builder
    * @param mappedCertAttributes mapped attributes from authentication source with mapping information
    * @throws CertificateException error parsing subject alt name data
    */
-  private void addSANToCertModel(DefaultCertificateModelBuilder certificateModelBuilder,
-    List<AttributeMappingData> mappedCertAttributes)
-    throws CertificateException {
-    Map<Integer, String> subjectAltNameMap = new HashMap<>();
-    for (AttributeMappingData mappedAttribute : mappedCertAttributes) {
+  private void addSANToCertModel(final DefaultCertificateModelBuilder certificateModelBuilder,
+      final List<AttributeMappingData> mappedCertAttributes)
+      throws CertificateException {
+    final Map<Integer, String> subjectAltNameMap = new HashMap<>();
+    for (final AttributeMappingData mappedAttribute : mappedCertAttributes) {
       if (mappedAttribute.getCertificateAttributeType().equals(CertificateAttributeType.SAN)) {
         try {
           subjectAltNameMap.put(Integer.valueOf(mappedAttribute.getReference()), mappedAttribute.getValue());
         }
-        catch (Exception ex) {
-          throw new CertificateException("Illegal SAN attribute data - aborting certificate issuance");
+        catch (final Exception ex) {
+          throw new CertificateException("Illegal SAN attribute data - aborting certificate issuance", ex);
         }
       }
     }
@@ -250,15 +267,17 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
    * @param mappedCertAttributes mapped attributes from authentication source with mapping information
    * @return attribute mapping data for the AuthnContextExtension
    */
-  private List<AttributeMapping> getAuthContextExtAttributeMappings(List<AttributeMappingData> mappedCertAttributes) {
-    List<AttributeMapping> extAttrMappingList = new ArrayList<>();
-    for (AttributeMappingData attributeMappingData : mappedCertAttributes) {
-      ObjectFactory objectFactory = new ObjectFactory();
-      AttributeMapping attributeMapping = objectFactory.createAttributeMapping();
+  private List<AttributeMapping> getAuthContextExtAttributeMappings(
+      final List<AttributeMappingData> mappedCertAttributes) {
+    final List<AttributeMapping> extAttrMappingList = new ArrayList<>();
+    for (final AttributeMappingData attributeMappingData : mappedCertAttributes) {
+      final ObjectFactory objectFactory = new ObjectFactory();
+      final AttributeMapping attributeMapping = objectFactory.createAttributeMapping();
       attributeMapping.setRef(attributeMappingData.getReference());
       attributeMapping.setType(attributeMappingData.getCertificateAttributeType().getType());
-      se.swedenconnect.schemas.saml_2_0.assertion.ObjectFactory samlObjFactory = new se.swedenconnect.schemas.saml_2_0.assertion.ObjectFactory();
-      Attribute attribute = samlObjFactory.createAttribute();
+      final se.swedenconnect.schemas.saml_2_0.assertion.ObjectFactory samlObjFactory =
+          new se.swedenconnect.schemas.saml_2_0.assertion.ObjectFactory();
+      final Attribute attribute = samlObjFactory.createAttribute();
       attribute.setName(attributeMappingData.getSourceId());
       attribute.setFriendlyName(attributeMappingData.getSourceFriendlyName());
       attribute.getAttributeValues().add(attributeMappingData.getValue());
@@ -275,22 +294,21 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
    * @return subject name model
    * @throws CertificateException error parsing subject name information
    */
-  private CertNameModel<?> getCertNameModel(List<AttributeMappingData> mappedCertAttributes)
-    throws CertificateException {
-    List<AttributeTypeAndValueModel> attributeList = new ArrayList<>();
-    for (AttributeMappingData attributeMapping : mappedCertAttributes) {
-      CertificateAttributeType attributeType = attributeMapping.getCertificateAttributeType();
+  private CertNameModel<?> getCertNameModel(final List<AttributeMappingData> mappedCertAttributes)
+      throws CertificateException {
+    final List<AttributeTypeAndValueModel> attributeList = new ArrayList<>();
+    for (final AttributeMappingData attributeMapping : mappedCertAttributes) {
+      final CertificateAttributeType attributeType = attributeMapping.getCertificateAttributeType();
       if (attributeType.equals(CertificateAttributeType.RDN)) {
         try {
           attributeList.add(AttributeTypeAndValueModel.builder()
-            .attributeType(new ASN1ObjectIdentifier(attributeMapping.getReference()))
-            .value(attributeMapping.getValue())
-            .build()
-          );
+              .attributeType(new ASN1ObjectIdentifier(attributeMapping.getReference()))
+              .value(attributeMapping.getValue())
+              .build());
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
           throw new CertificateException(
-            "Certificate attribute from authentication contains illegal data - aborting certificate issuance");
+              "Certificate attribute from authentication contains illegal data - aborting certificate issuance", ex);
         }
       }
     }
@@ -298,11 +316,12 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
   }
 
   /** {@inheritDoc} */
-  @Override protected void isCertificateTypeSupported(@NonNull CertificateType certificateType,
-    String certificateProfile) throws InvalidRequestException {
+  @Override
+  protected void isCertificateTypeSupported(@Nonnull final CertificateType certificateType,
+      @Nullable final String certificateProfile) throws InvalidRequestException {
     if (!certificateType.equals(CertificateType.PKC)) {
       throw new InvalidRequestException(
-        "This simple key and certificate handler can only produce non qualified certificates");
+          "This simple key and certificate handler can only produce non qualified certificates");
     }
   }
 }

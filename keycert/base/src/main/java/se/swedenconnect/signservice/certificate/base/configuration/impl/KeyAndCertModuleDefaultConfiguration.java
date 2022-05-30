@@ -15,22 +15,21 @@
  */
 package se.swedenconnect.signservice.certificate.base.configuration.impl;
 
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-import se.swedenconnect.signservice.certificate.base.configuration.DefaultConfiguration;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
+import org.apache.commons.lang.StringUtils;
+
+import se.swedenconnect.signservice.certificate.base.configuration.DefaultConfiguration;
+
 /**
- * Implementation of default configuration data for the Key and Cert module
+ * Implementation of default configuration data for the Key and Cert module.
  * <p>
- * Consider moving this implementation to a generic module to be used also by other modules
+ * Consider moving this implementation to a generic module to be used also by other modules.
  */
-@Slf4j
 public class KeyAndCertModuleDefaultConfiguration implements DefaultConfiguration {
 
   private final Map<String, Object> genericConfigMap;
@@ -40,8 +39,8 @@ public class KeyAndCertModuleDefaultConfiguration implements DefaultConfiguratio
    * Constructor that instantiates a new configuration registry;
    */
   public KeyAndCertModuleDefaultConfiguration() {
-    genericConfigMap = new HashMap<>();
-    clientSpecificConfigMap = new HashMap<>();
+    this.genericConfigMap = new HashMap<>();
+    this.clientSpecificConfigMap = new HashMap<>();
   }
 
   /**
@@ -50,9 +49,9 @@ public class KeyAndCertModuleDefaultConfiguration implements DefaultConfiguratio
    * @param parameterName the unique name of the parameter
    * @param defaultValue the element to store
    */
-  @Override public <T extends Serializable> void put(final @NonNull String parameterName,
-    final @NonNull T defaultValue) {
-    put(parameterName, defaultValue, null);
+  @Override
+  public <T extends Serializable> void put(final String parameterName, final T defaultValue) {
+    this.put(parameterName, defaultValue, null);
   }
 
   /**
@@ -62,20 +61,23 @@ public class KeyAndCertModuleDefaultConfiguration implements DefaultConfiguratio
    * @param defaultValue the element to store
    * @param clientId the clientId for the requester for which this default value is set
    */
-  @Override public <T extends Serializable> void put(final @NonNull String parameterName, final @NonNull T defaultValue,
-    final String clientId) {
+  @Override
+  public <T extends Serializable> void put(final String parameterName, final T defaultValue, final String clientId) {
+
+    Objects.requireNonNull(parameterName, "parameterName must not be null");
+    Objects.requireNonNull(defaultValue, "defaultValue must not be null");
 
     if (StringUtils.isBlank(clientId)) {
-      genericConfigMap.put(parameterName, defaultValue);
+      this.genericConfigMap.put(parameterName, defaultValue);
       return;
     }
-    if (clientSpecificConfigMap.containsKey(clientId)) {
-      clientSpecificConfigMap.get(clientId).put(parameterName, defaultValue);
+    if (this.clientSpecificConfigMap.containsKey(clientId)) {
+      this.clientSpecificConfigMap.get(clientId).put(parameterName, defaultValue);
     }
     else {
-      Map<String, Object> clientSpecificMap = new HashMap<>();
+      final Map<String, Object> clientSpecificMap = new HashMap<>();
       clientSpecificMap.put(parameterName, defaultValue);
-      clientSpecificConfigMap.put(clientId, clientSpecificMap);
+      this.clientSpecificConfigMap.put(clientId, clientSpecificMap);
     }
   }
 
@@ -86,18 +88,19 @@ public class KeyAndCertModuleDefaultConfiguration implements DefaultConfiguratio
    * @param clientId optional clientId or null to just get default values that are valid for any clientId
    * @return the default value, or null if no matching default value is available
    */
-  @Override public Object get(final @NonNull String parameterName, final String clientId) {
-    Object genericValue = genericConfigMap.get(parameterName);
+  @Override
+  public Object get(final String parameterName, final String clientId) {
+    final Object genericValue = this.genericConfigMap.get(Objects.requireNonNull(parameterName, "parameterName must not be null"));
     if (StringUtils.isBlank(clientId)) {
       return genericValue;
     }
     Object specificValue = null;
-    if (clientSpecificConfigMap.containsKey(clientId)) {
-      specificValue = clientSpecificConfigMap.get(clientId).get(parameterName);
+    if (this.clientSpecificConfigMap.containsKey(clientId)) {
+      specificValue = this.clientSpecificConfigMap.get(clientId).get(parameterName);
     }
     return specificValue != null
-      ? specificValue
-      : genericValue;
+        ? specificValue
+        : genericValue;
   }
 
   /**
@@ -109,8 +112,9 @@ public class KeyAndCertModuleDefaultConfiguration implements DefaultConfiguratio
    * @return the default value, or null if no matching default value is available
    * @throws ClassCastException if the default value exists but is not of the given type
    */
-  @Override public <T extends Serializable> T get(String parameterName, String clientId,
-    Class<T> type) throws ClassCastException {
-    return Optional.ofNullable(get(parameterName, clientId)).map(type::cast).orElse(null);
+  @Override
+  public <T extends Serializable> T get(final String parameterName, final String clientId,
+      final Class<T> type) throws ClassCastException {
+    return Optional.ofNullable(this.get(parameterName, clientId)).map(type::cast).orElse(null);
   }
 }
