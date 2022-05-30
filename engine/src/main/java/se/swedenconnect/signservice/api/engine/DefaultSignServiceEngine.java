@@ -15,6 +15,19 @@
  */
 package se.swedenconnect.signservice.api.engine;
 
+import java.io.IOException;
+import java.security.KeyException;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.api.engine.config.EngineConfiguration;
@@ -52,18 +65,6 @@ import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureHandler;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
 import se.swedenconnect.signservice.storage.MessageReplayException;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.security.KeyException;
-import java.security.SignatureException;
-import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * The default implementation of the {@link SignServiceEngine} API.
@@ -398,7 +399,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
 
     // Assert that the request was received on a correct endpoint ...
     //
-    if (!this.engineConfiguration.getAuthenticationHandler().canProcess(httpRequest)) {
+    if (!this.engineConfiguration.getAuthenticationHandler().canProcess(httpRequest, context.getContext())) {
       log.info("{}: Unexpected path '{}' [id: '{}']",
           this.engineConfiguration.getName(), httpRequest.getRequestURI(), context.getId());
 
@@ -587,7 +588,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       // Process SignRequest
       return true;
     }
-    else if (this.engineConfiguration.getAuthenticationHandler().canProcess(httpRequest)) {
+    else if (this.engineConfiguration.getAuthenticationHandler().canProcess(httpRequest, null)) {
       // Resume authn
       return true;
     }

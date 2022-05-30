@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<saml2:Assertion ID="_efe516a3168ad3c7ab4b67875f65215e"
+    IssueInstant="2022-05-18T14:55:19.733Z" Version="2.0" xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">
+    <saml2:Issuer>http://qa.test.swedenconnect.se/idp</saml2:Issuer>
+    <saml2:Subject>
+        <saml2:NameID
+            Format="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"
+            NameQualifier="http://qa.test.swedenconnect.se/idp" SPNameQualifier="https://eid.litsec.se/sp/2">ibxmDEIr9P95ZP08Z/o/sQ3q1SY=</saml2:NameID>
+        <saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+            <saml2:SubjectConfirmationData Address="158.174.14.166"
+                InResponseTo="_ev8FaJGJkvhnZ6LpMHZmTPU6eg9meILpyqpklbkE"
+                NotOnOrAfter="2022-05-18T15:00:19.753Z" Recipient="https://eid.litsec.se/svelegtest-sp/saml2/post/2"/>
+        </saml2:SubjectConfirmation>
+    </saml2:Subject>
+    <saml2:Conditions NotBefore="2022-05-18T14:55:19.733Z" NotOnOrAfter="2022-05-18T15:00:19.733Z">
+        <saml2:AudienceRestriction>
+            <saml2:Audience>https://eid.litsec.se/sp/2</saml2:Audience>
+        </saml2:AudienceRestriction>
+    </saml2:Conditions>
+    <saml2:AuthnStatement AuthnInstant="2022-05-18T14:55:19.711Z" SessionIndex="_a58f9427fe7df2b97c5b3d6fc1f1ecfa">
+        <saml2:SubjectLocality Address="158.174.14.166"/>
+        <saml2:AuthnContext>
+            <saml2:AuthnContextClassRef>http://id.elegnamnden.se/loa/1.0/loa3</saml2:AuthnContextClassRef>
+        </saml2:AuthnContext>
+    </saml2:AuthnStatement>
+    <saml2:AttributeStatement>
+        <saml2:Attribute FriendlyName="personalIdentityNumber"
+            Name="urn:oid:1.2.752.29.4.13" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml2:AttributeValue
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">196911292032</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute FriendlyName="displayName"
+            Name="urn:oid:2.16.840.1.113730.3.1.241" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml2:AttributeValue
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">Bo Ko</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute FriendlyName="givenName"
+            Name="urn:oid:2.5.4.42" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml2:AttributeValue
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">Bo</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute FriendlyName="dateOfBirth"
+            Name="urn:oid:1.3.6.1.5.5.7.9.1" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml2:AttributeValue
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">1969-11-29</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute FriendlyName="sn" Name="urn:oid:2.5.4.4" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml2:AttributeValue
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">Ko</saml2:AttributeValue>
+        </saml2:Attribute>
+    </saml2:AttributeStatement>
+</saml2:Assertion>

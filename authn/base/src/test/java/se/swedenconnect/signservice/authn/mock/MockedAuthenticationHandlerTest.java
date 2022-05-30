@@ -82,7 +82,7 @@ public class MockedAuthenticationHandlerTest {
   public void testCanProcess() {
     final MockedAuthenticationHandler handler = new MockedAuthenticationHandler();
     final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Assertions.assertFalse(handler.canProcess(request));
+    Assertions.assertFalse(handler.canProcess(request, null));
   }
 
   @Test
