@@ -74,12 +74,14 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
   }
 
   /** {@inheritDoc} */
-  @Override public CertificateIssuer getCertificateIssuer() {
+  @Override
+  public CertificateIssuer getCertificateIssuer() {
     return certificateIssuer;
   }
 
   /** {@inheritDoc} */
-  @Override protected CRLIssuer getCrlIssuer() {
+  @Override
+  protected CRLIssuer getCrlIssuer() {
     return crlIssuer;
   }
 
