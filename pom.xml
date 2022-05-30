@@ -101,6 +101,12 @@
   <dependencyManagement>
 
     <dependencies>
+    
+      <dependency>
+        <groupId>se.swedenconnect.security</groupId>
+        <artifactId>credentials-support</artifactId>
+        <version>1.2.2</version>
+      </dependency>    
 
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
