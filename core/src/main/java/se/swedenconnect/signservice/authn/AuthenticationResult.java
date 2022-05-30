@@ -15,10 +15,12 @@
  */
 package se.swedenconnect.signservice.authn;
 
+import java.io.Serializable;
+
 /**
  * Represents the result from a successful and completed authentication call.
  */
-public interface AuthenticationResult {
+public interface AuthenticationResult extends Serializable {
 
   /**
    * Gets the {@link IdentityAssertion} that holds the identity assertion from the authentication process.

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor ID="MeQAM1p2tE9bi6bRth5z"
+    cacheDuration="P0Y0M0DT1H0M0.000S"
+    entityID="https://eid.litsec.se/sp/2"
+    validUntil="2022-05-26T15:50:30.108Z"
+    xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:SignedInfo>
+            <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+            <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+            <ds:Reference URI="#MeQAM1p2tE9bi6bRth5z">
+                <ds:Transforms>
+                    <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#">
+                        <ec:InclusiveNamespaces PrefixList="xs" xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                    </ds:Transform>
+                </ds:Transforms>
+                <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                <ds:DigestValue>merEJEBGG2yZoa5m9kJQhyD6bQfBzinBhZDQWLis4D8=</ds:DigestValue>
+            </ds:Reference>
+        </ds:SignedInfo>
+        <ds:SignatureValue>d22drzNel0d5e7unblpKJamjkk6uj85Hol7dxf164u4fSeuCmjKvQUjRjkIsl3a95c5gytQqRO0MKbIToCGQb1h6RNDuBJ+eHEUZabw5+SBI/ccmAVUVEW+4lnHXk5q88q3d3XkCqAdRNK17Se1M8DwN525wdHUQlQ40v8hguJUIaDq/u/GzjlFa4uAASXfmoYqXzrYUSLnSiG83xFs5hoRlMEYiLOXOVZyR9QPIhihQBMaNsI3fjrPKukcvnyeXU3lkKaM7SCs5ZoUEfL1uo2Z+r+U+Yxf7Ewbztan8dAO4kFBv6tLUdSFEElsSJFW/6bebexWhqKfoZggKKEZC0Q==</ds:SignatureValue>
+        <ds:KeyInfo>
+            <ds:X509Data>
+                <ds:X509Certificate>MIIDUTCCAjmgAwIBAgIEVdyG+TANBgkqhkiG9w0BAQUFADBJMQswCQYDVQQGEwJTRTESMBAGA1UE
+ChMJTGl0c2VjIEFCMRQwEgYDVQQLEwtEZXZlbG9wbWVudDEQMA4GA1UEAxMHVGVzdCBDQTAeFw0x
+NTA4MjUxNTE3MTNaFw0xNzA4MjMxNTE3MTNaMEsxCzAJBgNVBAYTAlNFMRIwEAYDVQQKEwlMaXRz
+ZWMgQUIxFDASBgNVBAsTC0RldmVsb3BtZW50MRIwEAYDVQQDEwlMaXRzZWMgQUIwggEiMA0GCSqG
+SIb3DQEBAQUAA4IBDwAwggEKAoIBAQDSur1IbzJ93Sna3eC4COz09RzxB+xs71vrclZ1723avy7s
+fQgiUy/OubQSqgJGTXq77zENpJDOmmBKs3mdY1yTSLgtvnu2LVOq4hmd6i8mCnmmsiHcHJn8F8Ba
+8jS7JPI1yKZM7HyMyPl1GhIQ6V833Vpk9O5oFi4NU63ihj6FGOLCb3C1Z8YJYfi/Ytc/DGZqaNbO
+8/SYfiv5GKGR3bo+ksNvvEzmifdZYAlj0fkQ3JjdJUjy6nbQxb24VY7W2/DMiEePn3GZ4+q4oig1
+u8abMTLN3qGMaeoPS/D8x2c5OoirOWiC5QV4V3YSmYbWtcPlesUjVqr+vT81hZP7bbx/AgMBAAGj
+PzA9MAwGA1UdEwEB/wQCMAAwHQYDVR0OBBYEFHqYS0NsLA3lSPFnBIjNfHFadwhIMA4GA1UdDwEB
+/wQEAwIGQDANBgkqhkiG9w0BAQUFAAOCAQEAb16v8NjvtmJAZOrwnd5BUG2KAyomICwQ+FUZ87aw
+O56OKdcc3RPp1RStDzTzi+rAcT5LcG22CiWvCGrXp7ufZ+v88vCCKb0XdRidv96H3SoPnwWO0qrv
+XVK5sMzaZt+zRCI1MOBGIqj8tza+mwTqJtXXKI9pvB6ng1SvYFTPDVjLbx7f2Phm59AUooq8f9xW
+rPMktO04sVZnWz+nPs+so3wJ+cc7UqfnlSmJpSwlNfKWBmYBMFAmKcvuh7okcwNsmdlzb9NLwhdu
+QecKboXf52c8aGBt0CVkbx19HNM8CFHDuG5OoApBaOaeUF8fc9nHLzvlRV2cdhhGXGClUVRn6A==</ds:X509Certificate>
+            </ds:X509Data>
+        </ds:KeyInfo>
+    </ds:Signature>
+    <md:Extensions
+            xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+      <mdattr:EntityAttributes
+                xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute">
+         <saml2:Attribute
+                Name="http://macedir.org/entity-category"
+                NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
+                    xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">
+            <saml2:AttributeValue
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">http://id.elegnamnden.se/ec/1.0/loa3-pnr</saml2:AttributeValue>
+            <saml2:AttributeValue
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">http://id.swedenconnect.se/ec/1.0/loa3-name</saml2:AttributeValue>
+            <saml2:AttributeValue
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">http://id.swedenconnect.se/ec/1.0/loa3-orgid</saml2:AttributeValue>                                  
+            <saml2:AttributeValue
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">http://id.elegnamnden.se/sprop/1.0/mobile-auth</saml2:AttributeValue>
+            <saml2:AttributeValue
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">http://id.elegnamnden.se/st/1.0/public-sector-sp</saml2:AttributeValue>
+            <saml2:AttributeValue
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">http://id.swedenconnect.se/general-ec/1.0/secure-authenticator-binding</saml2:AttributeValue>
+            <saml2:AttributeValue
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">http://id.swedenconnect.se/general-ec/1.0/accepts-coordination-number</saml2:AttributeValue>
+         </saml2:Attribute>
+      </mdattr:EntityAttributes>
+   </md:Extensions>
+    <md:SPSSODescriptor AuthnRequestsSigned="true"
+        WantAssertionsSigned="false"
+        protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+        <md:Extensions
+                xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+         <mdui:UIInfo
+                    xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui">
+            <mdui:DisplayName
+                    xml:lang="sv">Sweden Connect Test-SP 2</mdui:DisplayName>
+            <mdui:DisplayName
+                    xml:lang="en">Sweden Connect Test SP 2</mdui:DisplayName>
+            <mdui:Description
+                    xml:lang="sv">Sweden Connect e-tjänst (Service Provider) för test- och referensändamål (SP 2) - Konfigurerad for legitimering enligt loa3-pnr, loa3-name, loa3-orgid samt mobilanpassad.</mdui:Description>
+            <mdui:Description
+                    xml:lang="en">The Sweden Connect Service Provider for test and reference (SP #2) - Configured for authentication according to the basic loa3-pnr, loa3-name and loa3-orgid categories and adopted for mobile use. </mdui:Description>
+            <mdui:Logo
+                    height="140"
+                width="391">https://eid.litsec.se/svelegtest-sp/img/sc-logo.svg</mdui:Logo>
+         </mdui:UIInfo>
+         <idpdisco:DiscoveryResponse
+                Binding="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"
+                Location="https://eid.litsec.se/svelegtest-sp/authnrequest/disco/2"
+                index="1"
+                xmlns:idpdisco="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"/>
+         <idpdisco:DiscoveryResponse
+                Binding="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"
+                Location="https://localhost:8443/svelegtest-sp/authnrequest/disco/2"
+                index="2" xmlns:idpdisco="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"/>
+      </md:Extensions>
+        <md:KeyDescriptor use="encryption"
+                xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+         <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+            <ds:KeyName>Litsec Encrypt</ds:KeyName>
+            <ds:X509Data>
+               <ds:X509Certificate>MIIDUTCCAjmgAwIBAgIEVdrc+DANBgkqhkiG9w0BAQUFADBJMQswCQYDVQQGEwJTRTESMBAGA1UE
+ChMJTGl0c2VjIEFCMRQwEgYDVQQLEwtEZXZlbG9wbWVudDEQMA4GA1UEAxMHVGVzdCBDQTAeFw0x
+NTA4MjQwODU5MzZaFw0xNzA4MjIwODU5MzZaMEsxCzAJBgNVBAYTAlNFMRIwEAYDVQQKEwlMaXRz
+ZWMgQUIxFDASBgNVBAsTC0RldmVsb3BtZW50MRIwEAYDVQQDEwlMaXRzZWMgU1AwggEiMA0GCSqG
+SIb3DQEBAQUAA4IBDwAwggEKAoIBAQCAi4ygTUb2iheUx11TteJ3lR57bwejEh6tPeF+5xpHDSnu
+1X38+5u9oywNFiXU4vwATvTd1JMOIT4Wk1yV1tiyEgrqZVFDPLM7pyY9VuCMNccuTZiGFyR8FJ2b
+88IadsNJlDnQJ7FYT0SZRINWRV+EQtxXIL573ircCN3wDjpTWgt+eEVaIoE2zQOM5O6HRqgd3m1g
+ZDMchUWUDDIGW8o71QbyqzNutlj6CNbCf6eH56+Hy2dUVkPGOc6WSClDwd3ewnKtNof1oDxzLRpp
+9Ysjcs1l9bYP2ERtt4WV1/c0H2Gtj7CmE4OAHl6916vK2H3EjMitGJkZi0VcCbrFAqJrAgMBAAGj
+PzA9MAwGA1UdEwEB/wQCMAAwHQYDVR0OBBYEFMn3sIqLHMPycr1qNxtsImuflECdMA4GA1UdDwEB
+/wQEAwIDuDANBgkqhkiG9w0BAQUFAAOCAQEAuqclL4BTDNVg4Dd80f7IyonoJsj8qE6nXQTigZ1F
+I9TGUAZTAiZ/mH2XCRpWDeFAHloPyG5O+YfCi3ZPtAFZ4oGuzNHna0/Opwz3Pudymfzon0jF6hY8
+MwZQxFGc7cszI/VI0nI9gAYyXQohJg17TwsUXAoA33urvpdfVByTuPd68C4NQyBAdvVD/ig5fX7+
+oykhMcy5hClCc+d4hK4OkkXoEIld+OXgcYzB4XzAZeNlMNxoSBTLjOoNUsGTuwlBO7QlylDF4KR/
+G76c5tEi6ut4dt5Y7XzbYyrtPEqlJm7MH2IirFZM11PK09YTE1cV3WKZP4Q6ldNWJ935KQMXqA==</ds:X509Certificate>
+            </ds:X509Data>
+         </ds:KeyInfo>
+      </md:KeyDescriptor>
+        <md:KeyDescriptor use="signing"
+                xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+         <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+            <ds:KeyName>Litsec Signing</ds:KeyName>
+            <ds:X509Data>
+               <ds:X509Certificate>MIIDUTCCAjmgAwIBAgIEVdrdozANBgkqhkiG9w0BAQUFADBJMQswCQYDVQQGEwJTRTESMBAGA1UE
+ChMJTGl0c2VjIEFCMRQwEgYDVQQLEwtEZXZlbG9wbWVudDEQMA4GA1UEAxMHVGVzdCBDQTAeFw0x
+NTA4MjQwOTAyMjdaFw0xNzA4MjIwOTAyMjdaMEsxCzAJBgNVBAYTAlNFMRIwEAYDVQQKEwlMaXRz
+ZWMgQUIxFDASBgNVBAsTC0RldmVsb3BtZW50MRIwEAYDVQQDEwlMaXRzZWMgU1AwggEiMA0GCSqG
+SIb3DQEBAQUAA4IBDwAwggEKAoIBAQCUgKxinn5Ad2ziKhbuZ74rVvTvNs9FsVlqnhI8M1Jdi4wL
+TZyo+UAvZVav7byA41aeZazqEhcXMFdEygSejNXaPsfgIniPBnX0NGXiUFCtBBlGRiJItUS1CSnT
+yCRlImYDSx5hjQreFLZpba8F24bAWRjSYP+C/eu9ZXxOgk4W780wootyAAVEPS3s06ruTb7+N+I8
+b6T7A3jzaLy/pB/jiD3Dho5+vxftydOEauE2Ot4F4KXl6GwKYVIg+wnBUTaYETEo9mD8Fpwoj+D5
+P1Y6FwXnqqPWm+nlBVEuRVYDI1TvO+r8bm6+161FFMuDOmVeLNmCWAF8nngmkgfLMjjbAgMBAAGj
+PzA9MAwGA1UdEwEB/wQCMAAwHQYDVR0OBBYEFM6SXaVtQnCyN2sl+RyoKzBa7vrXMA4GA1UdDwEB
+/wQEAwIGQDANBgkqhkiG9w0BAQUFAAOCAQEAG3YtmshzvKLjWYx5x7J0DhK8gm/LjzRdK/epvlnM
+SkAjt3cKPT6X81zK1s1H1242DAqBExCn9aXY8WeHaHlZ1CwvqjD0mXhU2975SZTqD5W/Xgx/4uKg
+l3ed5xp7sNDgW52vD4uNZJm1SKXlECHg8yFZqQ7kwfBd2CJm4gi3G9SP+DHE4oNTb+y2VpOdrSw5
+2wzC7gST+xAkhYQ9dgl5zQv3JBH4OeQFPxQM+VC40nkkQ9reJK90e1DnwIGqHkgmXFzwNZ8wHUtQ
+GHzOs9Vk0XQ3FRud6QJLQ9pjf/AZ2YEu+C32EOrMtReTGV+EQbF7Aj/cDup7DXyDpNzlsQHT9Q==</ds:X509Certificate>
+            </ds:X509Data>
+         </ds:KeyInfo>
+      </md:KeyDescriptor>
+        <md:NameIDFormat xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+        <md:AssertionConsumerService
+            Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+            Location="https://eid.litsec.se/svelegtest-sp/saml2/post/2"
+            index="0" isDefault="true" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"/>
+        <md:AssertionConsumerService
+            Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+            Location="https://localhost:8443/svelegtest-sp/saml2/post/2"
+            index="1" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"/>
+        <md:AttributeConsumingService index="0" isDefault="true"
+                xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+         <md:ServiceName
+                xml:lang="sv">Sweden Connect Test-SP 2</md:ServiceName>
+         <md:ServiceName
+                xml:lang="en">Sweden Connect Test SP 2</md:ServiceName>
+         <md:RequestedAttribute
+                Name="urn:oid:1.2.752.29.4.13" isRequired="false"/>
+      </md:AttributeConsumingService>
+    </md:SPSSODescriptor>
+    <md:Organization
+            xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+      <md:OrganizationName
+            xml:lang="sv">Sweden Connect</md:OrganizationName>
+      <md:OrganizationName
+            xml:lang="en">Sweden Connect</md:OrganizationName>
+      <md:OrganizationDisplayName
+            xml:lang="sv">Sweden Connect</md:OrganizationDisplayName>
+      <md:OrganizationDisplayName
+            xml:lang="en">Sweden Connect</md:OrganizationDisplayName>
+      <md:OrganizationURL xml:lang="sv">https://swedenconnect.se</md:OrganizationURL>
+   </md:Organization>
+    <md:ContactPerson contactType="technical" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+      <md:Company>Litsec AB</md:Company>
+      <md:GivenName>Martin</md:GivenName>
+      <md:SurName>Lindström</md:SurName>
+      <md:EmailAddress>martin.lindstrom@litsec.se</md:EmailAddress>
+      <md:TelephoneNumber>+46 (0)70 361 98 80</md:TelephoneNumber>
+   </md:ContactPerson>
+    <md:ContactPerson contactType="support" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+      <md:Company>Litsec AB</md:Company>
+      <md:GivenName>Martin</md:GivenName>
+      <md:SurName>Lindström</md:SurName>
+      <md:EmailAddress>martin.lindstrom@litsec.se</md:EmailAddress>
+      <md:TelephoneNumber>+46 (0)70 361 98 80</md:TelephoneNumber>
+   </md:ContactPerson>
+</md:EntityDescriptor>

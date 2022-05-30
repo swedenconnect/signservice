@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<saml2p:AuthnRequest
+    AssertionConsumerServiceURL="https://eid.litsec.se/svelegtest-sp/saml2/post/2"
+    Destination="https://idp.example.com/sso"
+    ForceAuthn="true" ID="_IY86afj1Dtm5OnuSP1pcJXTaqmFCtuDqbQtLx9Hp"
+    IsPassive="false" IssueInstant="2022-05-17T14:24:25.355Z"
+    ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+    Version="2.0" xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol">
+    <saml2:Issuer
+        Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity" xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">https://eid.litsec.se/sp/2</saml2:Issuer>
+    <saml2p:Extensions/>
+    <saml2p:NameIDPolicy AllowCreate="true" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"/>
+    <saml2p:RequestedAuthnContext Comparison="exact">
+        <saml2:AuthnContextClassRef xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">http://id.elegnamnden.se/loa/1.0/loa3</saml2:AuthnContextClassRef>
+    </saml2p:RequestedAuthnContext>
+</saml2p:AuthnRequest>
