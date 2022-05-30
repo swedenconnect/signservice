@@ -73,19 +73,19 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
 
   /** {@inheritDoc} */
   @Override
-  public void checkRequirements(@Nonnull final SignRequestMessage signRequest, @Nonnull final SignServiceContext context)
+  public void checkRequirements(@Nonnull final SignRequestMessage signRequest,
+      @Nonnull final SignServiceContext context)
       throws InvalidRequestException {
 
     final String clientId = Optional.ofNullable(signRequest.getClientId())
         .orElseThrow(() -> new InvalidRequestException("No client ID available"));
 
     // Algorithm tests
-    final SignatureRequirements signatureRequirements = Optional.ofNullable(signRequest.getSignatureRequirements())
-        .orElseThrow(() -> new InvalidRequestException("Missing signature requirements"));
-
-    final String signatureAlgorithm = Optional.ofNullable(signatureRequirements.getSignatureAlgorithm())
-        .orElse(this.defaultConfiguration.get(
-            DefaultParameter.signatureAlgorithm.getParameterName(), clientId, String.class));
+    final String signatureAlgorithm = Optional.ofNullable(signRequest.getSignatureRequirements())
+        .map(SignatureRequirements::getSignatureAlgorithm)
+        .orElseGet(
+            () -> this.defaultConfiguration.get(
+                DefaultParameter.signatureAlgorithm.getParameterName(), clientId, String.class));
     if (signatureAlgorithm == null) {
       throw new InvalidRequestException("No signature algorithm in request or in default parameters");
     }
@@ -143,10 +143,8 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
 
     final String clientId = signRequest.getClientId();
 
-    // Get signature and cert requirements. We throw NullPointer Exception here because this is an unrecoverable error
+    // Get cert requirements. We throw NullPointer Exception here because this is an unrecoverable error
     // that should be impossible given that we have made a compliance check before as requested by the engine.
-    final SignatureRequirements signatureRequirements = Optional.ofNullable(signRequest.getSignatureRequirements())
-        .orElseThrow(() -> new NullPointerException("No signature requirements provided"));
 
     final SigningCertificateRequirements certificateRequirements = Optional.ofNullable(
         signRequest.getSigningCertificateRequirements())
@@ -156,10 +154,14 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
     // contain default config values. The cert module should obtain the actual values from the context stored here.
 
     // Determine and store signature algorithm
-    final String signatureAlgorithm = Optional.ofNullable(signatureRequirements.getSignatureAlgorithm())
-        .orElse(
-            this.defaultConfiguration.get(DefaultParameter.signatureAlgorithm.getParameterName(), clientId,
-                String.class));
+    final String signatureAlgorithm = Optional.ofNullable(signRequest.getSignatureRequirements())
+        .map(SignatureRequirements::getSignatureAlgorithm)
+        .orElseGet(() -> { return Optional.ofNullable(this.defaultConfiguration.get(
+              DefaultParameter.signatureAlgorithm.getParameterName(), clientId, String.class))
+              .orElseThrow(
+                  () -> new IllegalArgumentException("No signature algorithm in request or in default parameters"));
+        });
+
     context.put(DefaultParameter.signatureAlgorithm.getParameterName(), signatureAlgorithm);
 
     // Determine and store certificate type
