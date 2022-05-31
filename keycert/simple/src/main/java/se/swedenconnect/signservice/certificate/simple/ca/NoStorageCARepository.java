@@ -15,6 +15,20 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
+import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
+import org.bouncycastle.asn1.x509.CRLNumber;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.cert.X509CRLHolder;
+import org.bouncycastle.cert.X509CertificateHolder;
+import se.swedenconnect.ca.engine.ca.repository.CARepository;
+import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
+import se.swedenconnect.ca.engine.ca.repository.SortBy;
+import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
+import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
+import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
+
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,22 +37,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
-import org.apache.commons.io.FileUtils;
-import org.bouncycastle.asn1.x509.CRLNumber;
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.cert.X509CRLHolder;
-import org.bouncycastle.cert.X509CertificateHolder;
-
-import lombok.SneakyThrows;
-import se.swedenconnect.ca.engine.ca.repository.CARepository;
-import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
-import se.swedenconnect.ca.engine.ca.repository.SortBy;
-import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
-import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
-import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
 
 /**
  * This CA repository does not store any certificates at all. It may be useful for simple deployments where no

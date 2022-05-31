@@ -16,23 +16,11 @@
 
 package se.swedenconnect.signservice.certificate.base.attributemapping.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.junit.jupiter.api.Test;
-
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.authn.impl.SimpleAuthnContextIdentifier;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
@@ -50,6 +38,17 @@ import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultCertificateAttributeMapping;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificateAttribute;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Test for the default SAML attribute mapper

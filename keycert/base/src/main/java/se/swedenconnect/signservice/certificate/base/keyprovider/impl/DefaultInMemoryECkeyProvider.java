@@ -15,21 +15,14 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
-import java.security.spec.ECGenParameterSpec;
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
+
+import javax.annotation.Nonnull;
+import java.security.*;
+import java.security.spec.ECGenParameterSpec;
+import java.util.Objects;
 
 /**
  * Default in memory Elliptic Curve key provider.

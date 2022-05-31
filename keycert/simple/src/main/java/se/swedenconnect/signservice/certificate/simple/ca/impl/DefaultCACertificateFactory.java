@@ -15,14 +15,9 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca.impl;
 
-import java.io.IOException;
-import java.security.KeyPair;
-import java.security.cert.CertificateException;
-
+import lombok.NonNull;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.cert.X509CertificateHolder;
-
-import lombok.NonNull;
 import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.issuer.impl.BasicCertificateIssuer;
@@ -35,6 +30,10 @@ import se.swedenconnect.ca.engine.ca.models.cert.impl.SelfIssuedCertificateModel
 import se.swedenconnect.ca.engine.utils.CAUtils;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.simple.ca.CACertificateFactory;
+
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.cert.CertificateException;
 
 /**
  * Default CA certificate factory.

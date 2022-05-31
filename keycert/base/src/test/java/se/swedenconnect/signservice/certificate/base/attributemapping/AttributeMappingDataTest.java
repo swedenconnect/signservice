@@ -16,14 +16,13 @@
 
 package se.swedenconnect.signservice.certificate.base.attributemapping;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.Test;
-
-import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * AttributeMappingData test

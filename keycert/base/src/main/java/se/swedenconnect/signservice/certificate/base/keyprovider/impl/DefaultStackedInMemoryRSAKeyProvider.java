@@ -15,6 +15,14 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.security.credential.BasicCredential;
+import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.security.KeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -22,15 +30,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import se.swedenconnect.security.credential.BasicCredential;
-import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 
 /**
  * Default in memory RSA key provider.

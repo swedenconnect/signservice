@@ -32,7 +32,6 @@ import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSign
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.CACertificateFactory;
 
-import java.security.KeyPair;
 import java.security.Security;
 import java.security.spec.ECGenParameterSpec;
 import java.util.List;

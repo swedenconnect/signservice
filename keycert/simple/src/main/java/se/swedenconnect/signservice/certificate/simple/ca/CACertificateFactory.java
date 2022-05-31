@@ -15,16 +15,13 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import java.security.KeyPair;
-import java.security.cert.CertificateException;
-
-import javax.annotation.Nonnull;
-
 import org.bouncycastle.cert.X509CertificateHolder;
-
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.security.credential.PkiCredential;
+
+import javax.annotation.Nonnull;
+import java.security.cert.CertificateException;
 
 /**
  * Factory for creating self issued CA certificates.

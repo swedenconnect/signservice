@@ -15,25 +15,11 @@
  */
 package se.swedenconnect.signservice.certificate.base;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.security.KeyPair;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
-import java.util.List;
-import java.util.Optional;
-
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.xml.security.algorithms.MessageDigestAlgorithm;
 import org.apache.xml.security.signature.XMLSignature;
 import org.junit.jupiter.api.Test;
-
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
@@ -56,6 +42,16 @@ import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
+
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.security.spec.ECGenParameterSpec;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Testing the abstract key and certificate handler

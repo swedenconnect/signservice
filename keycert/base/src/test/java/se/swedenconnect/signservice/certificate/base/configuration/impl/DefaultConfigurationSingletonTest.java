@@ -21,7 +21,8 @@ import org.junit.jupiter.api.Test;
 import se.swedenconnect.signservice.certificate.base.configuration.DefaultConfiguration;
 import se.swedenconnect.signservice.certificate.base.configuration.DefaultParameter;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Default configuration singleton test

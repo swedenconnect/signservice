@@ -15,25 +15,10 @@
  */
 package se.swedenconnect.signservice.certificate.simple;
 
-import java.io.IOException;
-import java.security.KeyPair;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.cert.X509CertificateHolder;
-
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.cert.X509CertificateHolder;
 import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeModel;
@@ -62,6 +47,13 @@ import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.*;
+
 /**
  * A simple key and certificate handler.
  */
@@ -71,8 +63,12 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
   /** CA service used to issue certificates */
   private final CAService caService;
 
-  /** name of this certificate handler */
-  private final String name;
+  /**
+   * Name of this key and certificate handler.
+   *
+   * @param name the name of this key and certificate handler
+   */
+  @Setter private String name;
 
   /** Attribute mapper mapping attribute data from assertion to Certificates */
   private final AttributeMapper attributeMapper;
@@ -101,26 +97,23 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
    * @param algorithmRegistry algorithm registry
    * @param caService ca service
    * @param attributeMapper attribute mapper
-   * @param name name of this handler
    */
   public SimpleKeyAndCertificateHandler(
       final @Nonnull SignServiceSigningKeyProvider signingKeyProvider,
       final @Nonnull DefaultConfiguration defaultConfiguration,
       final @Nonnull AlgorithmRegistry algorithmRegistry,
       final @Nonnull CAService caService,
-      final @Nonnull AttributeMapper attributeMapper,
-      final @Nonnull String name) {
+      final @Nonnull AttributeMapper attributeMapper) {
     super(signingKeyProvider, defaultConfiguration, algorithmRegistry);
     this.caService = Objects.requireNonNull(caService, "caService must not be null");
     this.attributeMapper = Objects.requireNonNull(attributeMapper, "attributeMapper must not be null");
-    this.name = Objects.requireNonNull(name, "name must not be null");
   }
 
   /** {@inheritDoc} */
   @Override
   @Nonnull
   public String getName() {
-    return this.name;
+    return Optional.ofNullable(name).orElse(this.getClass().getSimpleName());
   }
 
   /** {@inheritDoc} */

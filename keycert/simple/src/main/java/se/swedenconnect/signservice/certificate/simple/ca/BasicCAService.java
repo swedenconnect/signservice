@@ -15,14 +15,7 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bouncycastle.cert.X509CertificateHolder;
-
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -36,6 +29,12 @@ import se.swedenconnect.ca.engine.revocation.crl.CRLIssuer;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Basic CA service implementation equipped to issue certificates to signers.

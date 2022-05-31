@@ -15,12 +15,11 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 /**
  * This class provides a RSAKeyProviderSingleton.

@@ -21,7 +21,10 @@ import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 
 import javax.annotation.Nonnull;
-import java.security.*;
+import java.security.KeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * RSA key provider generating RSA keys on demand. This differs from the stacked RSA key

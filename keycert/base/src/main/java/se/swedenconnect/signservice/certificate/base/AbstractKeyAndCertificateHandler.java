@@ -15,22 +15,11 @@
  */
 package se.swedenconnect.signservice.certificate.base;
 
-import java.security.KeyException;
-import java.security.KeyPair;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.AbstractPkiCredential;
-import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.CertificateType;
@@ -44,9 +33,19 @@ import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.security.KeyException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 /**
  * Abstract base class for the {@link KeyAndCertificateHandler} interface.
  */
+@Slf4j
 public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertificateHandler {
 
   /** Provider of generated signing key pairs */
@@ -77,6 +76,7 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
   public void checkRequirements(@Nonnull final SignRequestMessage signRequest,
       @Nonnull final SignServiceContext context)
       throws InvalidRequestException {
+    log.debug("Checking generic key and certificate issuing requirements on SignRequest");
 
     final String clientId = Optional.ofNullable(signRequest.getClientId())
         .orElseThrow(() -> new InvalidRequestException("No client ID available"));
@@ -95,11 +95,13 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
     if (!(algorithm instanceof SignatureAlgorithm)) {
       throw new InvalidRequestException("Defined signature algorithm is not a signature algorithm");
     }
+    log.debug("Signature algorithm checks passed for {}", algorithm.getUri());
 
     final List<String> supportedKeyTypeList = this.signingKeyProvider.getSupportedKeyTypes();
     if (!supportedKeyTypeList.contains(((SignatureAlgorithm) algorithm).getKeyType())) {
       throw new InvalidRequestException("Unsupported key type " + ((SignatureAlgorithm) algorithm).getKeyType());
     }
+    log.debug("Key type checks passed for {}", ((SignatureAlgorithm) algorithm).getKeyType());
 
     final SigningCertificateRequirements certificateRequirements = Optional.ofNullable(
         signRequest.getSigningCertificateRequirements())
@@ -119,12 +121,15 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
 
     // Check that certificate type and profile is supported
     this.isCertificateTypeSupported(certificateType, signingCertificateProfile);
+    log.debug("Certificate issuing requirement checks passed");
 
     // We will not make any specific checks on authentication requirements as they will be tested and accepted by the
     // authentication module.
 
+    log.debug("Checking handler specific key and certificate issuing requirements on SignRequest");
     // Do any other specific compliance tests by the extending class
     this.specificRequirementTests(signRequest, context);
+    log.debug("Key and certificate issuing requirements on SignRequest passed");
   }
 
   /**
@@ -182,13 +187,19 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
     final SignatureAlgorithm algorithm = (SignatureAlgorithm) this.algorithmRegistry.getAlgorithm(signatureAlgorithm);
     // Obtain the raw key pair (public and private key
     final PkiCredential signingKeCredentials = this.signingKeyProvider.getSigningKeyPair(algorithm.getKeyType(), context);
+    log.debug("Issued key pair for key type {}", algorithm.getKeyType() );
     // Get the signer certificate for the public key
     final X509Certificate signerCertificate =
         this.obtainSigningCertificate(signingKeCredentials, signRequest, assertion, context);
-    // Add signer certificate to key credentials
+
+    // TODO remove this check when PkiCredential interface is updated to add certificates
     if (!(signingKeCredentials instanceof AbstractPkiCredential)){
-      throw new KeyException("Signing key pair must be instance of AbstractPkiCredential");
+      log.debug("Key pair credentials is not of type AbstractPkiCredential and can't be extended");
+      throw new KeyException("Unknown credential type " + signingKeCredentials.getClass().getSimpleName());
     }
+    log.debug("Extending generated keys with issued signing certificate");
+    // Add signer certificate to key credentials
+    // TODO extend PkiCredential directly when the interface is updated
     ((AbstractPkiCredential)signingKeCredentials).setCertificate(signerCertificate);
     return signingKeCredentials;
   }

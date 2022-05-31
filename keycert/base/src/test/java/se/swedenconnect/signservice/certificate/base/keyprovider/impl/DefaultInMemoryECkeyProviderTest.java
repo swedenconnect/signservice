@@ -15,12 +15,7 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.security.KeyPair;
-import java.security.Security;
-import java.security.spec.ECGenParameterSpec;
-
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -29,10 +24,13 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
+
+import java.security.Security;
+import java.security.spec.ECGenParameterSpec;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * DefaultInMemoryECkeyProviderTests

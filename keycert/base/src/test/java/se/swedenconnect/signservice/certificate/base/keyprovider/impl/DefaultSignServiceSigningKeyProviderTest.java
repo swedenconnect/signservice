@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 
-import java.security.KeyPair;
 import java.security.Security;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;

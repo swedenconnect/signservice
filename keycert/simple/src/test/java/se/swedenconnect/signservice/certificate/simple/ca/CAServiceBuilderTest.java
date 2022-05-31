@@ -15,22 +15,12 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.io.File;
-import java.security.KeyPair;
-import java.security.Security;
-import java.security.spec.ECGenParameterSpec;
-import java.time.Duration;
-import java.util.List;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import lombok.extern.slf4j.Slf4j;
 import se.idsec.utils.printcert.PrintCertificate;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -42,6 +32,14 @@ import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.impl.DefaultCACertificateFactory;
+
+import java.io.File;
+import java.security.Security;
+import java.security.spec.ECGenParameterSpec;
+import java.time.Duration;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * CA service builder test

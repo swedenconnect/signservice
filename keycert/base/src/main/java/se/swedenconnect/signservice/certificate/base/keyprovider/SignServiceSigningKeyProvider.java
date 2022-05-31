@@ -15,15 +15,13 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider;
 
-import java.security.KeyException;
-import java.security.KeyPair;
-import java.util.List;
+import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.session.SignServiceContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.session.SignServiceContext;
+import java.security.KeyException;
+import java.util.List;
 
 /**
  * Interface for a signing key provider that provides signing keys to the signing service.

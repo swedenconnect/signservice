@@ -18,7 +18,6 @@ package se.swedenconnect.signservice.certificate.base.keyprovider;
 import se.swedenconnect.security.credential.PkiCredential;
 
 import java.security.KeyException;
-import java.security.KeyPair;
 
 /**
  * Interface for a key provider.

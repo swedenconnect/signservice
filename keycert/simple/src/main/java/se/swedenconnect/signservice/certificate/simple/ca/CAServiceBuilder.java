@@ -15,6 +15,13 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
+import org.bouncycastle.cert.X509CertificateHolder;
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
+import se.swedenconnect.ca.engine.ca.repository.CARepository;
+import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
+import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
+
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -23,15 +30,6 @@ import java.time.Duration;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
-
-import javax.annotation.Nonnull;
-
-import org.bouncycastle.cert.X509CertificateHolder;
-
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
-import se.swedenconnect.ca.engine.ca.repository.CARepository;
-import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
-import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 
 /**
  * CA service builder

@@ -15,17 +15,16 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
-import java.security.KeyException;
-import java.security.spec.ECGenParameterSpec;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.session.SignServiceContext;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.security.KeyException;
+import java.security.spec.ECGenParameterSpec;
+import java.util.List;
 
 /**
  * Implementation of a default key provider.
