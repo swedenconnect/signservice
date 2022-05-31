@@ -185,23 +185,23 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
     context.put(DefaultParameter.certificateProfile.getParameterName(), certificateProfile);
 
     final SignatureAlgorithm algorithm = (SignatureAlgorithm) this.algorithmRegistry.getAlgorithm(signatureAlgorithm);
-    // Obtain the raw key pair (public and private key
-    final PkiCredential signingKeCredentials = this.signingKeyProvider.getSigningKeyPair(algorithm.getKeyType(), context);
+    // Obtain the raw key pair (public and private key)
+    final PkiCredential signingKeyCredentials = this.signingKeyProvider.getSigningKeyPair(algorithm.getKeyType(), context);
     log.debug("Issued key pair for key type {}", algorithm.getKeyType() );
     // Get the signer certificate for the public key
     final X509Certificate signerCertificate =
-        this.obtainSigningCertificate(signingKeCredentials, signRequest, assertion, context);
+        this.obtainSigningCertificate(signingKeyCredentials, signRequest, assertion, context);
 
     // TODO remove this check when PkiCredential interface is updated to add certificates
-    if (!(signingKeCredentials instanceof AbstractPkiCredential)){
+    if (!(signingKeyCredentials instanceof AbstractPkiCredential)){
       log.debug("Key pair credentials is not of type AbstractPkiCredential and can't be extended");
-      throw new KeyException("Unknown credential type " + signingKeCredentials.getClass().getSimpleName());
+      throw new KeyException("Unknown credential type " + signingKeyCredentials.getClass().getSimpleName());
     }
     log.debug("Extending generated keys with issued signing certificate");
     // Add signer certificate to key credentials
     // TODO extend PkiCredential directly when the interface is updated
-    ((AbstractPkiCredential)signingKeCredentials).setCertificate(signerCertificate);
-    return signingKeCredentials;
+    ((AbstractPkiCredential)signingKeyCredentials).setCertificate(signerCertificate);
+    return signingKeyCredentials;
   }
 
   /**

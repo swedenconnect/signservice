@@ -74,7 +74,7 @@ class DefaultSignServiceSigningKeyProviderTest {
   private void testEcKey(PkiCredential keyPair, ASN1ObjectIdentifier curveOID) throws Exception {
     assertTrue(keyPair.getPublicKey() instanceof ECPublicKey);
     log.info("Key is an EC key");
-    ASN1ObjectIdentifier namedCurve = DefaultInMemoryECkeyProviderTest.getNamedCurve(keyPair);
+    ASN1ObjectIdentifier namedCurve = DefaultInMemoryECKeyProviderTest.getNamedCurve(keyPair);
     assertEquals(curveOID, namedCurve);
     log.info("Generated expected EC key using named curve {}", curveOID);
   }

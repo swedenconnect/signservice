@@ -31,7 +31,7 @@ import java.security.NoSuchAlgorithmException;
  * provider that pre-generates RSA keys in a background thread to optimize the time
  * it takes to obtain a key.
  */
-public class OnDemandInMemoryRSAkeyProvider implements KeyProvider {
+public class OnDemandInMemoryRSAKeyProvider implements KeyProvider {
 
   /**
    * The RSA key size served by this key provider.
@@ -46,7 +46,7 @@ public class OnDemandInMemoryRSAkeyProvider implements KeyProvider {
    *
    * @param keySize key size for generated RSA keys
    */
-  public OnDemandInMemoryRSAkeyProvider(final int keySize) {
+  public OnDemandInMemoryRSAKeyProvider(final int keySize) {
     this.keySize = keySize;
   }
 

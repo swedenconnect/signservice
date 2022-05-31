@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * DefaultInMemoryECkeyProviderTests
  */
 @Slf4j
-class DefaultInMemoryECkeyProviderTest {
+class DefaultInMemoryECKeyProviderTest {
 
   @BeforeAll
   private static void init() {
@@ -54,7 +54,7 @@ class DefaultInMemoryECkeyProviderTest {
   }
 
   private void testECKeyProvider(String curveName, ASN1ObjectIdentifier expectedNamedCurve) throws Exception {
-    KeyProvider keyProvider = new DefaultInMemoryECkeyProvider(new ECGenParameterSpec(curveName));
+    KeyProvider keyProvider = new DefaultInMemoryECKeyProvider(new ECGenParameterSpec(curveName));
     long startTime = System.currentTimeMillis();
     PkiCredential keyPair = keyProvider.getKeyPair();
     long generationTime = System.currentTimeMillis() - startTime;

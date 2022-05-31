@@ -46,7 +46,7 @@ public class DefaultSignServiceSigningKeyProvider implements SignServiceSigningK
   public DefaultSignServiceSigningKeyProvider() {
     StackedRSAKeyProviderSingleton.setInstance(new DefaultStackedInMemoryRSAKeyProvider(3072, 100));
     this.rsaKeyProvider = StackedRSAKeyProviderSingleton.getSingletonInstance();
-    this.ecKeyProvider = new DefaultInMemoryECkeyProvider(new ECGenParameterSpec("P-256"));
+    this.ecKeyProvider = new DefaultInMemoryECKeyProvider(new ECGenParameterSpec("P-256"));
   }
 
   /**
@@ -60,7 +60,7 @@ public class DefaultSignServiceSigningKeyProvider implements SignServiceSigningK
       @Nonnull final ECGenParameterSpec ecParameterSpec) {
     StackedRSAKeyProviderSingleton.setInstance(new DefaultStackedInMemoryRSAKeyProvider(rsaKeyLen, rsaStackSize));
     this.rsaKeyProvider = StackedRSAKeyProviderSingleton.getSingletonInstance();
-    this.ecKeyProvider = new DefaultInMemoryECkeyProvider(ecParameterSpec);
+    this.ecKeyProvider = new DefaultInMemoryECKeyProvider(ecParameterSpec);
   }
 
   /** {@inheritDoc} */

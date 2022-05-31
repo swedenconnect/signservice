@@ -30,12 +30,12 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test for on demand RSA key generator
  */
 @Slf4j
-class OnDemandInMemoryRSAkeyProviderTest {
+class OnDemandInMemoryRSAKeyProviderTest {
 
   @Test
   void getKeyPair() throws Exception {
     log.info("Testing on-demand key provider -  size 2048 keys");
-    KeyProvider keyProvider = new OnDemandInMemoryRSAkeyProvider(2048);
+    KeyProvider keyProvider = new OnDemandInMemoryRSAKeyProvider(2048);
     PkiCredential keyPair = keyProvider.getKeyPair();
     assertNotNull(keyPair);
     assertNotNull(keyPair.getPrivateKey());
@@ -45,7 +45,7 @@ class OnDemandInMemoryRSAkeyProviderTest {
     log.info("Generated key pair with private key:\n{}", TestUtils.base64Print(keyPair.getPrivateKey().getEncoded(), 80));
     log.info("Generated key pair with public key:\n{}", TestUtils.base64Print(keyPair.getPublicKey().getEncoded(), 80));
 
-    assertEquals(2048, ((OnDemandInMemoryRSAkeyProvider)keyProvider).getKeySize());
+    assertEquals(2048, ((OnDemandInMemoryRSAKeyProvider)keyProvider).getKeySize());
   }
 
 }

@@ -27,7 +27,7 @@ import java.util.Objects;
 /**
  * Default in memory Elliptic Curve key provider.
  */
-public class DefaultInMemoryECkeyProvider implements KeyProvider {
+public class DefaultInMemoryECKeyProvider implements KeyProvider {
 
   /** Parameter specification for the EC keys to generate */
   private final ECGenParameterSpec ecSpec;
@@ -37,7 +37,7 @@ public class DefaultInMemoryECkeyProvider implements KeyProvider {
    *
    * @param ecSpec parameter specification for EC keys to generate
    */
-  public DefaultInMemoryECkeyProvider(@Nonnull final ECGenParameterSpec ecSpec) {
+  public DefaultInMemoryECKeyProvider(@Nonnull final ECGenParameterSpec ecSpec) {
     this.ecSpec = Objects.requireNonNull(ecSpec, "ecSpec must not be null");
   }
 
@@ -46,12 +46,12 @@ public class DefaultInMemoryECkeyProvider implements KeyProvider {
   @Nonnull
   public PkiCredential getKeyPair() throws KeyException {
     try {
-      final KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+      final KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA");
       g.initialize(this.ecSpec, new SecureRandom());
       KeyPair keyPair = g.generateKeyPair();
       return new BasicCredential(keyPair.getPublic(), keyPair.getPrivate());
     }
-    catch (final InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchProviderException e) {
+    catch (final InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
       throw new KeyException("Error generating EC key", e);
     }
   }

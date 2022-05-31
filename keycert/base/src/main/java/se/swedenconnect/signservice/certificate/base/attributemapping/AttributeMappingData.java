@@ -64,10 +64,11 @@ public class AttributeMappingData {
   private String sourceFriendlyName;
 
   /**
-   * An optional default value if no other trusted source is available.
+   * Indicates if the source of the value was a default value from SignRequest and not obtained from the
+   * assertion from the identity service
    *
-   * @param defaultValue default value
-   * @return default value
+   * @param defaultValue true if the value was obtained from a default value from SignRequest
+   * @return true if the value was obtained from a default value from SignRequest
    */
   private boolean defaultValue;
 
