@@ -31,6 +31,8 @@ import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.impl.DefaultCACertificateFactory;
 
 import java.io.File;
@@ -59,7 +61,9 @@ class CAServiceBuilderTest {
 
   @Test
   void getInstance() throws Exception {
-    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(2048, 5, new ECGenParameterSpec("P-256"));
+    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(
+      new OnDemandInMemoryRSAKeyProvider(2048),
+      new InMemoryECKeyProvider(new ECGenParameterSpec("P-256")));
     PkiCredential keyPair = keyProvider.getSigningKeyPair("EC");
     CACertificateFactory caCertificateFactory = new DefaultCACertificateFactory();
     X509CertificateHolder caCertificate = caCertificateFactory.getCACertificate(

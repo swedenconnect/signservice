@@ -27,7 +27,7 @@ import java.util.Objects;
 /**
  * Default in memory Elliptic Curve key provider.
  */
-public class DefaultInMemoryECKeyProvider implements KeyProvider {
+public class InMemoryECKeyProvider implements KeyProvider {
 
   /** Parameter specification for the EC keys to generate */
   private final ECGenParameterSpec ecSpec;
@@ -37,7 +37,7 @@ public class DefaultInMemoryECKeyProvider implements KeyProvider {
    *
    * @param ecSpec parameter specification for EC keys to generate
    */
-  public DefaultInMemoryECKeyProvider(@Nonnull final ECGenParameterSpec ecSpec) {
+  public InMemoryECKeyProvider(@Nonnull final ECGenParameterSpec ecSpec) {
     this.ecSpec = Objects.requireNonNull(ecSpec, "ecSpec must not be null");
   }
 

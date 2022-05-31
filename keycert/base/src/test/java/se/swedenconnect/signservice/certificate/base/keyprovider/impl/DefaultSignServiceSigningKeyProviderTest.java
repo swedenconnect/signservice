@@ -48,7 +48,10 @@ class DefaultSignServiceSigningKeyProviderTest {
 
   @Test
   void testSigningKeyProvider() throws Exception {
-    SignServiceSigningKeyProvider defaultKeyProvider = new DefaultSignServiceSigningKeyProvider();
+    SignServiceSigningKeyProvider defaultKeyProvider = new DefaultSignServiceSigningKeyProvider(
+      new OnDemandInMemoryRSAKeyProvider(3072),
+      new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))
+    );
     List<String> supportedKeyTypes = defaultKeyProvider.getSupportedKeyTypes();
     assertEquals(2, supportedKeyTypes.size());
     assertTrue(supportedKeyTypes.contains("EC"));
@@ -57,8 +60,11 @@ class DefaultSignServiceSigningKeyProviderTest {
     testEcKey(defaultKeyProvider.getSigningKeyPair("EC"), SECObjectIdentifiers.secp256r1);
     testRSAKey(defaultKeyProvider.getSigningKeyPair("RSA", null), 3072);
 
-    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(2048, 5,
-      new ECGenParameterSpec("P-521"));
+    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(
+      new StackedInMemoryRSAKeyProvider(2048, 5),
+      new InMemoryECKeyProvider(new ECGenParameterSpec("P-521"))
+    );
+
     testEcKey(keyProvider.getSigningKeyPair("EC", null), SECObjectIdentifiers.secp521r1);
     testRSAKey(keyProvider.getSigningKeyPair("RSA"), 2048);
   }
@@ -74,7 +80,7 @@ class DefaultSignServiceSigningKeyProviderTest {
   private void testEcKey(PkiCredential keyPair, ASN1ObjectIdentifier curveOID) throws Exception {
     assertTrue(keyPair.getPublicKey() instanceof ECPublicKey);
     log.info("Key is an EC key");
-    ASN1ObjectIdentifier namedCurve = DefaultInMemoryECKeyProviderTest.getNamedCurve(keyPair);
+    ASN1ObjectIdentifier namedCurve = InMemoryECKeyProviderTest.getNamedCurve(keyPair);
     assertEquals(curveOID, namedCurve);
     log.info("Generated expected EC key using named curve {}", curveOID);
   }

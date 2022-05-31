@@ -31,7 +31,9 @@ import se.swedenconnect.signservice.certificate.base.configuration.DefaultConfig
 import se.swedenconnect.signservice.certificate.base.configuration.DefaultParameter;
 import se.swedenconnect.signservice.certificate.base.configuration.impl.KeyAndCertModuleDefaultConfiguration;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.certificate.base.utils.TestUtils;
 import se.swedenconnect.signservice.certificate.base.utils.X509DnNameType;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
@@ -62,8 +64,9 @@ class AbstractKeyAndCertificateHandlerTest {
   @Test
   void keyAndCertHandlerTests() throws Exception {
     log.info("Testing Key and Certificate Handler");
-    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(2048, 10,
-      new ECGenParameterSpec("P-256"));
+    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(
+      new OnDemandInMemoryRSAKeyProvider(2048),
+      new InMemoryECKeyProvider(new ECGenParameterSpec("P-256")));
     DefaultConfiguration configuration = new KeyAndCertModuleDefaultConfiguration();
     KeyAndCertificateHandler keyAndCertificateHandler = new TestKeyAndCertificateHandler(
       keyProvider, configuration, AlgorithmRegistrySingleton.getInstance());
@@ -229,11 +232,13 @@ class AbstractKeyAndCertificateHandlerTest {
     }
 
     /** {@inheritDoc} */
-    @Override protected X509Certificate obtainSigningCertificate(PkiCredential signingKeyPair, SignRequestMessage signRequest,
+    @Override protected X509Certificate obtainSigningCertificate(PkiCredential signingKeyPair,
+      SignRequestMessage signRequest,
       IdentityAssertion assertion, SignServiceContext context) throws CertificateException {
 
-      CertificateType certificateType = Optional.ofNullable(context.get(DefaultParameter.certificateType.getParameterName(),
-        CertificateType.class)).orElseThrow(() -> new NullPointerException("Null certificate Type is not allowed"));
+      CertificateType certificateType = Optional.ofNullable(
+        context.get(DefaultParameter.certificateType.getParameterName(),
+          CertificateType.class)).orElseThrow(() -> new NullPointerException("Null certificate Type is not allowed"));
       String profile = context.get(DefaultParameter.certificateProfile.getParameterName(), String.class);
 
       try {

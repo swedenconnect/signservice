@@ -26,14 +26,14 @@ import static org.junit.jupiter.api.Assertions.*;
  * DefaultInMemoryRSAKeyProviderTests
  */
 @Slf4j
-class DefaultStackedInMemoryRSAKeyProviderTest {
+class StackedInMemoryRSAKeyProviderTest {
 
   @Test
   void getKeyPair() throws Exception {
     int keySize = 2048;
 
     log.info("Default in memory RSA Key provider tests");
-    DefaultStackedInMemoryRSAKeyProvider keyProvider = new DefaultStackedInMemoryRSAKeyProvider(keySize, 5);
+    StackedInMemoryRSAKeyProvider keyProvider = new StackedInMemoryRSAKeyProvider(keySize, 5);
     log.info("Created new key provider");
     assertEquals(5, keyProvider.getKeyStackSize());
     log.info("Confirmed key stack size");

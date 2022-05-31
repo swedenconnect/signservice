@@ -41,6 +41,8 @@ import se.swedenconnect.signservice.certificate.base.configuration.DefaultConfig
 import se.swedenconnect.signservice.certificate.base.configuration.impl.DefaultConfigurationSingleton;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.BasicCAService;
 import se.swedenconnect.signservice.certificate.simple.ca.CACertificateFactory;
 import se.swedenconnect.signservice.certificate.simple.ca.CAServiceBuilder;
@@ -92,8 +94,9 @@ class SimpleKeyAndCertificateHandlerTest {
   @Test
   void simpleKeyAndCertificateHandlerTest() throws Exception {
     log.info("Simple key and certificate handler tests");
-    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(2048, 5,
-      new ECGenParameterSpec("P-256"));
+    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(
+      new OnDemandInMemoryRSAKeyProvider(2048),
+      new InMemoryECKeyProvider(new ECGenParameterSpec("P-256")));
     log.info("Created key provider");
     DefaultConfiguration defaultConfiguration = DefaultConfigurationSingleton.getSingletonInstance();
     log.info("Get default configuration");

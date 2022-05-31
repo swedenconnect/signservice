@@ -35,11 +35,12 @@ import java.util.Optional;
  * Default in memory RSA key provider.
  *
  * <p>
- * This key provider produces and holds a stock of pre-produced RSA keys.
+ * This key provider produces and holds a stock of pre-produced RSA keys. It is therefore important that this
+ * class is instantiated as a singleton
  * </p>
  */
 @Slf4j
-public class DefaultStackedInMemoryRSAKeyProvider implements KeyProvider {
+public class StackedInMemoryRSAKeyProvider implements KeyProvider {
 
   /**
    * The RSA key size served by this key provider.
@@ -76,7 +77,7 @@ public class DefaultStackedInMemoryRSAKeyProvider implements KeyProvider {
    * @param keySize key size
    * @param keyStackSize key stack size
    */
-  public DefaultStackedInMemoryRSAKeyProvider(final int keySize, final int keyStackSize) {
+  public StackedInMemoryRSAKeyProvider(final int keySize, final int keyStackSize) {
     this.keySize = keySize;
     this.keyStackSize = keyStackSize;
     this.keyStack = new ArrayList<>();
@@ -155,11 +156,11 @@ public class DefaultStackedInMemoryRSAKeyProvider implements KeyProvider {
      */
     @Override
     public void run() {
-      while (DefaultStackedInMemoryRSAKeyProvider.this.keyStack.size() < DefaultStackedInMemoryRSAKeyProvider.this.keyStackSize) {
+      while (StackedInMemoryRSAKeyProvider.this.keyStack.size() < StackedInMemoryRSAKeyProvider.this.keyStackSize) {
         final long startTime = System.currentTimeMillis();
         try {
-          DefaultStackedInMemoryRSAKeyProvider.this
-              .addOrRetrieveStackedKey(DefaultStackedInMemoryRSAKeyProvider.this.generateKeyPair());
+          StackedInMemoryRSAKeyProvider.this
+              .addOrRetrieveStackedKey(StackedInMemoryRSAKeyProvider.this.generateKeyPair());
         }
         catch (final KeyException e) {
           log.error("Error creating RSA key", e);
@@ -167,10 +168,10 @@ public class DefaultStackedInMemoryRSAKeyProvider implements KeyProvider {
         }
         final long keyGenTime = System.currentTimeMillis() - startTime;
         log.debug("Generated new RSA key with key size {} in {} ms. Keys in stack: {}",
-            DefaultStackedInMemoryRSAKeyProvider.this.keySize, keyGenTime,
-            DefaultStackedInMemoryRSAKeyProvider.this.keyStack.size());
+            StackedInMemoryRSAKeyProvider.this.keySize, keyGenTime,
+            StackedInMemoryRSAKeyProvider.this.keyStack.size());
       }
-      log.debug("Completed RSA key generation at stick size {}", DefaultStackedInMemoryRSAKeyProvider.this.keyStackSize);
+      log.debug("Completed RSA key generation at stick size {}", StackedInMemoryRSAKeyProvider.this.keyStackSize);
     }
   }
 

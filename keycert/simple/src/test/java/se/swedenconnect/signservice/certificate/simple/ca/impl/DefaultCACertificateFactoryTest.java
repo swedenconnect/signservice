@@ -30,6 +30,8 @@ import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.CACertificateFactory;
 
 import java.security.Security;
@@ -56,8 +58,10 @@ class DefaultCACertificateFactoryTest {
 
   @Test
   void getCACertificate() throws Exception {
-    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(2048, 5,
-      new ECGenParameterSpec("P-256"));
+
+    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(
+      new OnDemandInMemoryRSAKeyProvider(2048),
+      new InMemoryECKeyProvider(new ECGenParameterSpec("P-256")));
 
     ExplicitCertNameModel caNameModel = new ExplicitCertNameModel(List.of(
       new AttributeTypeAndValueModel(CertAttributes.C, "SE"),

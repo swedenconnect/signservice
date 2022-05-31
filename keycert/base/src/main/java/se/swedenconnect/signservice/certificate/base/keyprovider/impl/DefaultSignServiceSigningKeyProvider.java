@@ -23,7 +23,6 @@ import se.swedenconnect.signservice.session.SignServiceContext;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.security.KeyException;
-import java.security.spec.ECGenParameterSpec;
 import java.util.List;
 
 /**
@@ -35,32 +34,14 @@ public class DefaultSignServiceSigningKeyProvider implements SignServiceSigningK
   private final KeyProvider ecKeyProvider;
 
   /**
-   * Constructor for a default sign service key provider using the following preset parameters:
-   *
-   * <ul>
-   * <li>RSA key length 3072 bits</li>
-   * <li>RSA pre-produced key stack size = 100 keys</li>
-   * <li>EC curve NIST P-256</li>
-   * </ul>
+   * Constructor for the default sign service key provider
+   * @param rsaKeyProvider key provider for generating RSA keys
+   * @param ecKeyProvider key provider for generating EC keys
    */
-  public DefaultSignServiceSigningKeyProvider() {
-    StackedRSAKeyProviderSingleton.setInstance(new DefaultStackedInMemoryRSAKeyProvider(3072, 100));
-    this.rsaKeyProvider = StackedRSAKeyProviderSingleton.getSingletonInstance();
-    this.ecKeyProvider = new DefaultInMemoryECKeyProvider(new ECGenParameterSpec("P-256"));
-  }
-
-  /**
-   * Constructor for default key provider.
-   *
-   * @param rsaKeyLen key size of the generated RSA keys
-   * @param rsaStackSize number of pre-produced RSA keys kept in the key generator
-   * @param ecParameterSpec the EC curve to use for generating EC keys
-   */
-  public DefaultSignServiceSigningKeyProvider(final int rsaKeyLen, final int rsaStackSize,
-      @Nonnull final ECGenParameterSpec ecParameterSpec) {
-    StackedRSAKeyProviderSingleton.setInstance(new DefaultStackedInMemoryRSAKeyProvider(rsaKeyLen, rsaStackSize));
-    this.rsaKeyProvider = StackedRSAKeyProviderSingleton.getSingletonInstance();
-    this.ecKeyProvider = new DefaultInMemoryECKeyProvider(ecParameterSpec);
+  public DefaultSignServiceSigningKeyProvider(
+    KeyProvider rsaKeyProvider, KeyProvider ecKeyProvider) {
+    this.rsaKeyProvider = rsaKeyProvider;
+    this.ecKeyProvider = ecKeyProvider;
   }
 
   /** {@inheritDoc} */
