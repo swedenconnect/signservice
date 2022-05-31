@@ -34,7 +34,7 @@ public class DefaultSigningCertificateRequirements implements SigningCertificate
   private static final long serialVersionUID = -1376803101192725366L;
 
   /** The certificate policy to use. */
-  private String signingCertificatePolicy;
+  private String signingCertificateProfile;
 
   /** The certificate type. */
   private CertificateType certificateType;
@@ -50,19 +50,19 @@ public class DefaultSigningCertificateRequirements implements SigningCertificate
 
   /** {@inheritDoc} */
   @Override
-  public String getSigningCertificatePolicy() {
-    return this.signingCertificatePolicy;
+  public String getSigningCertificateProfile() {
+    return this.signingCertificateProfile;
   }
 
   /**
-   * Assigns the signing certificate policy. This policy may cover things like certificate types and attribute mappings
-   * (see {@link #getCertificateType()} and {@link #getAttributeMappings()}) but also more fine grained settings of how
-   * a signing certificate is created.
+   * Assigns the signing certificate profile. This profile may cover things like certificate types and attribute
+   * mappings (see {@link #getCertificateType()} and {@link #getAttributeMappings()}) but also more fine-grained
+   * settings of how a signing certificate is created such as one or more certificate policies.
    *
-   * @param signingCertificatePolicy the policy
+   * @param signingCertificateProfile the certificate profile
    */
-  public void setSigningCertificatePolicy(final String signingCertificatePolicy) {
-    this.signingCertificatePolicy = signingCertificatePolicy;
+  public void setSigningCertificateProfile(final String signingCertificateProfile) {
+    this.signingCertificateProfile = signingCertificateProfile;
   }
 
   /** {@inheritDoc} */
@@ -102,7 +102,7 @@ public class DefaultSigningCertificateRequirements implements SigningCertificate
   @Override
   @GeneratedMethod
   public int hashCode() {
-    return Objects.hash(this.attributeMappings, this.certificateType, this.signingCertificatePolicy);
+    return Objects.hash(this.attributeMappings, this.certificateType, this.signingCertificateProfile);
   }
 
   /** {@inheritDoc} */
@@ -118,14 +118,14 @@ public class DefaultSigningCertificateRequirements implements SigningCertificate
     final DefaultSigningCertificateRequirements other = (DefaultSigningCertificateRequirements) obj;
     return Objects.equals(this.attributeMappings, other.attributeMappings)
         && this.certificateType == other.certificateType
-        && Objects.equals(this.signingCertificatePolicy, other.signingCertificatePolicy);
+        && Objects.equals(this.signingCertificateProfile, other.signingCertificateProfile);
   }
 
   /** {@inheritDoc} */
   @Override
   public String toString() {
     return String.format("signing-certificate-policy='%s', certificate-type='%s', attribute-mappings=%s",
-        this.signingCertificatePolicy, this.certificateType, this.attributeMappings);
+        this.signingCertificateProfile, this.certificateType, this.attributeMappings);
   }
 
 }

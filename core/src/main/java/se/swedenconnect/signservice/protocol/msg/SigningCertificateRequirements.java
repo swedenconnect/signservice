@@ -27,13 +27,14 @@ import se.swedenconnect.signservice.certificate.CertificateType;
 public interface SigningCertificateRequirements extends Serializable {
 
   /**
-   * The requirements of a signing certificate may be represented using a policy. This policy may cover things like
+   * The requirements of a signing certificate may be represented using a profile. This profile may cover things like
    * certificate types and attribute mappings (see {@link #getCertificateType()} and {@link #getAttributeMappings()})
-   * but also more fine grained settings of how a signing certificate is created.
+   * but also more fine-grained settings of how a signing certificate is created such as one or more certificate
+   * policies.
    *
-   * @return the policy or null if none has been given
+   * @return the profile or null if none has been given
    */
-  String getSigningCertificatePolicy();
+  String getSigningCertificateProfile();
 
   /**
    * Gets the requested certificate type.

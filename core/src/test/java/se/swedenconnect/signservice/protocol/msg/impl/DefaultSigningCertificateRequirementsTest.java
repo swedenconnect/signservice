@@ -31,7 +31,7 @@ public class DefaultSigningCertificateRequirementsTest {
   @Test
   public void testUsage() {
     final DefaultSigningCertificateRequirements reqs = new DefaultSigningCertificateRequirements();
-    reqs.setSigningCertificatePolicy("policy");
+    reqs.setSigningCertificateProfile("policy");
     reqs.setCertificateType(CertificateType.PKC);
 
     final DefaultIdentityAttributeIdentifier s1 =
@@ -48,7 +48,7 @@ public class DefaultSigningCertificateRequirementsTest {
 
     reqs.setAttributeMappings(Arrays.asList(cam));
 
-    Assertions.assertEquals("policy", reqs.getSigningCertificatePolicy());
+    Assertions.assertEquals("policy", reqs.getSigningCertificateProfile());
     Assertions.assertEquals(CertificateType.PKC, reqs.getCertificateType());
     Assertions.assertEquals(Arrays.asList(cam), reqs.getAttributeMappings());
     Assertions.assertNotNull(reqs.toString());
