@@ -15,6 +15,8 @@
  */
 package se.swedenconnect.signservice.authn.saml;
 
+import javax.annotation.Nonnull;
+
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorContainer;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 import se.swedenconnect.opensaml.saml2.request.AuthnRequestGenerator;
@@ -35,9 +37,12 @@ public class DefaultSamlAuthenticationHandler extends AbstractSamlAuthentication
    * @param entityDescriptorContainer the container for this SP's metadata
    * @param urlConfiguration the URL configuration
    */
-  public DefaultSamlAuthenticationHandler(final AuthnRequestGenerator authnRequestGenerator,
-      final ResponseProcessor responseProcessor, final MetadataProvider metadataProvider,
-      final EntityDescriptorContainer entityDescriptorContainer, final SpUrlConfiguration urlConfiguration) {
+  public DefaultSamlAuthenticationHandler(
+      @Nonnull final AuthnRequestGenerator authnRequestGenerator,
+      @Nonnull final ResponseProcessor responseProcessor,
+      @Nonnull final MetadataProvider metadataProvider,
+      @Nonnull final EntityDescriptorContainer entityDescriptorContainer,
+      @Nonnull final SpUrlConfiguration urlConfiguration) {
     super(authnRequestGenerator, responseProcessor, metadataProvider, entityDescriptorContainer, urlConfiguration);
   }
 

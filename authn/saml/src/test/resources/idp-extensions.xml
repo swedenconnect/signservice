@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Extensions xmlns="urn:oasis:names:tc:SAML:2.0:metadata">
+  <psc:RequestedPrincipalSelection xmlns:psc="http://id.swedenconnect.se/authn/1.0/principal-selection/ns">
+    <psc:MatchValue Name="urn:oid:1.2.752.29.4.13" />
+    <psc:MatchValue Name="urn:oid:1.2.752.201.3.1" />
+  </psc:RequestedPrincipalSelection>
+  <mdui:UIInfo xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui">
+    <mdui:DisplayName xml:lang="en">Sweden Connect Reference IdP</mdui:DisplayName>
+    <mdui:DisplayName xml:lang="sv">Sweden Connect Referens-IdP</mdui:DisplayName>
+    <mdui:Description xml:lang="en">Sweden Connect Reference Identity Provider</mdui:Description>
+    <mdui:Description xml:lang="sv">Sweden Connect referens-legitimeringstjänst</mdui:Description>
+    <mdui:Logo height="256" width="256" xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui">https://idp.sandbox.swedenconnect.se/idp/images/idp-logo-notext.svg</mdui:Logo>
+    <mdui:Logo height="56" width="280" xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui">https://idp.sandbox.swedenconnect.se/idp/images/idp-logo.svg</mdui:Logo>
+  </mdui:UIInfo>
+</Extensions>

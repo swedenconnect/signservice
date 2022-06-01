@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csig:SignMessage DisplayEntity="https://idp.example.com" MimeType="text" MustShow="true"
+  xmlns:csig="http://id.elegnamnden.se/csig/1.1/dss-ext/ns">
+  <csig:Message>VW5kZXJza3JpZnQgYmVnw6RyZCBhdiBTd2VkZW4gQ29ubmVjdCBVbmRlcnNrcmlmdHN0asOkbnN0</csig:Message>
+</csig:SignMessage>

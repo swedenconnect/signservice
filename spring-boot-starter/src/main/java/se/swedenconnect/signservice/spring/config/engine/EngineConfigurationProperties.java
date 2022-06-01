@@ -76,7 +76,7 @@ public class EngineConfigurationProperties implements InitializingBean {
     this.client.afterPropertiesSet();
 
     if (!StringUtils.hasText(this.protocolHandlerBean)) {
-      log.info("protocol-handler-bean has not been assigning, using {}",
+      log.info("protocol-handler-bean has not been assigned, using {}",
           ProtocolConfiguration.DSS_PROTOCOL_HANDLER_NAME);
       this.protocolHandlerBean = ProtocolConfiguration.DSS_PROTOCOL_HANDLER_NAME;
     }

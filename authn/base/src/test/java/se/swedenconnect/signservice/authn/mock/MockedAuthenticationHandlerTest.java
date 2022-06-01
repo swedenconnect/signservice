@@ -64,7 +64,8 @@ public class MockedAuthenticationHandlerTest {
 
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
-    final MockedAuthenticationHandler handler = new MockedAuthenticationHandler();
+    final MockedAuthenticationHandler handler = new MockedAuthenticationHandler("mocked");
+    Assertions.assertEquals("mocked", handler.getName());
     final AuthenticationResultChoice choice = handler.authenticate(authnReqs, signMessage, context);
     Assertions.assertNull(choice.getHttpRequestMessage());
 
@@ -80,14 +81,15 @@ public class MockedAuthenticationHandlerTest {
 
   @Test
   public void testCanProcess() {
-    final MockedAuthenticationHandler handler = new MockedAuthenticationHandler();
+    final MockedAuthenticationHandler handler = new MockedAuthenticationHandler(null);
+    Assertions.assertEquals(MockedAuthenticationHandler.class.getSimpleName(), handler.getName());
     final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
     Assertions.assertFalse(handler.canProcess(request, null));
   }
 
   @Test
   public void testResumeAuthentication() {
-    final MockedAuthenticationHandler handler = new MockedAuthenticationHandler();
+    final MockedAuthenticationHandler handler = new MockedAuthenticationHandler(null);
     final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
