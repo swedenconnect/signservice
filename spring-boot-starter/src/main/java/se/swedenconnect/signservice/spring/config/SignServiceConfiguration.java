@@ -188,7 +188,7 @@ public class SignServiceConfiguration {
       conf.setProcessingPaths(ecp.getProcessingPaths());
 
       conf.setProtocolHandler(this.createProtocolHandler(ecp.getProtocolHandlerBean()));
-      conf.setAuthenticationHandler(new MockedAuthenticationHandler());  // TODO: change
+      conf.setAuthenticationHandler(new MockedAuthenticationHandler("MockedAuthnHandler"));  // TODO: change
       conf.setKeyAndCertificateHandler(null); // TODO: change
       conf.setAuditLogger(this.auditLogger()); // TODO: change
 
@@ -227,7 +227,7 @@ public class SignServiceConfiguration {
   private ProtocolHandler createProtocolHandler(final String beanName) {
 
     try {
-      this.applicationContext.getBean(beanName, ProtocolHandler.class);
+      return this.applicationContext.getBean(beanName, ProtocolHandler.class);
     }
     catch (final NoSuchBeanDefinitionException e) {
       log.debug("The ProtocolHandler bean named '{}' is not yet created - creating a lazy proxy for the bean", beanName);

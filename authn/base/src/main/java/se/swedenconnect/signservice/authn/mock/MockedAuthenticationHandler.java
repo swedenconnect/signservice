@@ -21,8 +21,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,34 +51,41 @@ import se.swedenconnect.signservice.session.SignServiceContext;
 @Slf4j
 public class MockedAuthenticationHandler implements AuthenticationHandler {
 
-  /** The handler name. */
-  public static final String NAME = "Mocked Authentication Handler";
-
   /** The default authentication context URI to use if none has been specified. */
   public static final String DEFAULT_LOA = "http://id.elegnamnden.se/loa/1.0/loa3";
 
   /** The attribute name for the "Sign message digest" attribute (urn:oid:1.2.752.201.3.14). */
   public static final String ATTRIBUTE_NAME_SIGNMESSAGE_DIGEST = "urn:oid:1.2.752.201.3.14";
 
+  /** The handler name. */
+  private final String name;
+
   /**
    * Default constructor.
+   *
+   * @param name the handler name
    */
-  public MockedAuthenticationHandler() {
+  public MockedAuthenticationHandler(@Nullable final String name) {
+    this.name = name;
     log.warn("{}: Handler created - DO NOT USE IN PRODUCTION", this.getName());
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public String getName() {
-    return NAME;
+    return Optional.ofNullable(this.name).orElseGet(() -> this.getClass().getSimpleName());
   }
 
   /** {@inheritDoc} */
   @Override
-  public AuthenticationResultChoice authenticate(final AuthnRequirements authnRequirements,
-      final SignMessage signMessage, final SignServiceContext context) throws UserAuthenticationException {
+  @Nonnull
+  public AuthenticationResultChoice authenticate(@Nonnull final AuthnRequirements authnRequirements,
+      @Nullable final SignMessage signMessage, @Nonnull final SignServiceContext context)
+      throws UserAuthenticationException {
 
-    log.warn("{}: Handler '{}' called to authenticate user - DO NOT USE IN PRODUCTION", context.getId(), this.getName());
+    log.warn("{}: Handler '{}' called to authenticate user - DO NOT USE IN PRODUCTION", context.getId(),
+        this.getName());
 
     final DefaultIdentityAssertion assertion = new DefaultIdentityAssertion();
     assertion.setIdentifier(UUID.randomUUID().toString());
@@ -132,7 +142,9 @@ public class MockedAuthenticationHandler implements AuthenticationHandler {
    * @return an attribute
    * @throws UserAuthenticationException for internal processing errors
    */
-  private IdentityAttribute<?> issueSignMessageDigest(final byte[] message) throws UserAuthenticationException {
+  @Nonnull
+  private IdentityAttribute<?> issueSignMessageDigest(@Nonnull final byte[] message)
+      throws UserAuthenticationException {
 
     try {
       final MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
@@ -151,8 +163,9 @@ public class MockedAuthenticationHandler implements AuthenticationHandler {
 
   /** {@inheritDoc} */
   @Override
-  public AuthenticationResultChoice resumeAuthentication(final HttpServletRequest httpRequest,
-      final SignServiceContext context) throws UserAuthenticationException {
+  @Nonnull
+  public AuthenticationResultChoice resumeAuthentication(@Nonnull final HttpServletRequest httpRequest,
+      @Nonnull final SignServiceContext context) throws UserAuthenticationException {
 
     throw new UserAuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHN_ERROR,
         "Resumed authentication is not supported");
@@ -160,7 +173,7 @@ public class MockedAuthenticationHandler implements AuthenticationHandler {
 
   /** {@inheritDoc} */
   @Override
-  public boolean canProcess(final HttpServletRequest httpRequest, final SignServiceContext context) {
+  public boolean canProcess(@Nonnull final HttpServletRequest httpRequest, @Nullable final SignServiceContext context) {
     return false;
   }
 

@@ -298,7 +298,8 @@ public abstract class AbstractSamlAuthenticationHandler implements Authenticatio
       // Build result ...
       //
       final IdentityAssertion identityAssertion = this.buildIdentityAssertion(processingResult, attributes, context);
-      final boolean signMessageDisplayed = this.wasSignMessageDisplayed(processingResult, authnRequest, context);
+      final boolean signMessageDisplayed =
+          this.wasSignMessageDisplayed(processingResult, attributes, authnRequest, context);
 
       return new AuthenticationResultChoice(
           new AuthenticationResult() {
@@ -473,10 +474,12 @@ public abstract class AbstractSamlAuthenticationHandler implements Authenticatio
    * @param context the SignService context
    * @param idpMetadata the IdP metadata
    * @return a AuthnRequestGeneratorContext object
+   * @throws UserAuthenticationException for errors creating the context
    */
   protected AuthnRequestGeneratorContext createAuthnRequestContext(
       @Nonnull final AuthnRequirements authnRequirements, @Nullable final SignMessage signMessage,
-      @Nonnull final SignServiceContext context, @Nonnull final EntityDescriptor idpMetadata) {
+      @Nonnull final SignServiceContext context, @Nonnull final EntityDescriptor idpMetadata)
+      throws UserAuthenticationException {
 
     return new AuthnRequestGeneratorContext() {
 
@@ -785,13 +788,14 @@ public abstract class AbstractSamlAuthenticationHandler implements Authenticatio
    * was displayed. The default implementation of this method always returns {@code false}.
    *
    * @param result the processing result
+   * @param attributes the received attributes (in generic format)
    * @param authnRequest the authentication request
    * @param context the SignService context
    * @return a flag indicating whether the sign message was displayed or not
    * @throws UserAuthenticationException for processing errors, i.e., the proof for a displayed sign message is illegal
    */
-  protected boolean wasSignMessageDisplayed(
-      @Nonnull final ResponseProcessingResult result, @Nonnull final AuthnRequest authnRequest,
+  protected boolean wasSignMessageDisplayed(@Nonnull final ResponseProcessingResult result,
+      @Nonnull List<IdentityAttribute<?>> attributes, @Nonnull final AuthnRequest authnRequest,
       @Nonnull final SignServiceContext context) throws UserAuthenticationException {
     return false;
   }
