@@ -16,7 +16,9 @@
 package se.swedenconnect.signservice.signature.impl;
 
 import lombok.Setter;
+import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
+import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
@@ -70,7 +72,8 @@ public class DefaultSignatureHandler implements SignatureHandler {
    * @param algorithmRegistry algorithm registry
    * @param signServiceSignerProvider sign service signer provider
    */
-  public DefaultSignatureHandler(final AlgorithmRegistry algorithmRegistry, final SignServiceSignerProvider signServiceSignerProvider) {
+  public DefaultSignatureHandler(final AlgorithmRegistry algorithmRegistry,
+    final SignServiceSignerProvider signServiceSignerProvider) {
     this.signServiceSignerProvider = signServiceSignerProvider;
     this.algorithmRegistry = algorithmRegistry;
   }
@@ -97,11 +100,17 @@ public class DefaultSignatureHandler implements SignatureHandler {
 
     try {
       SignatureType signatureType = signatureTask.getSignatureType();
-      SignServiceSigner signer = signServiceSignerProvider.getSigner(
-        signRequest.getSignatureRequirements().getSignatureAlgorithm(),
-        signatureType);
+      String signatureAlgorithmUri = signRequest.getSignatureRequirements().getSignatureAlgorithm();
+      SignServiceSigner signer = signServiceSignerProvider.getSigner(signatureAlgorithmUri, signatureType);
+
+      SignatureAlgorithm signatureAlgorithm = (SignatureAlgorithm) algorithmRegistry.getAlgorithm(signatureAlgorithmUri);
 
       // TODO prepare data to be signed and use the signer to sign
+
+      byte[] signature = signer.sign(null, signingCredential.getPrivateKey(), signatureAlgorithm);
+      DefaultCompletedSignatureTask completedSignatureTask = new DefaultCompletedSignatureTask(signatureTask);
+      completedSignatureTask.setSignature(signature);
+      completedSignatureTask.setSignatureAlgorithmUri(signatureAlgorithmUri);
 
     }
     catch (Exception ex) {
