@@ -29,8 +29,9 @@ public class DefaultSignatureHandlerTest {
   @Test
   public void testName() {
     log.info("DefaultSignatureHandler tests");
-    final DefaultSignatureHandler handler = new DefaultSignatureHandler(AlgorithmRegistrySingleton.getInstance());
-    Assertions.assertEquals(DefaultSignatureHandler.DEFAULT_NAME, handler.getName());
+    final DefaultSignatureHandler handler = new DefaultSignatureHandler(AlgorithmRegistrySingleton.getInstance(),
+      null);
+    Assertions.assertEquals(DefaultSignatureHandler.class.getSimpleName(), handler.getName());
 
     handler.setName("the-name");
     Assertions.assertEquals("the-name", handler.getName());

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.signhandler.crypto;
+package se.swedenconnect.signservice.signature.signer.crypto;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -23,8 +23,8 @@ import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
-import se.swedenconnect.signservice.signature.signhandler.TestAlgorithms;
-import se.swedenconnect.signservice.signature.signhandler.TestCredentials;
+import se.swedenconnect.signservice.signature.signer.TestAlgorithms;
+import se.swedenconnect.signservice.signature.signer.TestCredentials;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
 
 import java.nio.charset.StandardCharsets;

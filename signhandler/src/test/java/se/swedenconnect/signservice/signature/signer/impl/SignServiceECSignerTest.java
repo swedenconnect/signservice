@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.signhandler.impl;
+package se.swedenconnect.signservice.signature.signer.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -25,11 +25,11 @@ import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.SignatureType;
-import se.swedenconnect.signservice.signature.signhandler.SignServiceSigner;
-import se.swedenconnect.signservice.signature.signhandler.TestAlgorithms;
-import se.swedenconnect.signservice.signature.signhandler.TestCredentials;
-import se.swedenconnect.signservice.signature.signhandler.crypto.EcdsaSigValue;
-import se.swedenconnect.signservice.signature.signhandler.crypto.PkCrypto;
+import se.swedenconnect.signservice.signature.signer.SignServiceSigner;
+import se.swedenconnect.signservice.signature.signer.TestAlgorithms;
+import se.swedenconnect.signservice.signature.signer.TestCredentials;
+import se.swedenconnect.signservice.signature.signer.crypto.EcdsaSigValue;
+import se.swedenconnect.signservice.signature.signer.crypto.PkCrypto;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
 
 import java.security.MessageDigest;

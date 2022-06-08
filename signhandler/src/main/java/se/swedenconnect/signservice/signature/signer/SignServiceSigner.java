@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.signhandler;
+package se.swedenconnect.signservice.signature.signer;
 
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 
