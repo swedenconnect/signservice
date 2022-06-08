@@ -20,6 +20,7 @@ import org.apache.xml.security.signature.XMLSignature;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.algorithms.MessageDigestAlgorithm;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
+import se.swedenconnect.security.algorithms.impl.StaticAlgorithmRegistry;
 
 /**
  * Algorithms used in tests
@@ -32,6 +33,7 @@ public class TestAlgorithms {
   @Getter public static SignatureAlgorithm rsaSha256;
   @Getter public static SignatureAlgorithm rsaSha384;
   @Getter public static SignatureAlgorithm rsaSha512;
+  @Getter public static SignatureAlgorithm ecdsaSha1;
   @Getter public static SignatureAlgorithm ecdsaSha256;
   @Getter public static SignatureAlgorithm ecdsaSha384;
   @Getter public static SignatureAlgorithm ecdsaSha512;
@@ -41,6 +43,7 @@ public class TestAlgorithms {
 
   static {
     AlgorithmRegistrySingleton algoRegistry = AlgorithmRegistrySingleton.getInstance();
+
     // Signature algorithms
     rsaPssSha256 = (SignatureAlgorithm) algoRegistry.getAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1);
     rsaPssSha384 = (SignatureAlgorithm) algoRegistry.getAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA384_MGF1);
@@ -48,6 +51,7 @@ public class TestAlgorithms {
     rsaSha256 = (SignatureAlgorithm) algoRegistry.getAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256);
     rsaSha384 = (SignatureAlgorithm) algoRegistry.getAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA384);
     rsaSha512 = (SignatureAlgorithm) algoRegistry.getAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA512);
+    ecdsaSha1 = (SignatureAlgorithm) algoRegistry.getAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA1);
     ecdsaSha256 = (SignatureAlgorithm) algoRegistry.getAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256);
     ecdsaSha384 = (SignatureAlgorithm) algoRegistry.getAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA384);
     ecdsaSha512 = (SignatureAlgorithm) algoRegistry.getAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA512);
