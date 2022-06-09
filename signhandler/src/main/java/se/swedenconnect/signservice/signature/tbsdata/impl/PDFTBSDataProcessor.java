@@ -54,13 +54,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Description
+ * PDF TBS Data processor that parse input data to be signed and produce the actual data to be signed
+ * by the signing service. This involves updating the CMS signed attributes with relevant data including:
  *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * <ul>
+ *   <li>Removing any signing time attribute in PAdES signatures</li>
+ *   <li>Adding or replacing any CMS algorithm protection attribute</li>
+ *   <li>Updating any ESSCertID or ESSCertIDV2 signing certificate attibutes</li>
+ * </ul>
  */
 @Slf4j
-public class PDFTBSDataProcessor implements TBSDataProcessor {
+public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
 
   /**
    * Defines if processing of input data is strict or applies the Postel's robustness principle.
@@ -80,6 +84,7 @@ public class PDFTBSDataProcessor implements TBSDataProcessor {
    */
   @Setter private boolean includeIssuerSerial = false;
 
+  /** Supported processing rules */
   private final List<String> supportedProcessingRules;
 
   /**
@@ -193,14 +198,20 @@ public class PDFTBSDataProcessor implements TBSDataProcessor {
         log.debug("Added CMS algorithm protection attribute");
       }
 
-      // Add signed certificate reference if PAdES
-      if (pades) {
+      // Add signed certificate reference if PAdES or if the signing certificate attribute is present
+      boolean hasSigningCertAttribute =
+        isAttributePresent(PKCSObjectIdentifiers.id_aa_signingCertificate, signedAttributes)
+          || isAttributePresent(PKCSObjectIdentifiers.id_aa_signingCertificateV2, signedAttributes);
+      if (pades || hasSigningCertAttribute) {
         log.debug("Setting signed certificate attribute for PAdES");
         // Remove any previously existing signed certificate attribute
-        signedAttributes = removeAttributes(List.of(
-            PKCSObjectIdentifiers.id_aa_signingCertificate,
-            PKCSObjectIdentifiers.id_aa_signingCertificateV2),
-          signedAttributes);
+        if (hasSigningCertAttribute) {
+          log.debug("Removing present ESSCertID attribute from requested TBS data");
+          signedAttributes = removeAttributes(List.of(
+              PKCSObjectIdentifiers.id_aa_signingCertificate,
+              PKCSObjectIdentifiers.id_aa_signingCertificateV2),
+            signedAttributes);
+        }
         //Add a new signed certificate attribute
         signedAttributes.add(getSignedCertAttr(signatureAlgorithm.getMessageDigestAlgorithm(),
           signingCredential.getCertificate(), includeIssuerSerial));

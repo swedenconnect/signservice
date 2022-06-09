@@ -96,6 +96,8 @@ public class DefaultSignatureHandler implements SignatureHandler {
 
     // TODO: Implement
 
+    // TODO: Check if algorithm is both known and supported (not deprecated)
+
   }
 
   /** {@inheritDoc} */
