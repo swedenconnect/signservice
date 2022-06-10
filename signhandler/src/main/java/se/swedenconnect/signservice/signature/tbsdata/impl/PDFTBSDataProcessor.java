@@ -16,7 +16,6 @@
 
 package se.swedenconnect.signservice.signature.tbsdata.impl;
 
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -37,7 +36,6 @@ import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.signature.AdESType;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureType;
-import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
 import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 
 import javax.annotation.Nonnull;
@@ -67,31 +65,10 @@ import java.util.stream.Collectors;
 public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
 
   /**
-   * Defines if processing of input data is strict or applies the Postel's robustness principle.
-   * An example of this is that a PAdES signature MUST NOT contain signing time in signed attributes.
-   * With strict processing a request with signing time will fail. By default, such request
-   * will be accepted, but the signing time will be removed in line with the PAdES standard.
-   *
-   * @param strictProcessing true to strictly fail all non-conformance requests
-   */
-  @Setter private boolean strictProcessing = false;
-
-  /**
-   * Defines if ESSCertID holding a hash of the signer certificate should include Issuer Serial
-   * data in addition to the certificate hash
-   *
-   * @param includeIssuerSerial true to include issuer serial data
-   */
-  @Setter private boolean includeIssuerSerial = false;
-
-  /** Supported processing rules */
-  private final List<String> supportedProcessingRules;
-
-  /**
    * Constructor for this PDF TBS data processor with default settings
    */
   public PDFTBSDataProcessor() {
-    this.supportedProcessingRules = Collections.EMPTY_LIST;
+    super(new ArrayList<>());
   }
 
   /**
@@ -100,48 +77,26 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
    * @param supportedProcessingRules list of supported processing rules for this TBS data processor
    */
   public PDFTBSDataProcessor(List<String> supportedProcessingRules) {
-    this.supportedProcessingRules = supportedProcessingRules;
+    super(supportedProcessingRules);
   }
 
   @Override public TBSProcessingData getTBSData(@Nonnull final RequestedSignatureTask signatureTask,
     @Nonnull final PkiCredential signingCredential,
     @Nonnull final SignatureAlgorithm signatureAlgorithm) throws SignatureException {
 
-    Objects.requireNonNull(signatureTask, "SignatureTask must not be null");
-    Objects.requireNonNull(signingCredential, "Signing credentials must not be null");
-    Objects.requireNonNull(signatureAlgorithm, "Signature algorithm must not be null");
-    byte[] tbsBytes = Optional.ofNullable(signatureTask.getTbsData())
-      .orElseThrow(() -> new SignatureException("Null data to be sign in sign request"));
-    SignatureType signatureType = Optional.ofNullable(signatureTask.getSignatureType())
-      .orElseThrow(() -> new SecurityException("SignatureType must not be null"));
+    // Check and collect data
+    checkIndata(signatureTask,signingCredential, signatureAlgorithm);
+    defaultProcessingRuleCheck(signatureTask.getProcessingRulesUri());
+    byte[] tbsBytes = signatureTask.getTbsData();
+    SignatureType signatureType = signatureTask.getSignatureType();
     if (!signatureType.equals(SignatureType.PDF)) {
       throw new SignatureException("Signature type must be PDF");
     }
     AdESType adESType = signatureTask.getAdESType();
-
-    if (signatureTask.getProcessingRulesUri() == null && this.supportedProcessingRules.isEmpty()) {
-      log.debug("Using default processing rules");
-    }
-    else {
-      if (signatureTask.getProcessingRulesUri() != null) {
-        if (this.supportedProcessingRules.contains(signatureTask.getProcessingRulesUri())) {
-          log.debug("Using supported processing rule: {}", signatureTask.getProcessingRulesUri());
-        }
-        else {
-          throw new SignatureException(
-            "Processing rule " + signatureTask.getProcessingRulesUri() + " is not supported." +
-              " Expected one of: " + String.join(",", this.supportedProcessingRules));
-        }
-      }
-      else {
-        log.debug("Null requested processing rule is accepted among supported processing rules. {}",
-          String.join(",", this.supportedProcessingRules));
-      }
-    }
-
     boolean pades = AdESType.BES.equals(adESType) || AdESType.EPES.equals(adESType);
     log.debug("PAdES signature = {}", pades);
 
+    // Process TBS data
     try {
       List<Attribute> signedAttributes = parseSignedAttributeBytes(tbsBytes);
       log.debug("Processing {} input signed attributes", signedAttributes.size());
@@ -231,7 +186,7 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
   public static byte[] consolidateTBSData(@Nonnull final List<Attribute> signedAttributes) throws IOException {
     Objects.requireNonNull(signedAttributes, "Signed attributes must not be null");
     ASN1EncodableVector aev = new ASN1EncodableVector();
-    signedAttributes.forEach(attribute -> aev.add(attribute));
+    signedAttributes.forEach(aev::add);
     return new DERSet(aev).getEncoded("DER");
   }
 
