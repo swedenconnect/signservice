@@ -96,13 +96,16 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
    */
   @Setter private String defaultCanonicalizationAlgorithm = "http://www.w3.org/2001/10/xml-exc-c14n#";
 
-  private static final org.apache.xml.security.binding.xmldsig.ObjectFactory dsObjectFactory =
+  /** Object factory for XML digital signature elements */
+  public static final org.apache.xml.security.binding.xmldsig.ObjectFactory dsObjectFactory =
     new org.apache.xml.security.binding.xmldsig.ObjectFactory();
 
-  private static final se.swedenconnect.schemas.etsi.xades_1_3_2.ObjectFactory xadesObjectFactory =
+  /** Object factory for XAdES digital signature elements */
+  public static final se.swedenconnect.schemas.etsi.xades_1_3_2.ObjectFactory xadesObjectFactory =
     new se.swedenconnect.schemas.etsi.xades_1_3_2.ObjectFactory();
 
-  private static Transformer xmlFragmentTransformer;
+  /** Transformer for transforming XML fragments to bytes without XML declaration */
+  public static Transformer xmlFragmentTransformer;
 
   private static final Random RNG = new SecureRandom();
 
