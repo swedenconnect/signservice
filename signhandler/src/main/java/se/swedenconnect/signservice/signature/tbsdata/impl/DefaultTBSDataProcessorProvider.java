@@ -16,16 +16,46 @@
 
 package se.swedenconnect.signservice.signature.tbsdata.impl;
 
-import se.swedenconnect.security.algorithms.SignatureAlgorithm;
+import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessorProvider;
+
+import javax.annotation.Nonnull;
+import java.security.SignatureException;
+import java.util.Objects;
 
 /**
  * Default provider of a suitable processor to prepare data to be signed
  */
 public class DefaultTBSDataProcessorProvider implements TBSDataProcessorProvider {
 
-  @Override public TBSDataProcessor getTBSDataProcessor(SignatureAlgorithm signatureAlgorithm) {
-    return null;
+  private final TBSDataProcessor xmlTBSDataProcessor;
+  private final TBSDataProcessor pdfTBSDataProcessor;
+
+  public DefaultTBSDataProcessorProvider() {
+    xmlTBSDataProcessor = new XMLTBSDataProcessor();
+    pdfTBSDataProcessor = new PDFTBSDataProcessor();
+  }
+
+  public DefaultTBSDataProcessorProvider(
+    TBSDataProcessor xmlTBSDataProcessor,
+    TBSDataProcessor pdfTBSDataProcessor) {
+    this.xmlTBSDataProcessor = xmlTBSDataProcessor;
+    this.pdfTBSDataProcessor = pdfTBSDataProcessor;
+  }
+
+  @Override public TBSDataProcessor getTBSDataProcessor(@Nonnull final SignatureType signatureType) throws SignatureException {
+
+    Objects.requireNonNull(signatureType, "SignatureType must not be null");
+
+    switch (signatureType) {
+
+    case XML:
+      return xmlTBSDataProcessor;
+    case PDF:
+      return pdfTBSDataProcessor;
+    default:
+      throw new SignatureException("Signature type " + signatureType + " is not supported");
+    }
   }
 }

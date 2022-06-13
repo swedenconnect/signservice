@@ -16,6 +16,7 @@
 package se.swedenconnect.signservice.signature.impl;
 
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.PkiCredential;
@@ -33,12 +34,15 @@ import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessorProvider;
 
+import javax.annotation.Nonnull;
 import java.security.SignatureException;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
  * Default implementation of the {@link SignatureHandler} interface.
  */
+@Slf4j
 public class DefaultSignatureHandler implements SignatureHandler {
 
   /** sign service signer provider */
@@ -94,6 +98,8 @@ public class DefaultSignatureHandler implements SignatureHandler {
   public void checkRequirements(final SignRequestMessage signRequest, final SignServiceContext context)
     throws InvalidRequestException {
 
+    //
+
     // TODO: Implement
 
     // TODO: Check if algorithm is both known and supported (not deprecated)
@@ -102,34 +108,42 @@ public class DefaultSignatureHandler implements SignatureHandler {
 
   /** {@inheritDoc} */
   @Override
-  public CompletedSignatureTask sign(final RequestedSignatureTask signatureTask, final PkiCredential signingCredential,
-    final SignRequestMessage signRequest, final SignServiceContext context) throws SignatureException {
+  public CompletedSignatureTask sign(@Nonnull final RequestedSignatureTask signatureTask,@Nonnull final PkiCredential signingCredential,
+    @Nonnull final SignRequestMessage signRequest, final SignServiceContext context) throws SignatureException {
+    log.debug("Starting process to sign data");
 
-    try {
-      SignatureType signatureType = signatureTask.getSignatureType();
-      String signatureAlgorithmUri = signRequest.getSignatureRequirements().getSignatureAlgorithm();
-      SignServiceSigner signer = signServiceSignerProvider.getSigner(signatureAlgorithmUri, signatureType);
+    Objects.requireNonNull(signatureTask, "SignatureTask must not be null");
+    Objects.requireNonNull(signingCredential, "Signing credentials must not be null");
+    Objects.requireNonNull(signRequest, "SignRequest must not be null");
 
-      SignatureAlgorithm signatureAlgorithm = (SignatureAlgorithm) algorithmRegistry.getAlgorithm(
-        signatureAlgorithmUri);
+    SignatureType signatureType = signatureTask.getSignatureType();
+    log.debug("Requested signature type: {}", signatureType);
+    String signatureAlgorithmUri = signRequest.getSignatureRequirements().getSignatureAlgorithm();
+    log.debug("Requested signature algorithm: {}", signatureAlgorithmUri);
+    SignServiceSigner signer = signServiceSignerProvider.getSigner(signatureAlgorithmUri, signatureType);
+    log.debug("Obtained signer of class {}", signer.getClass().getSimpleName());
 
-      TBSDataProcessor tbsDataProcessor = tbsDataProcessorProvider.getTBSDataProcessor(signatureAlgorithm);
-      TBSProcessingData tbsProcessingData = tbsDataProcessor.getTBSData(signatureTask, signingCredential, signatureAlgorithm);
+    SignatureAlgorithm signatureAlgorithm = (SignatureAlgorithm) algorithmRegistry.getAlgorithm(
+      signatureAlgorithmUri);
+    if (signatureAlgorithm.isBlacklisted()){
+      log.debug("Signature algorithm blacklisted. Signing aborted");
+      throw new SignatureException("Requested signature algorithm " + signatureAlgorithm.getJcaName() + " is blacklisted");
+    };
 
-      byte[] signature = signer.sign(tbsProcessingData.getTBSBytes(), signingCredential.getPrivateKey(), signatureAlgorithm);
-      DefaultCompletedSignatureTask completedSignatureTask = new DefaultCompletedSignatureTask(signatureTask);
-      completedSignatureTask.setSignature(signature);
-      completedSignatureTask.setSignatureAlgorithmUri(signatureAlgorithmUri);
-      completedSignatureTask.setTbsData(tbsProcessingData.getTBSBytes());
-      completedSignatureTask.setAdESObject(tbsProcessingData.getAdESObject());
-      completedSignatureTask.setProcessingRulesUri(tbsProcessingData.getProcessingRules());
+    TBSDataProcessor tbsDataProcessor = tbsDataProcessorProvider.getTBSDataProcessor(signatureType);
+    log.debug("Obtained TBS data processor of type: {}", tbsDataProcessor.getClass().getSimpleName());
+    TBSProcessingData tbsProcessingData = tbsDataProcessor.getTBSData(signatureTask, signingCredential, signatureAlgorithm);
 
-      return completedSignatureTask;
+    byte[] signature = signer.sign(tbsProcessingData.getTBSBytes(), signingCredential.getPrivateKey(), signatureAlgorithm);
+    DefaultCompletedSignatureTask completedSignatureTask = new DefaultCompletedSignatureTask(signatureTask);
+    completedSignatureTask.setSignature(signature);
+    completedSignatureTask.setSignatureAlgorithmUri(signatureAlgorithmUri);
+    completedSignatureTask.setTbsData(tbsProcessingData.getTBSBytes());
+    completedSignatureTask.setAdESObject(tbsProcessingData.getAdESObject());
+    completedSignatureTask.setProcessingRulesUri(tbsProcessingData.getProcessingRules());
+    log.debug("Sign task completed");
 
-    }
-    catch (Exception e) {
-      throw new SignatureException("Failed to sign the requested data", e);
-    }
+    return completedSignatureTask;
   }
 
 }

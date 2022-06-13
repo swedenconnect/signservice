@@ -22,6 +22,13 @@ import org.bouncycastle.util.encoders.Base64;
  */
 public class TestUtils {
 
+  public static String base64Print(String base64Data){
+    return base64Data == null ? "null" : base64Print(Base64.decode(base64Data),80);
+  }
+  public static String base64Print(byte[] base64Data){
+    return base64Data == null ? "null" : base64Print(base64Data,80);
+  }
+
   public static String base64Print(byte[] data, int width) {
     // Create a String with linebreaks
     String b64String = Base64.toBase64String(data).replaceAll("(.{" + width + "})", "$1\n");

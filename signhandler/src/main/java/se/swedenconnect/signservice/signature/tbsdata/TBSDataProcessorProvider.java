@@ -17,6 +17,10 @@
 package se.swedenconnect.signservice.signature.tbsdata;
 
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
+import se.swedenconnect.signservice.signature.SignatureType;
+
+import javax.annotation.Nonnull;
+import java.security.SignatureException;
 
 /**
  * Description
@@ -25,5 +29,5 @@ import se.swedenconnect.security.algorithms.SignatureAlgorithm;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public interface TBSDataProcessorProvider {
-  TBSDataProcessor getTBSDataProcessor(SignatureAlgorithm signatureAlgorithm);
+  TBSDataProcessor getTBSDataProcessor(@Nonnull final SignatureType signatureType)  throws SignatureException;
 }

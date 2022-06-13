@@ -94,7 +94,7 @@ public abstract class AbstractTBSDataProcessor implements TBSDataProcessor {
     Optional.ofNullable(signatureTask.getTbsData())
       .orElseThrow(() -> new SignatureException("Null TBS data in sign request"));
     Optional.ofNullable(signatureTask.getSignatureType())
-      .orElseThrow(() -> new SecurityException("SignatureType must not be null"));
+      .orElseThrow(() -> new SignatureException("SignatureType must not be null"));
   }
 
 }

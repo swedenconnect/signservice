@@ -245,6 +245,7 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
     if (signedSignatureProperties.isSetSigningCertificate()) {
       // There is an old outdated certificate reference deltet it
       signedSignatureProperties.setSigningCertificate(null);
+      log.debug("AdES object from sign request contained V1 certificate reference. This was deleted");
     }
 
     // Hash certificate
