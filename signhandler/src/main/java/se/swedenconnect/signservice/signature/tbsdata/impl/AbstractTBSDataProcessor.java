@@ -19,12 +19,12 @@ package se.swedenconnect.signservice.signature.tbsdata.impl;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
-import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.signature.AdESObject;
 import se.swedenconnect.signservice.signature.AdESType;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
+import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 
 import javax.annotation.Nonnull;
 import java.security.SignatureException;
@@ -86,28 +86,45 @@ public abstract class AbstractTBSDataProcessor implements TBSDataProcessor {
     }
   }
 
-  
-
-  protected void checkIndata(@Nonnull final RequestedSignatureTask signatureTask,
-    @Nonnull final X509Certificate signerCertificate,
-    @Nonnull final SignatureAlgorithm signatureAlgorithm) throws SignatureException {
-    // Note that on this level absence of any of these parameters are considered
+  @Override public TBSProcessingData processSignTaskData(@Nonnull final RequestedSignatureTask signatureTask,
+    @Nonnull final X509Certificate signerCertificate, @Nonnull final SignatureAlgorithm signatureAlgorithm)
+    throws SignatureException {
+    // Note that on this level absence of any input parameter is considered a programming error and produces
+    // an unchecked NullPointerException
     Objects.requireNonNull(signatureTask, "SignatureTask must not be null");
     Objects.requireNonNull(signerCertificate, "Signer certificate must not be null");
     Objects.requireNonNull(signatureAlgorithm, "Signature algorithm must not be null");
 
     try {
+      // Validate the input data
       checkSignTask(signatureTask, signatureAlgorithm);
     }
     catch (InvalidRequestException e) {
+      // Convert invalid request to SignatureException
       throw new SignatureException(e.getMessage());
     }
+
+    return processSignatureTypeTBSData(signatureTask, signerCertificate, signatureAlgorithm);
   }
 
-  @Override public void checkSignTask(final RequestedSignatureTask signatureTask, final SignatureAlgorithm signatureAlgorithm) throws InvalidRequestException {
+  /**
+   * Perform the signature type specific processing of sign task data to produce the data to be signed
+   *
+   * @param signatureTask requested signature task data
+   * @param signerCertificate signer certificate
+   * @param signatureAlgorithm signature algorithm
+   * @return data to be signed
+   * @throws SignatureException on error processing the requested signature task data
+   */
+  protected abstract TBSProcessingData processSignatureTypeTBSData(RequestedSignatureTask signatureTask,
+    X509Certificate signerCertificate, SignatureAlgorithm signatureAlgorithm) throws SignatureException;
+
+  @Override public void checkSignTask(final RequestedSignatureTask signatureTask,
+    final SignatureAlgorithm signatureAlgorithm) throws InvalidRequestException {
     // Note that on this level we consider absence of sign task and signature algorithm as a checked exception as it may not be a programming error
     Optional.ofNullable(signatureTask).orElseThrow(() -> new InvalidRequestException("SignatureTask must not be null"));
-    Optional.ofNullable(signatureAlgorithm).orElseThrow(() -> new InvalidRequestException("SignatureAlgorithm must not be null"));
+    Optional.ofNullable(signatureAlgorithm)
+      .orElseThrow(() -> new InvalidRequestException("SignatureAlgorithm must not be null"));
     Optional.ofNullable(signatureTask.getTbsData())
       .orElseThrow(() -> new InvalidRequestException("Null TBS data in sign request"));
     Optional.ofNullable(signatureTask.getSignatureType())
@@ -119,5 +136,14 @@ public abstract class AbstractTBSDataProcessor implements TBSDataProcessor {
     checkToBeSignedData(tbsData, ades, signatureTask.getAdESObject(), signatureAlgorithm);
   }
 
-  protected abstract void checkToBeSignedData(byte[] tbsData, boolean ades, AdESObject adESObject, SignatureAlgorithm signatureAlgorithm) throws InvalidRequestException;
+  /**
+   * Perform signature type specific checks on the data to be signed input
+   * @param tbsData data to be signed provided in the request
+   * @param ades true if this is an AdES signature according to an ETSI AdES profile
+   * @param adESObject optional AdES object provided in the request
+   * @param signatureAlgorithm signature algorithm intended to be used to sign
+   * @throws InvalidRequestException if the provided data is invalid
+   */
+  protected abstract void checkToBeSignedData(byte[] tbsData, boolean ades, AdESObject adESObject,
+    SignatureAlgorithm signatureAlgorithm) throws InvalidRequestException;
 }

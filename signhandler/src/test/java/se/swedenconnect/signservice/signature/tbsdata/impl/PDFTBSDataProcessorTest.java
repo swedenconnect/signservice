@@ -32,6 +32,7 @@ import se.swedenconnect.signservice.signature.impl.DefaultRequestedSignatureTask
 import se.swedenconnect.signservice.signature.signer.TestAlgorithms;
 import se.swedenconnect.signservice.signature.signer.TestCredentials;
 import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
+import se.swedenconnect.signservice.signature.testutils.TestData;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
 
 import java.io.IOException;
@@ -53,29 +54,10 @@ class PDFTBSDataProcessorTest {
 
   static PkiCredential testECCredential;
   static PkiCredential testRSACredential;
-  static String tbsDataPdfBes01 = "MYG/MBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwKgYJKoZIhvcNAQk0MR0wGzANBglghkgBZQMEAgEFAKEKBggqhkjOPQQ"
-    + "DAjAvBgkqhkiG9w0BCQQxIgQglmTHu8re0Yh3ExDB4DUcAj/YbYbnooAzFRdcGkMluXwwRgYLKoZIhvcNAQkQAi8xNzA1MDMwMTANBglghkgB"
-    + "ZQMEAgEFAAQg89vSUeiLpG0FVF29g5cyBTLK7yzk6sQ+AWWuDcZIq6g=";
   static String tbsDataPdfBesSigTime;
   static String tbsDataPdfNoMessageDigest;
   static String tbsDataPdfNoContentType;
-  static String tbsDataPdf01 = "MYGTMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIyMDYwODIxMzY1NFowKAYJKo"
-    + "ZIhvcNAQk0MRswGTALBglghkgBZQMEAgGhCgYIKoZIzj0EAwIwLwYJKoZIhvcNAQkEMSIEIP0H2n2cZU2crfQnF6BNSe19mvABX8ojfUB+LwBGFBbp";
   static String tbsDataPdfNoAlgoProt;
-
-  static String resultTbsDataPdfBes01 = "MYGuMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwKAYJKoZIhvcNAQk0MRswGTALBglghkgBZQMEAgGh"
-    + "CgYIKoZIzj0EAwIwLwYJKoZIhvcNAQkEMSIEIJZkx7vK3tGIdxMQweA1HAI/2G2G56KAMxUXXBpDJbl8"
-    + "MDcGCyqGSIb3DQEJEAIvMSgwJjAkMCIEIDbOxe9Zse1ViwENx9TFQDgn6oke9ptxkGtdDW50+FeQ";
-  static String resultTbsDataPdfBesSha1 = "MYGfMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwJQYJKoZIhvcNAQk0MRgwFjAJBgUrDgMCGgUA"
-    + "oQkGByqGSM49BAEwKwYLKoZIhvcNAQkQAgwxHDAaMBgwFgQU5XNXi5/RbgjvgmA9Dvdiayvp8j0wLwYJKoZIhvcNAQkEMSIEIJZkx7vK3tGIdxMQ"
-    + "weA1HAI/2G2G56KAMxUXXBpDJbl8";
-  static String resultTbsDataPdfBesIssuerSerial = "MYIBKjAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMCgGCSqGSIb3DQEJNDEbMBkwCwYJYIZIAWUDBAIBoQoGCCqGSM49BAM"
-    + "CMC8GCSqGSIb3DQEJBDEiBCCWZMe7yt7RiHcTEMHgNRwCP9hthueigDMVF1waQyW5fDCBsgYLKoZIhvcNAQkQAi8xgaIwgZ8wgZwwgZkE"
-    + "IDbOxe9Zse1ViwENx9TFQDgn6oke9ptxkGtdDW50+FeQMHUwbaRrMGkxCzAJBgNVBAYTAlNFMRowGAYDVQQFExFTRVBOUi0wMTIzNDU2N"
-    + "zg5MDESMBAGA1UEBRMJU2FudGVzc29uMQ8wDQYDVQQqDAZTdGVmYW4xGTAXBgNVBAMMEFN0ZWZhbiBTYW50ZXNzb24CBGEflMY=";
-  static String resultNoPadesNoTime = "MXUwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAoBgkqhkiG9w0BCTQxGzAZMAsGCWCGSAFlAwQCA"
-    + "aEKBggqhkjOPQQDAjAvBgkqhkiG9w0BCQQxIgQg/QfafZxlTZyt9CcXoE1J7X2a8AFfyiN9QH4vAEYUFuk=";
-
   static PDFTBSDataProcessor tdp;
   static PDFTBSDataProcessor tdpIssuerSerial;
   static PDFTBSDataProcessor tdpStrict;
@@ -85,7 +67,7 @@ class PDFTBSDataProcessorTest {
   static void setUp() throws Exception{
     testECCredential = new BasicCredential(TestCredentials.ecCertificate, TestCredentials.privateECKey);
     testRSACredential = new BasicCredential(TestCredentials.rsaCertificate, TestCredentials.privateRSAKey);
-    List<Attribute> attributes = PDFTBSDataProcessor.parseSignedAttributeBytes(Base64.decode(tbsDataPdfBes01));
+    List<Attribute> attributes = PDFTBSDataProcessor.parseSignedAttributeBytes(Base64.decode(TestData.tbsDataPdfBes01));
     attributes.add(PDFTBSDataProcessor.getSigningTimeAttribute(null));
     tbsDataPdfBesSigTime = Base64.toBase64String(PDFTBSDataProcessor.consolidateTBSData(attributes));
     List<Attribute> noMsgDigestAttrList = attributes.stream()
@@ -97,7 +79,7 @@ class PDFTBSDataProcessorTest {
       .collect(Collectors.toList());
     tbsDataPdfNoContentType = Base64.toBase64String(PDFTBSDataProcessor.consolidateTBSData(noContentTypeAttrList));
 
-    List<Attribute> attributes2 = PDFTBSDataProcessor.parseSignedAttributeBytes(Base64.decode(tbsDataPdf01));
+    List<Attribute> attributes2 = PDFTBSDataProcessor.parseSignedAttributeBytes(Base64.decode(TestData.tbsDataPdf01));
     List<Attribute> noCMSAlgoProtAttrList = attributes2.stream()
       .filter(attribute -> !CMSAttributes.cmsAlgorithmProtect.equals(attribute.getAttrType()))
       .filter(attribute -> !CMSAttributes.signingTime.equals(attribute.getAttrType()))
@@ -117,31 +99,31 @@ class PDFTBSDataProcessorTest {
 
     testCasePddTbsDataProcessor("PAdES - ECDSA - ECDSA-SHA256", tdpStrict,
       getRequestedSignatureTask(
-        tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null),
+        TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
-      resultTbsDataPdfBes01, null
+      TestData.resultTbsDataPdfBes01, null
     );
 
     testCasePddTbsDataProcessor("PAdES - ECDSA - ECDSA-SHA1", tdpStrict,
       getRequestedSignatureTask(
-        tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null),
+        TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null),
       testECCredential,
       TestAlgorithms.getEcdsaSha1(),
-      resultTbsDataPdfBesSha1, null
+      TestData.resultTbsDataPdfBesSha1, null
     );
 
     testCasePddTbsDataProcessor("PAdES - ECDSA - ECDSA-SHA256 - Issuer Serial", tdpIssuerSerial,
       getRequestedSignatureTask(
-        tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null),
+        TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
-      resultTbsDataPdfBesIssuerSerial, null
+      TestData.resultTbsDataPdfBesIssuerSerial, null
     );
 
     testCasePddTbsDataProcessor("Null requested processing rule", tdpPrules,
       getRequestedSignatureTask(
-        tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null),
+        TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
       null, null
@@ -149,7 +131,7 @@ class PDFTBSDataProcessorTest {
 
     testCasePddTbsDataProcessor("Specific requested processing rule", tdpPrules,
       getRequestedSignatureTask(
-        tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, "http://example.com/rule1"),
+        TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, "http://example.com/rule1"),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
       null, null
@@ -157,7 +139,7 @@ class PDFTBSDataProcessorTest {
 
     testCasePddTbsDataProcessor("Specific requested processing rule", tdpPrules,
       getRequestedSignatureTask(
-        tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, "http://example.com/rule3"),
+        TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, "http://example.com/rule3"),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
       null, SignatureException.class
@@ -165,7 +147,7 @@ class PDFTBSDataProcessorTest {
 
     testCasePddTbsDataProcessor("Specific requested processing rule - no rules", tdp,
       getRequestedSignatureTask(
-        tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, "http://example.com/rule3"),
+        TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, "http://example.com/rule3"),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
       null, SignatureException.class
@@ -176,7 +158,7 @@ class PDFTBSDataProcessorTest {
         tbsDataPdfBesSigTime, SignatureType.PDF, AdESType.BES, null),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
-      resultTbsDataPdfBes01, null
+      TestData.resultTbsDataPdfBes01, null
     );
 
     testCasePddTbsDataProcessor("Strict processing", tdpStrict,
@@ -184,7 +166,7 @@ class PDFTBSDataProcessorTest {
         tbsDataPdfBesSigTime, SignatureType.PDF, AdESType.BES, null),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
-      resultTbsDataPdfBes01, SignatureException.class
+      TestData.resultTbsDataPdfBes01, SignatureException.class
     );
 
     testCasePddTbsDataProcessor("Wrong signature type", tdp,
@@ -213,7 +195,7 @@ class PDFTBSDataProcessorTest {
 
     testCasePddTbsDataProcessor("No PAdES signature with signing time and strict", tdpStrict,
       getRequestedSignatureTask(
-        tbsDataPdf01, SignatureType.PDF, null,null),
+        TestData.tbsDataPdf01, SignatureType.PDF, null,null),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
       null, null
@@ -224,7 +206,7 @@ class PDFTBSDataProcessorTest {
         tbsDataPdfNoAlgoProt, SignatureType.PDF, null,null),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
-      resultNoPadesNoTime, null
+      TestData.resultNoPadesNoTime, null
     );
 
     testCasePddTbsDataProcessor("No PAdES signature and no CMS Algo protection", tdpStrict,
@@ -232,7 +214,7 @@ class PDFTBSDataProcessorTest {
         tbsDataPdfNoAlgoProt, SignatureType.PDF, null,null),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
-      resultNoPadesNoTime, null
+      TestData.resultNoPadesNoTime, null
     );
 
     int sdf = 0;
@@ -244,7 +226,7 @@ class PDFTBSDataProcessorTest {
     Exception e = assertThrows(IOException.class, () -> PDFTBSDataProcessor.parseSignedAttributeBytes(new byte[]{}));
     log.info("Caught exception parsing illegal tbs data {}", e.toString());
 
-    List<Attribute> attributes = PDFTBSDataProcessor.parseSignedAttributeBytes(Base64.decode(tbsDataPdf01));
+    List<Attribute> attributes = PDFTBSDataProcessor.parseSignedAttributeBytes(Base64.decode(TestData.tbsDataPdf01));
     Date cmsSigningTime = PDFTBSDataProcessor.getCmsSigningTime(attributes);
     log.info("Found signing time: {} - {} ms since epoch", cmsSigningTime, cmsSigningTime.getTime());
     assertEquals(1654724214000L, cmsSigningTime.getTime());
@@ -261,14 +243,15 @@ class PDFTBSDataProcessorTest {
     // Test exception case
     if (exceptionClass != null) {
       Exception exception = assertThrows(exceptionClass,
-        () -> pdftbsDataProcessor.getTBSData(signatureTask, credential.getCertificate(), signatureAlgorithm));
+        () -> pdftbsDataProcessor.processSignTaskData(signatureTask, credential.getCertificate(), signatureAlgorithm));
+      assertTrue(exceptionClass.isAssignableFrom(exception.getClass()));
       log.info("Caught exception: {}", exception.toString());
       return;
     }
 
     // Test positive result
     log.info("Processing input data:\n{}", TestUtils.base64Print(signatureTask.getTbsData(), 80));
-    TBSProcessingData tbsData = pdftbsDataProcessor.getTBSData(signatureTask, credential.getCertificate(), signatureAlgorithm);
+    TBSProcessingData tbsData = pdftbsDataProcessor.processSignTaskData(signatureTask, credential.getCertificate(), signatureAlgorithm);
 
     // Remove later
     log.debug(Base64.toBase64String(tbsData.getTBSBytes()));

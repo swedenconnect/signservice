@@ -48,6 +48,7 @@ import se.swedenconnect.signservice.signature.impl.DefaultRequestedSignatureTask
 import se.swedenconnect.signservice.signature.signer.TestAlgorithms;
 import se.swedenconnect.signservice.signature.signer.TestCredentials;
 import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
+import se.swedenconnect.signservice.signature.testutils.TestData;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
 
 import java.security.MessageDigest;
@@ -68,55 +69,9 @@ class XMLTBSDataProcessorTest {
   static PkiCredential testECCredential;
   static PkiCredential testRSACredential;
 
-  static String tbsDataAdes01 =
-    "PGRzOlNpZ25lZEluZm8geG1sbnM6ZHM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMiPgo8ZHM6Q2Fub2"
-      + "5pY2FsaXphdGlvbk1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyI+PC9kczpDYW5vbml"
-      + "jYWxpemF0aW9uTWV0aG9kPgo8ZHM6U2lnbmF0dXJlTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8wNC94bWxkc2ln"
-      + "LW1vcmUjcnNhLXNoYTI1NiI+PC9kczpTaWduYXR1cmVNZXRob2Q+CjxkczpSZWZlcmVuY2UgVVJJPSIiPgo8ZHM6VHJhbnNmb3Jtcz4KPGRzO"
-      + "lRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyNlbnZlbG9wZWQtc2lnbmF0dXJlIj48L2RzOl"
-      + "RyYW5zZm9ybT4KPGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyI+PC9kczp"
-      + "UcmFuc2Zvcm0+CjxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy9UUi8xOTk5L1JFQy14cGF0aC0xOTk5MTExNiI+"
-      + "CjxkczpYUGF0aD5ub3QoYW5jZXN0b3Itb3Itc2VsZjo6ZHM6U2lnbmF0dXJlKTwvZHM6WFBhdGg+CjwvZHM6VHJhbnNmb3JtPgo8L2RzOlRyY"
-      + "W5zZm9ybXM+CjxkczpEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGVuYyNzaGEyNTYiPjwvZH"
-      + "M6RGlnZXN0TWV0aG9kPgo8ZHM6RGlnZXN0VmFsdWU+SFJQMGZjMFNXNE9Wb1E0MDdpSnFyYmdXM0Rheks0Qkt0TVZoRUhIR3M3UT08L2RzOkR"
-      + "pZ2VzdFZhbHVlPgo8L2RzOlJlZmVyZW5jZT4KPGRzOlJlZmVyZW5jZSBUeXBlPSJodHRwOi8vdXJpLmV0c2kub3JnLzAxOTAzI1NpZ25lZFBy"
-      + "b3BlcnRpZXMiIFVSST0iI3hhZGVzLWlkLWI2NWM0MTI5ODI1NWEzODcxNmI2YjczNGQ4OWNkYWJiIj4KPGRzOlRyYW5zZm9ybXM+CjxkczpUc"
-      + "mFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiPjwvZHM6VHJhbnNmb3JtPgo8L2RzOl"
-      + "RyYW5zZm9ybXM+CjxkczpEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGVuYyNzaGEyNTYiPjw"
-      + "vZHM6RGlnZXN0TWV0aG9kPgo8ZHM6RGlnZXN0VmFsdWU+MmZXL3FyazBJc3lIa05vRXdXZENEaGpYUkpHSjQxdVRyV29hTksxSVF1dz08L2Rz"
-      + "OkRpZ2VzdFZhbHVlPgo8L2RzOlJlZmVyZW5jZT4KPC9kczpTaWduZWRJbmZvPg==";
-
-  static String reqAdesObject01 =
-    "PGRzOk9iamVjdCB4bWxuczpkcz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnIyI+PHhhZGVzOlF1YW"
-      + "xpZnlpbmdQcm9wZXJ0aWVzIHhtbG5zOnhhZGVzPSJodHRwOi8vdXJpLmV0c2kub3JnLzAxOTAzL3YxLjMuMiMiIFRhcmdldD0iI2lkLTg3ZGI"
-      + "wZGZjOGU1OGMyOTQ3MWRhOTM0YzE5NDkxMGIzIj48eGFkZXM6U2lnbmVkUHJvcGVydGllcyBJZD0ieGFkZXMtaWQtYjY1YzQxMjk4MjU1YTM4"
-      + "NzE2YjZiNzM0ZDg5Y2RhYmIiPjx4YWRlczpTaWduZWRTaWduYXR1cmVQcm9wZXJ0aWVzPjx4YWRlczpTaWduaW5nVGltZT4yMDIyLTA2LTA5V"
-      + "DEzOjU1OjQ3LjA5MCswMjowMDwveGFkZXM6U2lnbmluZ1RpbWU+PHhhZGVzOlNpZ25pbmdDZXJ0aWZpY2F0ZVYyPjx4YWRlczpDZXJ0Pjx4YW"
-      + "RlczpDZXJ0RGlnZXN0PjxkczpEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGVuYyNzaGEyNTY"
-      + "iPjwvZHM6RGlnZXN0TWV0aG9kPjxkczpEaWdlc3RWYWx1ZT5sYUJXVTlvaTZjN2dQNzIrZUl3L3JzM3Z2bW1SUzFYTWRWVytmZDhFNWdNPTwv"
-      + "ZHM6RGlnZXN0VmFsdWU+PC94YWRlczpDZXJ0RGlnZXN0Pjx4YWRlczpJc3N1ZXJTZXJpYWxWMj5NQ0l3R0tRV01CUXhFakFRQmdOVkJBTU1DW"
-      + "EJ5WlhOcFoyNWxjZ0lHQVlGSVVidlM8L3hhZGVzOklzc3VlclNlcmlhbFYyPjwveGFkZXM6Q2VydD48L3hhZGVzOlNpZ25pbmdDZXJ0aWZpY2"
-      + "F0ZVYyPjwveGFkZXM6U2lnbmVkU2lnbmF0dXJlUHJvcGVydGllcz48L3hhZGVzOlNpZ25lZFByb3BlcnRpZXM+PC94YWRlczpRdWFsaWZ5aW5"
-      + "nUHJvcGVydGllcz48L2RzOk9iamVjdD4=";
-
-  static String tbsDataNoAdes = "PGRzOlNpZ25lZEluZm8geG1sbnM6ZHM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMiPjxkc"
-    + "zpDYW5vbmljYWxpemF0aW9uTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIj48L2RzOkNh"
-    + "bm9uaWNhbGl6YXRpb25NZXRob2Q+PGRzOlNpZ25hdHVyZU1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZHN"
-    + "pZy1tb3JlI2VjZHNhLXNoYTI1NiI+PC9kczpTaWduYXR1cmVNZXRob2Q+PGRzOlJlZmVyZW5jZSBVUkk9IiI+PGRzOlRyYW5zZm9ybXM+PGRzOl"
-    + "RyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyNlbnZlbG9wZWQtc2lnbmF0dXJlIj48L2RzOlRyY"
-    + "W5zZm9ybT48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIj48L2RzOlRyYW5z"
-    + "Zm9ybT48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvVFIvMTk5OS9SRUMteHBhdGgtMTk5OTExMTYiPgo8ZHM6WFB"
-    + "hdGg+bm90KGFuY2VzdG9yLW9yLXNlbGY6OipbbG9jYWwtbmFtZSgpPSdTaWduYXR1cmUnIGFuZCBuYW1lc3BhY2UtdXJpKCk9J2h0dHA6Ly93d3"
-    + "cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMnXSk8L2RzOlhQYXRoPgo8L2RzOlRyYW5zZm9ybT48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ld"
-    + "GhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiI+PC9kczpEaWdlc3RNZXRob2Q+PGRzOkRpZ2Vz"
-    + "dFZhbHVlPjkwN3dxZ0VBOFVSZEx2ZE9JeWloQTQxdlJ3UlNRYWZNd3ovUk42N2xZQ0k9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT4"
-    + "8L2RzOlNpZ25lZEluZm8+";
-
   static String tbsDataNoRef = getNoRefSignedIfo();
 
   static String reqAdesObjectWithV1CertRef = getV1CertRefAdesObject();
-
-  static String signatureId01 = "id-87db0dfc8e58c29471da934c194910b3";
 
   static XMLTBSDataProcessor mainTbsDataprocessor;
   static XMLTBSDataProcessor strictTbsDataprocessor;
@@ -142,9 +97,9 @@ class XMLTBSDataProcessorTest {
     testCase(TestInput.builder()
       .description("Default request with input AdES object")
       .sigType(SignatureType.XML).adESType(AdESType.BES).processingRules(null)
-      .tbsData(tbsDataAdes01)
-      .requestAdesObject(reqAdesObject01)
-      .signatureId(signatureId01)
+      .tbsData(TestData.tbsDataXmlAdes01)
+      .requestAdesObject(TestData.reqAdesObject01)
+      .signatureId(TestData.signatureId01)
       .credential(testRSACredential)
       .signatureAlgorithm(TestAlgorithms.getRsaSha256())
       .build());
@@ -152,9 +107,9 @@ class XMLTBSDataProcessorTest {
     testCase(TestInput.builder()
       .description("RSA signing request with wrong algorithm")
       .sigType(SignatureType.XML).adESType(AdESType.BES).processingRules(null)
-      .tbsData(tbsDataAdes01)
-      .requestAdesObject(reqAdesObject01)
-      .signatureId(signatureId01)
+      .tbsData(TestData.tbsDataXmlAdes01)
+      .requestAdesObject(TestData.reqAdesObject01)
+      .signatureId(TestData.signatureId01)
       .credential(testRSACredential)
       .signatureAlgorithm(TestAlgorithms.getRsaPssSha384())
       .exception(SignatureException.class)
@@ -163,8 +118,8 @@ class XMLTBSDataProcessorTest {
     testCase(TestInput.builder()
       .description("Default request with no input AdES object")
       .sigType(SignatureType.XML).adESType(AdESType.BES).processingRules(null)
-      .tbsData(tbsDataNoAdes)
-      .signatureId(signatureId01)
+      .tbsData(TestData.tbsDataXmlNoAdes)
+      .signatureId(TestData.signatureId01)
       .credential(testECCredential)
       .signatureAlgorithm(TestAlgorithms.getEcdsaSha256())
       .build());
@@ -172,8 +127,8 @@ class XMLTBSDataProcessorTest {
     testCase(TestInput.builder()
       .description("Include issuer serial")
       .sigType(SignatureType.XML).adESType(AdESType.BES).processingRules(null)
-      .tbsData(tbsDataNoAdes)
-      .signatureId(signatureId01)
+      .tbsData(TestData.tbsDataXmlNoAdes)
+      .signatureId(TestData.signatureId01)
       .credential(testECCredential)
       .signatureAlgorithm(TestAlgorithms.getEcdsaSha256())
       .tbsDataProcessor(issuerSerialTbsDataprocessor)
@@ -183,7 +138,7 @@ class XMLTBSDataProcessorTest {
     testCase(TestInput.builder()
       .description("No AdES Signature")
       .sigType(SignatureType.XML).adESType(null).processingRules(null)
-      .tbsData(tbsDataNoAdes)
+      .tbsData(TestData.tbsDataXmlNoAdes)
       .credential(testECCredential)
       .signatureAlgorithm(TestAlgorithms.getEcdsaSha256())
       .build());
@@ -191,9 +146,9 @@ class XMLTBSDataProcessorTest {
     testCase(TestInput.builder()
       .description("Remove V1 Signing Certificate ref")
       .sigType(SignatureType.XML).adESType(AdESType.BES).processingRules(null)
-      .tbsData(tbsDataAdes01)
+      .tbsData(TestData.tbsDataXmlAdes01)
       .requestAdesObject(reqAdesObjectWithV1CertRef)
-      .signatureId(signatureId01)
+      .signatureId(TestData.signatureId01)
       .credential(testRSACredential)
       .signatureAlgorithm(TestAlgorithms.getRsaSha256())
       .build());
@@ -203,7 +158,7 @@ class XMLTBSDataProcessorTest {
       .sigType(SignatureType.XML).adESType(AdESType.BES)
       .tbsData(tbsDataNoRef)
       .credential(testECCredential)
-      .signatureId(signatureId01)
+      .signatureId(TestData.signatureId01)
       .signatureAlgorithm(TestAlgorithms.getEcdsaSha256())
       .exception(SignatureException.class)
       .build());
@@ -220,7 +175,7 @@ class XMLTBSDataProcessorTest {
     testCase(TestInput.builder()
       .description("Null Credentials")
       .sigType(SignatureType.XML).adESType(AdESType.BES)
-      .tbsData(tbsDataAdes01)
+      .tbsData(TestData.tbsDataXmlAdes01)
       .signatureAlgorithm(TestAlgorithms.getEcdsaSha256())
       .exception(NullPointerException.class)
       .build());
@@ -228,7 +183,7 @@ class XMLTBSDataProcessorTest {
     testCase(TestInput.builder()
       .description("Null Signature Algorithm")
       .sigType(SignatureType.XML).adESType(AdESType.BES)
-      .tbsData(tbsDataAdes01)
+      .tbsData(TestData.tbsDataXmlAdes01)
       .credential(testECCredential)
       .exception(NullPointerException.class)
       .build());
@@ -244,7 +199,7 @@ class XMLTBSDataProcessorTest {
     testCase(TestInput.builder()
       .description("Null signature type in signature request")
       .adESType(AdESType.BES)
-      .tbsData(tbsDataAdes01)
+      .tbsData(TestData.tbsDataXmlAdes01)
       .credential(testECCredential)
       .signatureAlgorithm(TestAlgorithms.getEcdsaSha256())
       .exception(SignatureException.class)
@@ -268,15 +223,16 @@ class XMLTBSDataProcessorTest {
 
     // Exception test
     if (input.getException() != null) {
-      Exception exception = assertThrows(input.exception, () -> tbsDP.getTBSData(
+      Exception exception = assertThrows(input.exception, () -> tbsDP.processSignTaskData(
         requestedSignatureTask, input.credential.getCertificate(), input.signatureAlgorithm
       ));
+      assertTrue(input.exception.isAssignableFrom(exception.getClass()));
       log.info("Caught exception: {}", exception.toString());
       return;
     }
 
     // Non exception test
-    TBSProcessingData tbsData = tbsDP.getTBSData(requestedSignatureTask, input.credential.getCertificate(), input.signatureAlgorithm);
+    TBSProcessingData tbsData = tbsDP.processSignTaskData(requestedSignatureTask, input.credential.getCertificate(), input.signatureAlgorithm);
     log.info("Result tbs data:\n{}", TestUtils.base64Print(tbsData.getTBSBytes()));
     if (tbsData.getAdESObject() != null) {
       log.info("Result AdES object:\n{}", TestUtils.base64Print(tbsData.getAdESObject().getObjectBytes()));
@@ -383,7 +339,7 @@ class XMLTBSDataProcessorTest {
 
   @SneakyThrows
   private static String getV1CertRefAdesObject() {
-    Document adesObjectDocument = DOMUtils.bytesToDocument(Base64.decode(reqAdesObject01));
+    Document adesObjectDocument = DOMUtils.bytesToDocument(Base64.decode(TestData.reqAdesObject01));
     ObjectType adesObjectType = JAXBUnmarshaller.unmarshall(adesObjectDocument, ObjectType.class);
     Element qpElement = (Element) adesObjectType.getContent().get(0);
     QualifyingProperties qp = JAXBUnmarshaller.unmarshall(qpElement, QualifyingProperties.class);
@@ -403,7 +359,7 @@ class XMLTBSDataProcessorTest {
 
   @SneakyThrows
   private static String getNoRefSignedIfo() {
-    Document inpTbsDocument = DOMUtils.bytesToDocument(Base64.decode(tbsDataNoAdes));
+    Document inpTbsDocument = DOMUtils.bytesToDocument(Base64.decode(TestData.tbsDataXmlNoAdes));
     SignedInfoType inpSignedInfo = JAXBUnmarshaller.unmarshall(inpTbsDocument, SignedInfoType.class);
     inpSignedInfo.getReference().clear();
     return Base64.toBase64String(XMLTBSDataProcessor.nodeToBytes(JAXBMarshaller.marshallNonRootElement(

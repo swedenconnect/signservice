@@ -35,6 +35,7 @@ import se.swedenconnect.signservice.signature.signer.impl.DefaultSignServiceSign
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessorProvider;
 import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
+import se.swedenconnect.signservice.signature.tbsdata.impl.DefaultTBSDataProcessorProvider;
 
 import javax.annotation.Nonnull;
 import java.security.SignatureException;
@@ -65,15 +66,13 @@ public class DefaultSignatureHandler implements SignatureHandler {
   private String name;
 
   /**
-   * Constructor with default sign service signer provider
+   * Constructor with default sign service signer provider and default TBS data processor
    *
    * @param algorithmRegistry algorithm registry
    */
-  public DefaultSignatureHandler(final AlgorithmRegistry algorithmRegistry,
-    TBSDataProcessorProvider tbsDataProcessorProvider) {
-    this.signServiceSignerProvider = new DefaultSignServiceSignerProvider(algorithmRegistry);
-    this.algorithmRegistry = algorithmRegistry;
-    this.tbsDataProcessorProvider = tbsDataProcessorProvider;
+  public DefaultSignatureHandler(@Nonnull final AlgorithmRegistry algorithmRegistry) {
+    this(algorithmRegistry, new DefaultSignServiceSignerProvider(algorithmRegistry),
+      new DefaultTBSDataProcessorProvider());
   }
 
   /**
@@ -82,11 +81,16 @@ public class DefaultSignatureHandler implements SignatureHandler {
    * @param algorithmRegistry algorithm registry
    * @param signServiceSignerProvider sign service signer provider
    */
-  public DefaultSignatureHandler(final AlgorithmRegistry algorithmRegistry,
-    final SignServiceSignerProvider signServiceSignerProvider, TBSDataProcessorProvider tbsDataProcessorProvider) {
+  public DefaultSignatureHandler(@Nonnull final AlgorithmRegistry algorithmRegistry,
+    @Nonnull final SignServiceSignerProvider signServiceSignerProvider,
+    @Nonnull final TBSDataProcessorProvider tbsDataProcessorProvider) {
     this.signServiceSignerProvider = signServiceSignerProvider;
     this.algorithmRegistry = algorithmRegistry;
     this.tbsDataProcessorProvider = tbsDataProcessorProvider;
+
+    Objects.requireNonNull(algorithmRegistry, "Algorithm registry must not be null");
+    Objects.requireNonNull(signServiceSignerProvider, "Signer provider must not be null");
+    Objects.requireNonNull(tbsDataProcessorProvider, "TBS data processor must not be null");
   }
 
   /** {@inheritDoc} */
@@ -109,16 +113,16 @@ public class DefaultSignatureHandler implements SignatureHandler {
       .orElseThrow(() -> new InvalidRequestException("Signature algorithm in request must not be null"));
     Algorithm algorithm = Optional.ofNullable(algorithmRegistry.getAlgorithm(sigAlgorithmUri))
       .orElseThrow(() -> new InvalidRequestException("Signature algorithm is not in the algorithm registry"));
-    if (!(algorithm instanceof SignatureAlgorithm)){
+    if (!(algorithm instanceof SignatureAlgorithm)) {
       throw new InvalidRequestException("Requested algorithm is not a signature algorithm");
     }
     SignatureAlgorithm signatureAlgorithm = (SignatureAlgorithm) algorithm;
-    if (signatureAlgorithm.isBlacklisted()){
+    if (signatureAlgorithm.isBlacklisted()) {
       throw new InvalidRequestException("Specified signature algorithm is blacklisted");
     }
 
     // Check sign task data
-    if (signRequest.getSignatureTasks() == null || signRequest.getSignatureTasks().isEmpty()){
+    if (signRequest.getSignatureTasks() == null || signRequest.getSignatureTasks().isEmpty()) {
       throw new InvalidRequestException("No sign tasks are available");
     }
     for (RequestedSignatureTask signTask : signRequest.getSignatureTasks()) {
@@ -161,7 +165,8 @@ public class DefaultSignatureHandler implements SignatureHandler {
 
     TBSDataProcessor tbsDataProcessor = tbsDataProcessorProvider.getTBSDataProcessor(signatureType);
     log.debug("Obtained TBS data processor of type: {}", tbsDataProcessor.getClass().getSimpleName());
-    TBSProcessingData tbsProcessingData = tbsDataProcessor.getTBSData(signatureTask, signingCredential.getCertificate(),
+    TBSProcessingData tbsProcessingData = tbsDataProcessor.processSignTaskData(signatureTask,
+      signingCredential.getCertificate(),
       signatureAlgorithm);
 
     byte[] signature = signer.sign(tbsProcessingData.getTBSBytes(), signingCredential.getPrivateKey(),

@@ -82,9 +82,12 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
     super(supportedProcessingRules);
   }
 
+  /** {@inheritDoc} */
   @Override protected void checkToBeSignedData(byte[] tbsData, boolean ades, AdESObject adESObject,
     SignatureAlgorithm signatureAlgorithm) throws InvalidRequestException {
     try {
+      log.debug("Checking PDF to be signed data");
+
       List<Attribute> signedAttributes = parseSignedAttributeBytes(tbsData);
       log.debug("Processing {} input signed attributes", signedAttributes.size());
 
@@ -124,12 +127,14 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
     }
   }
 
-  @Override public TBSProcessingData getTBSData(@Nonnull final RequestedSignatureTask signatureTask,
+  /** {@inheritDoc} */
+  @Override public TBSProcessingData processSignatureTypeTBSData(@Nonnull final RequestedSignatureTask signatureTask,
     @Nonnull final X509Certificate signerCertificate,
     @Nonnull final SignatureAlgorithm signatureAlgorithm) throws SignatureException {
 
+    log.debug("Processing PDF to be signed data");
+
     // Check and collect data
-    checkIndata(signatureTask, signerCertificate, signatureAlgorithm);
     defaultProcessingRuleCheck(signatureTask.getProcessingRulesUri());
     byte[] tbsBytes = signatureTask.getTbsData();
     SignatureType signatureType = signatureTask.getSignatureType();

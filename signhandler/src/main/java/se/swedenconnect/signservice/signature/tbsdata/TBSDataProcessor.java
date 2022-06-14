@@ -41,7 +41,7 @@ public interface TBSDataProcessor {
    * @return the data to be signed
    * @throws SignatureException on errors providing data to be signed based on the provided input
    */
-  TBSProcessingData getTBSData(@Nonnull final RequestedSignatureTask signatureTask,
+  TBSProcessingData processSignTaskData(@Nonnull final RequestedSignatureTask signatureTask,
     @Nonnull final X509Certificate signerCertificate, @Nonnull final SignatureAlgorithm signatureAlgorithm)
     throws SignatureException;
 

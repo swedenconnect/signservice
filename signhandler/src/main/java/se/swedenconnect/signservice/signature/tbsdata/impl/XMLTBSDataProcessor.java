@@ -131,8 +131,18 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
     super(supportedProcessingRules);
   }
 
+  /**
+   * Constructor for this XML TBS data processor with default settings
+   */
+  public XMLTBSDataProcessor() {
+    super(new ArrayList<>());
+  }
+
+  /** {@inheritDoc} */
   @Override protected void checkToBeSignedData(byte[] tbsData, boolean ades, AdESObject adESObject,
     SignatureAlgorithm signatureAlgorithm) throws InvalidRequestException {
+    log.debug("Checking XML to be signed data");
+
     try {
       if (ades) {
         if (adESObject == null) {
@@ -168,25 +178,19 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
       }
 
     }
-    catch (JAXBException | NoSuchAlgorithmException | IOException e) {
-      throw new InvalidRequestException(e.toString(), e);
+    catch (JAXBException | NoSuchAlgorithmException | IOException | InternalXMLException e) {
+      throw new InvalidRequestException(e.getMessage());
     }
 
   }
 
-  /**
-   * Constructor for this XML TBS data processor with default settings
-   */
-  public XMLTBSDataProcessor() {
-    super(new ArrayList<>());
-  }
-
-  @Override public TBSProcessingData getTBSData(@Nonnull final RequestedSignatureTask signatureTask,
+  /** {@inheritDoc} */
+  @Override public TBSProcessingData processSignatureTypeTBSData(@Nonnull final RequestedSignatureTask signatureTask,
     @Nonnull final X509Certificate signerCertificate,
     @Nonnull final SignatureAlgorithm signatureAlgorithm) throws SignatureException {
+    log.debug("Processing XML to be signed data");
 
     // Check and collect data
-    checkIndata(signatureTask, signerCertificate, signatureAlgorithm);
     defaultProcessingRuleCheck(signatureTask.getProcessingRulesUri());
     byte[] tbsBytes = signatureTask.getTbsData();
     SignatureType signatureType = signatureTask.getSignatureType();
