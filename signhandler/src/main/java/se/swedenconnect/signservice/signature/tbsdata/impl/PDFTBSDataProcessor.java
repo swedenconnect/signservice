@@ -33,6 +33,8 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import se.swedenconnect.security.algorithms.MessageDigestAlgorithm;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.core.types.InvalidRequestException;
+import se.swedenconnect.signservice.signature.AdESObject;
 import se.swedenconnect.signservice.signature.AdESType;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureType;
@@ -80,12 +82,54 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
     super(supportedProcessingRules);
   }
 
+  @Override protected void checkToBeSignedData(byte[] tbsData, boolean ades, AdESObject adESObject,
+    SignatureAlgorithm signatureAlgorithm) throws InvalidRequestException {
+    try {
+      List<Attribute> signedAttributes = parseSignedAttributeBytes(tbsData);
+      log.debug("Processing {} input signed attributes", signedAttributes.size());
+
+      // Check that contentType attribute is present
+      Attribute contentTypeAttr = signedAttributes.stream()
+        .filter(attribute -> CMSAttributes.contentType.equals(attribute.getAttrType()))
+        .findFirst()
+        .orElseThrow(() -> new InvalidRequestException("Signed attributes input has no contentType attribute"));
+      try {
+        ASN1ObjectIdentifier contentType = ASN1ObjectIdentifier.getInstance(
+          contentTypeAttr.getAttrValues().getObjectAt(0));
+        if (!PKCSObjectIdentifiers.data.equals(contentType)) {
+          throw new SignatureException("Illegal content type in signed attributes input");
+        }
+      }
+      catch (Exception ex) {
+        throw new InvalidRequestException(
+          "Illegal attribute data in content type attributes in signed attributes input");
+      }
+
+      if (!isAttributePresent(CMSAttributes.messageDigest, signedAttributes)) {
+        throw new InvalidRequestException("Signed attributes input has no message digest");
+      }
+      log.debug("TBS input has required signed attributes");
+
+      // Test signing time
+      if (isAttributePresent(CMSAttributes.signingTime, signedAttributes)) {
+        if (ades) {
+          if (strictProcessing) {
+            throw new InvalidRequestException("Signing time is not allowed in PAdES requests in strict processing");
+          }
+        }
+      }
+    }
+    catch (IOException e) {
+      throw new InvalidRequestException(e.getMessage());
+    }
+  }
+
   @Override public TBSProcessingData getTBSData(@Nonnull final RequestedSignatureTask signatureTask,
-    @Nonnull final PkiCredential signingCredential,
+    @Nonnull final X509Certificate signerCertificate,
     @Nonnull final SignatureAlgorithm signatureAlgorithm) throws SignatureException {
 
     // Check and collect data
-    checkIndata(signatureTask,signingCredential, signatureAlgorithm);
+    checkIndata(signatureTask, signerCertificate, signatureAlgorithm);
     defaultProcessingRuleCheck(signatureTask.getProcessingRulesUri());
     byte[] tbsBytes = signatureTask.getTbsData();
     SignatureType signatureType = signatureTask.getSignatureType();
@@ -99,28 +143,6 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
     // Process TBS data
     try {
       List<Attribute> signedAttributes = parseSignedAttributeBytes(tbsBytes);
-      log.debug("Processing {} input signed attributes", signedAttributes.size());
-
-      // Check that contentType attribute is present
-      Attribute contentTypeAttr = signedAttributes.stream()
-        .filter(attribute -> CMSAttributes.contentType.equals(attribute.getAttrType()))
-        .findFirst()
-        .orElseThrow(() -> new SignatureException("Signed attributes input has no contentType attribute"));
-      try {
-        ASN1ObjectIdentifier contentType = ASN1ObjectIdentifier.getInstance(
-          contentTypeAttr.getAttrValues().getObjectAt(0));
-        if (!PKCSObjectIdentifiers.data.equals(contentType)) {
-          throw new SignatureException("Illegal content type in signed attributes input");
-        }
-      }
-      catch (Exception ex) {
-        throw new SignatureException("Illegal attribute data in content type attributes in signed attributes input");
-      }
-
-      if (!isAttributePresent(CMSAttributes.messageDigest, signedAttributes)) {
-        throw new SignatureException("Signed attributes input has no message digest");
-      }
-      log.debug("TBS input has required signed attributes");
 
       // Test signing time
       if (isAttributePresent(CMSAttributes.signingTime, signedAttributes)) {
@@ -169,7 +191,7 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
         }
         //Add a new signed certificate attribute
         signedAttributes.add(getSignedCertAttr(signatureAlgorithm.getMessageDigestAlgorithm(),
-          signingCredential.getCertificate(), includeIssuerSerial));
+          signerCertificate, includeIssuerSerial));
       }
 
       // Assemble and return data to be signed

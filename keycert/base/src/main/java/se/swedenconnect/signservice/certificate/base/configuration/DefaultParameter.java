@@ -33,7 +33,7 @@ public enum DefaultParameter {
   /**
    * Default certificate type.
    */
-  certificateType("certificateTYpe"),
+  certificateType("certificateType"),
 
   /**
    * Default certificate profile.

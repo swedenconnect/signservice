@@ -261,14 +261,14 @@ class PDFTBSDataProcessorTest {
     // Test exception case
     if (exceptionClass != null) {
       Exception exception = assertThrows(exceptionClass,
-        () -> pdftbsDataProcessor.getTBSData(signatureTask, credential, signatureAlgorithm));
+        () -> pdftbsDataProcessor.getTBSData(signatureTask, credential.getCertificate(), signatureAlgorithm));
       log.info("Caught exception: {}", exception.toString());
       return;
     }
 
     // Test positive result
     log.info("Processing input data:\n{}", TestUtils.base64Print(signatureTask.getTbsData(), 80));
-    TBSProcessingData tbsData = pdftbsDataProcessor.getTBSData(signatureTask, credential, signatureAlgorithm);
+    TBSProcessingData tbsData = pdftbsDataProcessor.getTBSData(signatureTask, credential.getCertificate(), signatureAlgorithm);
 
     // Remove later
     log.debug(Base64.toBase64String(tbsData.getTBSBytes()));

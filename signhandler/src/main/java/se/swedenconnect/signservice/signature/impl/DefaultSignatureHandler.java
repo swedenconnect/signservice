@@ -17,11 +17,13 @@ package se.swedenconnect.signservice.signature.impl;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
+import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.signature.CompletedSignatureTask;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
@@ -30,9 +32,9 @@ import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.signer.SignServiceSigner;
 import se.swedenconnect.signservice.signature.signer.SignServiceSignerProvider;
 import se.swedenconnect.signservice.signature.signer.impl.DefaultSignServiceSignerProvider;
-import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessorProvider;
+import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 
 import javax.annotation.Nonnull;
 import java.security.SignatureException;
@@ -95,20 +97,45 @@ public class DefaultSignatureHandler implements SignatureHandler {
 
   /** {@inheritDoc} */
   @Override
-  public void checkRequirements(final SignRequestMessage signRequest, final SignServiceContext context)
+  public void checkRequirements(@Nonnull final SignRequestMessage signRequest, final SignServiceContext context)
     throws InvalidRequestException {
 
-    //
+    Objects.requireNonNull(signRequest, "SignRequest must not be null");
 
-    // TODO: Implement
+    // Check signature algorithm
+    SignatureRequirements signatureRequirements = Optional.ofNullable(signRequest.getSignatureRequirements())
+      .orElseThrow(() -> new InvalidRequestException("Signature requirements must be present"));
+    String sigAlgorithmUri = Optional.ofNullable(signatureRequirements.getSignatureAlgorithm())
+      .orElseThrow(() -> new InvalidRequestException("Signature algorithm in request must not be null"));
+    Algorithm algorithm = Optional.ofNullable(algorithmRegistry.getAlgorithm(sigAlgorithmUri))
+      .orElseThrow(() -> new InvalidRequestException("Signature algorithm is not in the algorithm registry"));
+    if (!(algorithm instanceof SignatureAlgorithm)){
+      throw new InvalidRequestException("Requested algorithm is not a signature algorithm");
+    }
+    SignatureAlgorithm signatureAlgorithm = (SignatureAlgorithm) algorithm;
+    if (signatureAlgorithm.isBlacklisted()){
+      throw new InvalidRequestException("Specified signature algorithm is blacklisted");
+    }
 
-    // TODO: Check if algorithm is both known and supported (not deprecated)
-
+    // Check sign task data
+    if (signRequest.getSignatureTasks() == null || signRequest.getSignatureTasks().isEmpty()){
+      throw new InvalidRequestException("No sign tasks are available");
+    }
+    for (RequestedSignatureTask signTask : signRequest.getSignatureTasks()) {
+      try {
+        TBSDataProcessor tbsDataProcessor = tbsDataProcessorProvider.getTBSDataProcessor(signTask.getSignatureType());
+        tbsDataProcessor.checkSignTask(signTask, signatureAlgorithm);
+      }
+      catch (SignatureException e) {
+        throw new InvalidRequestException(e.getMessage());
+      }
+    }
   }
 
   /** {@inheritDoc} */
   @Override
-  public CompletedSignatureTask sign(@Nonnull final RequestedSignatureTask signatureTask,@Nonnull final PkiCredential signingCredential,
+  public CompletedSignatureTask sign(@Nonnull final RequestedSignatureTask signatureTask,
+    @Nonnull final PkiCredential signingCredential,
     @Nonnull final SignRequestMessage signRequest, final SignServiceContext context) throws SignatureException {
     log.debug("Starting process to sign data");
 
@@ -125,16 +152,20 @@ public class DefaultSignatureHandler implements SignatureHandler {
 
     SignatureAlgorithm signatureAlgorithm = (SignatureAlgorithm) algorithmRegistry.getAlgorithm(
       signatureAlgorithmUri);
-    if (signatureAlgorithm.isBlacklisted()){
+    if (signatureAlgorithm.isBlacklisted()) {
       log.debug("Signature algorithm blacklisted. Signing aborted");
-      throw new SignatureException("Requested signature algorithm " + signatureAlgorithm.getJcaName() + " is blacklisted");
-    };
+      throw new SignatureException(
+        "Requested signature algorithm " + signatureAlgorithm.getJcaName() + " is blacklisted");
+    }
+    ;
 
     TBSDataProcessor tbsDataProcessor = tbsDataProcessorProvider.getTBSDataProcessor(signatureType);
     log.debug("Obtained TBS data processor of type: {}", tbsDataProcessor.getClass().getSimpleName());
-    TBSProcessingData tbsProcessingData = tbsDataProcessor.getTBSData(signatureTask, signingCredential, signatureAlgorithm);
+    TBSProcessingData tbsProcessingData = tbsDataProcessor.getTBSData(signatureTask, signingCredential.getCertificate(),
+      signatureAlgorithm);
 
-    byte[] signature = signer.sign(tbsProcessingData.getTBSBytes(), signingCredential.getPrivateKey(), signatureAlgorithm);
+    byte[] signature = signer.sign(tbsProcessingData.getTBSBytes(), signingCredential.getPrivateKey(),
+      signatureAlgorithm);
     DefaultCompletedSignatureTask completedSignatureTask = new DefaultCompletedSignatureTask(signatureTask);
     completedSignatureTask.setSignature(signature);
     completedSignatureTask.setSignatureAlgorithmUri(signatureAlgorithmUri);

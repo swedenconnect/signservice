@@ -43,6 +43,7 @@ import se.swedenconnect.schemas.etsi.xades_1_3_2.*;
 import se.swedenconnect.security.algorithms.MessageDigestAlgorithm;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.signature.AdESObject;
 import se.swedenconnect.signservice.signature.AdESType;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
@@ -130,6 +131,49 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
     super(supportedProcessingRules);
   }
 
+  @Override protected void checkToBeSignedData(byte[] tbsData, boolean ades, AdESObject adESObject,
+    SignatureAlgorithm signatureAlgorithm) throws InvalidRequestException {
+    try {
+      if (ades) {
+        if (adESObject == null) {
+          throw new InvalidRequestException(
+            "the AdESObject must not be null when the signature is an AdES XML signature");
+        }
+        Optional.ofNullable(adESObject.getSignatureId())
+          .orElseThrow(() -> new InvalidRequestException("Signature ID must not be null in a XAdES signature"));
+      }
+
+      Document tbsDocument = DOMUtils.bytesToDocument(tbsData);
+      SignedInfoType signedInfo = JAXBUnmarshaller.unmarshall(tbsDocument, SignedInfoType.class);
+
+      // Check algorithm consistency (the data to be signed must match the requested algorithm)
+      SignatureMethodType signatureMethod = Optional.ofNullable(signedInfo.getSignatureMethod())
+        .orElseThrow(() -> new NoSuchAlgorithmException("SignInfo does not have a specified signature algorithm"));
+      if (!signatureAlgorithm.getUri().equals(signatureMethod.getAlgorithm())) {
+        throw new IOException("Signature algorithm of request does not match provided data to be signed");
+      }
+
+      List<ReferenceType> referenceList = signedInfo.getReference();
+      if (referenceList == null || referenceList.isEmpty()) {
+        // We do require at least one reference to signed data
+        throw new InvalidRequestException("Input SignedInfo does not contain any reference data");
+      }
+      List<ReferenceType> xadesReferenceList = referenceList.stream()
+        .filter(referenceType -> SIGNED_PROPERTIES_TYPE.equalsIgnoreCase(referenceType.getType()))
+        .collect(Collectors.toList());
+
+      if (xadesReferenceList.size() > 1) {
+        // We do not allow more than one XAdES SignedProperties reference
+        throw new InvalidRequestException("SignedInfo has more than one XAdES reference");
+      }
+
+    }
+    catch (JAXBException | NoSuchAlgorithmException | IOException e) {
+      throw new InvalidRequestException(e.toString(), e);
+    }
+
+  }
+
   /**
    * Constructor for this XML TBS data processor with default settings
    */
@@ -138,11 +182,11 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
   }
 
   @Override public TBSProcessingData getTBSData(@Nonnull final RequestedSignatureTask signatureTask,
-    @Nonnull final PkiCredential signingCredential,
+    @Nonnull final X509Certificate signerCertificate,
     @Nonnull final SignatureAlgorithm signatureAlgorithm) throws SignatureException {
 
     // Check and collect data
-    checkIndata(signatureTask, signingCredential, signatureAlgorithm);
+    checkIndata(signatureTask, signerCertificate, signatureAlgorithm);
     defaultProcessingRuleCheck(signatureTask.getProcessingRulesUri());
     byte[] tbsBytes = signatureTask.getTbsData();
     SignatureType signatureType = signatureTask.getSignatureType();
@@ -158,9 +202,6 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
     try {
 
       if (xades) {
-        if (adESObject == null) {
-          throw new SignatureException("the AdESObject must not be null when the signature is an AdES XML signature");
-        }
         String signatureId = Optional.ofNullable(adESObject.getSignatureId())
           .orElseThrow(() -> new SignatureException("Signature ID must not be null in a XAdES signature"));
         byte[] adesObjectBytes = adESObject.getObjectBytes();
@@ -175,9 +216,10 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
         }
 
         Element adesElement = xadesObject.getAdesElement();
-        QualifyingProperties qualifyingProperties = Optional.ofNullable(getQualifyingProperties(adesElement)).orElseThrow(() ->
-          new SignatureException("Failed to obtain QualifyingProperties from provided AdES object"));
-        String ref = addSigningCertRef(signingCredential.getCertificate(), qualifyingProperties, signatureId,
+        QualifyingProperties qualifyingProperties = Optional.ofNullable(getQualifyingProperties(adesElement))
+          .orElseThrow(() ->
+            new SignatureException("Failed to obtain QualifyingProperties from provided AdES object"));
+        String ref = addSigningCertRef(signerCertificate, qualifyingProperties, signatureId,
           signatureAlgorithm);
         Element updatedAdesElement = getUpdatedAdesElement(qualifyingProperties);
         byte[] updatedAdesObjectBytes = nodeToBytes(updatedAdesElement);
@@ -201,12 +243,13 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
     catch (DocumentProcessingException | JAXBException | DatatypeConfigurationException | NoSuchAlgorithmException |
       CertificateEncodingException | IOException | XMLParserException | InvalidCanonicalizerException |
       CanonicalizationException | ParserConfigurationException | SAXException e) {
-      throw new SignatureException("Unable to parse data to be signed in request", e);
+      throw new SignatureException("Unable to parse data to be signed in request:" + e, e);
     }
   }
 
   /**
    * Adds signer certificate reference to AdES object
+   *
    * @param certificate certificate to reference in AdES object
    * @param qualifyingProperties QualifyingProperties to update
    * @param signatureId the id of the Signature being updated
@@ -264,7 +307,7 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
     digestAlgAndValueType.setDigestMethod(digestMethodType);
     digestAlgAndValueType.setDigestValue(certDigest);
     certIDTypeV2.setCertDigest(digestAlgAndValueType);
-    if (includeIssuerSerial){
+    if (includeIssuerSerial) {
       byte[] issuerSerial = getRfc5035IssuerSerialBytes(certificate);
       certIDTypeV2.setIssuerSerialV2(issuerSerial);
     }
@@ -300,18 +343,9 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
     SignedInfoType signedInfo = JAXBUnmarshaller.unmarshall(tbsDocument, SignedInfoType.class);
 
     List<ReferenceType> referenceList = signedInfo.getReference();
-    if (referenceList == null || referenceList.isEmpty()) {
-      // We do require at least one reference to signed data
-      throw new SignatureException("Input SignedInfo does not contain any reference data");
-    }
     List<ReferenceType> xadesReferenceList = referenceList.stream()
       .filter(referenceType -> SIGNED_PROPERTIES_TYPE.equalsIgnoreCase(referenceType.getType()))
       .collect(Collectors.toList());
-
-    if (xadesReferenceList.size() > 1) {
-      // We do not allow more than one XAdES SignedProperties reference
-      throw new SignatureException("SignedInfo has more than one XAdES reference");
-    }
 
     if (xadesReferenceList.isEmpty()) {
       ReferenceType newXadesRef = dsObjectFactory.createReferenceType();
@@ -353,7 +387,8 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
     String canonicalizationAlgorithm = Optional.ofNullable(canonicalizationMethodType.getAlgorithm())
       .orElseThrow(() -> new SignatureException(
         "SignedInfo has no canonicalization algorithm"));
-    return getCanonicalXml(nodeToBytes(JAXBMarshaller.marshallNonRootElement(dsObjectFactory.createSignedInfo(signedInfo)).getDocumentElement()),
+    return getCanonicalXml(nodeToBytes(
+        JAXBMarshaller.marshallNonRootElement(dsObjectFactory.createSignedInfo(signedInfo)).getDocumentElement()),
       canonicalizationAlgorithm);
   }
 
@@ -368,12 +403,13 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
    * @throws CanonicalizationException canonicalization error
    * @throws XMLParserException error parsing XML input
    */
-  public static byte[] getCanonicalXml(@Nonnull final byte[] xmlBytes, @Nonnull final String canonicalizationAlgo) throws
+  public static byte[] getCanonicalXml(@Nonnull final byte[] xmlBytes, @Nonnull final String canonicalizationAlgo)
+    throws
     InvalidCanonicalizerException, IOException, CanonicalizationException, XMLParserException {
     Objects.requireNonNull(xmlBytes, "XML Bytes to canonicalize must not be null");
     Objects.requireNonNull(canonicalizationAlgo, "Canonicalization algorithm must be specified");
     Canonicalizer canon = Canonicalizer.getInstance(canonicalizationAlgo);
-    try(ByteArrayOutputStream os = new ByteArrayOutputStream()){
+    try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
       canon.canonicalize(xmlBytes, os, true);
       return os.toByteArray();
     }
@@ -381,6 +417,7 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
 
   /**
    * Transforms an XML node to bytes without XML declaration
+   *
    * @param node node to transform to byte
    * @return byte representation of the XML node without XML declaration
    */
@@ -422,7 +459,6 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
     return JAXBMarshaller.marshallNonRootElement(dsObjectFactory.createObject(newAdesObject))
       .getDocumentElement();
   }
-
 
   private QualifyingProperties getQualifyingProperties(Element adesElement) throws JAXBException {
     NodeList objectNodeList = adesElement.getChildNodes();

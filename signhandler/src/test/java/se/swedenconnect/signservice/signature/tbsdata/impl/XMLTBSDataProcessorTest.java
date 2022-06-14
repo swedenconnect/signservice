@@ -145,14 +145,25 @@ class XMLTBSDataProcessorTest {
       .tbsData(tbsDataAdes01)
       .requestAdesObject(reqAdesObject01)
       .signatureId(signatureId01)
-      .credential(testECCredential)
-      .signatureAlgorithm(TestAlgorithms.getEcdsaSha256())
+      .credential(testRSACredential)
+      .signatureAlgorithm(TestAlgorithms.getRsaSha256())
+      .build());
+
+    testCase(TestInput.builder()
+      .description("RSA signing request with wrong algorithm")
+      .sigType(SignatureType.XML).adESType(AdESType.BES).processingRules(null)
+      .tbsData(tbsDataAdes01)
+      .requestAdesObject(reqAdesObject01)
+      .signatureId(signatureId01)
+      .credential(testRSACredential)
+      .signatureAlgorithm(TestAlgorithms.getRsaPssSha384())
+      .exception(SignatureException.class)
       .build());
 
     testCase(TestInput.builder()
       .description("Default request with no input AdES object")
       .sigType(SignatureType.XML).adESType(AdESType.BES).processingRules(null)
-      .tbsData(tbsDataAdes01)
+      .tbsData(tbsDataNoAdes)
       .signatureId(signatureId01)
       .credential(testECCredential)
       .signatureAlgorithm(TestAlgorithms.getEcdsaSha256())
@@ -161,7 +172,7 @@ class XMLTBSDataProcessorTest {
     testCase(TestInput.builder()
       .description("Include issuer serial")
       .sigType(SignatureType.XML).adESType(AdESType.BES).processingRules(null)
-      .tbsData(tbsDataAdes01)
+      .tbsData(tbsDataNoAdes)
       .signatureId(signatureId01)
       .credential(testECCredential)
       .signatureAlgorithm(TestAlgorithms.getEcdsaSha256())
@@ -183,8 +194,8 @@ class XMLTBSDataProcessorTest {
       .tbsData(tbsDataAdes01)
       .requestAdesObject(reqAdesObjectWithV1CertRef)
       .signatureId(signatureId01)
-      .credential(testECCredential)
-      .signatureAlgorithm(TestAlgorithms.getEcdsaSha256())
+      .credential(testRSACredential)
+      .signatureAlgorithm(TestAlgorithms.getRsaSha256())
       .build());
 
     testCase(TestInput.builder()
@@ -258,14 +269,14 @@ class XMLTBSDataProcessorTest {
     // Exception test
     if (input.getException() != null) {
       Exception exception = assertThrows(input.exception, () -> tbsDP.getTBSData(
-        requestedSignatureTask, input.credential, input.signatureAlgorithm
+        requestedSignatureTask, input.credential.getCertificate(), input.signatureAlgorithm
       ));
       log.info("Caught exception: {}", exception.toString());
       return;
     }
 
     // Non exception test
-    TBSProcessingData tbsData = tbsDP.getTBSData(requestedSignatureTask, input.credential, input.signatureAlgorithm);
+    TBSProcessingData tbsData = tbsDP.getTBSData(requestedSignatureTask, input.credential.getCertificate(), input.signatureAlgorithm);
     log.info("Result tbs data:\n{}", TestUtils.base64Print(tbsData.getTBSBytes()));
     if (tbsData.getAdESObject() != null) {
       log.info("Result AdES object:\n{}", TestUtils.base64Print(tbsData.getAdESObject().getObjectBytes()));
@@ -286,6 +297,9 @@ class XMLTBSDataProcessorTest {
     log.info("Input and output tbs data has matching canonicalization algorithm");
     assertEquals(inpSignedInfo.getSignatureMethod().getAlgorithm(), signedInfo.getSignatureMethod().getAlgorithm());
     log.info("Input and output tbs data has matching signature algorithm");
+    assertEquals(input.signatureAlgorithm.getUri(), signedInfo.getSignatureMethod().getAlgorithm());
+    log.info("Input and output tbs data has matching signature algorithm");
+
 
     if (input.adESType == null) {
       // This is a non AdES test
