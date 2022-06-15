@@ -149,19 +149,21 @@ public class DefaultSignatureHandler implements SignatureHandler {
 
     SignatureType signatureType = signatureTask.getSignatureType();
     log.debug("Requested signature type: {}", signatureType);
+
+    try {
+      // Check the requirements on the sign request data
+      checkRequirements(signRequest, context);
+    }
+    catch (InvalidRequestException e) {
+      throw new SignatureException(e.getMessage());
+    }
+
     String signatureAlgorithmUri = signRequest.getSignatureRequirements().getSignatureAlgorithm();
-    log.debug("Requested signature algorithm: {}", signatureAlgorithmUri);
+    SignatureAlgorithm signatureAlgorithm = (SignatureAlgorithm) algorithmRegistry.getAlgorithm(signatureAlgorithmUri);
+    log.debug("Signature algorithm: {}", signatureAlgorithm.getJcaName());
+
     SignServiceSigner signer = signServiceSignerProvider.getSigner(signatureAlgorithmUri, signatureType);
     log.debug("Obtained signer of class {}", signer.getClass().getSimpleName());
-
-    SignatureAlgorithm signatureAlgorithm = (SignatureAlgorithm) algorithmRegistry.getAlgorithm(
-      signatureAlgorithmUri);
-    if (signatureAlgorithm.isBlacklisted()) {
-      log.debug("Signature algorithm blacklisted. Signing aborted");
-      throw new SignatureException(
-        "Requested signature algorithm " + signatureAlgorithm.getJcaName() + " is blacklisted");
-    }
-    ;
 
     TBSDataProcessor tbsDataProcessor = tbsDataProcessorProvider.getTBSDataProcessor(signatureType);
     log.debug("Obtained TBS data processor of type: {}", tbsDataProcessor.getClass().getSimpleName());

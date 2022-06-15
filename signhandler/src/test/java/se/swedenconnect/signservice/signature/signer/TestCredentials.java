@@ -35,6 +35,13 @@ public class TestCredentials {
   public static PublicKey publicECKey;
   public static PrivateKey privateECKey;
   public static X509Certificate ecCertificate;
+  // Pre-sign credentials
+  public static PublicKey publicRSAPresignKey;
+  public static PrivateKey privateRSAPresignKey;
+  public static X509Certificate rsaPresignCertificate;
+  public static PublicKey publicECPresignKey;
+  public static PrivateKey privateECPresignKey;
+  public static X509Certificate ecPresignCertificate;
 
   static {
     try {
@@ -49,6 +56,18 @@ public class TestCredentials {
       publicECKey = ecKs.getCertificate("sign").getPublicKey();
       privateECKey = (PrivateKey) ecKs.getKey("sign", "Test1234".toCharArray());
       ecCertificate = X509Utils.decodeCertificate(ecKs.getCertificate("sign").getEncoded());
+
+      KeyStore rsaPresignKs = KeyStore.getInstance("JKS");
+      rsaPresignKs.load(TestCredentials.class.getResourceAsStream("/rsa-presigner.jks"), "Test1234".toCharArray());
+      publicRSAPresignKey = rsaPresignKs.getCertificate("sign").getPublicKey();
+      privateRSAPresignKey = (PrivateKey) rsaPresignKs.getKey("sign", "Test1234".toCharArray());
+      rsaPresignCertificate = X509Utils.decodeCertificate(rsaPresignKs.getCertificate("sign").getEncoded());
+
+      KeyStore ecPresignKs = KeyStore.getInstance("JKS");
+      ecPresignKs.load(TestCredentials.class.getResourceAsStream("/ec-presigner.jks"), "Test1234".toCharArray());
+      publicECPresignKey = ecPresignKs.getCertificate("sign").getPublicKey();
+      privateECPresignKey = (PrivateKey) ecPresignKs.getKey("sign", "Test1234".toCharArray());
+      ecPresignCertificate = X509Utils.decodeCertificate(ecPresignKs.getCertificate("sign").getEncoded());
     }
     catch (Exception ex) {
       log.error("Unable to load test credentials");
