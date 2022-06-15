@@ -43,16 +43,12 @@ public abstract class AbstractTBSDataProcessor implements TBSDataProcessor {
    * An example of this is that a PAdES signature MUST NOT contain signing time in signed attributes.
    * With strict processing a request with signing time will fail. By default, such request
    * will be accepted, but the signing time will be removed in line with the PAdES standard.
-   *
-   * @param strictProcessing true to strictly fail all non-conformance requests
    */
   @Setter protected boolean strictProcessing = false;
 
   /**
    * Defines if ESSCertID holding a hash of the signer certificate should include Issuer Serial
    * data in addition to the certificate hash
-   *
-   * @param includeIssuerSerial true to include issuer serial data
    */
   @Setter protected boolean includeIssuerSerial = false;
 
