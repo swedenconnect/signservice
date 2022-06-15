@@ -39,10 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * Sign service RSA-PSS signer tests
  */
 @Slf4j
 class SignServiceRSAPSSSignerTest {

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.signature.tbsdata.impl;
 
 import lombok.extern.slf4j.Slf4j;
@@ -44,10 +43,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * PDF To Be Signed data processor tests
  */
 @Slf4j
 class PDFTBSDataProcessorTest {
@@ -64,7 +60,7 @@ class PDFTBSDataProcessorTest {
   static PDFTBSDataProcessor tdpPrules;
 
   @BeforeAll
-  static void setUp() throws Exception{
+  static void setUp() throws Exception {
     testECCredential = new BasicCredential(TestCredentials.ecCertificate, TestCredentials.privateECKey);
     testRSACredential = new BasicCredential(TestCredentials.rsaCertificate, TestCredentials.privateRSAKey);
     List<Attribute> attributes = PDFTBSDataProcessor.parseSignedAttributeBytes(Base64.decode(TestData.tbsDataPdfBes01));
@@ -195,7 +191,7 @@ class PDFTBSDataProcessorTest {
 
     testCasePddTbsDataProcessor("No PAdES signature with signing time and strict", tdpStrict,
       getRequestedSignatureTask(
-        TestData.tbsDataPdf01, SignatureType.PDF, null,null),
+        TestData.tbsDataPdf01, SignatureType.PDF, null, null),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
       null, null
@@ -203,7 +199,7 @@ class PDFTBSDataProcessorTest {
 
     testCasePddTbsDataProcessor("No PAdES signature and no CMS Algo protection", tdpStrict,
       getRequestedSignatureTask(
-        tbsDataPdfNoAlgoProt, SignatureType.PDF, null,null),
+        tbsDataPdfNoAlgoProt, SignatureType.PDF, null, null),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
       TestData.resultNoPadesNoTime, null
@@ -211,7 +207,7 @@ class PDFTBSDataProcessorTest {
 
     testCasePddTbsDataProcessor("No PAdES signature and no CMS Algo protection", tdpStrict,
       getRequestedSignatureTask(
-        tbsDataPdfNoAlgoProt, SignatureType.PDF, null,null),
+        tbsDataPdfNoAlgoProt, SignatureType.PDF, null, null),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
       TestData.resultNoPadesNoTime, null
@@ -222,8 +218,8 @@ class PDFTBSDataProcessorTest {
   }
 
   @Test
-  public void generalStaticFunctionTests() throws Exception{
-    Exception e = assertThrows(IOException.class, () -> PDFTBSDataProcessor.parseSignedAttributeBytes(new byte[]{}));
+  public void generalStaticFunctionTests() throws Exception {
+    Exception e = assertThrows(IOException.class, () -> PDFTBSDataProcessor.parseSignedAttributeBytes(new byte[] {}));
     log.info("Caught exception parsing illegal tbs data {}", e.toString());
 
     List<Attribute> attributes = PDFTBSDataProcessor.parseSignedAttributeBytes(Base64.decode(TestData.tbsDataPdf01));
@@ -251,7 +247,8 @@ class PDFTBSDataProcessorTest {
 
     // Test positive result
     log.info("Processing input data:\n{}", TestUtils.base64Print(signatureTask.getTbsData(), 80));
-    TBSProcessingData tbsData = pdftbsDataProcessor.processSignTaskData(signatureTask, credential.getCertificate(), signatureAlgorithm);
+    TBSProcessingData tbsData = pdftbsDataProcessor.processSignTaskData(signatureTask, credential.getCertificate(),
+      signatureAlgorithm);
 
     // Remove later
     log.debug(Base64.toBase64String(tbsData.getTBSBytes()));

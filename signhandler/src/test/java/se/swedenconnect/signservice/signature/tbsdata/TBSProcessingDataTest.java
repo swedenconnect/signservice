@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.signature.tbsdata;
 
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.signservice.signature.impl.DefaultAdESObject;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * To Be Signed processing data tests
  */
 class TBSProcessingDataTest {
 
@@ -40,17 +37,16 @@ class TBSProcessingDataTest {
 
     assertEquals("id01", pd01.getAdESObject().getSignatureId());
     assertEquals("pr", pd01.getProcessingRules());
-    assertArrayEquals(new byte[]{0x00}, pd01.getTBSBytes());
+    assertArrayEquals(new byte[] { 0x00 }, pd01.getTBSBytes());
 
     TBSProcessingData pd02 = new TBSProcessingData();
     pd02.setAdESObject(new DefaultAdESObject("id01", null));
     pd02.setProcessingRules("pr");
-    pd02.setTBSBytes(new byte[]{0x00});
+    pd02.setTBSBytes(new byte[] { 0x00 });
 
     assertEquals("id01", pd02.getAdESObject().getSignatureId());
     assertEquals("pr", pd02.getProcessingRules());
-    assertArrayEquals(new byte[]{0x00}, pd02.getTBSBytes());
-
+    assertArrayEquals(new byte[] { 0x00 }, pd02.getTBSBytes());
 
   }
 }

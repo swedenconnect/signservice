@@ -13,34 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.signature.testutils;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * Test data
  */
 public class TestData {
 
-  public static String tbsDataPdfBes01 = "MYG/MBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwKgYJKoZIhvcNAQk0MR0wGzANBglghkgBZQMEAgEFAKEKBggqhkjOPQQ"
-    + "DAjAvBgkqhkiG9w0BCQQxIgQglmTHu8re0Yh3ExDB4DUcAj/YbYbnooAzFRdcGkMluXwwRgYLKoZIhvcNAQkQAi8xNzA1MDMwMTANBglghkgB"
-    + "ZQMEAgEFAAQg89vSUeiLpG0FVF29g5cyBTLK7yzk6sQ+AWWuDcZIq6g=";
-  public static String tbsDataPdf01 = "MYGTMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIyMDYwODIxMzY1NFowKAYJKo"
-    + "ZIhvcNAQk0MRswGTALBglghkgBZQMEAgGhCgYIKoZIzj0EAwIwLwYJKoZIhvcNAQkEMSIEIP0H2n2cZU2crfQnF6BNSe19mvABX8ojfUB+LwBGFBbp";
-  public static String resultTbsDataPdfBes01 = "MYGuMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwKAYJKoZIhvcNAQk0MRswGTALBglghkgBZQMEAgGh"
-    + "CgYIKoZIzj0EAwIwLwYJKoZIhvcNAQkEMSIEIJZkx7vK3tGIdxMQweA1HAI/2G2G56KAMxUXXBpDJbl8"
-    + "MDcGCyqGSIb3DQEJEAIvMSgwJjAkMCIEIDbOxe9Zse1ViwENx9TFQDgn6oke9ptxkGtdDW50+FeQ";
-  public static String resultTbsDataPdfBesSha1 = "MYGfMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwJQYJKoZIhvcNAQk0MRgwFjAJBgUrDgMCGgUA"
-    + "oQkGByqGSM49BAEwKwYLKoZIhvcNAQkQAgwxHDAaMBgwFgQU5XNXi5/RbgjvgmA9Dvdiayvp8j0wLwYJKoZIhvcNAQkEMSIEIJZkx7vK3tGIdxMQ"
-    + "weA1HAI/2G2G56KAMxUXXBpDJbl8";
-  public static String resultTbsDataPdfBesIssuerSerial = "MYIBKjAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMCgGCSqGSIb3DQEJNDEbMBkwCwYJYIZIAWUDBAIBoQoGCCqGSM49BAM"
-    + "CMC8GCSqGSIb3DQEJBDEiBCCWZMe7yt7RiHcTEMHgNRwCP9hthueigDMVF1waQyW5fDCBsgYLKoZIhvcNAQkQAi8xgaIwgZ8wgZwwgZkE"
-    + "IDbOxe9Zse1ViwENx9TFQDgn6oke9ptxkGtdDW50+FeQMHUwbaRrMGkxCzAJBgNVBAYTAlNFMRowGAYDVQQFExFTRVBOUi0wMTIzNDU2N"
-    + "zg5MDESMBAGA1UEBRMJU2FudGVzc29uMQ8wDQYDVQQqDAZTdGVmYW4xGTAXBgNVBAMMEFN0ZWZhbiBTYW50ZXNzb24CBGEflMY=";
-  public static String resultNoPadesNoTime = "MXUwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAoBgkqhkiG9w0BCTQxGzAZMAsGCWCGSAFlAwQCA"
-    + "aEKBggqhkjOPQQDAjAvBgkqhkiG9w0BCQQxIgQg/QfafZxlTZyt9CcXoE1J7X2a8AFfyiN9QH4vAEYUFuk=";
+  public static String tbsDataPdfBes01 =
+    "MYG/MBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwKgYJKoZIhvcNAQk0MR0wGzANBglghkgBZQMEAgEFAKEKBggqhkjOPQQ"
+      + "DAjAvBgkqhkiG9w0BCQQxIgQglmTHu8re0Yh3ExDB4DUcAj/YbYbnooAzFRdcGkMluXwwRgYLKoZIhvcNAQkQAi8xNzA1MDMwMTANBglghkgB"
+      + "ZQMEAgEFAAQg89vSUeiLpG0FVF29g5cyBTLK7yzk6sQ+AWWuDcZIq6g=";
+  public static String tbsDataPdf01 =
+    "MYGTMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIyMDYwODIxMzY1NFowKAYJKo"
+      + "ZIhvcNAQk0MRswGTALBglghkgBZQMEAgGhCgYIKoZIzj0EAwIwLwYJKoZIhvcNAQkEMSIEIP0H2n2cZU2crfQnF6BNSe19mvABX8ojfUB+LwBGFBbp";
+  public static String resultTbsDataPdfBes01 =
+    "MYGuMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwKAYJKoZIhvcNAQk0MRswGTALBglghkgBZQMEAgGh"
+      + "CgYIKoZIzj0EAwIwLwYJKoZIhvcNAQkEMSIEIJZkx7vK3tGIdxMQweA1HAI/2G2G56KAMxUXXBpDJbl8"
+      + "MDcGCyqGSIb3DQEJEAIvMSgwJjAkMCIEIDbOxe9Zse1ViwENx9TFQDgn6oke9ptxkGtdDW50+FeQ";
+  public static String resultTbsDataPdfBesSha1 =
+    "MYGfMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwJQYJKoZIhvcNAQk0MRgwFjAJBgUrDgMCGgUA"
+      + "oQkGByqGSM49BAEwKwYLKoZIhvcNAQkQAgwxHDAaMBgwFgQU5XNXi5/RbgjvgmA9Dvdiayvp8j0wLwYJKoZIhvcNAQkEMSIEIJZkx7vK3tGIdxMQ"
+      + "weA1HAI/2G2G56KAMxUXXBpDJbl8";
+  public static String resultTbsDataPdfBesIssuerSerial =
+    "MYIBKjAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMCgGCSqGSIb3DQEJNDEbMBkwCwYJYIZIAWUDBAIBoQoGCCqGSM49BAM"
+      + "CMC8GCSqGSIb3DQEJBDEiBCCWZMe7yt7RiHcTEMHgNRwCP9hthueigDMVF1waQyW5fDCBsgYLKoZIhvcNAQkQAi8xgaIwgZ8wgZwwgZkE"
+      + "IDbOxe9Zse1ViwENx9TFQDgn6oke9ptxkGtdDW50+FeQMHUwbaRrMGkxCzAJBgNVBAYTAlNFMRowGAYDVQQFExFTRVBOUi0wMTIzNDU2N"
+      + "zg5MDESMBAGA1UEBRMJU2FudGVzc29uMQ8wDQYDVQQqDAZTdGVmYW4xGTAXBgNVBAMMEFN0ZWZhbiBTYW50ZXNzb24CBGEflMY=";
+  public static String resultNoPadesNoTime =
+    "MXUwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAoBgkqhkiG9w0BCTQxGzAZMAsGCWCGSAFlAwQCA"
+      + "aEKBggqhkjOPQQDAjAvBgkqhkiG9w0BCQQxIgQg/QfafZxlTZyt9CcXoE1J7X2a8AFfyiN9QH4vAEYUFuk=";
 
   // XML
   public static String tbsDataXmlAdes01 =
@@ -72,18 +74,19 @@ public class TestData {
       + "EJ5WlhOcFoyNWxjZ0lHQVlGSVVidlM8L3hhZGVzOklzc3VlclNlcmlhbFYyPjwveGFkZXM6Q2VydD48L3hhZGVzOlNpZ25pbmdDZXJ0aWZpY2"
       + "F0ZVYyPjwveGFkZXM6U2lnbmVkU2lnbmF0dXJlUHJvcGVydGllcz48L3hhZGVzOlNpZ25lZFByb3BlcnRpZXM+PC94YWRlczpRdWFsaWZ5aW5"
       + "nUHJvcGVydGllcz48L2RzOk9iamVjdD4=";
-  public static String tbsDataXmlNoAdes = "PGRzOlNpZ25lZEluZm8geG1sbnM6ZHM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMiPjxkc"
-    + "zpDYW5vbmljYWxpemF0aW9uTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIj48L2RzOkNh"
-    + "bm9uaWNhbGl6YXRpb25NZXRob2Q+PGRzOlNpZ25hdHVyZU1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZHN"
-    + "pZy1tb3JlI2VjZHNhLXNoYTI1NiI+PC9kczpTaWduYXR1cmVNZXRob2Q+PGRzOlJlZmVyZW5jZSBVUkk9IiI+PGRzOlRyYW5zZm9ybXM+PGRzOl"
-    + "RyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyNlbnZlbG9wZWQtc2lnbmF0dXJlIj48L2RzOlRyY"
-    + "W5zZm9ybT48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIj48L2RzOlRyYW5z"
-    + "Zm9ybT48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvVFIvMTk5OS9SRUMteHBhdGgtMTk5OTExMTYiPgo8ZHM6WFB"
-    + "hdGg+bm90KGFuY2VzdG9yLW9yLXNlbGY6OipbbG9jYWwtbmFtZSgpPSdTaWduYXR1cmUnIGFuZCBuYW1lc3BhY2UtdXJpKCk9J2h0dHA6Ly93d3"
-    + "cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMnXSk8L2RzOlhQYXRoPgo8L2RzOlRyYW5zZm9ybT48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ld"
-    + "GhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiI+PC9kczpEaWdlc3RNZXRob2Q+PGRzOkRpZ2Vz"
-    + "dFZhbHVlPjkwN3dxZ0VBOFVSZEx2ZE9JeWloQTQxdlJ3UlNRYWZNd3ovUk42N2xZQ0k9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT4"
-    + "8L2RzOlNpZ25lZEluZm8+";
+  public static String tbsDataXmlNoAdes =
+    "PGRzOlNpZ25lZEluZm8geG1sbnM6ZHM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMiPjxkc"
+      + "zpDYW5vbmljYWxpemF0aW9uTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIj48L2RzOkNh"
+      + "bm9uaWNhbGl6YXRpb25NZXRob2Q+PGRzOlNpZ25hdHVyZU1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZHN"
+      + "pZy1tb3JlI2VjZHNhLXNoYTI1NiI+PC9kczpTaWduYXR1cmVNZXRob2Q+PGRzOlJlZmVyZW5jZSBVUkk9IiI+PGRzOlRyYW5zZm9ybXM+PGRzOl"
+      + "RyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyNlbnZlbG9wZWQtc2lnbmF0dXJlIj48L2RzOlRyY"
+      + "W5zZm9ybT48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8xMC94bWwtZXhjLWMxNG4jIj48L2RzOlRyYW5z"
+      + "Zm9ybT48ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvVFIvMTk5OS9SRUMteHBhdGgtMTk5OTExMTYiPgo8ZHM6WFB"
+      + "hdGg+bm90KGFuY2VzdG9yLW9yLXNlbGY6OipbbG9jYWwtbmFtZSgpPSdTaWduYXR1cmUnIGFuZCBuYW1lc3BhY2UtdXJpKCk9J2h0dHA6Ly93d3"
+      + "cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMnXSk8L2RzOlhQYXRoPgo8L2RzOlRyYW5zZm9ybT48L2RzOlRyYW5zZm9ybXM+PGRzOkRpZ2VzdE1ld"
+      + "GhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiI+PC9kczpEaWdlc3RNZXRob2Q+PGRzOkRpZ2Vz"
+      + "dFZhbHVlPjkwN3dxZ0VBOFVSZEx2ZE9JeWloQTQxdlJ3UlNRYWZNd3ovUk42N2xZQ0k9PC9kczpEaWdlc3RWYWx1ZT48L2RzOlJlZmVyZW5jZT4"
+      + "8L2RzOlNpZ25lZEluZm8+";
 
   public static String signatureId01 = "id-87db0dfc8e58c29471da934c194910b3";
 

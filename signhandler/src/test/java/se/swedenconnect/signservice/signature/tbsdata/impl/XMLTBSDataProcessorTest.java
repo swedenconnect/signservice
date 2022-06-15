@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.signature.tbsdata.impl;
 
 import lombok.AllArgsConstructor;
@@ -58,10 +57,7 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * XML To Be Signed data processor tests
  */
 @Slf4j
 class XMLTBSDataProcessorTest {
