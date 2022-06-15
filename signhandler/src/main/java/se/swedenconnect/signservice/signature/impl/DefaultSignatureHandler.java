@@ -80,6 +80,7 @@ public class DefaultSignatureHandler implements SignatureHandler {
    *
    * @param algorithmRegistry algorithm registry
    * @param signServiceSignerProvider sign service signer provider
+   * @param tbsDataProcessorProvider To Be Signed data processor provider
    */
   public DefaultSignatureHandler(@Nonnull final AlgorithmRegistry algorithmRegistry,
     @Nonnull final SignServiceSignerProvider signServiceSignerProvider,
@@ -104,6 +105,8 @@ public class DefaultSignatureHandler implements SignatureHandler {
   public void checkRequirements(@Nonnull final SignRequestMessage signRequest, final SignServiceContext context)
     throws InvalidRequestException {
 
+    log.debug("Checking signature process requirements on sign request input");
+
     Objects.requireNonNull(signRequest, "SignRequest must not be null");
 
     // Check signature algorithm
@@ -120,11 +123,13 @@ public class DefaultSignatureHandler implements SignatureHandler {
     if (signatureAlgorithm.isBlacklisted()) {
       throw new InvalidRequestException("Specified signature algorithm is blacklisted");
     }
+    log.debug("Signature algorithm {} is supported for signing", sigAlgorithmUri);
 
     // Check sign task data
     if (signRequest.getSignatureTasks() == null || signRequest.getSignatureTasks().isEmpty()) {
       throw new InvalidRequestException("No sign tasks are available");
     }
+    log.debug("Found {} sign task(s) to process", signRequest.getSignatureTasks().size());
     for (RequestedSignatureTask signTask : signRequest.getSignatureTasks()) {
       try {
         TBSDataProcessor tbsDataProcessor = tbsDataProcessorProvider.getTBSDataProcessor(signTask.getSignatureType());
@@ -134,6 +139,7 @@ public class DefaultSignatureHandler implements SignatureHandler {
         throw new InvalidRequestException(e.getMessage());
       }
     }
+    log.debug("All sign tasks pass all compliance checks");
   }
 
   /** {@inheritDoc} */

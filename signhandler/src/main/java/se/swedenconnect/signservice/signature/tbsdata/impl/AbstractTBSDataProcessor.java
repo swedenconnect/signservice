@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.signature.tbsdata.impl;
 
 import lombok.Setter;
@@ -60,10 +59,21 @@ public abstract class AbstractTBSDataProcessor implements TBSDataProcessor {
   /** Supported processing rules */
   protected final List<String> supportedProcessingRules;
 
+  /**
+   * Constructor
+   *
+   * @param supportedProcessingRules list of processing rule identifiers supported by this TBS data processor
+   */
   public AbstractTBSDataProcessor(List<String> supportedProcessingRules) {
     this.supportedProcessingRules = supportedProcessingRules;
   }
 
+  /**
+   * Check processing rules of this TBS data processor against requested processing rule
+   *
+   * @param processingRulesUri requested processing rule
+   * @throws SignatureException on error processing according to the required processing rule
+   */
   protected void defaultProcessingRuleCheck(String processingRulesUri) throws SignatureException {
     if (processingRulesUri == null && this.supportedProcessingRules.isEmpty()) {
       log.debug("Using default processing rules");

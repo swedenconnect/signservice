@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.signature.tbsdata;
 
 import lombok.AllArgsConstructor;
@@ -23,10 +22,7 @@ import lombok.NoArgsConstructor;
 import se.swedenconnect.signservice.signature.AdESObject;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * Data class holding data related to a sign task that is the result of preparing data for signing
  */
 @Data
 @AllArgsConstructor

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.signature.tbsdata;
 
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
@@ -25,10 +24,7 @@ import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * Interface for a "To Be Signed" data processor that prepares data for signing based on a specific signature format.
  */
 public interface TBSDataProcessor {
 

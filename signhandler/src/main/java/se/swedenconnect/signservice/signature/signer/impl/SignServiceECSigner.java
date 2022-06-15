@@ -35,6 +35,11 @@ public class SignServiceECSigner implements SignServiceSigner {
   /** Signature type for signatures created by this signer */
   private final SignatureType signatureType;
 
+  /**
+   * Constructor
+   *
+   * @param signatureType signature type served by this signer
+   */
   public SignServiceECSigner(final SignatureType signatureType) {
     this.signatureType = signatureType;
   }

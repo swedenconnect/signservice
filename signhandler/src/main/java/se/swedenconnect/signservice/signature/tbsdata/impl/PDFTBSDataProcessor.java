@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.signature.tbsdata.impl;
 
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +31,6 @@ import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.cert.X509CertificateHolder;
 import se.swedenconnect.security.algorithms.MessageDigestAlgorithm;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
-import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.signature.AdESObject;
 import se.swedenconnect.signservice.signature.AdESType;
@@ -210,6 +208,12 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
     }
   }
 
+  /**
+   * Create a DER set of signed attributes from a list of attribute data
+   * @param signedAttributes list of attribute data
+   * @return DER encoded set of attributes
+   * @throws IOException error creating DER encoded SET
+   */
   public static byte[] consolidateTBSData(@Nonnull final List<Attribute> signedAttributes) throws IOException {
     Objects.requireNonNull(signedAttributes, "Signed attributes must not be null");
     ASN1EncodableVector aev = new ASN1EncodableVector();
@@ -217,6 +221,12 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
     return new DERSet(aev).getEncoded("DER");
   }
 
+  /**
+   * Remove attributes from the current attribute list
+   * @param attrOidList attribute OID list specifying attributes to remove
+   * @param attributeList attribute list from which attributes should be removed
+   * @return updated attribute list
+   */
   public static List<Attribute> removeAttributes(@Nullable final List<ASN1ObjectIdentifier> attrOidList,
     @Nonnull final List<Attribute> attributeList) {
     Objects.requireNonNull(attributeList, "Attribute list must not be null");

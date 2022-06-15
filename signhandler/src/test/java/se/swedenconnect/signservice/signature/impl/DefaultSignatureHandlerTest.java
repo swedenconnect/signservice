@@ -81,14 +81,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Test cases for DefaultSignatureHandler.
+ * Test cases for DefaultSignatureHandler including integration tests for XML and PDF document signing and validation
  */
 @Slf4j
 public class DefaultSignatureHandlerTest {
 
-  private static se.swedenconnect.schemas.csig.dssext_1_1.ObjectFactory dssExtFactory =
+  private static final se.swedenconnect.schemas.csig.dssext_1_1.ObjectFactory dssExtFactory =
     new se.swedenconnect.schemas.csig.dssext_1_1.ObjectFactory();
-
 
   static AlgorithmRegistry algorithmRegistry;
   static PkiCredential testECCredential;
@@ -198,6 +197,7 @@ public class DefaultSignatureHandlerTest {
     List<SignatureValidationResult> validationResults = validator.validate(pAdESDataCompiledSignedDocument.getDocument());
     assertEquals(1, validationResults.size());
     assertEquals(SignatureValidationResult.Status.SUCCESS, validationResults.get(0).getStatus());
+    assertEquals(signCredential.getCertificate(), validationResults.get(0).getSignerCertificate());
     log.info("Successful validation of signed PDF document");
   }
 
@@ -234,7 +234,7 @@ public class DefaultSignatureHandlerTest {
       .includeSignatureId(true)
       .build();
     final XMLSignerResult preSignResult = xmlPresigner.sign(testDoc);
-    log.info("Pre Signed Document:\n{}", DOMUtils.prettyPrint(preSignResult.getSignedDocument()).replaceAll("\\n[ ]{1,}\\n", "\n"));
+    log.info("Pre Signed Document:\n{}", DOMUtils.prettyPrint(preSignResult.getSignedDocument()).replaceAll("\\n[ ]+\\n", "\n"));
 
     // Perform signature service signing
     SignRequestMessage signRequest = getSignRequest(signatureAlgorithm, List.of(
@@ -275,7 +275,7 @@ public class DefaultSignatureHandlerTest {
     // Assemble signed document
     CompiledSignedDocument<Document, XadesQualifyingProperties> signedDocument = documentProcessor.buildSignedDocument(
       tbsDocument, signTaskData, List.of(signCredential.getCertificate()), signRequestWrapper, null);
-    log.info("Signed Document:\n{}", DOMUtils.prettyPrint(signedDocument.getDocument()).replaceAll("\\n[ ]{1,}\\n", "\n"));
+    log.info("Signed Document:\n{}", DOMUtils.prettyPrint(signedDocument.getDocument()).replaceAll("\\n[ ]+\\n", "\n"));
 
     // Validate the signed document
     final DefaultXMLSignatureValidator validator = new DefaultXMLSignatureValidator(signCredential.getCertificate());

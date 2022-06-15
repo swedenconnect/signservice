@@ -13,21 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.signature.tbsdata;
 
-import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.SignatureType;
 
 import javax.annotation.Nonnull;
 import java.security.SignatureException;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * Interface for a provider of to be signed data processors
  */
 public interface TBSDataProcessorProvider {
+
+  /**
+   * Get a suitable to be signed data processor for the specified signature type
+   *
+   * @param signatureType signature type such as XML or PDF
+   * @return {@link TBSDataProcessor}
+   * @throws SignatureException on errors creating the TBS data processor
+   */
   TBSDataProcessor getTBSDataProcessor(@Nonnull final SignatureType signatureType)  throws SignatureException;
 }

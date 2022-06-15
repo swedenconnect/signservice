@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.signature.tbsdata.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessorProvider;
@@ -27,16 +27,29 @@ import java.util.Objects;
 /**
  * Default provider of a suitable processor to prepare data to be signed
  */
+@Slf4j
 public class DefaultTBSDataProcessorProvider implements TBSDataProcessorProvider {
 
+  /** XML TBS data processor */
   private final TBSDataProcessor xmlTBSDataProcessor;
+
+  /** PDF TBS data processor */
   private final TBSDataProcessor pdfTBSDataProcessor;
 
+  /**
+   * Default constructor
+   */
   public DefaultTBSDataProcessorProvider() {
     xmlTBSDataProcessor = new XMLTBSDataProcessor();
     pdfTBSDataProcessor = new PDFTBSDataProcessor();
   }
 
+  /**
+   * Constructor providing explicit XML and PDF TBS data processors
+   *
+   * @param xmlTBSDataProcessor XML TBS data processor
+   * @param pdfTBSDataProcessor PDF TBS data processor
+   */
   public DefaultTBSDataProcessorProvider(
     TBSDataProcessor xmlTBSDataProcessor,
     TBSDataProcessor pdfTBSDataProcessor) {
@@ -44,17 +57,19 @@ public class DefaultTBSDataProcessorProvider implements TBSDataProcessorProvider
     this.pdfTBSDataProcessor = pdfTBSDataProcessor;
   }
 
+  /** {@inheritDoc} */
   @Override public TBSDataProcessor getTBSDataProcessor(@Nonnull final SignatureType signatureType) throws SignatureException {
 
+    log.debug("Requesting TBS data processor for signature type {}", signatureType);
     Objects.requireNonNull(signatureType, "SignatureType must not be null");
 
     switch (signatureType) {
-
     case XML:
       return xmlTBSDataProcessor;
     case PDF:
       return pdfTBSDataProcessor;
     default:
+      log.debug("Unsupported signature type: {}", signatureType);
       throw new SignatureException("Signature type " + signatureType + " is not supported");
     }
   }

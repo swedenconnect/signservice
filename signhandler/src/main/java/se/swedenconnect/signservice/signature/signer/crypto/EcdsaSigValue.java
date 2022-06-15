@@ -21,10 +21,12 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.*;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Objects;
 
 /**
  * ECDSA Signature value
@@ -32,6 +34,12 @@ import java.util.Enumeration;
 @Slf4j
 public class EcdsaSigValue implements ASN1Encodable {
 
+	/**
+	 * Supported key lengths for ECDSA keys
+	 *
+	 * @param supportedKeyLengths array of integers providing supported key lengths
+	 * @return array of integers providing supported key lengths
+	 */
 	@Getter
 	@Setter
 	private static int[] supportedKeyLengths = new int[] { 160, 224, 256, 384, 521 };
@@ -53,8 +61,9 @@ public class EcdsaSigValue implements ASN1Encodable {
 	 * @return ECDSA signature value
 	 * @throws IOException invalid input
 	 */
-	public static EcdsaSigValue getInstance(@NonNull final ASN1TaggedObject obj, final boolean explicit)
+	public static EcdsaSigValue getInstance(@Nonnull final ASN1TaggedObject obj, final boolean explicit)
 			throws IOException {
+		Objects.requireNonNull(obj, "The input object to the ASN.1 constructor must not be null");
 		return getInstance(ASN1Sequence.getInstance(obj, explicit));
 	}
 
@@ -65,7 +74,8 @@ public class EcdsaSigValue implements ASN1Encodable {
 	 * @return ECDSA signature value
 	 * @throws IOException invalid input
 	 */
-	public static EcdsaSigValue getInstance(@NonNull final Object obj) throws IOException {
+	public static EcdsaSigValue getInstance(@Nonnull final Object obj) throws IOException {
+		Objects.requireNonNull(obj, "The input object to the general constructor must not be null");
 		if (obj instanceof EcdsaSigValue) {
 			return (EcdsaSigValue) obj;
 		}
@@ -81,11 +91,13 @@ public class EcdsaSigValue implements ASN1Encodable {
 
 	/**
 	 * Creates an instance of ECDSA signature value
+	 *
 	 * @param concatenatedRS concatenated bytes of the R and S signature value integers
 	 * @return ECDSA signature value
 	 * @throws IOException invalid input
 	 */
-	public static EcdsaSigValue getInstance(@NonNull final byte[] concatenatedRS) throws IOException {
+	public static EcdsaSigValue getInstance(@Nonnull final byte[] concatenatedRS) throws IOException {
+		Objects.requireNonNull(concatenatedRS, "Concatenated RS value must not be null");
 		try {
 			final BigInteger[] rsVals = getRSFromConcatenatedBytes(concatenatedRS);
 			return new EcdsaSigValue(rsVals[0], rsVals[1]);
@@ -97,11 +109,14 @@ public class EcdsaSigValue implements ASN1Encodable {
 
 	/**
 	 * Creates an instance of ECDSA signature value
+	 *
 	 * @param r R component of the ECDSA signature
 	 * @param s S component of the ECDSA signature
+	 * @return ECDSA signature value
 	 */
-	public static EcdsaSigValue getInstance(@NonNull final BigInteger r, @NonNull final BigInteger s)
-			throws IOException {
+	public static EcdsaSigValue getInstance(@Nonnull final BigInteger r, @Nonnull final BigInteger s) {
+		Objects.requireNonNull(r, "Integer r of the signature value must not be null");
+		Objects.requireNonNull(s, "Integer s of the signature value must not be null");
 		return new EcdsaSigValue(r, s);
 	}
 

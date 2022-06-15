@@ -30,6 +30,8 @@ import java.util.Arrays;
  * </p>
  */
 public class PSSPadding {
+
+  /** The default trailer octet to use */
   static final public byte TRAILER_IMPLICIT = (byte) 0xBC;
 
   private final Digest contentDigest;
@@ -217,13 +219,17 @@ public class PSSPadding {
 
   /**
    * update the internal digest with the byte b
+   *
+   * @param b byte to append to internal digest
    */
   public void update(final byte b) {
     contentDigest.update(b);
   }
 
   /**
-   * update the internal digest with the byte array in.
+   * update the internal digest with a byte array.*
+   *
+   * @param in the byte array to add to the internal digest
    */
   public void update(final byte[] in) {
     contentDigest.update(in, 0, in.length);
@@ -249,6 +255,8 @@ public class PSSPadding {
 
   /**
    * Generate a padded message for the data that has been loaded using the update() function.
+   *
+   * @return padded message for the data that has been loaded using the update() function
    */
   public byte[] generateSignatureEncodedMessage() throws DataLengthException {
     contentDigest.doFinal(mDash, mDash.length - hLen - sLen);
