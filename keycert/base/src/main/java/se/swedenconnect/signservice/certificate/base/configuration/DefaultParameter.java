@@ -26,11 +26,6 @@ import lombok.Getter;
 public enum DefaultParameter {
 
   /**
-   * Default value for the signature algorithm in the sign request.
-   */
-  signatureAlgorithm("signatureAlgorithm"),
-
-  /**
    * Default certificate type.
    */
   certificateType("certificateTYpe"),

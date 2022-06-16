@@ -31,8 +31,8 @@ import se.swedenconnect.signservice.certificate.base.configuration.DefaultConfig
 import se.swedenconnect.signservice.certificate.base.configuration.DefaultParameter;
 import se.swedenconnect.signservice.certificate.base.configuration.impl.KeyAndCertModuleDefaultConfiguration;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.certificate.base.utils.TestUtils;
 import se.swedenconnect.signservice.certificate.base.utils.X509DnNameType;
@@ -113,12 +113,10 @@ class AbstractKeyAndCertificateHandlerTest {
     );
 
     // Set default configuraiton values
-    configuration.put(DefaultParameter.signatureAlgorithm.getParameterName(),
-      XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256);
     configuration.put(DefaultParameter.certificateType.getParameterName(), CertificateType.PKC, "client1");
 
     keyAndCertificateHandler.checkRequirements(
-      getSignRequest(null, "client1", null, null),
+      getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, "client1", null, null),
       new DefaultSignServiceContext("test-context"));
     log.info("Good checkRequirements call passed (ECDSA_SHA256, PKC)");
 
@@ -269,12 +267,12 @@ class AbstractKeyAndCertificateHandlerTest {
       String certSigningAlgoJcaName;
       switch (signatureAlgorithm.getKeyType()) {
       case "RSA":
-        certSigningAlgoJcaName = ((SignatureAlgorithm) algorithmRegistry.getAlgorithm(
-          XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1)).getJcaName();
+        certSigningAlgoJcaName = algorithmRegistry.getAlgorithm(
+          XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1).getJcaName();
         break;
       case "EC":
-        certSigningAlgoJcaName = ((SignatureAlgorithm) algorithmRegistry.getAlgorithm(
-          XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256)).getJcaName();
+        certSigningAlgoJcaName = algorithmRegistry.getAlgorithm(
+          XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256).getJcaName();
         break;
       default:
         throw new CertificateException("Unsupported signature algorithm key type");
