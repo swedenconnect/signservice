@@ -65,7 +65,7 @@ public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertific
    * @param serviceName service name for inclusion in AuthnContextExtensions
    */
   @Setter
-  protected String serviceName = "sign-service";
+  protected String serviceName = null;
 
   /**
    * Constructor for the key and certificate handler.
