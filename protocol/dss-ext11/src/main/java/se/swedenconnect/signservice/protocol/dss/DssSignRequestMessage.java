@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.xpath.XPathExpressionException;
@@ -533,6 +534,7 @@ class DssSignRequestMessage implements SignRequestMessage {
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public SignatureRequirements getSignatureRequirements() {
     return Optional.ofNullable(this.signRequest.getSignRequestExtension())
         .map(SignRequestExtension::getRequestedSignatureAlgorithm)
