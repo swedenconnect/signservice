@@ -81,7 +81,8 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
   }
 
   /** {@inheritDoc} */
-  @Override protected void checkToBeSignedData(byte[] tbsData, boolean ades, AdESObject adESObject,
+  @Override
+  protected void checkToBeSignedData(byte[] tbsData, boolean ades, AdESObject adESObject,
     SignatureAlgorithm signatureAlgorithm) throws InvalidRequestException {
     try {
       log.debug("Checking PDF to be signed data");
@@ -126,7 +127,8 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
   }
 
   /** {@inheritDoc} */
-  @Override public TBSProcessingData processSignatureTypeTBSData(@Nonnull final RequestedSignatureTask signatureTask,
+  @Override
+  public TBSProcessingData processSignatureTypeTBSData(@Nonnull final RequestedSignatureTask signatureTask,
     @Nonnull final X509Certificate signerCertificate,
     @Nonnull final SignatureAlgorithm signatureAlgorithm) throws SignatureException {
 
