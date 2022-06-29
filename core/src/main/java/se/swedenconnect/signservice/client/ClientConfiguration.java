@@ -18,6 +18,9 @@ package se.swedenconnect.signservice.client;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Representation of SignService client configuration.
  */
@@ -28,6 +31,7 @@ public interface ClientConfiguration {
    *
    * @return the client id
    */
+  @Nonnull
   String getClientId();
 
   /**
@@ -35,6 +39,7 @@ public interface ClientConfiguration {
    *
    * @return a list of certificates
    */
+  @Nonnull
   List<X509Certificate> getTrustedCertificates();
 
   /**
@@ -47,6 +52,7 @@ public interface ClientConfiguration {
    *
    * @return a list of registered URL:s
    */
+  @Nullable
   List<String> getResponseUrls();
 
 }

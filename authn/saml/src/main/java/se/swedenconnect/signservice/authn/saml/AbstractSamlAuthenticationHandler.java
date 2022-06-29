@@ -74,6 +74,7 @@ import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.authn.impl.DefaultIdentityAssertion;
 import se.swedenconnect.signservice.authn.impl.SimpleAuthnContextIdentifier;
 import se.swedenconnect.signservice.authn.saml.config.SpUrlConfiguration;
+import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
 import se.swedenconnect.signservice.core.attribute.AttributeConverter;
 import se.swedenconnect.signservice.core.attribute.AttributeException;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
@@ -87,7 +88,8 @@ import se.swedenconnect.signservice.session.SignServiceContext;
  * Abstract base class for SAML authentication handlers.
  */
 @Slf4j
-public abstract class AbstractSamlAuthenticationHandler implements AuthenticationHandler, HttpResourceProvider {
+public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServiceHandler
+    implements AuthenticationHandler, HttpResourceProvider {
 
   /** Media type for SAML metadata in XML format. */
   public static final String APPLICATION_SAML_METADATA = "application/samlmetadata+xml";
@@ -106,9 +108,6 @@ public abstract class AbstractSamlAuthenticationHandler implements Authenticatio
 
   /** Key for storing the SignMessage. */
   public static final String SIGNMESSAGE_KEY = PREFIX + ".SignMessage";
-
-  /** The handler name. */
-  private String name;
 
   /** The bean used when creating authentication requests. */
   protected final AuthnRequestGenerator authnRequestGenerator;
@@ -151,24 +150,6 @@ public abstract class AbstractSamlAuthenticationHandler implements Authenticatio
     this.entityDescriptorContainer =
         Objects.requireNonNull(entityDescriptorContainer, "entityDescriptorContainer must not be null");
     this.urlConfiguration = Objects.requireNonNull(urlConfiguration, "urlConfiguration must not be null");
-  }
-
-  /**
-   * Gets the handler name. Returns the class name if the name has not explicitly been set.
-   */
-  @Override
-  @Nonnull
-  public String getName() {
-    return Optional.ofNullable(this.name).orElse(this.getClass().getSimpleName());
-  }
-
-  /**
-   * Assigns the handler name.
-   *
-   * @param name the handler name
-   */
-  public void setName(@Nonnull final String name) {
-    this.name = name;
   }
 
   /** {@inheritDoc} */

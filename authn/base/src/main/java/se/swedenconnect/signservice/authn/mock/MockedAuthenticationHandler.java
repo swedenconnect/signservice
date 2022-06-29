@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -39,6 +38,7 @@ import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.authn.impl.DefaultIdentityAssertion;
 import se.swedenconnect.signservice.authn.impl.SimpleAuthnContextIdentifier;
+import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
@@ -49,7 +49,7 @@ import se.swedenconnect.signservice.session.SignServiceContext;
  * A mocked authentication handler that may be used in testing scenarios.
  */
 @Slf4j
-public class MockedAuthenticationHandler implements AuthenticationHandler {
+public class MockedAuthenticationHandler extends AbstractSignServiceHandler implements AuthenticationHandler {
 
   /** The default authentication context URI to use if none has been specified. */
   public static final String DEFAULT_LOA = "http://id.elegnamnden.se/loa/1.0/loa3";
@@ -57,24 +57,11 @@ public class MockedAuthenticationHandler implements AuthenticationHandler {
   /** The attribute name for the "Sign message digest" attribute (urn:oid:1.2.752.201.3.14). */
   public static final String ATTRIBUTE_NAME_SIGNMESSAGE_DIGEST = "urn:oid:1.2.752.201.3.14";
 
-  /** The handler name. */
-  private final String name;
-
   /**
    * Default constructor.
-   *
-   * @param name the handler name
    */
-  public MockedAuthenticationHandler(@Nullable final String name) {
-    this.name = name;
-    log.warn("{}: Handler created - DO NOT USE IN PRODUCTION", this.getName());
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  @Nonnull
-  public String getName() {
-    return Optional.ofNullable(this.name).orElseGet(() -> this.getClass().getSimpleName());
+  public MockedAuthenticationHandler() {
+    log.warn("{} created - DO NOT USE IN PRODUCTION", this.getClass().getSimpleName());
   }
 
   /** {@inheritDoc} */

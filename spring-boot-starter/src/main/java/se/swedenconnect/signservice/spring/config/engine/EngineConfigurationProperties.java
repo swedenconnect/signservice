@@ -19,18 +19,17 @@ import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationProperties;
-import se.swedenconnect.signservice.spring.config.protocol.ProtocolConfiguration;
+import se.swedenconnect.signservice.client.impl.DefaultClientConfiguration;
+import se.swedenconnect.signservice.spring.config.authn.AuthenticationConfigurationProperties;
+import se.swedenconnect.signservice.spring.config.protocol.ProtocolConfigurationProperties;
 
 /**
  * Configuration properties for an engine configuration.
  */
 @Data
-@Slf4j
 public class EngineConfigurationProperties implements InitializingBean {
 
   /**
@@ -56,12 +55,17 @@ public class EngineConfigurationProperties implements InitializingBean {
   /**
    * The client configuration.
    */
-  private ClientConfigurationProperties client;
+  private DefaultClientConfiguration client;
 
   /**
-   * The name of the protocol handler bean to use for this engine.
+   * Protocol configuration.
    */
-  private String protocolHandlerBean;
+  private ProtocolConfigurationProperties protocol;
+
+  /**
+   * Authentication handler configuration.
+   */
+  private AuthenticationConfigurationProperties authn;
 
   // TODO: more settings
 
@@ -72,14 +76,11 @@ public class EngineConfigurationProperties implements InitializingBean {
     Assert.hasText(this.signServiceId, "sign-service-id must be assigned");
     Assert.notEmpty(this.processingPaths, "processing-paths must be assigned and non-empty");
 
-    Assert.notNull(client, "client must be assigned");
-    this.client.afterPropertiesSet();
+    Assert.notNull(this.client, "client must be assigned");
+    this.client.init();
 
-    if (!StringUtils.hasText(this.protocolHandlerBean)) {
-      log.info("protocol-handler-bean has not been assigned, using {}",
-          ProtocolConfiguration.DSS_PROTOCOL_HANDLER_NAME);
-      this.protocolHandlerBean = ProtocolConfiguration.DSS_PROTOCOL_HANDLER_NAME;
-    }
+    Assert.notNull(this.protocol, "protocol must be assigned");
+    Assert.notNull(this.authn, "authn must be assigned");
   }
 
 }

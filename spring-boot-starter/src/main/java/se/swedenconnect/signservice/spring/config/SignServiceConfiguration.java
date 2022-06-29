@@ -15,17 +15,13 @@
  */
 package se.swedenconnect.signservice.spring.config;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,22 +30,24 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean;
-import se.swedenconnect.security.credential.utils.X509Utils;
 import se.swedenconnect.signservice.api.engine.DefaultSignServiceEngine;
 import se.swedenconnect.signservice.api.engine.config.impl.DefaultEngineConfiguration;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
 import se.swedenconnect.signservice.audit.actuator.ActuatorAuditLogger;
-import se.swedenconnect.signservice.authn.mock.MockedAuthenticationHandler;
-import se.swedenconnect.signservice.client.impl.DefaultClientConfiguration;
+import se.swedenconnect.signservice.authn.AuthenticationHandler;
+import se.swedenconnect.signservice.core.config.HandlerConfiguration;
+import se.swedenconnect.signservice.core.config.HandlerFactory;
+import se.swedenconnect.signservice.core.config.HandlerFactoryRegistry;
+import se.swedenconnect.signservice.core.config.spring.SpringBeanLoader;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
+import se.swedenconnect.signservice.protocol.dss.DssProtocolHandler;
 import se.swedenconnect.signservice.session.SessionHandler;
 import se.swedenconnect.signservice.session.impl.DefaultSessionHandler;
 import se.swedenconnect.signservice.spring.config.engine.EngineConfigurationProperties;
@@ -72,6 +70,11 @@ public class SignServiceConfiguration {
   @Setter
   @Autowired
   private SignServiceConfigurationProperties properties;
+
+  /** The registry bean for factories. */
+  @Setter
+  @Autowired
+  private HandlerFactoryRegistry handlerFactoryRegistry;
 
   /**
    * Creates the {@code signservice.Domain} bean representing the domain under which the IdP is running.
@@ -149,6 +152,17 @@ public class SignServiceConfiguration {
     return null;
   }
 
+  /**
+   * Creates a {@link DssProtocolHandler} with default configuration.
+   *
+   * @return a ProtocolHandler
+   */
+  @ConditionalOnMissingBean(name = "signservice.DssProtocolHandler")
+  @Bean("signservice.DssProtocolHandler")
+  public ProtocolHandler dssProtocolHandler() {
+    return new DssProtocolHandler();
+  }
+
   @Bean
   public AuditLogger auditLogger() {
     // TODO Change configuration logger type
@@ -163,6 +177,11 @@ public class SignServiceConfiguration {
       @Qualifier("signservice.MessageReplayChecker") final MessageReplayChecker messageReplayChecker,
       @Qualifier("signservice.DefaultCredential") final PkiCredential defaultCredential) throws Exception {
 
+    final SpringBeanLoader<ProtocolHandler> protocolBeanLoader =
+        new SpringBeanLoader<>(this.applicationContext, ProtocolHandler.class);
+    final SpringBeanLoader<AuthenticationHandler> authnBeanLoader =
+        new SpringBeanLoader<>(this.applicationContext, AuthenticationHandler.class);
+
     List<SignServiceEngine> engines = new ArrayList<>();
 
     for (final EngineConfigurationProperties ecp : this.properties.getEngines()) {
@@ -173,9 +192,9 @@ public class SignServiceConfiguration {
       conf.setSignServiceId(ecp.getSignServiceId());
 
       if (ecp.getCredential() != null) {
-      final PkiCredentialFactoryBean credentialFactory = new PkiCredentialFactoryBean(ecp.getCredential());
-      credentialFactory.afterPropertiesSet();
-      conf.setSignServiceCredential(credentialFactory.getObject());
+        final PkiCredentialFactoryBean credentialFactory = new PkiCredentialFactoryBean(ecp.getCredential());
+        credentialFactory.afterPropertiesSet();
+        conf.setSignServiceCredential(credentialFactory.getObject());
       }
       else {
         if (defaultCredential == null) {
@@ -187,23 +206,43 @@ public class SignServiceConfiguration {
 
       conf.setProcessingPaths(ecp.getProcessingPaths());
 
-      conf.setProtocolHandler(this.createProtocolHandler(ecp.getProtocolHandlerBean()));
-      conf.setAuthenticationHandler(new MockedAuthenticationHandler("MockedAuthnHandler"));  // TODO: change
+      // Protocol handler
+      //
+      final HandlerConfiguration<ProtocolHandler> protocolConf = ecp.getProtocol().getHandlerConfiguration();
+      if (protocolConf.needsDefaultConfigResolving()) {
+        protocolConf.resolveDefaultConfigRef((ref) -> {
+          if (!ref.startsWith("protocol.")) {
+            throw new IllegalArgumentException("Unknown default configuration reference: " + ref);
+          }
+          final String protocolRef = ref.substring("protocol.".length());
+          return Optional.ofNullable(this.properties.getDefaultHandlerConfig())
+              .map(SharedHandlerConfigurationProperties::getProtocol)
+              .map(c -> c.getHandlerConfiguration(protocolRef))
+              .orElse(null);
+        });
+      }
+      protocolConf.init();
+
+      final HandlerFactory<ProtocolHandler> protocolFactory = this.handlerFactoryRegistry.getFactory(
+          protocolConf.getFactoryClass(), ProtocolHandler.class);
+      conf.setProtocolHandler(protocolFactory.create(protocolConf, protocolBeanLoader));
+
+      // Authentication handler
+      //
+      final HandlerConfiguration<AuthenticationHandler> authnConf = ecp.getAuthn().getHandlerConfiguration();
+      if (authnConf.needsDefaultConfigResolving()) {
+        // TODO
+      }
+      authnConf.init();
+
+      final HandlerFactory<AuthenticationHandler> authnFactory = this.handlerFactoryRegistry.getFactory(
+          authnConf.getFactoryClass(), AuthenticationHandler.class);
+      conf.setAuthenticationHandler(authnFactory.create(authnConf, authnBeanLoader));
+
+
       conf.setKeyAndCertificateHandler(null); // TODO: change
       conf.setAuditLogger(this.auditLogger()); // TODO: change
-
-      final DefaultClientConfiguration clientConf = new DefaultClientConfiguration(ecp.getClient().getClientId());
-      if (ecp.getClient().getResponseUrls() != null) {
-        clientConf.setResponseUrls(ecp.getClient().getResponseUrls());
-      }
-      if (ecp.getClient().getCertificates() != null) {
-        final List<X509Certificate> certs = new ArrayList<>();
-        for (final Resource r : ecp.getClient().getCertificates()) {
-          certs.add(X509Utils.decodeCertificate(r));
-        }
-        clientConf.setTrustedCertificates(certs);
-      }
-      conf.setClientConfiguration(clientConf);
+      conf.setClientConfiguration(ecp.getClient());
 
 //      conf.init();
 
@@ -214,40 +253,6 @@ public class SignServiceConfiguration {
     }
 
     return engines;
-  }
-
-  /**
-   * The protocol handler is given to the engine configuration as a bean name. We can not be
-   * sure that the application context has loaded this bean yet. So we use a proxy to implement
-   * a lazy initialization.
-   *
-   * @param beanName the protocol handler bean name
-   * @return a protocol handler proxy
-   */
-  private ProtocolHandler createProtocolHandler(final String beanName) {
-
-    try {
-      return this.applicationContext.getBean(beanName, ProtocolHandler.class);
-    }
-    catch (final NoSuchBeanDefinitionException e) {
-      log.debug("The ProtocolHandler bean named '{}' is not yet created - creating a lazy proxy for the bean", beanName);
-    }
-
-    return (ProtocolHandler) Proxy.newProxyInstance(
-        this.getClass().getClassLoader(),
-        new Class[] { ProtocolHandler.class },
-        new InvocationHandler() {
-
-          private ProtocolHandler handler = null;
-
-          @Override
-          public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-            if (this.handler == null) {
-              this.handler = applicationContext.getBean(beanName, ProtocolHandler.class);
-            }
-            return method.invoke(this.handler, args);
-          }
-        });
   }
 
 }

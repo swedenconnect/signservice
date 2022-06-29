@@ -15,8 +15,10 @@
  */
 package se.swedenconnect.signservice.protocol;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 
+import se.swedenconnect.signservice.core.SignServiceHandler;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.engine.SignServiceError;
 import se.swedenconnect.signservice.session.SignServiceContext;
@@ -24,14 +26,7 @@ import se.swedenconnect.signservice.session.SignServiceContext;
 /**
  * A handler interface for decoding and encoding Sign request and response messages.
  */
-public interface ProtocolHandler {
-
-  /**
-   * Gets the name of this protocol handler instance.
-   *
-   * @return handler name
-   */
-  String getName();
+public interface ProtocolHandler extends SignServiceHandler {
 
   /**
    * Given a message (the HTTP servlet request) and the context the handler decodes the message into a
@@ -45,7 +40,9 @@ public interface ProtocolHandler {
    * @return a SignRequestMessage
    * @throws ProtocolException for decoding errors
    */
-  SignRequestMessage decodeRequest(final HttpServletRequest httpRequest, final SignServiceContext context)
+  @Nonnull
+  SignRequestMessage decodeRequest(
+      @Nonnull final HttpServletRequest httpRequest, @Nonnull final SignServiceContext context)
       throws ProtocolException;
 
   /**
@@ -61,8 +58,10 @@ public interface ProtocolHandler {
    * @return a SignResponseMessage
    * @throws ProtocolException if a response message cannot be created
    */
-  SignResponseMessage createSignResponseMessage(final SignServiceContext context,
-      final SignRequestMessage signRequestMessage) throws ProtocolException;
+  @Nonnull
+  SignResponseMessage createSignResponseMessage(
+      @Nonnull final SignServiceContext context, @Nonnull final SignRequestMessage signRequestMessage)
+      throws ProtocolException;
 
   /**
    * Encodes a response message so that it can be returned to the SignService application. The method will create a
@@ -73,7 +72,9 @@ public interface ProtocolHandler {
    * @return a HttpRequestMessage
    * @throws ProtocolException for encoding errors
    */
-  HttpRequestMessage encodeResponse(final SignResponseMessage responseMessage, final SignServiceContext context)
+  @Nonnull
+  HttpRequestMessage encodeResponse(
+      @Nonnull final SignResponseMessage responseMessage, @Nonnull final SignServiceContext context)
       throws ProtocolException;
 
   /**
@@ -83,6 +84,7 @@ public interface ProtocolHandler {
    * @param error the error to translate
    * @return a SignResponseResult
    */
-  SignResponseResult translateError(final SignServiceError error);
+  @Nonnull
+  SignResponseResult translateError(@Nonnull final SignServiceError error);
 
 }

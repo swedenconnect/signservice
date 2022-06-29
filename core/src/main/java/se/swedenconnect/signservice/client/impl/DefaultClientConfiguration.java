@@ -23,6 +23,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
+
 import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.swedenconnect.signservice.client.ClientConfiguration;
 import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
@@ -33,13 +37,19 @@ import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
 public class DefaultClientConfiguration implements ClientConfiguration {
 
   /** The client ID. */
-  private final String clientId;
+  private String clientId;
 
   /** The client certificate(s). */
   private List<X509Certificate> trustedCertificates;
 
   /** The registered client response URL:s. */
   private List<String> responseUrls;
+
+  /**
+   * Default constructor.
+   */
+  public DefaultClientConfiguration() {
+  }
 
   /**
    * Constructor.
@@ -52,14 +62,26 @@ public class DefaultClientConfiguration implements ClientConfiguration {
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public String getClientId() {
     return this.clientId;
   }
 
+  /**
+   * Assigns the client ID.
+   *
+   * @param clientId the client ID
+   */
+  public void setClientId(@Nonnull final String clientId) {
+    this.clientId = clientId;
+  }
+
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public List<X509Certificate> getTrustedCertificates() {
-    return this.trustedCertificates != null ? Collections.unmodifiableList(this.trustedCertificates) : null;
+    return this.trustedCertificates != null ? Collections.unmodifiableList(this.trustedCertificates)
+        : Collections.emptyList();
   }
 
   /**
@@ -67,12 +89,13 @@ public class DefaultClientConfiguration implements ClientConfiguration {
    *
    * @param trustedCertificates client certificates
    */
-  public void setTrustedCertificates(final List<X509Certificate> trustedCertificates) {
+  public void setTrustedCertificates(@Nonnull final List<X509Certificate> trustedCertificates) {
     this.trustedCertificates = trustedCertificates;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nullable
   public List<String> getResponseUrls() {
     return this.responseUrls != null ? Collections.unmodifiableList(this.responseUrls) : null;
   }
@@ -82,8 +105,20 @@ public class DefaultClientConfiguration implements ClientConfiguration {
    *
    * @param responseUrls response URL:s
    */
-  public void setResponseUrls(final List<String> responseUrls) {
+  public void setResponseUrls(@Nonnull final List<String> responseUrls) {
     this.responseUrls = responseUrls;
+  }
+
+  /**
+   * Should be invoked after all properties have been assigned.
+   *
+   * @throws Exception if the object has not been initialized correctly
+   */
+  @PostConstruct
+  public void init() throws Exception {
+    if (this.clientId == null) {
+      throw new IllegalArgumentException("clientId must be set");
+    }
   }
 
   /** {@inheritDoc} */

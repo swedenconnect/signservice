@@ -106,6 +106,12 @@
         <groupId>se.swedenconnect.security</groupId>
         <artifactId>credentials-support</artifactId>
         <version>1.2.2</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>    
 
       <dependency>
@@ -115,7 +121,7 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-
+      
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-commons</artifactId>

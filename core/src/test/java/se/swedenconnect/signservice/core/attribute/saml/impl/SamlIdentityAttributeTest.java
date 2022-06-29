@@ -48,6 +48,50 @@ public class SamlIdentityAttributeTest {
   }
 
   @Test
+  public void testSamlIdentityAttributeDefaults() {
+    final SamlIdentityAttribute<String> a = new SamlIdentityAttribute<>() {
+
+      @Override
+      public List<String> getValues() {
+        return null;
+      }
+
+      @Override
+      public String getValue() {
+        return null;
+      }
+
+      @Override
+      public boolean isMultiValued() {
+        return false;
+      }
+
+      @Override
+      public Class<String> getAttributeValueType() {
+        return null;
+      }
+
+      @Override
+      public String getIdentifier() {
+        return "id";
+      }
+
+      @Override
+      public String getFriendlyName() {
+        return null;
+      }
+
+      @Override
+      public String getNameFormat() {
+        return null;
+      }
+    };
+
+    Assertions.assertEquals("SAML", a.getScheme());
+    Assertions.assertEquals("id", a.getName());
+  }
+
+  @Test
   public void testUsageString() {
     StringSamlIdentityAttribute a = new StringSamlIdentityAttribute("id", "friendly", "value");
     a.setNameFormat("otherNameFormat");
