@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.xpath.XPathExpressionException;
@@ -354,12 +355,12 @@ class DssSignRequestMessage implements SignRequestMessage {
 
     // RequestedSignatureAlgorithm
     //
-    final SignatureRequirements signatureRequirements = this.getSignatureRequirements();
-    if (!Optional.ofNullable(signatureRequirements).map(SignatureRequirements::getSignatureAlgorithm)
-        .filter(StringUtils::isNotBlank).isPresent()) {
-      final String msg = "RequestedSignatureAlgorithm is missing - this field is required";
-      log.info("{} [request-id: '{}']", msg, this.signRequest.getRequestID());
-      throw new ProtocolException(msg);
+    try {
+      this.getSignatureRequirements();
+    }
+    catch (final DssProtocolException e) {
+      log.info("{} [request-id: '{}']", e.getMessage(), this.signRequest.getRequestID());
+      throw new ProtocolException(e.getMessage());
     }
 
     // SignMessage is optional ...
@@ -494,11 +495,13 @@ class DssSignRequestMessage implements SignRequestMessage {
     }
     authnRequirements.setAuthnProfile(extension.getAuthnProfile());
     authnRequirements.setAuthnServiceID(Optional.ofNullable(extension.getIdentityProvider())
-        .map(NameIDType::getValue).orElse(null));
+        .map(NameIDType::getValue)
+        .orElse(null));
 
     final CertRequestProperties certRequestProperties = extension.getCertRequestProperties();
     if (certRequestProperties != null && certRequestProperties.isSetAuthnContextClassRefs()) {
-      authnRequirements.setAuthnContextIdentifiers(certRequestProperties.getAuthnContextClassRefs().stream()
+      authnRequirements.setAuthnContextIdentifiers(certRequestProperties.getAuthnContextClassRefs()
+          .stream()
           .map(s -> new SimpleAuthnContextIdentifier(s))
           .collect(Collectors.toList()));
     }
@@ -533,11 +536,13 @@ class DssSignRequestMessage implements SignRequestMessage {
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public SignatureRequirements getSignatureRequirements() {
     return Optional.ofNullable(this.signRequest.getSignRequestExtension())
         .map(SignRequestExtension::getRequestedSignatureAlgorithm)
+        .filter(StringUtils::isNotBlank)
         .map(a -> new DefaultSignatureRequirements(a))
-        .orElse(null);
+        .orElseThrow(() -> new DssProtocolException("RequestedSignatureAlgorithm is missing - this field is required"));
   }
 
   /** {@inheritDoc} */
@@ -575,7 +580,8 @@ class DssSignRequestMessage implements SignRequestMessage {
                 new DefaultIdentityAttributeIdentifier("SAML", samlAttr.getValue(), null);
             sources.put(Integer.valueOf(samlAttr.getOrder()), sa);
           }
-          cam.setSources(sources.entrySet().stream()
+          cam.setSources(sources.entrySet()
+              .stream()
               .sorted(Map.Entry.comparingByKey())
               .map(Map.Entry::getValue)
               .collect(Collectors.toList()));

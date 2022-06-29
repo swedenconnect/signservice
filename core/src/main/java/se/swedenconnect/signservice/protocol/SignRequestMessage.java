@@ -20,7 +20,7 @@ import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.List;
-
+import javax.annotation.Nonnull;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.MessageConditions;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
@@ -133,6 +133,7 @@ public interface SignRequestMessage extends Serializable {
    *
    * @return signature requirements
    */
+  @Nonnull
   SignatureRequirements getSignatureRequirements();
 
   /**

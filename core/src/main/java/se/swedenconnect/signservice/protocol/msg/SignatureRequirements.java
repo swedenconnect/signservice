@@ -16,6 +16,7 @@
 package se.swedenconnect.signservice.protocol.msg;
 
 import java.io.Serializable;
+import javax.annotation.Nonnull;
 
 /**
  * Represents the signature requirements of a sign request message.
@@ -25,8 +26,9 @@ public interface SignatureRequirements extends Serializable {
   /**
    * Gets the requested signature algorithm.
    *
-   * @return the signature algorithm URI, or null if none has been specified
+   * @return the signature algorithm URI
    */
+  @Nonnull
   String getSignatureAlgorithm();
 
 }
