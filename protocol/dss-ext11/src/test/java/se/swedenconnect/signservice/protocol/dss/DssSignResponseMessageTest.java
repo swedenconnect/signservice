@@ -62,23 +62,16 @@ public class DssSignResponseMessageTest {
   }
 
   @Test
-  public void testCtorNullConfig() {
-    Assertions.assertThrows(NullPointerException.class, () -> {
-      new DssSignResponseMessage(null, signRequest);
-    });
-  }
-
-  @Test
   public void testCtorNullRequest() {
     Assertions.assertThrows(NullPointerException.class, () -> {
-      new DssSignResponseMessage(new DssConfiguration(), null);
+      new DssSignResponseMessage(null, null);
     });
   }
 
   @Test
   public void testIncludeSignMessage() {
-    final DssConfiguration conf = new DssConfiguration();
-    conf.setIncludeRequestMessage(true);
+    final DssSignResponseMessage.ResponseConfiguration conf = new DssSignResponseMessage.ResponseConfiguration();
+    conf.includeRequestMessage = true;
     final DssSignResponseMessage response = new DssSignResponseMessage(conf, signRequest);
 
     Assertions.assertTrue(
@@ -87,7 +80,7 @@ public class DssSignResponseMessageTest {
 
   @Test
   public void testSetSignErrorResult() {
-    final DssSignResponseMessage response = new DssSignResponseMessage(new DssConfiguration(), signRequest);
+    final DssSignResponseMessage response = new DssSignResponseMessage(null, signRequest);
 
     final DefaultIdentityAssertion identityAssertion = new DefaultIdentityAssertion();
     identityAssertion.setIdentifier("abc");
@@ -120,7 +113,7 @@ public class DssSignResponseMessageTest {
     final X509Certificate cert = X509Utils.decodeCertificate(
         DssSignResponseMessageTest.class.getResourceAsStream("/cert1.crt"));
 
-    final DssSignResponseMessage response = new DssSignResponseMessage(new DssConfiguration(), signRequest);
+    final DssSignResponseMessage response = new DssSignResponseMessage(null, signRequest);
 
     response.setSignatureCertificateChain(Arrays.asList(cert));
 
@@ -129,7 +122,7 @@ public class DssSignResponseMessageTest {
 
   @Test
   public void testSignTasks() {
-    final DssSignResponseMessage response = new DssSignResponseMessage(new DssConfiguration(), signRequest);
+    final DssSignResponseMessage response = new DssSignResponseMessage(null, signRequest);
 
     final DefaultCompletedSignatureTask task = new DefaultCompletedSignatureTask();
     task.setProcessingRulesUri("uri");
@@ -149,7 +142,7 @@ public class DssSignResponseMessageTest {
 
   @Test
   public void testSignTasksNull() {
-    final DssSignResponseMessage response = new DssSignResponseMessage(new DssConfiguration(), signRequest);
+    final DssSignResponseMessage response = new DssSignResponseMessage(null, signRequest);
 
     response.setSignatureTasks(Collections.emptyList());
     Assertions.assertNull(response.getSignatureTasks());

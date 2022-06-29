@@ -19,6 +19,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
+import se.swedenconnect.signservice.core.SignServiceHandler;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
@@ -44,15 +45,7 @@ import se.swedenconnect.signservice.session.SignServiceContext;
  * implemented authentication scheme the {@code resumeAuthentication} may have to be invoked several times.
  * </p>
  */
-public interface AuthenticationHandler {
-
-  /**
-   * Gets the name of the handler.
-   *
-   * @return the handler name
-   */
-  @Nonnull
-  String getName();
+public interface AuthenticationHandler extends SignServiceHandler {
 
   /**
    * Initiates authentication of the user. Depending on the authentication scheme the return result object may contain

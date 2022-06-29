@@ -18,6 +18,7 @@ package se.swedenconnect.signservice.signature.impl;
 import java.util.Arrays;
 import java.util.Objects;
 
+import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
 import se.swedenconnect.signservice.signature.CompletedSignatureTask;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 
@@ -91,6 +92,7 @@ public class DefaultCompletedSignatureTask extends DefaultRequestedSignatureTask
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
@@ -101,6 +103,7 @@ public class DefaultCompletedSignatureTask extends DefaultRequestedSignatureTask
 
   /** {@inheritDoc} */
   @Override
+  @GeneratedMethod
   public boolean equals(final Object obj) {
     if (this == obj) {
       return true;

@@ -62,7 +62,7 @@ public class DefaultClientConfigurationTest {
   public void testUsage() throws CertificateException {
     final DefaultClientConfiguration c1 = new DefaultClientConfiguration("clientID");
     Assertions.assertEquals("clientID", c1.getClientId());
-    Assertions.assertNull(c1.getTrustedCertificates());
+    Assertions.assertTrue(c1.getTrustedCertificates().isEmpty());
     Assertions.assertNull(c1.getResponseUrls());
     Assertions.assertEquals("client-id='clientID', trusted-certificates=[], response-urls=[]", c1.toString());
 

@@ -50,7 +50,7 @@ public class DssProtocolHandlerTest {
   @Test
   public void testName() {
     final DssProtocolHandler protocolHandler = new DssProtocolHandler();
-    Assertions.assertEquals(DssProtocolHandler.DEFAULT_NAME, protocolHandler.getName());
+    Assertions.assertEquals(DssProtocolHandler.class.getSimpleName(), protocolHandler.getName());
 
     protocolHandler.setName("dummy");
     Assertions.assertEquals("dummy", protocolHandler.getName());
@@ -253,8 +253,6 @@ public class DssProtocolHandlerTest {
   @Test
   public void testCreateResponse() throws Exception {
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
-    Mockito.when(context.get(DssProtocolHandler.CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class))
-        .thenReturn(new DssConfiguration());
 
     final DssProtocolHandler protocolHandler = new DssProtocolHandler();
     final DssSignRequestMessage request = this.getTestRequest();
@@ -272,8 +270,6 @@ public class DssProtocolHandlerTest {
   @Test
   public void testCreateResponseMissingSignRequestField() throws Exception {
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
-    Mockito.when(context.get(DssProtocolHandler.CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class))
-        .thenReturn(new DssConfiguration());
 
     final DssSignRequestMessage request = Mockito.mock(DssSignRequestMessage.class);
     Mockito.when(request.getVersion()).thenReturn(ProtocolVersion.valueOf("1.4"));
@@ -303,11 +299,8 @@ public class DssProtocolHandlerTest {
   public void testEncodeResponse() throws Exception {
 
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
-    Mockito.when(context.get(DssProtocolHandler.CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class))
-        .thenReturn(null);
 
     final DssProtocolHandler protocolHandler = new DssProtocolHandler();
-    protocolHandler.init();
 
     final DssSignRequestMessage request = this.getTestRequest();
     final DssSignResponseMessage response =
@@ -328,11 +321,8 @@ public class DssProtocolHandlerTest {
   public void testSignNoResult() throws Exception {
 
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
-    Mockito.when(context.get(DssProtocolHandler.CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class))
-        .thenReturn(null);
 
     final DssProtocolHandler protocolHandler = new DssProtocolHandler();
-    protocolHandler.init();
 
     final DssSignRequestMessage request = this.getTestRequest();
     final DssSignResponseMessage response =
@@ -349,8 +339,6 @@ public class DssProtocolHandlerTest {
   public void testEncodeResponseNotSigned() throws Exception {
 
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
-    Mockito.when(context.get(DssProtocolHandler.CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class))
-        .thenReturn(null);
 
     final DssProtocolHandler protocolHandler = new DssProtocolHandler();
     final DssSignRequestMessage request = this.getTestRequest();
@@ -366,8 +354,6 @@ public class DssProtocolHandlerTest {
   @Test
   public void testEncodeMissingDestination() throws Exception {
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
-    Mockito.when(context.get(DssProtocolHandler.CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class))
-        .thenReturn(null);
 
     final DssProtocolHandler protocolHandler = new DssProtocolHandler();
     final DssSignRequestMessage request = this.getTestRequest();
@@ -405,9 +391,6 @@ public class DssProtocolHandlerTest {
     Mockito.when(request.getParameter("EidSignRequest")).thenReturn(encodedRequest);
 
     final DssProtocolHandler protocolHandler = new DssProtocolHandler();
-    protocolHandler.setConfiguration(new DssConfiguration());
-    protocolHandler.init();
-
     return (DssSignRequestMessage) protocolHandler.decodeRequest(request, context);
   }
 

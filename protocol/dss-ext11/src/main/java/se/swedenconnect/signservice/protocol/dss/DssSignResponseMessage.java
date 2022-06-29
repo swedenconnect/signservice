@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.signservice.protocol.dss;
 
+import java.io.Serializable;
 import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -105,7 +106,7 @@ class DssSignResponseMessage implements SignResponseMessage {
   private static XMLSignatureLocation xmlSignatureLocation;
 
   /** Configuration object used when building a response. */
-  private DssConfiguration configuration;
+  private ResponseConfiguration configuration;
 
   /** The JAXB representation of the SignResponse. */
   private SignResponseWrapper signResponse;
@@ -145,8 +146,8 @@ class DssSignResponseMessage implements SignResponseMessage {
    * @param configuration the protocol configuration
    * @param signRequest the corresponding SignRequest
    */
-  public DssSignResponseMessage(final DssConfiguration configuration, final DssSignRequestMessage signRequest) {
-    this.configuration = Objects.requireNonNull(configuration, "configuration must not be null");
+  public DssSignResponseMessage(final ResponseConfiguration configuration, final DssSignRequestMessage signRequest) {
+    this.configuration = Optional.ofNullable(configuration).orElseGet(() -> new ResponseConfiguration());
     Objects.requireNonNull(signRequest, "signRequest must not be null");
 
     final ProtocolVersion version = signRequest.getVersion();
@@ -165,7 +166,7 @@ class DssSignResponseMessage implements SignResponseMessage {
 
     // Should we include the encoded SignRequest in the response message?
     //
-    if (this.configuration.isIncludeRequestMessage() || version.compareTo(VERSION_1_1) <= 0) {
+    if (this.configuration.includeRequestMessage || version.compareTo(VERSION_1_1) <= 0) {
       this.setSignRequestMessage(signRequest);
     }
   }
@@ -443,7 +444,7 @@ class DssSignResponseMessage implements SignResponseMessage {
     contextInfo.setAssertionRef(signerAuthnInfo.getIdentityAssertion().getIdentifier());
 
     // Assertion ...
-    if (this.configuration.isIncludeAssertion()) {
+    if (this.configuration.includeAssertion) {
       final byte[] encodedAssertion = signerAuthnInfo.getIdentityAssertion().getEncodedAssertion();
       if (encodedAssertion != null) {
         final SamlAssertions sa = new SamlAssertions();
@@ -607,6 +608,23 @@ class DssSignResponseMessage implements SignResponseMessage {
       log.info("Failed to marshall SignResponse message", e);
       return "-- Marshalling error --";
     }
+  }
+
+  /**
+   * Configuration for response messages.
+   */
+  static class ResponseConfiguration implements Serializable {
+
+    private static final long serialVersionUID = 288455638407072741L;
+
+    /** Setting that tells whether SAML assertions should be included in the response messages. */
+    public boolean includeAssertion = true;
+
+    /**
+     * Setting that tells whether to include the request message in the response messages created. For 1.1 version and
+     * below this will always be included, but in greater versions the field is optional.
+     */
+    public boolean includeRequestMessage = false;
   }
 
 }

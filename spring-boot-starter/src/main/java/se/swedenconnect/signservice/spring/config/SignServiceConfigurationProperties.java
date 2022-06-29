@@ -51,6 +51,11 @@ public class SignServiceConfigurationProperties implements InitializingBean {
   private PkiCredentialConfigurationProperties defaultCredential;
 
   /**
+   * Default handler configuration. Used by the handler instances configured as part of the engine configuration.
+   */
+  private SharedHandlerConfigurationProperties defaultHandlerConfig;
+
+  /**
    * A list of engine configurations.
    */
   private List<EngineConfigurationProperties> engines;

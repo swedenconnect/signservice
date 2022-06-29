@@ -15,7 +15,13 @@ signservice:
     alias: signservice
     type: JKS
     password: secret
-    key-password: secret
+    key-password: secret  
+  default-handler-config:
+    protocol:
+      dss:
+        name: "DssProtocolHandler"
+        include-assertion: true
+        include-request-message: true        
   engines:
   - name: "Sandbox"
     processing-paths:
@@ -23,9 +29,16 @@ signservice:
     sign-service-id: https://signservice.digg.se
     client:
       client-id: https://eid2cssp.3xasecurity.com/sign
-      certificates:
+      trusted-certificates:
       - classpath:clients/sandbox.crt
-    protocol-handler-bean: "signservice.DssProtocolHandler"  
+    protocol:
+      dss:
+        include-request-message: false
+        default-config-ref: protocol.dss
+    authn:
+      mock:
+        active: true
+        name: "MockedAuthenticationHandler"
 
 #
 # Logging

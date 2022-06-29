@@ -17,7 +17,8 @@ package se.swedenconnect.signservice.protocol.dss;
 
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBException;
 
@@ -29,7 +30,7 @@ import se.idsec.signservice.xml.DOMUtils;
 import se.idsec.signservice.xml.InternalXMLException;
 import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.dss_1_0.SignRequest;
-import se.swedenconnect.signservice.client.ClientConfiguration;
+import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.core.http.impl.DefaultHttpRequestMessage;
 import se.swedenconnect.signservice.engine.SignServiceError;
@@ -46,24 +47,13 @@ import se.swedenconnect.signservice.session.SignServiceContext;
  * Extension for Federated Central Signing Services</a>.
  */
 @Slf4j
-public class DssProtocolHandler implements ProtocolHandler {
-
-  /** The default handler name. */
-  public static final String DEFAULT_NAME = "DSS extensions Protocol Handler";
+public class DssProtocolHandler extends AbstractSignServiceHandler implements ProtocolHandler {
 
   /** The only binding that we support. */
   public static final String BINDING = "POST/XML/1.0";
 
-  /** The context key for finding a client specific DSS configuration. */
-  public static final String CLIENT_CONFIG_CONTEXT_KEY =
-      String.format("%s.%s.%s", ClientConfiguration.class.getPackageName(),
-          ClientConfiguration.class.getSimpleName(), DssConfiguration.class.getSimpleName());
-
-  /** The handler name. */
-  private String name;
-
-  /** The protocol handler configuration. */
-  private DssConfiguration configuration;
+  /** The configuration for response messages. */
+  private DssSignResponseMessage.ResponseConfiguration responseConfiguration;
 
   /**
    * Default constructor.
@@ -72,34 +62,21 @@ public class DssProtocolHandler implements ProtocolHandler {
   }
 
   /**
-   * Initializes the bean.
-   */
-  @PostConstruct
-  public void init() {
-    if (this.configuration == null) {
-      log.info("No DSS protocol configuration supplied, using default configuration");
-      this.configuration = new DssConfiguration();
-    }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public String getName() {
-    return Optional.ofNullable(this.name).orElse(DEFAULT_NAME);
-  }
-
-  /**
-   * Assigns the protocol handler name. If none is assigned, {@value #DEFAULT_NAME} will be used.
+   * Assigns the response message configuration
    *
-   * @param name the name
+   * @param responseConfiguration the response message configuration
    */
-  public void setName(final String name) {
-    this.name = name;
+  public void setResponseConfiguration(
+      @Nullable final DssSignResponseMessage.ResponseConfiguration responseConfiguration) {
+    this.responseConfiguration = Optional.ofNullable(responseConfiguration)
+        .orElseGet(() -> new DssSignResponseMessage.ResponseConfiguration());
   }
 
   /** {@inheritDoc} */
   @Override
-  public SignRequestMessage decodeRequest(final HttpServletRequest httpRequest, final SignServiceContext context)
+  @Nonnull
+  public SignRequestMessage decodeRequest(
+      @Nonnull final HttpServletRequest httpRequest, @Nonnull final SignServiceContext context)
       throws ProtocolException {
 
     // We only handle POST ...
@@ -167,8 +144,10 @@ public class DssProtocolHandler implements ProtocolHandler {
 
   /** {@inheritDoc} */
   @Override
-  public SignResponseMessage createSignResponseMessage(final SignServiceContext context,
-      final SignRequestMessage signRequestMessage) throws ProtocolException {
+  @Nonnull
+  public SignResponseMessage createSignResponseMessage(
+      @Nonnull final SignServiceContext context, @Nonnull final SignRequestMessage signRequestMessage)
+      throws ProtocolException {
 
     if (!DssSignRequestMessage.class.isInstance(signRequestMessage)) {
       final String msg = "Invalid call - Supplied request message must be of type DssSignRequestMessage";
@@ -177,17 +156,8 @@ public class DssProtocolHandler implements ProtocolHandler {
     }
     final DssSignRequestMessage request = DssSignRequestMessage.class.cast(signRequestMessage);
 
-    // Normally the handler is configured to function for all clients, but a client configuration
-    // may be setup so that the client has specific requirements on the protocol handler. In these
-    // cases this is assigned in the context.
-    //
-    DssConfiguration config = context.get(CLIENT_CONFIG_CONTEXT_KEY, DssConfiguration.class);
-    if (config == null) {
-      config = this.getConfiguration();
-    }
-
     try {
-      return new DssSignResponseMessage(config, request);
+      return new DssSignResponseMessage(this.responseConfiguration, request);
     }
     catch (final NullPointerException | IllegalArgumentException e) {
       final String msg = String.format("Cannot create DssSignResponseMessage - %s", e.getMessage());
@@ -198,7 +168,9 @@ public class DssProtocolHandler implements ProtocolHandler {
 
   /** {@inheritDoc} */
   @Override
-  public HttpRequestMessage encodeResponse(final SignResponseMessage responseMessage, final SignServiceContext context)
+  @Nonnull
+  public HttpRequestMessage encodeResponse(
+      @Nonnull final SignResponseMessage responseMessage, @Nonnull final SignServiceContext context)
       throws ProtocolException {
 
     if (responseMessage.getDestinationUrl() == null) {
@@ -216,30 +188,9 @@ public class DssProtocolHandler implements ProtocolHandler {
 
   /** {@inheritDoc} */
   @Override
-  public SignResponseResult translateError(final SignServiceError error) {
+  @Nonnull
+  public SignResponseResult translateError(@Nonnull final SignServiceError error) {
     return new DssSignResponseResult(error);
-  }
-
-  /**
-   * Assigns the DSS protocol configuration.
-   *
-   * @param configuration the configuration
-   */
-  public void setConfiguration(final DssConfiguration configuration) {
-    this.configuration = configuration;
-  }
-
-  /**
-   * Gets the configuration to use.
-   *
-   * @return the configuration
-   */
-  private DssConfiguration getConfiguration() {
-    if (this.configuration == null) {
-      log.info("No DSS protocol configuration supplied, using default configuration");
-      this.configuration = new DssConfiguration();
-    }
-    return this.configuration;
   }
 
 }
