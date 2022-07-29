@@ -19,6 +19,9 @@ package se.swedenconnect.signservice.certificate.cmc;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.xml.security.signature.XMLSignature;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -26,6 +29,7 @@ import se.idsec.utils.printcert.PrintCertificate;
 import se.swedenconnect.ca.cmc.api.client.CMCClient;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.credential.PkiCredential;
@@ -46,6 +50,7 @@ import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandIn
 import se.swedenconnect.signservice.certificate.cmc.testutils.CMCApiFactory;
 import se.swedenconnect.signservice.certificate.cmc.testutils.TestCMCHttpConnector;
 import se.swedenconnect.signservice.certificate.cmc.testutils.TestCredentials;
+import se.swedenconnect.signservice.certificate.cmc.testutils.ca.BadCAService;
 import se.swedenconnect.signservice.certificate.cmc.testutils.ca.TestCA;
 import se.swedenconnect.signservice.certificate.cmc.testutils.ca.TestCAHolder;
 import se.swedenconnect.signservice.certificate.cmc.testutils.ca.TestServices;
@@ -62,6 +67,8 @@ import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificat
 import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 
+import java.security.Security;
+import java.security.cert.CertificateException;
 import java.security.spec.ECGenParameterSpec;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -87,6 +94,10 @@ class CMCKeyAndCertificateHandlerTest {
 
   @BeforeAll
   static void init() {
+    if (Security.getProvider("BC") == null) {
+      Security.insertProviderAt(new BouncyCastleProvider(), 2);
+    }
+
     log.info("Simple key and certificate handler tests");
     keyProvider = new DefaultSignServiceSigningKeyProvider(
       new OnDemandInMemoryRSAKeyProvider(2048),
@@ -100,7 +111,8 @@ class CMCKeyAndCertificateHandlerTest {
         CertAttributes.C.getId())
         && value.equalsIgnoreCase("SE"));
     TestServices.addCa(TestCA.INSTANCE1);
-    //TestServices.addCa(TestCA.ECDSA_CA);
+    TestServices.addCa(TestCA.RSA_PSS_CA);
+    TestServices.addCa(TestCA.ECDSA_CA);
   }
 
   @Test
@@ -126,10 +138,40 @@ class CMCKeyAndCertificateHandlerTest {
   void obtainSigningCertificate() throws Exception {
 
     TestCAHolder caHolder = TestServices.getTestCAs().get(TestCA.INSTANCE1);
-    CMCClient cmcClient = getCMCClient(caHolder.getCscaService());
-    cmcClient.setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(caHolder.getCscaService())));
+    CMCClient rsaCaCmcClient = getCMCClient(caHolder.getCscaService());
+    rsaCaCmcClient.setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(caHolder.getCscaService())));
     CMCKeyAndCertificateHandler keyAndCertificateHandler = new CMCKeyAndCertificateHandler(keyProvider,
-      defaultConfiguration, algorithmRegistry, cmcClient, attributeMapper);
+      defaultConfiguration, algorithmRegistry, rsaCaCmcClient, attributeMapper);
+    keyAndCertificateHandler.setCertificatePolicy(new CertificatePolicyModel(false, new ASN1ObjectIdentifier("1.2.3.4.5.6.7.8.9")));
+    log.info("Created CMC key and certificate handler");
+
+    CMCClient badRsaCaCmcClient = getCMCClient(caHolder.getCscaService());
+    badRsaCaCmcClient.setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getBadCMCApi(caHolder.getCscaService())));
+    CMCKeyAndCertificateHandler badKeyAndCertificateHandler = new CMCKeyAndCertificateHandler(keyProvider,
+      defaultConfiguration, algorithmRegistry, badRsaCaCmcClient, attributeMapper);
+    log.info("Created bad CMC key and certificate handler");
+
+    TestCAHolder rsaPssCaHolder = TestServices.getTestCAs().get(TestCA.RSA_PSS_CA);
+    CMCClient rsaPssCaCmcClient = getCMCClient(rsaPssCaHolder.getCscaService());
+    rsaPssCaCmcClient.setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(rsaPssCaHolder.getCscaService())));
+    CMCKeyAndCertificateHandler rsaPssCaKeyAndCertificateHandler = new CMCKeyAndCertificateHandler(keyProvider,
+      defaultConfiguration, algorithmRegistry, rsaPssCaCmcClient, attributeMapper);
+    log.info("Created RSA PSS CA CMC key and certificate handler");
+
+    TestCAHolder ecCaHolder = TestServices.getTestCAs().get(TestCA.ECDSA_CA);
+    CMCClient ecCaCmcClient = getCMCClient(ecCaHolder.getCscaService());
+    ecCaCmcClient.setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(ecCaHolder.getCscaService())));
+    CMCKeyAndCertificateHandler ecCaKeyAndCertificateHandler = new CMCKeyAndCertificateHandler(keyProvider,
+      defaultConfiguration, algorithmRegistry, ecCaCmcClient, attributeMapper);
+    log.info("Created ECDSA CA CMC key and certificate handler");
+
+    CMCClient badCaCmcClient = getCMCClient(ecCaHolder.getCscaService());
+    badCaCmcClient.setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(
+      new BadCAService(TestServices.getTestCAs().get(TestCA.INSTANCE1).getCscaService()))));
+    CMCKeyAndCertificateHandler badCaKeyAndCertificateHandler = new CMCKeyAndCertificateHandler(keyProvider,
+      defaultConfiguration, algorithmRegistry, badCaCmcClient, attributeMapper);
+    log.info("Created ECDSA CA CMC key and certificate handler");
+
 
     keyAndCertificateHandler.checkRequirements(getCheckRequirementsRequest(CertificateType.PKC, "client-01"), null);
     log.info("Testing support for PKC certificates successful");
@@ -138,12 +180,63 @@ class CMCKeyAndCertificateHandlerTest {
         null));
     log.info("Caught exception when checking requirements: {}", e1.toString());
 
-    testKeyAndCertGeneration("Normal ECDSA test",
+    testKeyAndCertGeneration("Normal ECDSA test - RSA CA",
       keyAndCertificateHandler, XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
       "client01", CertificateType.PKC,
       null, TestData.defaultAttributeMappings, null);
 
+    testKeyAndCertGeneration("Normal ECDSA test - RSA-PSS CA",
+      rsaPssCaKeyAndCertificateHandler, XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
+      "client01", CertificateType.PKC,
+      null, TestData.defaultAttributeMappings, null);
+
+    testKeyAndCertGeneration("Normal ECDSA test - EC CA",
+      ecCaKeyAndCertificateHandler, XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
+      "client01", CertificateType.PKC,
+      null, TestData.defaultAttributeMappings, null);
+
+    testKeyAndCertGeneration("Normal RSA test",
+      ecCaKeyAndCertificateHandler, XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256,
+      "client01", CertificateType.PKC,
+      null, TestData.defaultAttributeMappings, null);
+
+    testKeyAndCertGeneration("Normal RSA-PSS test",
+      ecCaKeyAndCertificateHandler, XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1,
+      "client01", CertificateType.PKC,
+      null, TestData.defaultAttributeMappings, null);
+
+    testKeyAndCertGeneration("SAN and Subj Directory Attributes test",
+      ecCaKeyAndCertificateHandler, XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
+      "client01", CertificateType.PKC,
+      null, TestData.allAttributeMappings, null);
+
+    testKeyAndCertGeneration("SAN and Subj Directory Attributes test",
+      ecCaKeyAndCertificateHandler, "Bad algorithm",
+      "client01", CertificateType.PKC,
+      null, TestData.allAttributeMappings, InvalidRequestException.class);
+
+    testKeyAndCertGeneration("SAN and Subj Directory Attributes test",
+      keyAndCertificateHandler, XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
+      "client01", CertificateType.QC,
+      null, TestData.allAttributeMappings, InvalidRequestException.class);
+
+    testKeyAndCertGeneration("SAN and Subj Directory Attributes test",
+      keyAndCertificateHandler, XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
+      "client01", CertificateType.PKC,
+      null, null, CertificateException.class);
+
+    testKeyAndCertGeneration("Bad CMC Request validator",
+      badKeyAndCertificateHandler, XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
+      "client01", CertificateType.PKC,
+      null, TestData.defaultAttributeMappings, CertificateException.class);
+
+    testKeyAndCertGeneration("Bad CMC Request validator",
+      badCaKeyAndCertificateHandler, XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
+      "client01", CertificateType.PKC,
+      null, TestData.defaultAttributeMappings, CertificateException.class);
+
   }
+
 
   void testKeyAndCertGeneration(String message, KeyAndCertificateHandler keyAndCertificateHandler,
     String signServiceSignAlo,
@@ -293,4 +386,5 @@ class CMCKeyAndCertificateHandlerTest {
     String identifier;
     String friendlyName;
   }
+
 }

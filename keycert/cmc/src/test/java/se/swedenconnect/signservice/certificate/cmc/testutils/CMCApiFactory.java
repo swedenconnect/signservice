@@ -16,15 +16,21 @@
 
 package se.swedenconnect.signservice.certificate.cmc.testutils;
 
+import lombok.Getter;
+import org.bouncycastle.cms.CMSSignedData;
 import se.swedenconnect.ca.cmc.api.CMCCaApi;
 import se.swedenconnect.ca.cmc.api.CMCRequestParser;
 import se.swedenconnect.ca.cmc.api.CMCResponseFactory;
+import se.swedenconnect.ca.cmc.api.CMCResponseParser;
 import se.swedenconnect.ca.cmc.api.impl.DefaultCMCCaApi;
+import se.swedenconnect.ca.cmc.auth.CMCReplayChecker;
 import se.swedenconnect.ca.cmc.auth.impl.DefaultCMCReplayChecker;
 import se.swedenconnect.ca.cmc.auth.impl.DefaultCMCValidator;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
 
+import java.io.IOException;
 import java.security.KeyPair;
+import java.security.cert.CertificateEncodingException;
 
 /**
  * Description
@@ -35,7 +41,7 @@ import java.security.KeyPair;
 public class CMCApiFactory {
 
   static CMCResponseFactory cmcResponseFactory;
-  static CMCRequestParser cmcRequestParser;
+  @Getter static CMCRequestParser cmcRequestParser;
 
   static {
     try {
@@ -44,7 +50,7 @@ public class CMCApiFactory {
         TestCredentials.cMCCaSignerCertificate);
       cmcResponseFactory = new CMCResponseFactory(caCmcSigner.getSignerChain(), caCmcSigner.getContentSigner());
       cmcRequestParser = new CMCRequestParser(new DefaultCMCValidator(TestCredentials.cMCClientSignerCertificate),
-        new DefaultCMCReplayChecker());
+        cmsSignedData -> {});
     }
     catch (Exception ex) {
       ex.printStackTrace();
@@ -53,6 +59,11 @@ public class CMCApiFactory {
 
   public static CMCCaApi getCMCApi(CAService ca) {
     return new DefaultCMCCaApi(ca, cmcRequestParser, cmcResponseFactory);
+  }
+
+  public static CMCCaApi getBadCMCApi(CAService ca) throws CertificateEncodingException {
+    CMCRequestParser badCmcReqParser =  new CMCRequestParser(new DefaultCMCValidator(TestCredentials.cMCCaSignerCertificate), cmsSignedData -> {});
+    return new DefaultCMCCaApi(ca, badCmcReqParser, cmcResponseFactory);
   }
 
 }

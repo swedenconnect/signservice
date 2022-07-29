@@ -40,7 +40,7 @@ public enum TestCA {
     TestServices.rsa2048kp02,
     CAAlgorithmRegistry.ALGO_ID_SIGNATURE_RSA_SHA256),
 
-  RA_CA(
+  RSA_PSS_CA(
     "rsa-pss-ca",
     "XB",
     "XB RSA PSS Test CA",

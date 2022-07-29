@@ -16,11 +16,16 @@
 
 package se.swedenconnect.signservice.certificate.cmc.testutils;
 
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.cmc.api.CMCCaApi;
+import se.swedenconnect.ca.cmc.api.CMCRequestParser;
+import se.swedenconnect.ca.cmc.api.CMCResponseParser;
 import se.swedenconnect.ca.cmc.api.client.CMCClientHttpConnector;
 import se.swedenconnect.ca.cmc.api.client.CMCHttpResponseData;
+import se.swedenconnect.ca.cmc.api.data.CMCRequest;
 import se.swedenconnect.ca.cmc.api.data.CMCResponse;
 
+import java.io.IOException;
 import java.net.URL;
 
 /**
@@ -30,9 +35,14 @@ import java.net.URL;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
+@Slf4j
 public class TestCMCHttpConnector implements CMCClientHttpConnector {
 
   private final CMCCaApi cmcCaApi;
+  CMCResponseParser cmcResponseParser;
+
+  static {
+  }
 
   public TestCMCHttpConnector(CMCCaApi cmcCaApi) {
     this.cmcCaApi = cmcCaApi;
@@ -40,7 +50,17 @@ public class TestCMCHttpConnector implements CMCClientHttpConnector {
 
   /** {@inheritDoc} */
   @Override public CMCHttpResponseData sendCmcRequest(final byte[] cmcRequestBytes, final URL requestUrl, final int connectTimeout, final int readTimeout) {
+
+    CMCRequest cmcRequest;
+    try {
+      cmcRequest = CMCApiFactory.getCmcRequestParser().parseCMCrequest(cmcRequestBytes);
+      log.debug("Sending CMC request from test CMC connector:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, false, true));
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
     CMCResponse cmcResponse = cmcCaApi.processRequest(cmcRequestBytes);
+    log.debug("Obtained CMC response from CA:\n{}", CMCDataPrint.printCMCResponse(cmcResponse, false));
     return new CMCHttpResponseData(cmcResponse.getCmcResponseBytes(), 200, null);
   }
 }

@@ -46,7 +46,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * This class when instantiated creates a test CA services and related revocation services for CRL adn OCSP revocation checking.
+ * This class when instantiated creates a test CA services.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -130,7 +130,7 @@ public class TestCAHolder {
         kp = caConfig.getOcspKeyPair();
         algorithm = caConfig.getOcspAlgo();
         DefaultCertificateModelBuilder certModelBuilder = cscaService.getCertificateModelBuilder(
-          CertRequestData.getTypicalServiceName(caConfig.getOcspName(), caConfig.getCountry()), kp.getPublic());
+          getTypicalServiceName(caConfig.getOcspName(), caConfig.getCountry()), kp.getPublic());
 
         certModelBuilder
           .qcStatements(null)
@@ -173,5 +173,27 @@ public class TestCAHolder {
     String urlEncodedPath = URLEncoder.encode(path, StandardCharsets.UTF_8);
     return FILE_URL_PREFIX + urlEncodedPath;
   }
+
+  public static CertNameModel getTypicalServiceName(String commonName, String country) {
+    CertNameModel subjectName = new ExplicitCertNameModel(Arrays.asList(
+      AttributeTypeAndValueModel.builder()
+        .attributeType(CertAttributes.C)
+        .value(country).build(),
+      AttributeTypeAndValueModel.builder()
+        .attributeType(CertAttributes.O)
+        .value("Organization AB").build(),
+      AttributeTypeAndValueModel.builder()
+        .attributeType(CertAttributes.OU)
+        .value("Service department").build(),
+      AttributeTypeAndValueModel.builder()
+        .attributeType(CertAttributes.ORGANIZATION_IDENTIFIER)
+        .value("556677-1122").build(),
+      AttributeTypeAndValueModel.builder()
+        .attributeType(CertAttributes.CN)
+        .value(commonName).build()
+    ));
+    return subjectName;
+  }
+
 
 }

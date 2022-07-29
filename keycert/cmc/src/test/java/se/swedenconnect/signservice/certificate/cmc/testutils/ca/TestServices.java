@@ -44,7 +44,6 @@ import java.util.*;
 @Slf4j
 public class TestServices {
   @Getter private static Map<TestCA, TestCAHolder> testCAs;
-  @Getter private static Map<ValidatorProfile, CertValidatorComponents> certValidators;
   private static List<X509Certificate> trustAnchors;
   public static KeyPair rsa2048kp01;
   public static KeyPair rsa2048kp02;
@@ -55,7 +54,6 @@ public class TestServices {
 
   static {
     testCAs = new HashMap<>();
-    certValidators = new HashMap<>();
     trustAnchors = new ArrayList<>();
 
     try {
@@ -94,16 +92,6 @@ public class TestServices {
     TestCAHolder testCAHolder = new TestCAHolder(caConfig);
     testCAs.put(caConfig, testCAHolder);
     trustAnchors.add(X509Utils.decodeCertificate(testCAHolder.getCscaService().getCaCertificate().getEncoded()));
-  }
-
-  public static void addValidators(boolean singleThreaded) {
-    certValidators = new HashMap<>();
-    Arrays.stream(ValidatorProfile.values()).forEach(profile -> certValidators.put(profile, getValidator(profile, singleThreaded)));
-  }
-
-  @SneakyThrows
-  public static CertValidatorComponents getValidator(ValidatorProfile profile, boolean singleThreaded) {
-    return TestValidatorFactory.getCertificateValidator(trustAnchors, profile, singleThreaded );
   }
 
 }

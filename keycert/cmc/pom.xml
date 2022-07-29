@@ -87,12 +87,6 @@
       <version>1.2.1</version>
     </dependency>
     <dependency>
-      <groupId>se.swedenconnect.sigval</groupId>
-      <artifactId>cert-validation</artifactId>
-      <version>1.2.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>se.idsec.utils</groupId>
       <artifactId>print-cert</artifactId>
       <version>[1.0.4,)</version>
