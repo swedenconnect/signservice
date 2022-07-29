@@ -33,6 +33,7 @@ jobs:
             ${{ github.workspace }}/signhandler/target/site/jacoco/jacoco.xml,
             ${{ github.workspace }}/keycert/base/target/site/jacoco/jacoco.xml,
             ${{ github.workspace }}/keycert/simple/target/site/jacoco/jacoco.xml
+            ${{ github.workspace }}/keycert/cmc/target/site/jacoco/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 60
           min-coverage-changed-files: 60
