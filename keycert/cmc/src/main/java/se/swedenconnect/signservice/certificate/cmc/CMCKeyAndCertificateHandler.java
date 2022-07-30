@@ -102,6 +102,8 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
    * @param signingKeyProvider provider for providing signing keys
    * @param defaultConfiguration default value configuration data
    * @param algorithmRegistry algorithm registry
+   * @param cmcClient CMC client used to issue certificates using CMC
+   * @param attributeMapper mapper for mapping authentication attributes to certificate attributes
    */
   public CMCKeyAndCertificateHandler(
     final @Nonnull SignServiceSigningKeyProvider signingKeyProvider,
@@ -115,15 +117,18 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
     this.attributeMapper = Objects.requireNonNull(attributeMapper, "attributeMapper must not be null");
   }
 
+  /** {@inheritDoc} */
   @Override public String getName() {
     return Optional.ofNullable(name).orElse(this.getClass().getSimpleName());
   }
 
+  /** {@inheritDoc} */
   @Override protected void specificRequirementTests(@Nonnull SignRequestMessage signRequest,
     @Nonnull SignServiceContext context) throws InvalidRequestException {
     // No additional tests
   }
 
+  /** {@inheritDoc} */
   @Override protected X509Certificate obtainSigningCertificate(@Nonnull PkiCredential signingKeyPair,
     @Nonnull SignRequestMessage signRequest, @Nonnull IdentityAssertion assertion,
     @Nonnull SignServiceContext context) throws CertificateException {
@@ -211,7 +216,7 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
     }
     catch (final IOException e) {
       final String msg = "Failed to complete CMC request";
-      log.info("{}", e);
+      log.info("Failed to complete CMC request to issue certificate: {}", e.getMessage());
       throw new CertificateException(msg, e);
     }
   }
@@ -327,6 +332,7 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
     return new ExplicitCertNameModel(attributeList);
   }
 
+  /** {@inheritDoc} */
   @Override protected void isCertificateTypeSupported(@Nonnull CertificateType certificateType,
     @Nullable String certificateProfile) throws InvalidRequestException {
     if (!supportedCertificateType.equals(certificateType)) {
