@@ -17,9 +17,11 @@
 package se.swedenconnect.signservice.certificate.cmc;
 
 import lombok.Data;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,6 +29,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import se.idsec.utils.printcert.PrintCertificate;
 import se.swedenconnect.ca.cmc.api.client.CMCClient;
+import se.swedenconnect.ca.cmc.api.client.impl.PreConfiguredCMCClient;
+import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
@@ -50,6 +54,7 @@ import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandIn
 import se.swedenconnect.signservice.certificate.cmc.testutils.CMCApiFactory;
 import se.swedenconnect.signservice.certificate.cmc.testutils.TestCMCHttpConnector;
 import se.swedenconnect.signservice.certificate.cmc.testutils.TestCredentials;
+import se.swedenconnect.signservice.certificate.cmc.testutils.TestUtils;
 import se.swedenconnect.signservice.certificate.cmc.testutils.ca.BadCAService;
 import se.swedenconnect.signservice.certificate.cmc.testutils.ca.TestCA;
 import se.swedenconnect.signservice.certificate.cmc.testutils.ca.TestCAHolder;
@@ -67,8 +72,12 @@ import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificat
 import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.Security;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -128,10 +137,24 @@ class CMCKeyAndCertificateHandlerTest {
   }
 
   private CMCClient getCMCClient(CAService caService) throws Exception {
-    CMCClient cmcClient = new CMCClient("http://example.com/test", TestCredentials.privateCMCClientSignerECKey,
+    StaticCAInformation staticCAInformation = StaticCAInformation.builder()
+      .caAlgorithm(caService.getCaAlgorithm())
+      .certificateChain(caService.getCACertificateChain().stream()
+        .map(x509CertificateHolder -> getCertBytes(x509CertificateHolder))
+        .collect(Collectors.toList()))
+      .ocspResponserUrl(caService.getOCSPResponderURL())
+      .crlDpURLs(caService.getCrlDpURLs())
+      .ocspCertificate(getCertBytes(caService.getOCSPResponderCertificate()))
+      .build();
+    CMCClient cmcClient = new PreConfiguredCMCClient("http://example.com/test", TestCredentials.privateCMCClientSignerECKey,
       TestCredentials.cMCClientSignerCertificate, XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
-      TestCredentials.cMCCaSignerCertificate, X509Utils.decodeCertificate(caService.getCaCertificate().getEncoded()));
+      TestCredentials.cMCCaSignerCertificate, staticCAInformation);
     return cmcClient;
+  }
+
+  @SneakyThrows
+  private byte[] getCertBytes(X509CertificateHolder x509CertificateHolder) {
+    return x509CertificateHolder.getEncoded();
   }
 
   @Test

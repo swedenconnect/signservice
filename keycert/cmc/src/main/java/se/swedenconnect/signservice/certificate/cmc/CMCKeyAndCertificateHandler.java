@@ -201,7 +201,7 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
     log.debug("Issuing certificate from certificate model");
 
     try {
-      CMCResponse cmcResponse = this.cmcClient.certIssuerRequest(certificateModelBuilder.build());
+      CMCResponse cmcResponse = this.cmcClient.issueCertificate(certificateModelBuilder.build());
       final CMCResponseStatus responseStatus = cmcResponse.getResponseStatus();
       if (!responseStatus.getStatus().equals(CMCStatusType.success)) {
         final CMCFailType failType = responseStatus.getFailType();
