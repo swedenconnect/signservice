@@ -17,11 +17,15 @@ package se.swedenconnect.signservice.spring.config;
 
 import java.security.cert.X509Certificate;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import lombok.Setter;
 import se.swedenconnect.security.credential.converters.PropertyToX509CertificateConverter;
+import se.swedenconnect.signservice.audit.actuator.ActuatorAuditLoggerFactory;
 import se.swedenconnect.signservice.core.config.HandlerFactoryRegistry;
 
 /**
@@ -30,6 +34,11 @@ import se.swedenconnect.signservice.core.config.HandlerFactoryRegistry;
 @Configuration
 public class SignServiceBaseBeansConfiguration {
 
+  /** Needed to set up actuator audit logging. */
+  @Setter
+  @Autowired
+  private ApplicationEventPublisher applicationEventPublisher;
+
   /**
    * Creates the {@link HandlerFactoryRegistry} bean that is needed for handler configuration and creation.
    *
@@ -37,7 +46,12 @@ public class SignServiceBaseBeansConfiguration {
    */
   @Bean
   public HandlerFactoryRegistry handlerFactoryRegistry() {
-    return new HandlerFactoryRegistry();
+    final ActuatorAuditLoggerFactory actuatorFactory = new ActuatorAuditLoggerFactory();
+    actuatorFactory.setPublisher(this.applicationEventPublisher);
+    final HandlerFactoryRegistry factoryRegistry = new HandlerFactoryRegistry();
+    // Pre-load it with the special factory used to create ActuatorAuditLogger:s.
+    factoryRegistry.addFactory(actuatorFactory);
+    return factoryRegistry;
   }
 
   /**

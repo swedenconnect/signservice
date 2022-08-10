@@ -15,53 +15,82 @@
  */
 package se.swedenconnect.signservice.audit.file;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.Nonnull;
+import javax.annotation.PreDestroy;
+
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import se.swedenconnect.signservice.audit.base.events.AuditEventFactory;
 import se.swedenconnect.signservice.audit.AuditEvent;
-import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerException;
+import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
+import se.swedenconnect.signservice.audit.logsystem.LogSystemAuditLogger;
 
 /**
- * The {@link AuditLogger} log file implementation
+ * A simple file logger that uses Java's util logging package to audit log. The logger is "rolling" and a new log file
+ * is created per day.
+ * <p>
+ * Also see {@link LogSystemAuditLogger} for an audit logger that can be configured using an underlying log system.
+ * </p>
  */
 @Slf4j
-public class FileAuditLogger implements AuditLogger {
+public class FileAuditLogger extends AbstractAuditLogger {
+
+  /** The underlying JUL handler. */
+  private final DateRollingFileHandler handler;
+
+  /** The JUL logger. */
+  private final Logger auditLogger;
 
   /**
-   * The audit log name
+   * Constructor setting up the file audit logger with the target file.
+   *
+   * @param logFile the log file including its path
+   * @throws IOException if the supplied file is not a valid file, or if it is not possible to create the file
    */
-  protected final static String AUDIT_LOGGER_NAME = "AUDIT_LOG";
+  public FileAuditLogger(@Nonnull final String logFile) throws IOException {
+    this.handler = new DateRollingFileHandler(logFile);
+
+    // Build the logger name based on the log file name ...
+    final String loggerName = Path.of(logFile).toAbsolutePath().toString();
+
+    this.auditLogger = Logger.getLogger(loggerName);
+    this.auditLogger.setLevel(Level.INFO);
+    this.auditLogger.addHandler(this.handler);
+    this.auditLogger.setUseParentHandlers(false);
+  }
 
   /**
-   * The audit log
+   * Should be called when the object is no longer needed. The method is annotated with {@code PreDestroy} meaning that
+   * the method will be automatically be invoked by frameworks supporting this annotation.
    */
-  private final static Logger auditLog = LoggerFactory.getLogger(AUDIT_LOGGER_NAME);
+  @PreDestroy
+  public void close() {
+    if (this.handler != null) {
+      this.handler.flush();
+      this.handler.close();
+    }
+  }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
-  public void auditLog(final AuditEvent event) throws AuditLoggerException {
+  public void auditLog(@Nonnull final AuditEvent event) throws AuditLoggerException {
     if (event == null) {
       throw new AuditLoggerException("event must not be null");
     }
     try {
-      log.debug("Publish audit event [{}]", event.getId());
-      auditLog.info("{}", event);
-    } catch (Throwable t) {
-      final String msg = String.format("Couldn't publish audit event - %s", t.getMessage());
+      log.debug("Audit logger '{}' publishing audit event '{}'", this.getName(), event.getId());
+      this.auditLogger.log(Level.INFO, this.formatAuditEvent(event));
+    }
+    catch (final Throwable t) {
+      final String msg = String.format("Audit logger '%s' failed to publish audit event - %s",
+          this.getName(), t.getMessage());
+      log.error("{}", msg, t);
       throw new AuditLoggerException(msg, t);
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public AuditEvent createAuditEvent(final String eventId) {
-    return AuditEventFactory.createAuditEvent(eventId);
   }
 
 }

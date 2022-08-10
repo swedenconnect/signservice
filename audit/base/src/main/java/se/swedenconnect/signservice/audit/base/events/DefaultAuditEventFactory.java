@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.audit;
+package se.swedenconnect.signservice.audit.base.events;
+
+import javax.annotation.Nonnull;
+
+import se.swedenconnect.signservice.audit.AuditEvent;
 
 /**
- * Defines audit logger events identifiers.
+ * The default implementation of {@link AuditEventFactory} creating {@link SignServiceAuditEvent} events.
  */
-public class AuditEventIds {
+public class DefaultAuditEventFactory implements AuditEventFactory {
 
-  /** SignService system was started. */
-  public final static String EVENT_SYSTEM_STARTED = "audit.system.started";
-
-  /** A SignService engine instance (servicing a client) was started. */
-  public final static String EVENT_ENGINE_STARTED = "audit.engine.started";
-
-  // TODO: More
-
-  // Hidden constructor
-  private AuditEventIds() {
+  /** {@inheritDoc} */
+  @Override
+  @Nonnull
+  public AuditEvent createAuditEvent(@Nonnull final String eventId) {
+    return new SignServiceAuditEvent(eventId);
   }
 
 }

@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.signservice.engine;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -56,5 +57,13 @@ public interface SignServiceEngine {
    * @return true if the engine can process the request and false otherwise
    */
   boolean canProcess(final HttpServletRequest httpRequest);
+
+  /**
+   * Initializes the engine bean.
+   *
+   * @throws Exception for init errors
+   */
+  @PostConstruct
+  void init() throws Exception;
 
 }

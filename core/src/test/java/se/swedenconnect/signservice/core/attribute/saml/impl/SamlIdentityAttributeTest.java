@@ -51,6 +51,8 @@ public class SamlIdentityAttributeTest {
   public void testSamlIdentityAttributeDefaults() {
     final SamlIdentityAttribute<String> a = new SamlIdentityAttribute<>() {
 
+      private static final long serialVersionUID = -3861387883324674349L;
+
       @Override
       public List<String> getValues() {
         return null;

@@ -34,6 +34,9 @@ import se.swedenconnect.signservice.api.engine.config.EngineConfiguration;
 import se.swedenconnect.signservice.api.engine.impl.DefaultSignRequestMessageVerifier;
 import se.swedenconnect.signservice.api.engine.session.EngineContext;
 import se.swedenconnect.signservice.api.engine.session.SignOperationState;
+import se.swedenconnect.signservice.audit.AuditEventIds;
+import se.swedenconnect.signservice.audit.AuditLogger;
+import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
 import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
 import se.swedenconnect.signservice.authn.AuthenticationResult;
 import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
@@ -84,32 +87,44 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   /** The sign message verifier. */
   private SignRequestMessageVerifier signRequestMessageVerifier;
 
+  /** The system audit logger. */
+  private AuditLogger systemAuditLogger;
+
   /**
    * Constructor.
    *
    * @param engineConfiguration the engine configuration
    * @param sessionHandler the session handler to use
    * @param messageReplayChecker the message replay checker
+   * @param systemAuditLogger the system audit logger
    */
-  public DefaultSignServiceEngine(final EngineConfiguration engineConfiguration,
-      final SessionHandler sessionHandler, final MessageReplayChecker messageReplayChecker) {
+  public DefaultSignServiceEngine(
+      final EngineConfiguration engineConfiguration,
+      final SessionHandler sessionHandler,
+      final MessageReplayChecker messageReplayChecker,
+      final AuditLogger systemAuditLogger) {
     this.engineConfiguration = Objects.requireNonNull(engineConfiguration, "engineConfiguration must not be null");
     this.sessionHandler = Objects.requireNonNull(sessionHandler, "sessionHandler must not be null");
     this.messageReplayChecker = Objects.requireNonNull(messageReplayChecker, "messageReplayChecker must not be null");
+    this.systemAuditLogger = Objects.requireNonNull(systemAuditLogger, "systemAuditLogger must not be null");
   }
 
-  /**
-   * Initializes the engine bean.
-   *
-   * @throws Exception for init errors
-   */
+  /** {@inheritDoc} */
   @PostConstruct
+  @Override
   public void init() throws Exception {
     if (this.signRequestMessageVerifier == null) {
       log.debug("{}: Setting default signRequestMessageVerifier to {}",
           this.engineConfiguration.getName(), DefaultSignRequestMessageVerifier.class.getSimpleName());
       this.signRequestMessageVerifier = new DefaultSignRequestMessageVerifier();
     }
+
+    this.systemAuditLogger.auditLog(
+        this.systemAuditLogger
+            .getAuditEventBuilder(AuditEventIds.EVENT_ENGINE_STARTED)
+            .parameter("engine-name", this.engineConfiguration.getName())
+            .parameter("client-id", this.engineConfiguration.getClientConfiguration().getClientId())
+            .build());
   }
 
   /** {@inheritDoc} */
@@ -119,6 +134,10 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
 
     log.debug("{}: Received request [path: '{}', client-ip: '{}']",
         this.engineConfiguration.getName(), httpRequest.getRequestURI(), httpRequest.getRemoteAddr());
+
+    // Assign the audit logger to TLS so that any underlying component can get hold of the logger.
+    //
+    AuditLoggerSingleton.init(this.engineConfiguration.getAuditLogger());
 
     // Before processing the request, check if it is a request for an HTTP resource ...
     //
@@ -584,6 +603,8 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   /** {@inheritDoc} */
   @Override
   public boolean canProcess(final HttpServletRequest httpRequest) {
+    AuditLoggerSingleton.init(this.engineConfiguration.getAuditLogger());
+
     if (this.isSignRequestEndpoint(httpRequest)) {
       // Process SignRequest
       return true;

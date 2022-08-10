@@ -77,8 +77,7 @@ public class AuthenticationConfigurationProperties implements HandlerConfigurati
   /** {@inheritDoc} */
   @Override
   @Nullable
-  public HandlerConfiguration<AuthenticationHandler> getHandlerConfiguration(@Nonnull final String name)
-      throws IllegalArgumentException {
+  public HandlerConfiguration<AuthenticationHandler> getHandlerConfiguration(@Nonnull final String name) {
     if ("mock".equalsIgnoreCase(name)) {
       return this.mock != null ? (this.mock.isActive() ? this.mock : null) : null;
     }
@@ -89,6 +88,5 @@ public class AuthenticationConfigurationProperties implements HandlerConfigurati
       return null;
     }
   }
-
 
 }

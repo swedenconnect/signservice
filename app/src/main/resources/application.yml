@@ -4,11 +4,31 @@
 
 server:
   servlet:
-    context-path: /    
+    context-path: /
+    
+#
+# Management
+#
+management:
+  server:
+    port: 8081
+  auditevents:
+    enabled: true
+  endpoint:
+    auditevents:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,auditevents
 
 signservice:
   domain: localhost
   base-url: http://${signservice.domain}:8080
+  system-audit:
+    actuator:
+      name: "SignService System Audit Logger"
+      principal: "SignService"
   default-credential:
     name: SignService
     resource: classpath:signservice.jks
@@ -39,6 +59,30 @@ signservice:
       mock:
         active: true
         name: "MockedAuthenticationHandler"
+    audit:
+      log-system:
+        name: "Sandbox Audit Logger"
+        logger-name: SANDBOX
+        
+  - name: "Sandbox2"
+    processing-paths:
+    - /sign/sandbox2
+    sign-service-id: https://signservice.digg.se
+    client:
+      client-id: https://eid2cssp.3xasecurity.com/sign2
+      trusted-certificates:
+      - classpath:clients/sandbox.crt
+    protocol:
+      dss:
+        include-request-message: false
+        default-config-ref: protocol.dss
+    authn:
+      mock:
+        active: true
+    audit:
+      file:
+        name: "Sandbox2 Audit Logger"
+        file-name: target/audit/sandbox2-audit.log
 
 #
 # Logging
@@ -49,21 +93,8 @@ logging:
       swedenconnect:
         security: DEBUG
         signservice: DEBUG
-  file:
-    path: app/target/logs
+#  file:
+#    path: app/target/logs
 
-#
-# Management
-#
-management:
-  auditevents:
-    enabled: true
-  endpoint:
-    auditevents:
-      enabled: true
-  endpoints:
-    web:
-      exposure:
-        include: "auditevents"
 
 #logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter=DEBUG
