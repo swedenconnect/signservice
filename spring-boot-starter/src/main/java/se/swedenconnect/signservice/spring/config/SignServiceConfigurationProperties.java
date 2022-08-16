@@ -48,6 +48,11 @@ public class SignServiceConfigurationProperties implements InitializingBean {
   private String baseUrl;
 
   /**
+   * The default SignService ID. May be overridden in engines.
+   */
+  private String defaultSignServiceId;
+
+  /**
    * The SignService default credential. By setting this, several engines may share the same credential.
    */
   private PkiCredentialConfigurationProperties defaultCredential;

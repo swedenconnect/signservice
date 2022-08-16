@@ -30,6 +30,7 @@ import org.apache.commons.lang.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.core.SignServiceHandler;
 
 /**
@@ -256,6 +257,11 @@ public abstract class AbstractHandlerConfiguration<T extends SignServiceHandler>
       // If this object is a non-complex class (for example a String) we shouldn't merge
       // since 'thisObject' already has a value.
       if (targetObject.getClass().getPackageName().startsWith("java.")) {
+        log.trace("Since the objects are of type '{}' no merge will be attempted", targetObject.getClass().getName());
+        return;
+      }
+      // Special case...
+      if (PkiCredential.class.isAssignableFrom(targetObject.getClass())) {
         log.trace("Since the objects are of type '{}' no merge will be attempted", targetObject.getClass().getName());
         return;
       }
