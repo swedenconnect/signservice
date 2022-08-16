@@ -15,10 +15,12 @@
  */
 package se.swedenconnect.signservice.core.config;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
@@ -174,7 +176,8 @@ public abstract class AbstractHandlerConfiguration<T extends SignServiceHandler>
   public void resolveDefaultConfigRef(@Nonnull final Function<String, HandlerConfiguration<T>> resolver)
       throws NullPointerException, IllegalArgumentException {
     if (this.defaultConfigRef == null) {
-      throw new IllegalArgumentException("Invalid call to resolveDefaultConfigRef - no default-config-ref has been assigned");
+      throw new IllegalArgumentException(
+          "Invalid call to resolveDefaultConfigRef - no default-config-ref has been assigned");
     }
     final HandlerConfiguration<T> defaultConfig = resolver.apply(this.defaultConfigRef);
     if (defaultConfig == null) {
@@ -231,17 +234,32 @@ public abstract class AbstractHandlerConfiguration<T extends SignServiceHandler>
       log.trace("Merging default configuration of type '{}' into target configuration object of type '{}' ...",
           defaultObject.getClass().getName(), targetObject.getClass().getName());
 
+      // If the objects are equal, there is nothing to merge ...
+      if (targetObject.equals(defaultObject)) {
+        log.trace("Default configuration and target configuration are equal - no merging will be done");
+        return;
+      }
+
+      if (List.class.isAssignableFrom(targetObject.getClass())) {
+        this.mergeLists(targetObject, defaultObject);
+        return;
+      }
+      if (targetObject.getClass().isArray()) {
+        this.mergeArrays(targetObject, defaultObject);
+        return;
+      }
+      if (Map.class.isAssignableFrom(targetObject.getClass())) {
+        this.mergeMaps(targetObject, defaultObject);
+        return;
+      }
+
       // If this object is a non-complex class (for example a String) we shouldn't merge
       // since 'thisObject' already has a value.
       if (targetObject.getClass().getPackageName().startsWith("java.")) {
         log.trace("Since the objects are of type '{}' no merge will be attempted", targetObject.getClass().getName());
         return;
       }
-      // If the objects are equal, there is nothing to merge ...
-      if (targetObject.equals(defaultObject)) {
-        log.trace("Default configuration and target configuration are equal - no merging will be done");
-        return;
-      }
+
       // Else, list att getters of the default object and compare against our object ...
       //
       log.trace("Listing all getter methods from default configuration object ...");
@@ -260,7 +278,7 @@ public abstract class AbstractHandlerConfiguration<T extends SignServiceHandler>
         }
         // Get the value from the target object ...
         final Method targetMethod = targetObject.getClass().getMethod(method.getName());
-        final Object targetValue = targetMethod.invoke(targetObject);
+        Object targetValue = targetMethod.invoke(targetObject);
         if (targetValue == null) {
           log.trace("Execution of {} on target configuration object return null - merging value from default",
               method.getName());
@@ -276,6 +294,22 @@ public abstract class AbstractHandlerConfiguration<T extends SignServiceHandler>
               continue;
             }
           }
+          // If targetValue is an array, we need to make sure that its size is equal to mergeValue's.
+          // Otherwise merging of the array will not be possible ...
+          //
+          if (targetValue.getClass().isArray()) {
+            if (Array.getLength(mergeValue) > Array.getLength(targetValue)) {
+              final Object updatedTargetValue =
+                  Array.newInstance(targetValue.getClass().getComponentType(), Array.getLength(mergeValue));
+              for (int i = 0; i < Array.getLength(targetValue); i++) {
+                Array.set(updatedTargetValue, i, Array.get(targetValue, i));
+              }
+              targetValue = updatedTargetValue;
+              this.assignValue(targetObject, getterNameToSetter(targetMethod.getName()), method.getReturnType(),
+                  targetValue);
+            }
+          }
+
           this.mergeConfigObject(targetValue, mergeValue);
         }
       }
@@ -284,6 +318,93 @@ public abstract class AbstractHandlerConfiguration<T extends SignServiceHandler>
       final String msg = "Failed to merge default configuration";
       log.info("{}", msg, e);
       throw new IllegalArgumentException(msg, e);
+    }
+  }
+
+  /**
+   * Merges two lists.
+   *
+   * @param targetObject the target
+   * @param defaultObject the source (default settings)
+   */
+  protected void mergeLists(@Nonnull final Object targetObject, @Nonnull final Object defaultObject) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    final List<Object> targetList = (List) targetObject;
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    final List<Object> defaultList = (List) defaultObject;
+
+    final int tSize = targetList.size();
+
+    if (defaultList.size() > tSize) {
+      for (int i = tSize; i < defaultList.size(); i++) {
+        try {
+          targetList.add(defaultList.get(i));
+        }
+        catch (final UnsupportedOperationException e) {
+          log.warn("Could not merge config lists - static array list is being used");
+        }
+      }
+    }
+    for (int i = 0; i < tSize; i++) {
+      if (defaultList.size() - 1 < i) {
+        break;
+      }
+      final Object tObj = targetList.get(i);
+      final Object dObj = defaultList.get(i);
+      this.mergeConfigObject(tObj, dObj);
+      targetList.set(i, tObj);
+    }
+  }
+
+  /**
+   * Merges two arrays. When called we know that the size of the targetObject array is no less than defaultObject.
+   *
+   * @param targetObject the target
+   * @param defaultObject the source (default settings)
+   */
+  protected void mergeArrays(@Nonnull final Object targetObject, @Nonnull final Object defaultObject) {
+
+    for (int i = 0; i < Array.getLength(targetObject); i++) {
+      if (Array.getLength(defaultObject) < i) {
+        break;
+      }
+      final Object dObj = Array.get(defaultObject, i);
+      if (dObj == null) {
+        continue;
+      }
+      final Object tObj = Array.get(targetObject, i);
+      if (tObj == null) {
+        Array.set(targetObject, i, dObj);
+      }
+      else {
+        this.mergeConfigObject(tObj, dObj);
+        Array.set(targetObject, i, tObj);
+      }
+    }
+  }
+
+  /**
+   * Merges two maps.
+   *
+   * @param targetObject the target
+   * @param defaultObject the source (default settings)
+   */
+  protected void mergeMaps(@Nonnull final Object targetObject, @Nonnull final Object defaultObject) {
+    @SuppressWarnings("unchecked")
+    final Map<Object, Object> targetMap = (Map<Object, Object>) targetObject;
+    @SuppressWarnings("unchecked")
+    final Map<Object, Object> defaultMap = (Map<Object, Object>) defaultObject;
+
+    for (final Object dkey : defaultMap.keySet()) {
+      final Object tValue = targetMap.get(dkey);
+      final Object dValue = defaultMap.get(dkey);
+      if (tValue == null) {
+        targetMap.put(dkey, dValue);
+      }
+      else if (dValue != null) {
+        this.mergeConfigObject(tValue, dValue);
+        targetMap.put(dkey, tValue);
+      }
     }
   }
 
