@@ -1,0 +1,19 @@
+{
+  "groups": [
+    {
+      "name": "",
+      "type": "se.swedenconnect.signservice.authn.saml.config.SamlAuthenticationHandlerConfiguration",
+      "description": "SAML Authentication Handler Configuration.",
+      "sourceType": "se.swedenconnect.signservice.authn.saml.config.SamlAuthenticationHandlerConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "name",
+      "type": "java.lang.String",
+      "description": "The name of the authentication handler.",
+      "sourceType": "se.swedenconnect.signservice.authn.saml.config.SamlAuthenticationHandlerConfiguration"
+    }
+ ],
+  "hints": []
+}

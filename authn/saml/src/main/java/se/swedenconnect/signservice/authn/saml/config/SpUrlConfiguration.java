@@ -29,39 +29,27 @@ public class SpUrlConfiguration {
 
   /**
    * The application base URL. Must not end with a slash.
-   *
-   * @return the application base URL
    */
   @Getter
-  @Nonnull
   private String baseUrl;
 
   /**
    * The path to where the SP receives SAML responses. Relative to {@code baseUrl}.
-   *
-   * @return the path for receiving SAML responses
    */
   @Getter
-  @Nonnull
   private String assertionConsumerPath;
 
   /**
    * Optional additional path for receiving SAML responses. Relative to {@code baseUrl}. May be useful when testing and
    * debugging.
-   *
-   * @return additional path for receiving SAML responses
    */
   @Getter
-  @Nullable
   private String additionalAssertionConsumerPath;
 
   /**
    * The path to where the SP exposes its metadata. Relative to {@code baseUrl}.
-   *
-   * @return the metadata publishing path
    */
   @Getter
-  @Nonnull
   private String metadataPublishingPath;
 
   /**
@@ -108,7 +96,8 @@ public class SpUrlConfiguration {
    * @param metadataPublishingPath the metadata publishing path
    */
   public void setMetadataPublishingPath(@Nonnull final String metadataPublishingPath) {
-    this.metadataPublishingPath = Objects.requireNonNull(metadataPublishingPath, "metadataPublishingPath must not be null");
+    this.metadataPublishingPath =
+        Objects.requireNonNull(metadataPublishingPath, "metadataPublishingPath must not be null");
     if (!this.metadataPublishingPath.startsWith("/")) {
       throw new IllegalArgumentException("The metadataPublishingPath must begin with a '/'");
     }
@@ -123,11 +112,11 @@ public class SpUrlConfiguration {
         .append(this.assertionConsumerPath);
     if (this.additionalAssertionConsumerPath != null) {
       sb.append("', additional-assertion-consumer-path='")
-      .append(this.additionalAssertionConsumerPath);
+          .append(this.additionalAssertionConsumerPath);
     }
     sb.append("', metadata-publishing-path='")
-      .append(this.metadataPublishingPath)
-      .append("'");
+        .append(this.metadataPublishingPath)
+        .append("'");
     return sb.toString();
   }
 

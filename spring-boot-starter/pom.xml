@@ -115,6 +115,12 @@
     
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
+      <artifactId>signservice-authn-saml</artifactId>
+      <version>${project.version}</version>
+    </dependency>    
+    
+    <dependency>
+      <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-audit-base</artifactId>
       <version>${project.version}</version>
     </dependency>

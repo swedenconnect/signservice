@@ -83,7 +83,6 @@
   </repositories>  
 
   <properties>
-    <opensaml.version>4.2.0</opensaml.version>
   </properties>
   
   <dependencyManagement>
@@ -95,61 +94,6 @@
         <artifactId>bcprov-jdk15on</artifactId>
         <version>1.70</version>
       </dependency>
-      
-      <!-- OpenSAML -->
-      <dependency>
-        <groupId>org.opensaml</groupId>
-        <artifactId>opensaml-core</artifactId>
-        <version>${opensaml.version}</version>
-      </dependency>
-      
-      <dependency>
-        <groupId>org.opensaml</groupId>
-        <artifactId>opensaml-saml-api</artifactId>
-        <version>${opensaml.version}</version>
-      </dependency>
-      
-      <dependency>
-        <groupId>org.opensaml</groupId>
-        <artifactId>opensaml-saml-impl</artifactId>
-        <version>${opensaml.version}</version>
-      </dependency>
-      
-      <dependency>
-        <groupId>org.opensaml</groupId>
-        <artifactId>opensaml-security-api</artifactId>
-        <version>${opensaml.version}</version>
-      </dependency>
-      
-      <dependency>
-        <groupId>org.opensaml</groupId>
-        <artifactId>opensaml-security-impl</artifactId>
-        <version>${opensaml.version}</version>
-      </dependency>
-      
-      <dependency>
-        <groupId>org.opensaml</groupId>
-        <artifactId>opensaml-storage-api</artifactId>
-        <version>${opensaml.version}</version>
-      </dependency>
-      
-      <dependency>
-        <groupId>org.opensaml</groupId>
-        <artifactId>opensaml-storage-impl</artifactId>
-        <version>${opensaml.version}</version>
-      </dependency>
-      
-      <dependency>
-          <groupId>org.opensaml</groupId>
-          <artifactId>opensaml-xmlsec-api</artifactId>
-          <version>${opensaml.version}</version>
-      </dependency>
-      
-      <dependency>
-        <groupId>org.opensaml</groupId>
-        <artifactId>opensaml-xmlsec-impl</artifactId>
-        <version>${opensaml.version}</version>
-      </dependency>      
         
     </dependencies>
     

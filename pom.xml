@@ -122,6 +122,13 @@
         <scope>import</scope>
       </dependency>
       
+      <!-- Should be moved to bom -->
+      <dependency>
+        <groupId>org.opensaml</groupId>
+        <artifactId>opensaml-messaging-api</artifactId>
+        <version>4.1.1</version>
+      </dependency>      
+      
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-commons</artifactId>

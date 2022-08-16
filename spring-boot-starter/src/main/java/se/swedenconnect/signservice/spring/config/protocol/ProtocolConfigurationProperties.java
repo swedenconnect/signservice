@@ -18,6 +18,8 @@ package se.swedenconnect.signservice.spring.config.protocol;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.signservice.core.config.BeanReferenceHandlerConfiguration;
@@ -29,6 +31,7 @@ import se.swedenconnect.signservice.spring.config.HandlerConfigurationProperties
 /**
  * Properties for protocol configuration.
  */
+@ConfigurationProperties
 public class ProtocolConfigurationProperties implements HandlerConfigurationProperties<ProtocolHandler> {
 
   /**

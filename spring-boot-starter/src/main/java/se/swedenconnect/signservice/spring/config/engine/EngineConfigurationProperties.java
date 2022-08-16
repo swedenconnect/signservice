@@ -18,6 +18,7 @@ package se.swedenconnect.signservice.spring.config.engine;
 import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.Assert;
 
 import lombok.Data;
@@ -31,6 +32,7 @@ import se.swedenconnect.signservice.spring.config.protocol.ProtocolConfiguration
  * Configuration properties for an engine configuration.
  */
 @Data
+@ConfigurationProperties
 public class EngineConfigurationProperties implements InitializingBean {
 
   /**
@@ -79,7 +81,6 @@ public class EngineConfigurationProperties implements InitializingBean {
   @Override
   public void afterPropertiesSet() throws Exception {
     Assert.hasText(this.name, "name must be assigned");
-    Assert.hasText(this.signServiceId, "sign-service-id must be assigned");
     Assert.notEmpty(this.processingPaths, "processing-paths must be assigned and non-empty");
 
     Assert.notNull(this.client, "client must be assigned");
