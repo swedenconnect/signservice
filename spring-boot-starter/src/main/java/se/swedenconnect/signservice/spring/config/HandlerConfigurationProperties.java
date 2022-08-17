@@ -53,22 +53,6 @@ public interface HandlerConfigurationProperties<T extends SignServiceHandler> {
 
   /**
    * An handler configuration properties class may have setters for several types of a particular types of a handler.
-   * For a specific engine configuration only one may be assigned. This method returns a function pointing at the
-   * configuration that was set.
-   * <p>
-   * The reason that a function is returned, and not just the actual {@link HandlerConfiguration}, is returned is that we want
-   * to apply the function to the shared/default settings for this particular handler type, if a XXX
-   * </p>
-   *
-   * @return
-   * @throws IllegalArgumentException
-   */
-//  @Nonnull
-//  Function<HandlerConfigurationProperties<T>, HandlerConfiguration<T>> getHandlerConfiguration()
-//      throws IllegalArgumentException;
-
-  /**
-   * An handler configuration properties class may have setters for several types of a particular types of a handler.
    * For a specific engine configuration only one may be assigned. This method returns the configuration that was set.
    *
    * @return the assigned configuration object
@@ -77,7 +61,13 @@ public interface HandlerConfigurationProperties<T extends SignServiceHandler> {
   @Nonnull
   HandlerConfiguration<T> getHandlerConfiguration() throws IllegalArgumentException;
 
+  /**
+   * Gets the handler configuration for the given name.
+   *
+   * @param name the name of the configuration
+   * @return the handler configuration or null
+   */
   @Nullable
-  HandlerConfiguration<T> getHandlerConfiguration(@Nonnull final String name) throws IllegalArgumentException;
+  HandlerConfiguration<T> getHandlerConfiguration(@Nonnull final String name);
 
 }

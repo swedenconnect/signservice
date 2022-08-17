@@ -15,6 +15,7 @@ package se.swedenconnect.signservice.engine;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
@@ -67,5 +68,13 @@ public interface SignServiceEngine {
    */
   @Nonnull
   String getName();
+
+  /**
+   * Initializes the engine bean.
+   *
+   * @throws Exception for init errors
+   */
+  @PostConstruct
+  void init() throws Exception;
 
 }

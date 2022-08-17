@@ -15,6 +15,9 @@
  */
 package se.swedenconnect.signservice.audit;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Singleton that holds an {@link AuditLogger} object in thread local storage (TLS). This
  * object will be initiated by the SignService Engine and may be used by SignService modules that
@@ -39,7 +42,7 @@ public class AuditLoggerSingleton {
    *
    * @param auditLogger the audit logger object
    */
-  public static void init(final AuditLogger auditLogger) {
+  public static void init(@Nonnull final AuditLogger auditLogger) {
     THREAD_LOCAL.get().auditLogger = auditLogger;
   }
 
@@ -48,6 +51,7 @@ public class AuditLoggerSingleton {
    *
    * @return the audit logger object, or null if none has been set
    */
+  @Nullable
   public static AuditLogger getAuditLogger() {
     return THREAD_LOCAL.get().auditLogger;
   }

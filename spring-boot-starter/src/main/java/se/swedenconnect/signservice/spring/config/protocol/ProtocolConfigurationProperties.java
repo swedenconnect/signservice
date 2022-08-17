@@ -18,6 +18,8 @@ package se.swedenconnect.signservice.spring.config.protocol;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.signservice.core.config.BeanReferenceHandlerConfiguration;
@@ -29,6 +31,7 @@ import se.swedenconnect.signservice.spring.config.HandlerConfigurationProperties
 /**
  * Properties for protocol configuration.
  */
+@ConfigurationProperties
 public class ProtocolConfigurationProperties implements HandlerConfigurationProperties<ProtocolHandler> {
 
   /**
@@ -69,10 +72,10 @@ public class ProtocolConfigurationProperties implements HandlerConfigurationProp
     return this.dss != null ? this.dss : this.external;
   }
 
+  /** {@inheritDoc} */
   @Override
   @Nullable
-  public HandlerConfiguration<ProtocolHandler> getHandlerConfiguration(@Nonnull final String name)
-      throws IllegalArgumentException {
+  public HandlerConfiguration<ProtocolHandler> getHandlerConfiguration(@Nonnull final String name) {
 
     if ("dss".equalsIgnoreCase(name)) {
       return this.dss;

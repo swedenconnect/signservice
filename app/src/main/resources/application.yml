@@ -3,12 +3,34 @@
 #
 
 server:
+  port: 8080
   servlet:
-    context-path: /    
+    context-path: /
+    
+#
+# Management
+#
+management:
+  server:
+    port: 8081
+  auditevents:
+    enabled: true
+  endpoint:
+    auditevents:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,auditevents
 
 signservice:
   domain: localhost
-  base-url: http://${signservice.domain}:8080
+  base-url: http://${signservice.domain}:${server.port}
+  system-audit:
+    actuator:
+      name: "SignService System Audit Logger"
+      principal: "SignService"
+  default-sign-service-id: https://sandbox.swedenconnect.se/signservice
   default-credential:
     name: SignService
     resource: classpath:signservice.jks
@@ -21,16 +43,126 @@ signservice:
       dss:
         name: "DssProtocolHandler"
         include-assertion: true
-        include-request-message: true        
-  engines:
-  - name: "Sandbox"
+        include-request-message: true
+    authn:
+      saml:
+        saml-type: sweden-connect
+        sp-paths:
+          base-url: ${signservice.base-url}
+        metadata-providers:
+        - url: https://eid.svelegtest.se/metadata/mdx/role/idp.xml
+          backup-file: ${java.io.tmpdir}/sandbox-metadata.xml
+          validation-certificate: classpath:sandbox/sandbox-metadata.crt
+        signature-credential-props:
+          name: SignService SAML Signing
+          resource: classpath:sandbox/saml-sp.jks
+          alias: sign
+          type: JKS
+          password: secret
+          key-password: secret
+        decryption-credential-props:
+          name: SignService SAML Decryption
+          resource: classpath:sandbox/saml-sp.jks
+          alias: encrypt
+          type: JKS
+          password: secret
+          key-password: secret          
+        sign-authn-requests: true
+        require-encrypted-assertions: true
+        response-validation:
+          strict-validation: false
+          require-signed-assertions: true
+          allowed-clock-skew: PT60S
+        metadata:
+          entity-categories:
+          - http://id.elegnamnden.se/st/1.0/sigservice
+          - http://id.elegnamnden.se/ec/1.0/loa3-pnr
+          - http://id.swedenconnect.se/ec/sc/uncertified-loa3-pnr
+          - http://id.elegnamnden.se/ec/1.0/eidas-naturalperson
+          - http://id.elegnamnden.se/st/1.0/public-sector-sp
+          - http://id.swedenconnect.se/contract/sc/sweden-connect
+          - http://id.swedenconnect.se/contract/sc/eid-choice-2017
+          - http://id.swedenconnect.se/general-ec/1.0/secure-authenticator-binding
+          - http://id.swedenconnect.se/general-ec/1.0/accepts-coordination-number
+          authn-requests-signed: true
+          want-assertions-signed: true
+          requested-attributes:
+          - name: urn:oid:1.2.752.29.4.13
+            required: false
+          - name: urn:oid:1.2.752.201.3.4
+            required: false
+          service-names:
+          - "sv-SignService Demo"
+          - "en-SignService Demo"            
+          ui-info:
+            display-names:
+            - "sv-Sweden Connect Demo SignService"
+            - "en-Sweden Connect Demo SignService"
+            descriptions:
+            - "sv-Sweden Connect Underskriftstjänst för test och demonstration"
+            - "en-Sweden Connect SignService for test and demonstration"
+            logos:
+            - path: /images/logo.svg
+              height: 56 
+              width: 280
+            - path: /images/logo-notext.svg
+              height: 256
+              width: 256 
+          organization:
+            names:
+            - "sv-Sweden Connect"
+            - "en-Sweden Connect"
+            display-names:
+            - "sv-Sweden Connect"
+            - "en-Sweden Connect"
+            urls:
+            - "en-https://www.swedenconnect.se"
+          contact-persons:
+            support:
+              company: "Sweden Connect"
+              email-address: operations@swedenconnect.se
+            technical:
+              company: "Sweden Connect"
+              email-address: operations@swedenconnect.se
+  engines:  
+  - name: "Sandbox SignService Test Application"
     processing-paths:
-    - /sign/sandbox          
-    sign-service-id: https://signservice.digg.se
-    client:
+    - /sign/sandbox/eid2cssp        
+    client:      
       client-id: https://eid2cssp.3xasecurity.com/sign
       trusted-certificates:
-      - classpath:clients/sandbox.crt
+      - classpath:clients/eid2cssp.3xasecurity.com.crt
+    protocol:
+      dss:        
+        include-request-message: false
+        default-config-ref: protocol.dss
+    authn:
+      saml:
+        default-config-ref: authn.saml
+        entity-id: https://sandbox.swedenconnect.se/eid2cssp        
+        sp-paths:
+          metadata-publishing-path: /sign/sandbox/eid2cssp/saml/metadata
+          assertion-consumer-path: /sign/sandbox/eid2cssp/saml/sso
+        metadata:
+          ui-info:
+            display-names:
+            - "en-Sweden Connect Signature Service Test"
+            - "sv-Sweden Connect test för underskriftstjänster"
+            descriptions:
+            - "en-Sweden Connect test application for signature services"
+            - "sv-Sweden Connect testapplikation för underskriftstjänster"
+    audit:
+      log-system:
+        name: "Sandbox SignService Test Application Audit Logger"
+        logger-name: SANDBOX_TEST_APP
+        
+  - name: "Sandbox2"
+    processing-paths:
+    - /sign/sandbox2
+    client:
+      client-id: https://eid2cssp.3xasecurity.com/sign2
+      trusted-certificates:
+      - classpath:clients/eid2cssp.3xasecurity.com.crt
     protocol:
       dss:
         include-request-message: false
@@ -38,7 +170,10 @@ signservice:
     authn:
       mock:
         active: true
-        name: "MockedAuthenticationHandler"
+    audit:
+      file:
+        name: "Sandbox2 Audit Logger"
+        file-name: target/audit/sandbox2-audit.log
 
 #
 # Logging
@@ -49,21 +184,8 @@ logging:
       swedenconnect:
         security: DEBUG
         signservice: DEBUG
-  file:
-    path: app/target/logs
+#  file:
+#    path: app/target/logs
 
-#
-# Management
-#
-management:
-  auditevents:
-    enabled: true
-  endpoint:
-    auditevents:
-      enabled: true
-  endpoints:
-    web:
-      exposure:
-        include: "auditevents"
 
 #logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter=DEBUG

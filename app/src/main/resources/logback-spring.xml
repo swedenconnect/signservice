@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <include resource="org/springframework/boot/logging/logback/base.xml"/>
+  
+  <property name="SANDBOX_LOG_FILE" value="target/audit/sandbox-audit.log"/>
+  
+  <appender name="SANDBOX_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <encoder>
+      <pattern>%m%n</pattern>
+      <charset>${FILE_LOG_CHARSET}</charset>
+    </encoder>
+    <file>${SANDBOX_LOG_FILE}</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${SANDBOX_LOG_FILE}-%d{yyyyMMdd}.%i.log}</fileNamePattern>
+      <cleanHistoryOnStart>${LOGBACK_ROLLINGPOLICY_CLEAN_HISTORY_ON_START:-false}</cleanHistoryOnStart>
+      <maxFileSize>${LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE:-10MB}</maxFileSize>
+      <totalSizeCap>${LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP:-0}</totalSizeCap>
+    </rollingPolicy>
+  </appender>  
+
+  <logger name="SANDBOX_TEST_APP" level="INFO" additivity="false">
+    <appender-ref ref="SANDBOX_APPENDER" />
+  </logger>
+
+  <logger name="se.swedenconnect.signservice" level="DEBUG" additivity="false">
+    <appender-ref ref="CONSOLE"/>
+  </logger>
+    
+  <root level="INFO">
+    <appender-ref ref="CONSOLE" />
+  </root>
+
+</configuration>

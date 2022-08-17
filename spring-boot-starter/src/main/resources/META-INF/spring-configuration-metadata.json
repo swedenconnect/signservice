@@ -1,0 +1,49 @@
+{
+  "groups": [
+    {
+      "name": "signservice",
+      "type": "se.swedenconnect.signservice.spring.config.SignServiceConfigurationProperties",
+      "description": "The SignService main configuration.",
+      "sourceType": "se.swedenconnect.signservice.spring.config.SignServiceConfigurationProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "signservice.base-url",
+      "type": "java.lang.String",
+      "description": "The \"base URL\" of the SignService, i.e., everything up until the context path. If not explicitly set, the value is set to https:\/\/${signservice.domain}.",
+      "sourceType": "se.swedenconnect.signservice.spring.config.SignServiceConfigurationProperties"
+    },
+    {
+      "name": "signservice.default-credential",
+      "type": "se.swedenconnect.security.credential.factory.PkiCredentialConfigurationProperties",
+      "description": "The SignService default credential. By setting this, several engines may share the same credential.",
+      "sourceType": "se.swedenconnect.signservice.spring.config.SignServiceConfigurationProperties"
+    },
+    {
+      "name": "signservice.default-handler-config",
+      "type": "se.swedenconnect.signservice.spring.config.SharedHandlerConfigurationProperties",
+      "description": "Default handler configuration. Used by the handler instances configured as part of the engine configuration.",
+      "sourceType": "se.swedenconnect.signservice.spring.config.SignServiceConfigurationProperties"
+    },
+    {
+      "name": "signservice.domain",
+      "type": "java.lang.String",
+      "description": "The domain under which the SignService is running.",
+      "sourceType": "se.swedenconnect.signservice.spring.config.SignServiceConfigurationProperties"
+    },
+    {
+      "name": "signservice.engines",
+      "type": "java.util.List<se.swedenconnect.signservice.spring.config.engine.EngineConfigurationProperties>",
+      "description": "A list of engine configurations.",
+      "sourceType": "se.swedenconnect.signservice.spring.config.SignServiceConfigurationProperties"
+    },
+    {
+      "name": "signservice.system-audit",
+      "type": "se.swedenconnect.signservice.spring.config.audit.AuditLoggerConfigurationProperties",
+      "description": "System audit logger configuration.",
+      "sourceType": "se.swedenconnect.signservice.spring.config.SignServiceConfigurationProperties"
+    }
+  ],
+  "hints": []
+}

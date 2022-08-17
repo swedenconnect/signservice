@@ -15,35 +15,22 @@
  */
 package se.swedenconnect.signservice.audit.base.events;
 
+import javax.annotation.Nonnull;
+
 import se.swedenconnect.signservice.audit.AuditEvent;
 
 /**
- * A factory for audit events.
+ * Interface for an audit event factory.
  */
-public class AuditEventFactory {
-
-  /** The default principal */
-  public final static String DEFAULT_PRINCIPAL = "SignService";
+public interface AuditEventFactory {
 
   /**
-   * Creates an audit event
+   * Creates an audit event.
+   *
    * @param eventId the event id
    * @return the audit event
    */
-  public static AuditEvent createAuditEvent(final String eventId) {
-    return new SignServiceAuditEvent(eventId, DEFAULT_PRINCIPAL);
-  }
+  @Nonnull
+  AuditEvent createAuditEvent(@Nonnull final String eventId);
 
-  /**
-   * Creates an audit event
-   * @param eventId   the event id
-   * @param principal the event principal
-   * @return the audit event
-   */
-  public static AuditEvent createAuditEvent(final String eventId, final String principal) {
-    return new SignServiceAuditEvent(eventId, principal);
-  }
-
-  // Private constructor
-  private AuditEventFactory() {}
 }

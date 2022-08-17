@@ -15,69 +15,67 @@
  */
 package se.swedenconnect.signservice.audit.actuator;
 
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+
+import org.springframework.boot.actuate.audit.listener.AuditApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.stereotype.Component;
-import se.swedenconnect.signservice.audit.base.events.AuditEventFactory;
+
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditEventParameter;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerException;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
 
 /**
- * The {@link AuditLogger} Spring actuator implementation
+ * An {@link AuditLogger} Spring actuator implementation.
  */
 @Slf4j
-@Component
-public class ActuatorAuditLogger implements AuditLogger, ApplicationEventPublisherAware {
+public class ActuatorAuditLogger extends AbstractAuditLogger implements ApplicationEventPublisherAware {
 
-  /** The ApplicationEventPublisher used to publish events */
+  /** The ApplicationEventPublisher used to publish events. */
   private ApplicationEventPublisher publisher;
 
   /** {@inheritDoc} */
   @Override
-  public void auditLog(final AuditEvent event) throws AuditLoggerException {
+  public void auditLog(@Nonnull final AuditEvent event) throws AuditLoggerException {
     if (event == null) {
       throw new AuditLoggerException("event must not be null");
     }
     try {
-      log.debug("Publish audit event [{}]", event.getId());
-      publisher.publishEvent(createActuatorEvent(event));
+      log.debug("Audit logger '{}' publishing audit event '{}'", this.getName(), event.getId());
+      this.publisher.publishEvent(this.createActuatorEvent(event));
     }
-    catch (Throwable t) {
-      final String msg = String.format("Couldn't publish audit event - %s", t.getMessage());
+    catch (final Throwable t) {
+      final String msg = String.format("Failed to publish audit event - %s", t.getMessage());
       throw new AuditLoggerException(msg, t);
     }
   }
 
   /** {@inheritDoc} */
   @Override
-  public AuditEvent createAuditEvent(final String eventId) {
-    return AuditEventFactory.createAuditEvent(eventId);
-  }
-
-  /** {@inheritDoc}*/
-  @Override
-  public void setApplicationEventPublisher(@NonNull final ApplicationEventPublisher publisher) {
+  public void setApplicationEventPublisher(@Nonnull final ApplicationEventPublisher publisher) {
     this.publisher = publisher;
   }
 
   /**
-   * Creates and actuate audit event
-   * @param event - The SignService AuditEvent
-   * @return - the audit event
+   * Creates and actuates audit event.
+   *
+   * @param event the SignService AuditEvent
+   * @return the audit event
    */
-  protected org.springframework.boot.actuate.audit.AuditEvent createActuatorEvent(final AuditEvent event) {
-    Objects.requireNonNull(event, "event must not be null");
+  @Nonnull
+  protected AuditApplicationEvent createActuatorEvent(@Nonnull final AuditEvent event) {
     final Map<String, Object> auditParameters = event.getParameters().stream()
-      .collect(Collectors.toMap(AuditEventParameter::getName, AuditEventParameter::getValue));
-    return new org.springframework.boot.actuate.audit.AuditEvent(event.getPrincipal(), event.getId(), auditParameters);
+        .collect(Collectors.toMap(AuditEventParameter::getName, AuditEventParameter::getValue));
+
+    return new AuditApplicationEvent(
+        new org.springframework.boot.actuate.audit.AuditEvent(
+            event.getTimestamp(), event.getPrincipal(), event.getId(), auditParameters));
   }
 
 }
