@@ -31,9 +31,6 @@ import java.net.URL;
 /**
  * Http connector for CMC tests. This connector will skip using HTTP to a CMC responder and instead
  * obtain the CMC response directly from a test CA
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
 public class TestCMCHttpConnector implements CMCClientHttpConnector {

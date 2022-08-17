@@ -48,9 +48,6 @@ import java.util.List;
 
 /**
  * CA service for test
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
  */
 public class TestCAService extends AbstractCAService<DefaultCertificateModelBuilder> {
 

@@ -72,13 +72,6 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
   /** CMC Client for remote CA service used to issue certificates */
   private final CMCClient cmcClient;
 
-  /**
-   * Name of this key and certificate handler.
-   *
-   * @param name the name of this key and certificate handler
-   */
-  @Setter private String name;
-
   /** Attribute mapper mapping attribute data from assertion to Certificates */
   private final AttributeMapper attributeMapper;
 
@@ -94,7 +87,7 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
    * The certificate type produced by this certificate handler. Default PKC certificates
    */
   @Setter
-  CertificateType supportedCertificateType;
+  private CertificateType supportedCertificateType;
 
   /**
    * Constructor for the key and certificate handler.
@@ -118,21 +111,17 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
   }
 
   /** {@inheritDoc} */
-  @Override public String getName() {
-    return Optional.ofNullable(name).orElse(this.getClass().getSimpleName());
-  }
-
-  /** {@inheritDoc} */
-  @Override protected void specificRequirementTests(@Nonnull SignRequestMessage signRequest,
-    @Nonnull SignServiceContext context) throws InvalidRequestException {
+  @Override
+  protected void specificRequirementTests(final @Nonnull SignRequestMessage signRequest,
+    final @Nonnull SignServiceContext context) throws InvalidRequestException {
     // No additional tests
   }
 
   /** {@inheritDoc} */
-  @Override protected X509Certificate obtainSigningCertificate(@Nonnull PkiCredential signingKeyPair,
-    @Nonnull SignRequestMessage signRequest, @Nonnull IdentityAssertion assertion,
-    @Nonnull SignServiceContext context) throws CertificateException {
-    // TODO implement certificate requests using CMC
+  @Override
+  protected X509Certificate obtainSigningCertificate(final @Nonnull PkiCredential signingKeyPair,
+    final @Nonnull SignRequestMessage signRequest, final @Nonnull IdentityAssertion assertion,
+    final @Nonnull SignServiceContext context) throws CertificateException {
 
     log.debug("Issuing certificate from CA via CMC ...");
 
@@ -170,6 +159,7 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
     }
     catch (Exception e) {
       // We have to catch Exception broadly, as the CMC client may provide NullPointerException on bad response
+      // TODO update CMC client exception handling to allow catching specific checked exception
       throw new CertificateException("Error obtaining certificate model from CMC client");
     }
 
@@ -333,7 +323,8 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
   }
 
   /** {@inheritDoc} */
-  @Override protected void isCertificateTypeSupported(@Nonnull CertificateType certificateType,
+  @Override
+  protected void isCertificateTypeSupported(@Nonnull CertificateType certificateType,
     @Nullable String certificateProfile) throws InvalidRequestException {
     if (!supportedCertificateType.equals(certificateType)) {
       throw new InvalidRequestException(

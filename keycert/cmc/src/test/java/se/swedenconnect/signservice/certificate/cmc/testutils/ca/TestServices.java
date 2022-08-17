@@ -37,9 +37,6 @@ import java.util.*;
  *  - TestCAService holds a CA service. The CA Service in turn consist of a Certificate issuer component that creates the certificates
  *    and the CA repository and revocation services.
  *  - The TestCARepository is a simple implementation of a repository used to store information about issued Certificates
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
 public class TestServices {

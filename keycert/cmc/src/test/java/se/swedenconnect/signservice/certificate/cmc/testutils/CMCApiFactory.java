@@ -17,26 +17,18 @@
 package se.swedenconnect.signservice.certificate.cmc.testutils;
 
 import lombok.Getter;
-import org.bouncycastle.cms.CMSSignedData;
 import se.swedenconnect.ca.cmc.api.CMCCaApi;
 import se.swedenconnect.ca.cmc.api.CMCRequestParser;
 import se.swedenconnect.ca.cmc.api.CMCResponseFactory;
-import se.swedenconnect.ca.cmc.api.CMCResponseParser;
 import se.swedenconnect.ca.cmc.api.impl.DefaultCMCCaApi;
-import se.swedenconnect.ca.cmc.auth.CMCReplayChecker;
-import se.swedenconnect.ca.cmc.auth.impl.DefaultCMCReplayChecker;
 import se.swedenconnect.ca.cmc.auth.impl.DefaultCMCValidator;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
 
-import java.io.IOException;
 import java.security.KeyPair;
 import java.security.cert.CertificateEncodingException;
 
 /**
- * Description
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * Factory for providing CMC API instances
  */
 public class CMCApiFactory {
 

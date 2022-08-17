@@ -47,9 +47,6 @@ import java.util.List;
 
 /**
  * This class when instantiated creates a test CA services.
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
 public class TestCAHolder {

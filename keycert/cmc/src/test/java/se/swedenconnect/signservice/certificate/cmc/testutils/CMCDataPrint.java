@@ -36,9 +36,6 @@ import java.util.List;
 
 /**
  * Test result data printing
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
  */
 public class CMCDataPrint {
 

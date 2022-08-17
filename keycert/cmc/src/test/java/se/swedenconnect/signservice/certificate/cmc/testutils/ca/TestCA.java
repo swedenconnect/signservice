@@ -23,9 +23,6 @@ import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 import java.security.KeyPair;
 /**
  * Enumeration of configuration data for test CA providers
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
  */
 @AllArgsConstructor
 @Getter
