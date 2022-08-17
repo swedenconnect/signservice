@@ -23,6 +23,12 @@ public class AuditEventIds {
   /** SignService system was started. */
   public final static String EVENT_SYSTEM_STARTED = "audit.system.started";
 
+  /** A request was made to the application that could not be serviced. */
+  public final static String EVENT_SYSTEM_NOTFOUND = "audit.system.not-found";
+
+  /** An unrecoverable processing error was caught and reported by the system. */
+  public final static String EVENT_SYSTEM_PROCESSING_ERROR = "audit.system.processing-error";
+
   /** A SignService engine instance (servicing a client) was started. */
   public final static String EVENT_ENGINE_STARTED = "audit.engine.started";
 
