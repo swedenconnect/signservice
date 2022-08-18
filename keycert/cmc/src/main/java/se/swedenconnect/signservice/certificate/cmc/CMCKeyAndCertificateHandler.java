@@ -158,7 +158,7 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
       );
     }
     catch (IOException e) {
-      throw new CertificateException("Error obtaining certificate model from CMC client");
+      throw new CertificateException("Error obtaining certificate model from CMC client", e);
     }
 
     // Obtain attribute mapping for the AuthContextExtension
