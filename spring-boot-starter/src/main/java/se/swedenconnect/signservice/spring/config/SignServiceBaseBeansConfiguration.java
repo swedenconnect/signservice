@@ -17,15 +17,23 @@ package se.swedenconnect.signservice.spring.config;
 
 import java.security.cert.X509Certificate;
 
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import lombok.Setter;
+import se.swedenconnect.opensaml.OpenSAMLInitializer;
+import se.swedenconnect.opensaml.OpenSAMLSecurityDefaultsConfig;
+import se.swedenconnect.opensaml.OpenSAMLSecurityExtensionConfig;
+import se.swedenconnect.opensaml.sweid.xmlsec.config.SwedishEidSecurityConfiguration;
 import se.swedenconnect.security.credential.converters.PropertyToX509CertificateConverter;
 import se.swedenconnect.signservice.audit.actuator.ActuatorAuditLoggerFactory;
+import se.swedenconnect.signservice.authn.saml.spring.PropertyToEntityDescriptorConverter;
 import se.swedenconnect.signservice.core.config.HandlerFactoryRegistry;
 
 /**
@@ -60,10 +68,48 @@ public class SignServiceBaseBeansConfiguration {
    *
    * @return a PropertyToX509CertificateConverter bean
    */
+  @ConditionalOnMissingBean
   @Bean
   @ConfigurationPropertiesBinding
   public PropertyToX509CertificateConverter propertyToX509CertificateConverter() {
     return new PropertyToX509CertificateConverter();
+  }
+
+  /**
+   * Creates the bean the allows us to use property values that are referencing EntityDescriptor resources and get the
+   * {@link EntityDescriptor} injected.
+   *
+   * @return a EntityDescriptor bean
+   */
+  @ConditionalOnMissingBean
+  @Bean
+  @ConfigurationPropertiesBinding
+  @DependsOn("openSAML")
+  public PropertyToEntityDescriptorConverter propertyToEntityDescriptorConverter() {
+    return new PropertyToEntityDescriptorConverter();
+  }
+
+  @ConditionalOnMissingBean
+  @Bean
+  @ConfigurationPropertiesBinding
+  public LocalizedStringConverter localizedStringConverter() {
+    return new LocalizedStringConverter();
+  }
+
+  /**
+   * Gets the OpenSAML initializer (which is needed for SAML support)
+   *
+   * @return OpenSAMLInitializer
+   * @throws Exception for init errors
+   */
+  @ConditionalOnMissingBean
+  @Bean("openSAML")
+  public OpenSAMLInitializer openSAML() throws Exception {
+    OpenSAMLInitializer.getInstance()
+        .initialize(
+            new OpenSAMLSecurityDefaultsConfig(new SwedishEidSecurityConfiguration()),
+            new OpenSAMLSecurityExtensionConfig());
+    return OpenSAMLInitializer.getInstance();
   }
 
 }

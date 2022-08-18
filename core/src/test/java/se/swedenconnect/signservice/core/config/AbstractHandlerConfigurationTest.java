@@ -15,6 +15,12 @@
  */
 package se.swedenconnect.signservice.core.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.Nonnull;
 
 import org.junit.jupiter.api.Assertions;
@@ -44,7 +50,24 @@ public class AbstractHandlerConfigurationTest {
     shared.getDummy2().setOne("1-1");
     shared.getDummy2().setTwo("2-2");
     shared.setDef(17);
+    shared.setList1(Arrays.asList("one", "two", "three"));
+    shared.setArray1(new String[] { "one", "two", "three" });
     shared.setName("The configuration");
+
+    final Map<String, DummyObject> smap = new HashMap<>();
+    final DummyObject sd1 = new DummyObject();
+    sd1.setOne("ONE");
+    sd1.setTwo("TWO");
+    sd1.setThree(false);
+    smap.put("D1", sd1);
+    final DummyObject sd2 = new DummyObject();
+    sd2.setOne("1");
+    smap.put("D2", sd2);
+    shared.setMap(smap);
+
+    final List<String> list = new ArrayList<>();
+    list.add("ett");
+    list.add("two");
 
     final DummyHandlerConfiguration conf = new DummyHandlerConfiguration();
     conf.setAbc("ABC");
@@ -54,7 +77,16 @@ public class AbstractHandlerConfigurationTest {
     conf.setDummy2(new DummyObject());
     conf.getDummy2().setOne("1-1");
     conf.getDummy2().setTwo("2-2");
+    conf.setList1(list);
+    conf.setArray1(new String[] { "ett", "two" });
     conf.setDefaultConfigRef("ref");
+
+    final Map<String, DummyObject> cmap = new HashMap<>();
+    final DummyObject cd1 = new DummyObject();
+    cd1.setOne("ETT");
+    cd1.setTwo("TVÅ");
+    cmap.put("D1", cd1);
+    conf.setMap(cmap);
 
     Assertions.assertTrue(conf.needsDefaultConfigResolving());
 
@@ -80,6 +112,15 @@ public class AbstractHandlerConfigurationTest {
     Assertions.assertNull(conf.getDummy().getFive()); // Couldn't be merged
     Assertions.assertEquals("1-1", conf.getDummy2().getOne());
     Assertions.assertEquals("2-2", conf.getDummy2().getTwo());
+    Assertions.assertEquals(Arrays.asList("ett", "two", "three"), conf.getList1());
+    Assertions.assertArrayEquals(new String[] { "ett", "two", "three" }, conf.getArray1());
+    Assertions.assertTrue(conf.getMap().size() == 2);
+    final DummyObject d1 = conf.getMap().get("D1");
+    Assertions.assertEquals("ETT", d1.getOne());
+    Assertions.assertEquals("TVÅ", d1.getTwo());
+    Assertions.assertEquals(Boolean.FALSE, d1.isThree());
+    final DummyObject d2 = conf.getMap().get("D2");
+    Assertions.assertEquals("1", d2.getOne());
   }
 
   @Test
@@ -213,6 +254,9 @@ public class AbstractHandlerConfigurationTest {
     private char ghi;
     private DummyObject dummy;
     private DummyObject dummy2;
+    private List<String> list1;
+    private String[] array1;
+    private Map<String, DummyObject> map;
 
     @Override
     @Nonnull

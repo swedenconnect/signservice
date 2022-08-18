@@ -79,7 +79,6 @@ public class EngineConfigurationProperties implements InitializingBean {
   @Override
   public void afterPropertiesSet() throws Exception {
     Assert.hasText(this.name, "name must be assigned");
-    Assert.hasText(this.signServiceId, "sign-service-id must be assigned");
     Assert.notEmpty(this.processingPaths, "processing-paths must be assigned and non-empty");
 
     Assert.notNull(this.client, "client must be assigned");

@@ -19,7 +19,7 @@
     </rollingPolicy>
   </appender>  
 
-  <logger name="SANDBOX" level="INFO" additivity="false">
+  <logger name="SANDBOX_TEST_APP" level="INFO" additivity="false">
     <appender-ref ref="SANDBOX_APPENDER" />
   </logger>
 

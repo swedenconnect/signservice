@@ -34,6 +34,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.util.StringUtils;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,7 @@ import se.swedenconnect.signservice.api.engine.config.impl.DefaultEngineConfigur
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerConfiguration;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
+import se.swedenconnect.signservice.authn.saml.config.SamlAuthenticationHandlerConfiguration;
 import se.swedenconnect.signservice.core.SignServiceHandler;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.core.config.HandlerFactory;
@@ -62,6 +65,7 @@ import se.swedenconnect.signservice.storage.MessageReplayChecker;
  */
 @Configuration
 @EnableConfigurationProperties(SignServiceConfigurationProperties.class)
+@DependsOn("openSAML")
 @Slf4j
 public class SignServiceConfiguration {
 
@@ -176,7 +180,7 @@ public class SignServiceConfiguration {
   @ConditionalOnMissingBean(name = "signservice.MessageReplayChecker")
   @Bean("signservice.MessageReplayChecker")
   public MessageReplayChecker messageReplayChecker() {
-    // TODO
+    // TODO: Introduce a simple InMemory version ...
     return null;
   }
 
@@ -190,13 +194,6 @@ public class SignServiceConfiguration {
   public ProtocolHandler dssProtocolHandler() {
     return new DssProtocolHandler();
   }
-
-//  @Bean
-//  public AuditLogger auditLogger() {
-//    // TODO Change configuration logger type
-//    AuditLoggerSingleton.init(new ActuatorAuditLogger());
-//    return AuditLoggerSingleton.getAuditLogger();
-//  }
 
   @ConditionalOnMissingBean(name = "signservice.Engines")
   @Bean("signservice.Engines")
@@ -220,7 +217,16 @@ public class SignServiceConfiguration {
 
       final DefaultEngineConfiguration conf = new DefaultEngineConfiguration();
       conf.setName(ecp.getName());
-      conf.setSignServiceId(ecp.getSignServiceId());
+
+      if (StringUtils.hasText(ecp.getSignServiceId())) {
+        conf.setSignServiceId(ecp.getSignServiceId());
+      }
+      else if (StringUtils.hasText(this.properties.getDefaultSignServiceId())) {
+        conf.setSignServiceId(this.properties.getDefaultSignServiceId());
+      }
+      else {
+        throw new IllegalArgumentException("No sign-service-id given for engine (and missing default-sign-service-id)");
+      }
 
       if (ecp.getCredential() != null) {
         final PkiCredentialFactoryBean credentialFactory = new PkiCredentialFactoryBean(ecp.getCredential());
@@ -281,7 +287,14 @@ public class SignServiceConfiguration {
       //
       final HandlerConfiguration<AuthenticationHandler> authnConf = ecp.getAuthn().getHandlerConfiguration();
       if (authnConf.needsDefaultConfigResolving()) {
-        // TODO
+        authnConf.resolveDefaultConfigRef(this.getResolver("authn",
+            Optional.ofNullable(this.properties.getDefaultHandlerConfig())
+                .map(SharedHandlerConfigurationProperties::getAuthn)
+                .orElse(null)));
+      }
+      if (SamlAuthenticationHandlerConfiguration.class.isInstance(authnConf)) {
+        final SamlAuthenticationHandlerConfiguration _authnConf = SamlAuthenticationHandlerConfiguration.class.cast(authnConf);
+        _authnConf.setMessageReplayChecker(messageReplayChecker);
       }
       authnConf.init();
 

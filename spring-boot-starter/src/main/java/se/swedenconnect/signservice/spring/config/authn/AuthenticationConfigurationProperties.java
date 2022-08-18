@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.authn.mock.MockedAuthenticationHandlerConfiguration;
+import se.swedenconnect.signservice.authn.saml.config.SpringSamlAuthenticationHandlerConfiguration;
 import se.swedenconnect.signservice.core.config.BeanReferenceHandlerConfiguration;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.spring.config.HandlerConfigurationProperties;
@@ -37,6 +38,13 @@ public class AuthenticationConfigurationProperties implements HandlerConfigurati
   @Getter
   @Setter
   private MockedAuthenticationHandlerConfiguration mock;
+
+  /**
+   * Configuration for using the SAML authentication handler.
+   */
+  @Getter
+  @Setter
+  private SpringSamlAuthenticationHandlerConfiguration saml;
 
   /**
    * Configuration that points to an already configured authentication handler bean.
@@ -60,26 +68,29 @@ public class AuthenticationConfigurationProperties implements HandlerConfigurati
   @Override
   @Nonnull
   public HandlerConfiguration<AuthenticationHandler> getHandlerConfiguration() throws IllegalArgumentException {
-    if (this.external != null && (this.mock != null && this.mock.isActive())) {
-      throw new IllegalArgumentException("Both mock and external configuration supplied, only one can be assigned");
+    final int noAssigned = (this.saml != null ? 1 : 0) + (this.mock != null && this.mock.isActive() ? 1 : 0)
+        + (this.external != null ? 1 : 0);
+    if (noAssigned > 1) {
+      throw new IllegalArgumentException("Several authentication handler configurations supplied, only one can be assigned");
     }
-    if (this.external == null && (this.mock == null || (this.mock != null && !this.mock.isActive()))) {
+    else if (noAssigned == 0) {
       throw new IllegalArgumentException("Missing configuration");
     }
-    if (this.external != null) {
-      return this.external;
-    }
-    else { // mock
-      return this.mock;
-    }
+
+    return this.saml != null ? this.saml
+        : this.external != null ? this.external
+            : this.mock;
   }
 
   /** {@inheritDoc} */
   @Override
   @Nullable
   public HandlerConfiguration<AuthenticationHandler> getHandlerConfiguration(@Nonnull final String name) {
-    if ("mock".equalsIgnoreCase(name)) {
-      return this.mock != null ? (this.mock.isActive() ? this.mock : null) : null;
+    if ("saml".equalsIgnoreCase(name)) {
+      return this.saml;
+    }
+    else if ("mock".equalsIgnoreCase(name)) {
+      return this.mock;
     }
     else if ("external".equalsIgnoreCase(name)) {
       return this.external;
