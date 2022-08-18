@@ -18,7 +18,6 @@ package se.swedenconnect.signservice.spring.config.engine;
 import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.Assert;
 
 import lombok.Data;
@@ -32,7 +31,6 @@ import se.swedenconnect.signservice.spring.config.protocol.ProtocolConfiguration
  * Configuration properties for an engine configuration.
  */
 @Data
-@ConfigurationProperties
 public class EngineConfigurationProperties implements InitializingBean {
 
   /**

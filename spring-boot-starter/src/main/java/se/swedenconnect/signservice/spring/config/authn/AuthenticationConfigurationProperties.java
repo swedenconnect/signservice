@@ -18,8 +18,6 @@ package se.swedenconnect.signservice.spring.config.authn;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
@@ -32,7 +30,6 @@ import se.swedenconnect.signservice.spring.config.HandlerConfigurationProperties
 /**
  * Properties for authentication configuration.
  */
-@ConfigurationProperties
 public class AuthenticationConfigurationProperties implements HandlerConfigurationProperties<AuthenticationHandler> {
 
   /**
