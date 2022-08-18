@@ -15,14 +15,21 @@
  */
 package se.swedenconnect.signservice.signature.signer.crypto;
 
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import se.swedenconnect.security.algorithms.MessageDigestAlgorithm;
-
 import java.io.IOException;
 import java.util.Arrays;
+
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.security.algorithms.MessageDigestAlgorithm;
 
 /**
  * Provides functions to create and verify RSA Padded data according to PKCS#1 version 1.5
@@ -75,8 +82,7 @@ public class PKCS1V15Padding {
   public static boolean verifyMessageDigest(@NonNull final byte[] paddedDigest, @NonNull final byte[] digest,
     @NonNull final MessageDigestAlgorithm messageDigestAlgorithm) throws IOException {
 
-    try {
-      final ASN1InputStream asn1InputStream = new ASN1InputStream(paddedDigest);
+    try (final ASN1InputStream asn1InputStream = new ASN1InputStream(paddedDigest)) {
       final ASN1Sequence asn1Sequence = ASN1Sequence.getInstance(asn1InputStream.readObject());
       final AlgorithmIdentifier hashAlgorithmIdentifier = AlgorithmIdentifier
         .getInstance(asn1Sequence.getObjectAt(0));
@@ -98,7 +104,7 @@ public class PKCS1V15Padding {
       }
       return true;
     }
-    catch (Exception ex) {
+    catch (final Exception ex) {
       throw new IOException("Failed to process padding verification data", ex);
     }
   }

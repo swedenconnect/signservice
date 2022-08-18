@@ -15,6 +15,16 @@
  */
 package se.swedenconnect.signservice.signature.tbsdata.impl;
 
+import java.security.SignatureException;
+import java.security.cert.X509Certificate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
@@ -25,13 +35,6 @@ import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
 import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 
-import javax.annotation.Nonnull;
-import java.security.SignatureException;
-import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
 /**
  * Abstract implementation of TBS data processor
  */
@@ -39,38 +42,41 @@ import java.util.Optional;
 public abstract class AbstractTBSDataProcessor implements TBSDataProcessor {
 
   /**
-   * Defines if processing of input data is strict or applies the Postel's robustness principle.
-   * An example of this is that a PAdES signature MUST NOT contain signing time in signed attributes.
-   * With strict processing a request with signing time will fail. By default, such request
-   * will be accepted, but the signing time will be removed in line with the PAdES standard.
+   * Defines if processing of input data is strict or applies the Postel's robustness principle. An example of this is
+   * that a PAdES signature MUST NOT contain signing time in signed attributes. With strict processing a request with
+   * signing time will fail. By default, such request will be accepted, but the signing time will be removed in line
+   * with the PAdES standard.
    */
-  @Setter protected boolean strictProcessing = false;
+  @Setter
+  private boolean strictProcessing = false;
 
   /**
-   * Defines if ESSCertID holding a hash of the signer certificate should include Issuer Serial
-   * data in addition to the certificate hash
+   * Defines if ESSCertID holding a hash of the signer certificate should include Issuer Serial data in addition to the
+   * certificate hash
    */
-  @Setter protected boolean includeIssuerSerial = false;
+  @Setter
+  private boolean includeIssuerSerial = false;
 
   /** Supported processing rules */
-  protected final List<String> supportedProcessingRules;
+  private final List<String> supportedProcessingRules;
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param supportedProcessingRules list of processing rule identifiers supported by this TBS data processor
    */
-  public AbstractTBSDataProcessor(List<String> supportedProcessingRules) {
-    this.supportedProcessingRules = supportedProcessingRules;
+  public AbstractTBSDataProcessor(@Nullable final List<String> supportedProcessingRules) {
+    this.supportedProcessingRules = Optional.ofNullable(supportedProcessingRules)
+        .orElseGet(() -> Collections.emptyList());
   }
 
   /**
-   * Check processing rules of this TBS data processor against requested processing rule
+   * Check processing rules of this TBS data processor against requested processing rule.
    *
    * @param processingRulesUri requested processing rule
    * @throws SignatureException on error processing according to the required processing rule
    */
-  protected void defaultProcessingRuleCheck(String processingRulesUri) throws SignatureException {
+  protected void defaultProcessingRuleCheck(@Nullable final String processingRulesUri) throws SignatureException {
     if (processingRulesUri == null && this.supportedProcessingRules.isEmpty()) {
       log.debug("Using default processing rules");
     }
@@ -80,21 +86,23 @@ public abstract class AbstractTBSDataProcessor implements TBSDataProcessor {
           log.debug("Using supported processing rule: {}", processingRulesUri);
         }
         else {
-          throw new SignatureException(
-            "Processing rule " + processingRulesUri + " is not supported." +
-              " Expected one of: " + String.join(",", this.supportedProcessingRules));
+          throw new SignatureException(String.format(
+              "Processing rule %s is not supported. Expected one of %s", processingRulesUri,
+              this.supportedProcessingRules));
         }
       }
       else {
         log.debug("Null requested processing rule is accepted among supported processing rules. {}",
-          String.join(",", this.supportedProcessingRules));
+            this.supportedProcessingRules);
       }
     }
   }
 
-  @Override public TBSProcessingData processSignTaskData(@Nonnull final RequestedSignatureTask signatureTask,
-    @Nonnull final X509Certificate signerCertificate, @Nonnull final SignatureAlgorithm signatureAlgorithm)
-    throws SignatureException {
+  /** {@inheritDoc} */
+  @Override
+  public TBSProcessingData processSignTaskData(@Nonnull final RequestedSignatureTask signatureTask,
+      @Nonnull final X509Certificate signerCertificate, @Nonnull final SignatureAlgorithm signatureAlgorithm)
+      throws SignatureException {
     // Note that on this level absence of any input parameter is considered a programming error and produces
     // an unchecked NullPointerException
     Objects.requireNonNull(signatureTask, "SignatureTask must not be null");
@@ -103,18 +111,18 @@ public abstract class AbstractTBSDataProcessor implements TBSDataProcessor {
 
     try {
       // Validate the input data
-      checkSignTask(signatureTask, signatureAlgorithm);
+      this.checkSignTask(signatureTask, signatureAlgorithm);
     }
-    catch (InvalidRequestException e) {
+    catch (final InvalidRequestException e) {
       // Convert invalid request to SignatureException
       throw new SignatureException(e.getMessage());
     }
 
-    return processSignatureTypeTBSData(signatureTask, signerCertificate, signatureAlgorithm);
+    return this.processSignatureTypeTBSData(signatureTask, signerCertificate, signatureAlgorithm);
   }
 
   /**
-   * Perform the signature type specific processing of sign task data to produce the data to be signed
+   * Perform the signature type specific processing of sign task data to produce the data to be signed.
    *
    * @param signatureTask requested signature task data
    * @param signerCertificate signer certificate
@@ -122,34 +130,71 @@ public abstract class AbstractTBSDataProcessor implements TBSDataProcessor {
    * @return data to be signed
    * @throws SignatureException on error processing the requested signature task data
    */
-  protected abstract TBSProcessingData processSignatureTypeTBSData(RequestedSignatureTask signatureTask,
-    X509Certificate signerCertificate, SignatureAlgorithm signatureAlgorithm) throws SignatureException;
+  @Nonnull
+  protected abstract TBSProcessingData processSignatureTypeTBSData(@Nonnull final RequestedSignatureTask signatureTask,
+      @Nonnull final X509Certificate signerCertificate, @Nonnull final SignatureAlgorithm signatureAlgorithm)
+      throws SignatureException;
 
-  @Override public void checkSignTask(final RequestedSignatureTask signatureTask,
-    final SignatureAlgorithm signatureAlgorithm) throws InvalidRequestException {
-    // Note that on this level we consider absence of sign task and signature algorithm as a checked exception as it may not be a programming error
+  /** {@inheritDoc} */
+  @Override
+  public void checkSignTask(@Nonnull final RequestedSignatureTask signatureTask,
+      @Nonnull final SignatureAlgorithm signatureAlgorithm) throws InvalidRequestException {
+
+    // Note that on this level we consider absence of sign task and signature algorithm as a checked exception as it may
+    // not be a programming error
     Optional.ofNullable(signatureTask).orElseThrow(() -> new InvalidRequestException("SignatureTask must not be null"));
     Optional.ofNullable(signatureAlgorithm)
-      .orElseThrow(() -> new InvalidRequestException("SignatureAlgorithm must not be null"));
+        .orElseThrow(() -> new InvalidRequestException("SignatureAlgorithm must not be null"));
     Optional.ofNullable(signatureTask.getTbsData())
-      .orElseThrow(() -> new InvalidRequestException("Null TBS data in sign request"));
+        .orElseThrow(() -> new InvalidRequestException("Null TBS data in sign request"));
     Optional.ofNullable(signatureTask.getSignatureType())
-      .orElseThrow(() -> new InvalidRequestException("SignatureType must not be null"));
-    byte[] tbsData = Optional.ofNullable(signatureTask.getTbsData())
-      .orElseThrow(() -> new InvalidRequestException("To be signed data must not be null"));
-    AdESType adESType = signatureTask.getAdESType();
-    boolean ades = adESType != null && (adESType.equals(AdESType.BES) || adESType.equals(AdESType.EPES));
-    checkToBeSignedData(tbsData, ades, signatureTask.getAdESObject(), signatureAlgorithm);
+        .orElseThrow(() -> new InvalidRequestException("SignatureType must not be null"));
+    final byte[] tbsData = Optional.ofNullable(signatureTask.getTbsData())
+        .orElseThrow(() -> new InvalidRequestException("To be signed data must not be null"));
+    final AdESType adESType = signatureTask.getAdESType();
+    final boolean ades = adESType != null && (adESType.equals(AdESType.BES) || adESType.equals(AdESType.EPES));
+    this.checkToBeSignedData(tbsData, ades, signatureTask.getAdESObject(), signatureAlgorithm);
   }
 
   /**
-   * Perform signature type specific checks on the data to be signed input
+   * Perform signature type specific checks on the data to be signed input.
+   *
    * @param tbsData data to be signed provided in the request
    * @param ades true if this is an AdES signature according to an ETSI AdES profile
    * @param adESObject optional AdES object provided in the request
    * @param signatureAlgorithm signature algorithm intended to be used to sign
    * @throws InvalidRequestException if the provided data is invalid
    */
-  protected abstract void checkToBeSignedData(byte[] tbsData, boolean ades, AdESObject adESObject,
-    SignatureAlgorithm signatureAlgorithm) throws InvalidRequestException;
+  protected abstract void checkToBeSignedData(@Nonnull final byte[] tbsData, final boolean ades,
+      @Nullable final AdESObject adESObject, @Nonnull final SignatureAlgorithm signatureAlgorithm)
+      throws InvalidRequestException;
+
+  /**
+   * Gets the {@code strictProcessing} setting.
+   *
+   * @return the strict processing setting
+   */
+  protected boolean isStrictProcessing() {
+    return this.strictProcessing;
+  }
+
+  /**
+   * Gets the {@code includeIssuerSerial} setting.
+   *
+   * @return the includeIssuerSerial setting
+   */
+  protected boolean isIncludeIssuerSerial() {
+    return this.includeIssuerSerial;
+  }
+
+  /**
+   * Gets the supported processing rules.
+   *
+   * @return the supported processing rules
+   */
+  @Nonnull
+  protected List<String> getSupportedProcessingRules() {
+    return this.supportedProcessingRules;
+  }
+
 }

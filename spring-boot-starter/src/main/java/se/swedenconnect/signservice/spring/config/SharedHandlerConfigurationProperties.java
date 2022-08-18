@@ -20,6 +20,7 @@ import lombok.Setter;
 import se.swedenconnect.signservice.spring.config.audit.AuditLoggerConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.authn.AuthenticationConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.protocol.ProtocolConfigurationProperties;
+import se.swedenconnect.signservice.spring.config.sign.SignatureHandlerConfigurationProperties;
 
 /**
  * Shared, or default, configuration properties that may be merged into the engine configuration.
@@ -39,6 +40,13 @@ public class SharedHandlerConfigurationProperties {
   @Getter
   @Setter
   private AuthenticationConfigurationProperties authn;
+
+  /**
+   * Default/shared signature handler configuration.
+   */
+  @Getter
+  @Setter
+  private SignatureHandlerConfigurationProperties sign;
 
   /**
    * Default/shared audit logger configuration.

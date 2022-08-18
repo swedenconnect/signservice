@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ds:Object xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+  <xades:QualifyingProperties Target="#id-75a9546c7636a433ad031995a7459070" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#">
+    <xades:SignedProperties Id="xades-231432ef8b9aed1b2efdf161066de57d">
+      <xades:SignedSignatureProperties>
+        <xades:SigningTime>2020-03-23T12:28:43.467Z</xades:SigningTime>
+        <xades:SigningCertificateV2>
+          <xades:Cert>
+            <xades:CertDigest>
+              <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+              <ds:DigestValue>nPWiLm5ZYQmxHoTQywMN8ogSrgOcku6vEXPw2AqF1U0=</ds:DigestValue>
+            </xades:CertDigest>
+            <xades:IssuerSerialV2>MIHQMIG7MIG4MQswCQYDVQQGEwJTRTE1MDMGA1UEChMsRGV2IFRFU1QgQ0Egb3JnIEFCIChOT1QgQSBSRUFMIE9SR0FOSVpBVElPTikxIDAeBgNVBAsTF0NlbnRyYWwgU2lnbmluZyBTZXJ2aWNlMRUwEwYDVQQFEwxBMTIzNDU2LTc4OTAxOTA3BgNVBAMTMENlbnRyYWwgU2lnbmluZyBDQTAwMSAtIEVJRCAyLjAgRGV2IFRFU1QgU2VydmljZQIQL4abhzPVGadiLjpZbxvaBw==</xades:IssuerSerialV2>
+          </xades:Cert>
+        </xades:SigningCertificateV2>
+      </xades:SignedSignatureProperties>
+    </xades:SignedProperties>
+  </xades:QualifyingProperties>
+</ds:Object>

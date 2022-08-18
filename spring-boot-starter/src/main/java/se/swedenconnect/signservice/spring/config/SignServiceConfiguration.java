@@ -16,6 +16,7 @@
 package se.swedenconnect.signservice.spring.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -57,6 +58,10 @@ import se.swedenconnect.signservice.protocol.ProtocolHandler;
 import se.swedenconnect.signservice.protocol.dss.DssProtocolHandler;
 import se.swedenconnect.signservice.session.SessionHandler;
 import se.swedenconnect.signservice.session.impl.DefaultSessionHandler;
+import se.swedenconnect.signservice.signature.SignatureHandler;
+import se.swedenconnect.signservice.signature.impl.DefaultSignatureHandler;
+import se.swedenconnect.signservice.signature.tbsdata.impl.PDFTBSDataProcessor;
+import se.swedenconnect.signservice.signature.tbsdata.impl.XMLTBSDataProcessor;
 import se.swedenconnect.signservice.spring.config.engine.EngineConfigurationProperties;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
 
@@ -195,6 +200,12 @@ public class SignServiceConfiguration {
     return new DssProtocolHandler();
   }
 
+  @ConditionalOnMissingBean(name = "signservice.DefaultSignatureHandler")
+  @Bean("signservice.DefaultSignatureHandler")
+  public SignatureHandler defaultSignatureHandler() {
+    return new DefaultSignatureHandler(Arrays.asList(new XMLTBSDataProcessor(), new PDFTBSDataProcessor()));
+  }
+
   @ConditionalOnMissingBean(name = "signservice.Engines")
   @Bean("signservice.Engines")
   public List<SignServiceEngine> engines(
@@ -209,6 +220,8 @@ public class SignServiceConfiguration {
         new SpringBeanLoader<>(this.applicationContext, AuthenticationHandler.class);
     final SpringBeanLoader<AuditLogger> auditBeanLoader =
         new SpringBeanLoader<>(this.applicationContext, AuditLogger.class);
+    final SpringBeanLoader<SignatureHandler> sigHandlerBeanLoader =
+        new SpringBeanLoader<>(this.applicationContext, SignatureHandler.class);
 
     List<SignServiceEngine> engines = new ArrayList<>();
 
@@ -261,6 +274,20 @@ public class SignServiceConfiguration {
       final HandlerFactory<ProtocolHandler> protocolFactory = this.handlerFactoryRegistry.getFactory(
           protocolConf.getFactoryClass(), ProtocolHandler.class);
       conf.setProtocolHandler(protocolFactory.create(protocolConf, protocolBeanLoader));
+
+      // Signature handler
+      final HandlerConfiguration<SignatureHandler> sigHandlerConf = ecp.getSign().getHandlerConfiguration();
+      if (sigHandlerConf.needsDefaultConfigResolving()) {
+        sigHandlerConf.resolveDefaultConfigRef(this.getResolver("sign",
+            Optional.ofNullable(this.properties.getDefaultHandlerConfig())
+                .map(SharedHandlerConfigurationProperties::getSign)
+                .orElse(null)));
+      }
+      sigHandlerConf.init();
+
+      final HandlerFactory<SignatureHandler> sigHandlerFactory = this.handlerFactoryRegistry.getFactory(
+          sigHandlerConf.getFactoryClass(), SignatureHandler.class);
+      conf.setSignatureHandler(sigHandlerFactory.create(sigHandlerConf, sigHandlerBeanLoader));
 
       // Audit logger
       //

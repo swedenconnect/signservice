@@ -132,6 +132,12 @@
     </dependency>
     
     <dependency>
+      <groupId>se.swedenconnect.signservice</groupId>
+      <artifactId>signservice-signhandler</artifactId>
+      <version>${project.version}</version>
+    </dependency>    
+    
+    <dependency>
       <groupId>se.swedenconnect.security</groupId>
       <artifactId>credentials-support</artifactId>
     </dependency>

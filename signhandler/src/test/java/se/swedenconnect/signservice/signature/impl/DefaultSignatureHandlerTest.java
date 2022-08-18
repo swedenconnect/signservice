@@ -15,7 +15,25 @@
  */
 package se.swedenconnect.signservice.signature.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.SignatureException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.util.encoders.Base64;
@@ -23,6 +41,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
+
+import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.integration.core.Extension;
 import se.idsec.signservice.integration.document.CompiledSignedDocument;
 import se.idsec.signservice.integration.document.DocumentType;
@@ -57,28 +77,18 @@ import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.session.SignServiceContext;
-import se.swedenconnect.signservice.signature.*;
+import se.swedenconnect.signservice.signature.AdESType;
+import se.swedenconnect.signservice.signature.CompletedSignatureTask;
+import se.swedenconnect.signservice.signature.RequestedSignatureTask;
+import se.swedenconnect.signservice.signature.SignatureHandler;
+import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.signer.TestAlgorithms;
 import se.swedenconnect.signservice.signature.signer.TestCredentials;
 import se.swedenconnect.signservice.signature.signer.impl.DefaultSignServiceSignerProvider;
-import se.swedenconnect.signservice.signature.tbsdata.impl.DefaultTBSDataProcessorProvider;
 import se.swedenconnect.signservice.signature.tbsdata.impl.PDFTBSDataProcessor;
 import se.swedenconnect.signservice.signature.tbsdata.impl.XMLTBSDataProcessor;
 import se.swedenconnect.signservice.signature.testutils.TestData;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.SignatureException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Test cases for DefaultSignatureHandler including integration tests for XML and PDF document signing and validation
@@ -87,7 +97,7 @@ import static org.mockito.Mockito.when;
 public class DefaultSignatureHandlerTest {
 
   private static final se.swedenconnect.schemas.csig.dssext_1_1.ObjectFactory dssExtFactory =
-    new se.swedenconnect.schemas.csig.dssext_1_1.ObjectFactory();
+      new se.swedenconnect.schemas.csig.dssext_1_1.ObjectFactory();
 
   static AlgorithmRegistry algorithmRegistry;
   static PkiCredential testECCredential;
@@ -103,16 +113,16 @@ public class DefaultSignatureHandlerTest {
     testECCredential = new BasicCredential(TestCredentials.ecCertificate, TestCredentials.privateECKey);
     testRSACredential = new BasicCredential(TestCredentials.rsaCertificate, TestCredentials.privateRSAKey);
     testECPresignCredential = new BasicCredential(TestCredentials.ecPresignCertificate,
-      TestCredentials.privateECPresignKey);
+        TestCredentials.privateECPresignKey);
     testRSAPresignCredential = new BasicCredential(TestCredentials.rsaPresignCertificate,
-      TestCredentials.privateRSAPresignKey);
+        TestCredentials.privateRSAPresignKey);
 
     testPdfDocBytes = IOUtils.toByteArray(
-      Objects.requireNonNull(DefaultSignatureHandlerTest.class.getResourceAsStream("/testdoc.pdf")));
+        Objects.requireNonNull(DefaultSignatureHandlerTest.class.getResourceAsStream("/testdoc.pdf")));
   }
 
-
-  @Test void pdfIntegrationTest() throws Exception {
+  @Test
+  void pdfIntegrationTest() throws Exception {
     pdfIntegrationTestInstance(TestAlgorithms.ecdsaSha256, true);
     pdfIntegrationTestInstance(TestAlgorithms.ecdsaSha384, true);
     pdfIntegrationTestInstance(TestAlgorithms.ecdsaSha512, true);
@@ -130,32 +140,32 @@ public class DefaultSignatureHandlerTest {
     PDFTBSDataProcessor pdftbsDataProcessor = new PDFTBSDataProcessor();
     pdftbsDataProcessor.setIncludeIssuerSerial(true);
     pdftbsDataProcessor.setStrictProcessing(true);
-    DefaultTBSDataProcessorProvider tbsDataProcessorProvider = new DefaultTBSDataProcessorProvider(xmltbsDataProcessor, pdftbsDataProcessor);
-    DefaultSignatureHandler signatureHandler = new DefaultSignatureHandler(algorithmRegistry,
-      new DefaultSignServiceSignerProvider(algorithmRegistry), tbsDataProcessorProvider);
-
+    DefaultSignatureHandler signatureHandler =
+        new DefaultSignatureHandler(Arrays.asList(xmltbsDataProcessor, pdftbsDataProcessor), algorithmRegistry);
 
     String signatureAlgorithmUri = signatureAlgorithm.getUri();
     PkiCredential preSignCredential = signatureAlgorithm.getKeyType().equals("EC")
-      ? testECPresignCredential : testRSAPresignCredential;
+        ? testECPresignCredential
+        : testRSAPresignCredential;
     PkiCredential signCredential = signatureAlgorithm.getKeyType().equals("EC")
-      ? testECCredential : testRSACredential;
+        ? testECCredential
+        : testRSACredential;
 
     // Pre-sign document
     final DefaultPDFSigner signer = new DefaultPDFSigner(preSignCredential, signatureAlgorithmUri);
     signer.setIncludeCertificateChain(false);
     final PDFSignerParameters signerParameters = PDFSignerParameters.builder()
-      .padesType(ades ? AdesProfileType.BES : null)
-      .build();
+        .padesType(ades ? AdesProfileType.BES : null)
+        .build();
     final PDFSignerResult pdfSignerResult = signer.sign(testPdfDocBytes, signerParameters);
     log.info("Pre-signed signed attributes:\n{}", TestUtils.base64Print(pdfSignerResult.getSignedAttributes()));
 
     // Perform signature service signing
     SignRequestMessage signRequest = getSignRequest(signatureAlgorithm, List.of(
-      getRequestedSignatureTask(Base64.toBase64String(pdfSignerResult.getSignedAttributes()), SignatureType.PDF,
-        ades ? AdESType.BES : null,null,null,null)));
+        getRequestedSignatureTask(Base64.toBase64String(pdfSignerResult.getSignedAttributes()), SignatureType.PDF,
+            ades ? AdESType.BES : null, null, null, null)));
     CompletedSignatureTask completedSignatureTask = signatureHandler.sign(signRequest.getSignatureTasks().get(0),
-      signCredential, signRequest,null);
+        signCredential, signRequest, null);
     log.info("Sign service TBS signed attributes:\n{}", TestUtils.base64Print(completedSignatureTask.getTbsData()));
 
     // Back to integration service prepare the result for signed document assembly
@@ -164,11 +174,12 @@ public class DefaultSignatureHandlerTest {
     extMap.put(PDFExtensionParams.signTimeAndId.name(), String.valueOf(pdfSignerResult.getSigningTime()));
     extMap.put(PDFExtensionParams.cmsSignedData.name(), Base64.toBase64String(pdfSignerResult.getSignedData()));
     TbsDocument tbsDocument = TbsDocument.builder()
-      .adesRequirement(TbsDocument.EtsiAdesRequirement.builder().adesFormat(ades ? TbsDocument.AdesType.BES : null).build())
-      .content(Base64.toBase64String(testPdfDocBytes))
-      .mimeType(DocumentType.PDF.getMimeType())
-      .extension(new Extension(extMap))
-      .build();
+        .adesRequirement(
+            TbsDocument.EtsiAdesRequirement.builder().adesFormat(ades ? TbsDocument.AdesType.BES : null).build())
+        .content(Base64.toBase64String(testPdfDocBytes))
+        .mimeType(DocumentType.PDF.getMimeType())
+        .extension(new Extension(extMap))
+        .build();
     SignRequestWrapper signRequestWrapper = mock(SignRequestWrapper.class);
     when(signRequestWrapper.getRequestID()).thenReturn("id-019283901283");
     se.swedenconnect.schemas.csig.dssext_1_1.SignTaskData signTaskData = dssExtFactory.createSignTaskData();
@@ -189,19 +200,22 @@ public class DefaultSignatureHandlerTest {
     // Assemble signed document
 
     CompiledSignedDocument<byte[], PAdESData> pAdESDataCompiledSignedDocument = documentProcessor.buildSignedDocument(
-      tbsDocument, signTaskData, List.of(signCredential.getCertificate()), signRequestWrapper, null);
+        tbsDocument, signTaskData, List.of(signCredential.getCertificate()), signRequestWrapper, null);
 
     // Validate the signed document
     final PDFSignatureValidator validator = new BasicPDFSignatureValidator();
-    FileUtils.writeByteArrayToFile(new File(System.getProperty("user.dir") , "target/signed.pdf"), pAdESDataCompiledSignedDocument.getDocument());
-    List<SignatureValidationResult> validationResults = validator.validate(pAdESDataCompiledSignedDocument.getDocument());
+    FileUtils.writeByteArrayToFile(new File(System.getProperty("user.dir"), "target/signed.pdf"),
+        pAdESDataCompiledSignedDocument.getDocument());
+    List<SignatureValidationResult> validationResults =
+        validator.validate(pAdESDataCompiledSignedDocument.getDocument());
     assertEquals(1, validationResults.size());
     assertEquals(SignatureValidationResult.Status.SUCCESS, validationResults.get(0).getStatus());
     assertEquals(signCredential.getCertificate(), validationResults.get(0).getSignerCertificate());
     log.info("Successful validation of signed PDF document");
   }
 
-  @Test void xmlIntegrationTest() throws Exception {
+  @Test
+  void xmlIntegrationTest() throws Exception {
     xmlIntegrationTestInstance(TestAlgorithms.getEcdsaSha256(), true);
     xmlIntegrationTestInstance(TestAlgorithms.getEcdsaSha384(), true);
     xmlIntegrationTestInstance(TestAlgorithms.getEcdsaSha512(), true);
@@ -212,49 +226,53 @@ public class DefaultSignatureHandlerTest {
     xmlIntegrationTestInstance(TestAlgorithms.getRsaPssSha512(), false);
   }
 
-
   void xmlIntegrationTestInstance(SignatureAlgorithm signatureAlgorithm, boolean ades) throws Exception {
     log.info("Integration test for XML signature - Algorithm: {}, AdES={}", signatureAlgorithm.getJcaName(), ades);
-    DefaultSignatureHandler signatureHandler = new DefaultSignatureHandler(algorithmRegistry,
-      new DefaultSignServiceSignerProvider(algorithmRegistry), new DefaultTBSDataProcessorProvider());
+    DefaultSignatureHandler signatureHandler = new DefaultSignatureHandler(
+        Arrays.asList(new XMLTBSDataProcessor(), new PDFTBSDataProcessor()),
+        algorithmRegistry,
+        new DefaultSignServiceSignerProvider(algorithmRegistry));
 
     // Document to sign
     Document testDoc = DOMUtils.bytesToDocument(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-      + "<test><parameter type=\"string\">Value</parameter></test>").getBytes(StandardCharsets.UTF_8));
+        + "<test><parameter type=\"string\">Value</parameter></test>").getBytes(StandardCharsets.UTF_8));
     String tbsDocB64 = DOMUtils.nodeToBase64(testDoc);
     PkiCredential preSignCredential = signatureAlgorithm.getKeyType().equals("EC")
-      ? testECPresignCredential : testRSAPresignCredential;
+        ? testECPresignCredential
+        : testRSAPresignCredential;
     PkiCredential signCredential = signatureAlgorithm.getKeyType().equals("EC")
-      ? testECCredential : testRSACredential;
+        ? testECCredential
+        : testRSACredential;
 
     // Pre-sign document
     String signatureAlgorithmUri = signatureAlgorithm.getUri();
     final XMLSigner xmlPresigner = DefaultXMLSigner.builder(preSignCredential)
-      .signatureAlgorithm(signatureAlgorithmUri)
-      .includeSignatureId(true)
-      .build();
+        .signatureAlgorithm(signatureAlgorithmUri)
+        .includeSignatureId(true)
+        .build();
     final XMLSignerResult preSignResult = xmlPresigner.sign(testDoc);
-    log.info("Pre Signed Document:\n{}", DOMUtils.prettyPrint(preSignResult.getSignedDocument()).replaceAll("\\n[ ]+\\n", "\n"));
+    log.info("Pre Signed Document:\n{}",
+        DOMUtils.prettyPrint(preSignResult.getSignedDocument()).replaceAll("\\n[ ]+\\n", "\n"));
 
     // Perform signature service signing
     SignRequestMessage signRequest = getSignRequest(signatureAlgorithm, List.of(
-      getRequestedSignatureTask(Base64.toBase64String(preSignResult.getCanonicalizedSignedInfo()), SignatureType.XML,
-        ades ? AdESType.BES : null,
-        preSignResult.getSignatureElement().getAttribute("Id"),
-        null, null)
-    ));
+        getRequestedSignatureTask(Base64.toBase64String(preSignResult.getCanonicalizedSignedInfo()), SignatureType.XML,
+            ades ? AdESType.BES : null,
+            preSignResult.getSignatureElement().getAttribute("Id"),
+            null, null)));
     CompletedSignatureTask completedSignatureTask = signatureHandler.sign(signRequest.getSignatureTasks().get(0),
-      signCredential,
-      signRequest, null);
+        signCredential,
+        signRequest, null);
 
     // Back to integration service prepare the result for signed document assembly
     XmlSignedDocumentProcessor documentProcessor = new XmlSignedDocumentProcessor();
     TbsDocument tbsDocument = TbsDocument.builder()
-      .adesRequirement(TbsDocument.EtsiAdesRequirement.builder().adesFormat(ades ? TbsDocument.AdesType.BES : null).build())
-      .content(tbsDocB64)
-      .mimeType(DocumentType.XML.getMimeType())
-      .contentReference("")
-      .build();
+        .adesRequirement(
+            TbsDocument.EtsiAdesRequirement.builder().adesFormat(ades ? TbsDocument.AdesType.BES : null).build())
+        .content(tbsDocB64)
+        .mimeType(DocumentType.XML.getMimeType())
+        .contentReference("")
+        .build();
     SignRequestWrapper signRequestWrapper = mock(SignRequestWrapper.class);
     when(signRequestWrapper.getRequestID()).thenReturn("id-019283901283");
     se.swedenconnect.schemas.csig.dssext_1_1.SignTaskData signTaskData = dssExtFactory.createSignTaskData();
@@ -274,7 +292,7 @@ public class DefaultSignatureHandlerTest {
     signTaskData.setBase64Signature(base64Signature);
     // Assemble signed document
     CompiledSignedDocument<Document, XadesQualifyingProperties> signedDocument = documentProcessor.buildSignedDocument(
-      tbsDocument, signTaskData, List.of(signCredential.getCertificate()), signRequestWrapper, null);
+        tbsDocument, signTaskData, List.of(signCredential.getCertificate()), signRequestWrapper, null);
     log.info("Signed Document:\n{}", DOMUtils.prettyPrint(signedDocument.getDocument()).replaceAll("\\n[ ]+\\n", "\n"));
 
     // Validate the signed document
@@ -289,140 +307,157 @@ public class DefaultSignatureHandlerTest {
   public void testName() {
     log.info("DefaultSignatureHandler tests");
     AlgorithmRegistrySingleton algorithmRegistry = AlgorithmRegistrySingleton.getInstance();
-    DefaultSignatureHandler handler1 = new DefaultSignatureHandler(algorithmRegistry);
+    DefaultSignatureHandler handler1 = new DefaultSignatureHandler(
+        Arrays.asList(new XMLTBSDataProcessor(), new PDFTBSDataProcessor()), algorithmRegistry);
     handler1.setName("handler1Name");
     assertEquals("handler1Name", handler1.getName());
 
-    DefaultSignatureHandler handler = new DefaultSignatureHandler(algorithmRegistry,
-      new DefaultSignServiceSignerProvider(algorithmRegistry), new DefaultTBSDataProcessorProvider());
+    DefaultSignatureHandler handler = new DefaultSignatureHandler(
+        Arrays.asList(new XMLTBSDataProcessor(), new PDFTBSDataProcessor()));
 
     Assertions.assertEquals(DefaultSignatureHandler.class.getSimpleName(), handler.getName());
   }
 
   @Test
+  public void testNoProcessors() {
+    assertThatThrownBy(() -> {
+      new DefaultSignatureHandler(Collections.emptyList());
+    }).isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("tbsDataProcessors must not be empty");
+  }
+
+  @Test
   public void checkRequirementsTestInstance() throws Exception {
-    DefaultSignatureHandler handler = new DefaultSignatureHandler(algorithmRegistry,
-      new DefaultSignServiceSignerProvider(algorithmRegistry), new DefaultTBSDataProcessorProvider());
+    DefaultSignatureHandler handler = new DefaultSignatureHandler(
+        Arrays.asList(new XMLTBSDataProcessor(), new PDFTBSDataProcessor()), algorithmRegistry,
+        new DefaultSignServiceSignerProvider(algorithmRegistry));
 
     Assertions.assertEquals(DefaultSignatureHandler.class.getSimpleName(), handler.getName());
 
     checkRequirementsTestInstance("Basic PDF requirements test with PDF and XML sign task", handler,
-      getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
-        getRequestedSignatureTask(TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null, null, null),
-        getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.XML, null, null, null, null)
-      )), null, null);
+        getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
+            getRequestedSignatureTask(TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null, null, null),
+            getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.XML, null, null, null, null))),
+        null, null);
 
     checkRequirementsTestInstance("Single XML AdES check", handler,
-      getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
-        getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES, TestData.signatureId01,
-          TestData.tbsDataXmlAdes01, null)
-      )), null, null);
+        getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
+            getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES,
+                TestData.signatureId01,
+                TestData.tbsDataXmlAdes01, null))),
+        null, null);
 
     checkRequirementsTestInstance("Conflicting algorithms", handler,
-      getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
-        getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES, TestData.signatureId01,
-          TestData.tbsDataXmlAdes01, null)
-      )), null, InvalidRequestException.class);
+        getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
+            getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES,
+                TestData.signatureId01,
+                TestData.tbsDataXmlAdes01, null))),
+        null, InvalidRequestException.class);
 
     checkRequirementsTestInstance("No algorithm", handler,
-      getSignRequest(null, List.of(
-        getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES, TestData.signatureId01,
-          TestData.tbsDataXmlAdes01, null)
-      )), null, InvalidRequestException.class);
+        getSignRequest(null, List.of(
+            getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES,
+                TestData.signatureId01,
+                TestData.tbsDataXmlAdes01, null))),
+        null, InvalidRequestException.class);
 
     checkRequirementsTestInstance("No sign tasks", handler,
-      getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
-      )), null, InvalidRequestException.class);
+        getSignRequest(TestAlgorithms.getRsaSha256(), List.of()), null, InvalidRequestException.class);
 
     checkRequirementsTestInstance("No signature Id in XML AdES request", handler,
-      getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
-        getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES, null,
-          TestData.tbsDataXmlAdes01, null)
-      )), null, InvalidRequestException.class);
+        getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
+            getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES, null,
+                TestData.tbsDataXmlAdes01, null))),
+        null, InvalidRequestException.class);
 
     checkRequirementsTestInstance("Illegal XML request data", handler,
-      getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
-        getRequestedSignatureTask(TestData.tbsDataPdf01, SignatureType.XML, AdESType.BES, TestData.signatureId01, null,
-          null)
-      )), null, InvalidRequestException.class);
+        getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
+            getRequestedSignatureTask(TestData.tbsDataPdf01, SignatureType.XML, AdESType.BES, TestData.signatureId01,
+                null,
+                null))),
+        null, InvalidRequestException.class);
 
     checkRequirementsTestInstance("Illegal PDF request data", handler,
-      getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
-        getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.PDF, null, null, null, null)
-      )), null, InvalidRequestException.class);
+        getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
+            getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.PDF, null, null, null, null))),
+        null, InvalidRequestException.class);
 
   }
 
   @Test
   void signTest() throws Exception {
-    DefaultSignatureHandler handler = new DefaultSignatureHandler(algorithmRegistry,
-      new DefaultSignServiceSignerProvider(algorithmRegistry), new DefaultTBSDataProcessorProvider());
+    DefaultSignatureHandler handler = new DefaultSignatureHandler(
+        Arrays.asList(new XMLTBSDataProcessor(), new PDFTBSDataProcessor()), algorithmRegistry,
+        new DefaultSignServiceSignerProvider(algorithmRegistry));
 
     signTestInstance("XML Signature, RSA-SAH256, BES with AdES object", handler,
-      getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
-        getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES, TestData.signatureId01,
-          TestData.reqAdesObject01, null)
-      )), testRSACredential, null, null);
+        getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
+            getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES,
+                TestData.signatureId01,
+                TestData.reqAdesObject01, null))),
+        testRSACredential, null, null);
 
     signTestInstance("XML Signature, ECDSA-SAH256, BES with AdES object", handler,
-      getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
-        getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.XML, AdESType.BES, TestData.signatureId01,
-          null, null)
-      )), testECCredential, null, null);
+        getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
+            getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.XML, AdESType.BES,
+                TestData.signatureId01,
+                null, null))),
+        testECCredential, null, null);
 
     signTestInstance("XML Signature, ECDSA-SAH256, BES no AdES object", handler,
-      getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
-        getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.XML, null, TestData.signatureId01,
-          null, null)
-      )), testECCredential, null, null);
+        getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
+            getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.XML, null, TestData.signatureId01,
+                null, null))),
+        testECCredential, null, null);
 
     signTestInstance("XML Signature, ECDSA-SAH256, no AdES", handler,
-      getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
-        getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.XML, null, TestData.signatureId01,
-          null, null)
-      )), testECCredential, null, null);
+        getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
+            getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.XML, null, TestData.signatureId01,
+                null, null))),
+        testECCredential, null, null);
 
     signTestInstance("XML and PDF Signature, ECDSA-SAH256, no AdES", handler,
-      getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
-        getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.XML, null, TestData.signatureId01,
-          null, null),
-        getRequestedSignatureTask(TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null, null, null)
-      )), testECCredential, null, null);
+        getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
+            getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.XML, null, TestData.signatureId01,
+                null, null),
+            getRequestedSignatureTask(TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null, null, null))),
+        testECCredential, null, null);
 
     // Error tests
     SignatureAlgorithm badSigAlgo = mock(SignatureAlgorithm.class);
     when(badSigAlgo.getUri()).thenReturn("http://example.com/bad/algorithm");
 
     signTestInstance("Bad signature algorithm", handler,
-      getSignRequest(badSigAlgo, List.of(
-        getRequestedSignatureTask(TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null, null, null)
-      )), testECCredential, null, SignatureException.class);
+        getSignRequest(badSigAlgo, List.of(
+            getRequestedSignatureTask(TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null, null, null))),
+        testECCredential, null, SignatureException.class);
 
     signTestInstance("Blacklisted signature algorithm", handler,
-      getSignRequest(TestAlgorithms.ecdsaSha1, List.of(
-        getRequestedSignatureTask(TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null, null, null)
-      )), testECCredential, null, SignatureException.class);
+        getSignRequest(TestAlgorithms.ecdsaSha1, List.of(
+            getRequestedSignatureTask(TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null, null, null))),
+        testECCredential, null, SignatureException.class);
 
     signTestInstance("Not a signature algorithm", handler,
-      getSignRequest(TestAlgorithms.sha256, List.of(
-        getRequestedSignatureTask(TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null, null, null)
-      )), testECCredential, null, SignatureException.class);
+        getSignRequest(TestAlgorithms.sha256, List.of(
+            getRequestedSignatureTask(TestData.tbsDataPdfBes01, SignatureType.PDF, AdESType.BES, null, null, null))),
+        testECCredential, null, SignatureException.class);
 
     signTestInstance("Invalid sign task", handler,
-      getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
-        getRequestedSignatureTask("aWxsZWdhbHRic2RhdGE=", SignatureType.XML, null, null, null, null)
-      )), testECCredential, null, SignatureException.class);
+        getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
+            getRequestedSignatureTask("aWxsZWdhbHRic2RhdGE=", SignatureType.XML, null, null, null, null))),
+        testECCredential, null, SignatureException.class);
 
     signTestInstance("Invalid key type", handler,
-      getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
-        getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.XML, AdESType.BES, TestData.signatureId01,
-          null, null)
-      )), testRSACredential, null, SignatureException.class);
+        getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
+            getRequestedSignatureTask(TestData.tbsDataXmlNoAdes, SignatureType.XML, AdESType.BES,
+                TestData.signatureId01,
+                null, null))),
+        testRSACredential, null, SignatureException.class);
   }
 
   private void signTestInstance(String description, SignatureHandler signatureHandler,
-    SignRequestMessage signRequestMessage,
-    PkiCredential credential, SignServiceContext context, Class<? extends Exception> exClass) throws Exception {
+      SignRequestMessage signRequestMessage,
+      PkiCredential credential, SignServiceContext context, Class<? extends Exception> exClass) throws Exception {
 
     log.info("Sign test: " + description);
 
@@ -440,7 +475,7 @@ public class DefaultSignatureHandlerTest {
       CompletedSignatureTask signData = signatureHandler.sign(signatureTask, credential, signRequestMessage, context);
       log.info("Completed signature operation");
       log.info("Signature type {}, Algorithm {}, AdES {}", signData.getSignatureType(),
-        signData.getSignatureAlgorithmUri(), signData.getAdESType() == null ? "None" : signData.getAdESType());
+          signData.getSignatureAlgorithmUri(), signData.getAdESType() == null ? "None" : signData.getAdESType());
       log.info("Signature value:\n{}", TestUtils.base64Print(signData.getSignature()));
       log.info("To Be Signed bytes:\n{}", TestUtils.base64Print(signData.getTbsData()));
       if (signData.getAdESType() != null && signData.getSignatureType().equals(SignatureType.XML)) {
@@ -454,15 +489,15 @@ public class DefaultSignatureHandlerTest {
   }
 
   private void checkRequirementsTestInstance(
-    String description, SignatureHandler signatureHandler, SignRequestMessage signRequest,
-    SignServiceContext serviceContext, Class<? extends Exception> exClass)
-    throws InvalidRequestException {
+      String description, SignatureHandler signatureHandler, SignRequestMessage signRequest,
+      SignServiceContext serviceContext, Class<? extends Exception> exClass)
+      throws InvalidRequestException {
 
     log.info("Signature handler test: " + description);
 
     if (exClass != null) {
       Exception exception = assertThrows(exClass,
-        () -> signatureHandler.checkRequirements(signRequest, serviceContext));
+          () -> signatureHandler.checkRequirements(signRequest, serviceContext));
 
       assertTrue(exClass.isAssignableFrom(exception.getClass()));
       log.info("Requirement check resulted in expected exception: {}", exception.toString());
@@ -476,7 +511,7 @@ public class DefaultSignatureHandlerTest {
   }
 
   SignRequestMessage getSignRequest(Algorithm signatureAlgorithm,
-    List<RequestedSignatureTask> signatureTaskList) {
+      List<RequestedSignatureTask> signatureTaskList) {
     String signatureAlgorithmUri = signatureAlgorithm == null ? null : signatureAlgorithm.getUri();
     SignRequestMessage signRequestMessage = mock(SignRequestMessage.class);
     SignatureRequirements signatureRequirements = mock(SignatureRequirements.class);
@@ -487,7 +522,7 @@ public class DefaultSignatureHandlerTest {
   }
 
   private RequestedSignatureTask getRequestedSignatureTask(String tbsDataB64, SignatureType signatureType,
-    AdESType adESType, String sigId, String adesObjData, String processingRules) {
+      AdESType adESType, String sigId, String adesObjData, String processingRules) {
     DefaultRequestedSignatureTask signatureTask = new DefaultRequestedSignatureTask();
     signatureTask.setTaskId("id01");
     signatureTask.setSignatureType(signatureType);

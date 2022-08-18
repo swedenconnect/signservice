@@ -44,6 +44,13 @@ signservice:
         name: "DssProtocolHandler"
         include-assertion: true
         include-request-message: true
+    sign:
+      default-handler:
+        tbs-processors:
+        - type: xml
+          strict-processing: false
+          include-issuer-serial: true
+        - type: pdf
     authn:
       saml:
         saml-type: sweden-connect
@@ -151,6 +158,9 @@ signservice:
             descriptions:
             - "en-Sweden Connect test application for signature services"
             - "sv-Sweden Connect testapplikation för underskriftstjänster"
+    sign:
+      default-handler:
+        default-config-ref: sign.default-handler        
     audit:
       log-system:
         name: "Sandbox SignService Test Application Audit Logger"
@@ -170,6 +180,9 @@ signservice:
     authn:
       mock:
         active: true
+    sign:
+      external:
+        bean-name: signservice.DefaultSignatureHandler
     audit:
       file:
         name: "Sandbox2 Audit Logger"

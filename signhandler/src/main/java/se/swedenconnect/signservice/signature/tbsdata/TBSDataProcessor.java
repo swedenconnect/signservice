@@ -15,13 +15,15 @@
  */
 package se.swedenconnect.signservice.signature.tbsdata;
 
+import java.security.SignatureException;
+import java.security.cert.X509Certificate;
+
+import javax.annotation.Nonnull;
+
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
-
-import javax.annotation.Nonnull;
-import java.security.SignatureException;
-import java.security.cert.X509Certificate;
+import se.swedenconnect.signservice.signature.SignatureType;
 
 /**
  * Interface for a "To Be Signed" data processor that prepares data for signing based on a specific signature format.
@@ -29,7 +31,7 @@ import java.security.cert.X509Certificate;
 public interface TBSDataProcessor {
 
   /**
-   * Process the sign task data to obtain the data To Be Signed
+   * Process the sign task data to obtain the To Be Signed data.
    *
    * @param signatureTask requested signature task data
    * @param signerCertificate the certificate of the intended signer
@@ -38,16 +40,25 @@ public interface TBSDataProcessor {
    * @throws SignatureException on errors providing data to be signed based on the provided input
    */
   TBSProcessingData processSignTaskData(@Nonnull final RequestedSignatureTask signatureTask,
-    @Nonnull final X509Certificate signerCertificate, @Nonnull final SignatureAlgorithm signatureAlgorithm)
-    throws SignatureException;
+      @Nonnull final X509Certificate signerCertificate, @Nonnull final SignatureAlgorithm signatureAlgorithm)
+      throws SignatureException;
 
   /**
-   * Check an instance of requested signature task data against the specified signature algorithm
+   * Check an instance of requested signature task data against the specified signature algorithm.
    *
    * @param signatureTask requested signature task data
    * @param signatureAlgorithm signature algorithm
    * @throws InvalidRequestException if the provided data is not valid
    */
-  void checkSignTask(final RequestedSignatureTask signatureTask, final SignatureAlgorithm signatureAlgorithm)
-    throws InvalidRequestException;
+  void checkSignTask(
+      @Nonnull final RequestedSignatureTask signatureTask, @Nonnull final SignatureAlgorithm signatureAlgorithm)
+      throws InvalidRequestException;
+
+  /**
+   * Predicate that tells whether the given signature type is supported by the processor.
+   *
+   * @param signatureType the signature type
+   * @return true if the type is supported and false otherwise
+   */
+  boolean supportsType(@Nonnull final SignatureType signatureType);
 }
