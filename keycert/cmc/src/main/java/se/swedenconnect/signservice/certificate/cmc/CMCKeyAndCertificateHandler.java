@@ -157,9 +157,7 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
         certNameModel, true, true
       );
     }
-    catch (Exception e) {
-      // We have to catch Exception broadly, as the CMC client may provide NullPointerException on bad response
-      // TODO update CMC client exception handling to allow catching specific checked exception
+    catch (IOException e) {
       throw new CertificateException("Error obtaining certificate model from CMC client");
     }
 
