@@ -69,10 +69,10 @@ public class ProtocolConfigurationProperties implements HandlerConfigurationProp
     return this.dss != null ? this.dss : this.external;
   }
 
+  /** {@inheritDoc} */
   @Override
   @Nullable
-  public HandlerConfiguration<ProtocolHandler> getHandlerConfiguration(@Nonnull final String name)
-      throws IllegalArgumentException {
+  public HandlerConfiguration<ProtocolHandler> getHandlerConfiguration(@Nonnull final String name) {
 
     if ("dss".equalsIgnoreCase(name)) {
       return this.dss;

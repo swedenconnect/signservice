@@ -18,6 +18,9 @@ package se.swedenconnect.signservice.audit;
 import java.io.Serializable;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
 
 /**
@@ -40,7 +43,7 @@ public class AuditEventParameter implements Serializable {
    * @param name the parameter name (must not be null)
    * @param value the parameter value (may be null)
    */
-  public AuditEventParameter(final String name, final String value) {
+  public AuditEventParameter(@Nonnull final String name, @Nullable final String value) {
     this.name = Objects.requireNonNull(name, "name must not be null");
     this.value = value;
   }
@@ -50,6 +53,7 @@ public class AuditEventParameter implements Serializable {
    *
    * @return the parameter name
    */
+  @Nonnull
   public String getName() {
     return this.name;
   }
@@ -59,6 +63,7 @@ public class AuditEventParameter implements Serializable {
    *
    * @return the parameter value, or null if none has been set
    */
+  @Nullable
   public String getValue() {
     return this.value;
   }

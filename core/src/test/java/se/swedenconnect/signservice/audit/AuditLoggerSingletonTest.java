@@ -18,6 +18,8 @@ package se.swedenconnect.signservice.audit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
+
 /**
  * Test cases for AuditLoggerSingleton.
  */
@@ -48,7 +50,7 @@ public class AuditLoggerSingletonTest {
     Assertions.assertNull(AuditLoggerSingleton.getAuditLogger());
   }
 
-  public static class MockedAuditLogger implements AuditLogger {
+  public static class MockedAuditLogger extends AbstractSignServiceHandler implements AuditLogger {
 
     @Override
     public void auditLog(final AuditEvent event) throws AuditLoggerException {
@@ -59,5 +61,10 @@ public class AuditLoggerSingletonTest {
       return null;
     }
 
+    @Override
+    public AuditEventBuilder getAuditEventBuilder(final String eventId) {
+      return null;
+    }
   }
+
 }

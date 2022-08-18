@@ -23,6 +23,7 @@ import org.springframework.util.Assert;
 import lombok.Data;
 import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationProperties;
 import se.swedenconnect.signservice.client.impl.DefaultClientConfiguration;
+import se.swedenconnect.signservice.spring.config.audit.AuditLoggerConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.authn.AuthenticationConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.protocol.ProtocolConfigurationProperties;
 
@@ -67,6 +68,11 @@ public class EngineConfigurationProperties implements InitializingBean {
    */
   private AuthenticationConfigurationProperties authn;
 
+  /**
+   * Audit logger configuration.
+   */
+  private AuditLoggerConfigurationProperties audit;
+
   // TODO: more settings
 
   /** {@inheritDoc} */
@@ -81,6 +87,7 @@ public class EngineConfigurationProperties implements InitializingBean {
 
     Assert.notNull(this.protocol, "protocol must be assigned");
     Assert.notNull(this.authn, "authn must be assigned");
+    Assert.notNull(this.audit, "audit must be assigned");
   }
 
 }

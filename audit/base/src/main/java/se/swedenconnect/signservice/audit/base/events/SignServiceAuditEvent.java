@@ -15,9 +15,6 @@
  */
 package se.swedenconnect.signservice.audit.base.events;
 
-import se.swedenconnect.signservice.audit.AuditEvent;
-import se.swedenconnect.signservice.audit.AuditEventParameter;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,81 +22,110 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import se.swedenconnect.signservice.audit.AuditEvent;
+import se.swedenconnect.signservice.audit.AuditEventParameter;
+
 /**
- * The {@link AuditEvent} implementation SignService Audit Events
+ * The {@link AuditEvent} implementation SignService Audit Events.
  */
 public class SignServiceAuditEvent implements AuditEvent {
 
+  /** For serialization. */
   private static final long serialVersionUID = -5389675099235412855L;
 
-  /** The AuditEvent id */
-  private final Instant timestamp;
-
-  /** The AuditEvent id */
+  /** The AuditEvent id. */
   private final String id;
 
-  /** The AuditEvent principal */
-  private final String principal;
+  /** The AuditEvent creation time. */
+  private final Instant timestamp;
 
-  /** The AuditEvent parameters */
-  private final Map<String, AuditEventParameter> parameterMap;
+  /** The AuditEvent principal. */
+  private String principal;
+
+  /** The AuditEvent parameters. */
+  private final Map<String, AuditEventParameter> parameters;
 
   /**
-   * Instantiates a new Sign service audit event.
+   * Instantiates a new audit event.
    *
-   * @param id        the id, must not be null
+   * @param id the id
+   */
+  public SignServiceAuditEvent(@Nonnull final String id) {
+    this.id = Objects.requireNonNull(id, "id must not be null");
+    this.timestamp = Instant.now();
+    this.parameters = new HashMap<>();
+  }
+
+  /**
+   * Instantiates a new audit event.
+   *
+   * @param id the id
    * @param principal the principal
    */
-  public SignServiceAuditEvent(String id, String principal) {
-    java.util.Objects.requireNonNull(id, "id must not be null");
-    java.util.Objects.requireNonNull(principal, "principal must not be null");
-    this.timestamp = Instant.now();
-    this.id = id;
-    this.principal = principal;
-    this.parameterMap = new HashMap<>();
+  public SignServiceAuditEvent(@Nonnull final String id, @Nonnull final String principal) {
+    this(id);
+    this.principal = Objects.requireNonNull(principal, "principal must not be null");
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public String getId() {
-    return id;
+    return this.id;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
+  public Instant getTimestamp() {
+    return this.timestamp;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Nonnull
   public String getPrincipal() {
-    return principal;
+    return this.principal != null ? this.principal : AuditEvent.DEFAULT_PRINCIPAL;
   }
 
   /** {@inheritDoc} */
   @Override
+  public void setPrincipal(@Nonnull final String principal) {
+    if (this.principal != null) {
+      throw new IllegalArgumentException("principal has already been assigned");
+    }
+    this.principal = principal;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Nonnull
   public List<AuditEventParameter> getParameters() {
-    return new ArrayList<>(parameterMap.values());
+    return new ArrayList<>(this.parameters.values());
   }
 
   /** {@inheritDoc} */
   @Override
-  public void addParameter(AuditEventParameter parameter) {
+  public void addParameter(@Nonnull final AuditEventParameter parameter) {
     Objects.requireNonNull(parameter, "parameter must not be null");
-    parameterMap.put(parameter.getName(), parameter);
+    this.parameters.put(parameter.getName(), parameter);
   }
 
   /** {@inheritDoc} */
   @Override
-  public void addParameter(String name, String value) {
+  public void addParameter(@Nonnull final String name, @Nullable final String value) {
     Objects.requireNonNull(name, "name must not be null");
-    parameterMap.put(name, new AuditEventParameter(name, value));
+    this.parameters.put(name, new AuditEventParameter(name, value));
   }
 
   /** {@inheritDoc} */
   @Override
   public String toString() {
-    final StringBuilder sb = new StringBuilder("Audit event [")
-            .append("timestamp=").append(this.timestamp)
-            .append(" principal=").append(this.principal)
-            .append(" id=").append(this.id)
-            .append(" data=").append(this.parameterMap.values());
-    return sb.toString();
+    return String.format("%s | %s | %s %s",
+        this.timestamp, this.getPrincipal(), this.id, this.parameters.values());
   }
 
 }

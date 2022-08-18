@@ -15,12 +15,16 @@
  */
 package se.swedenconnect.signservice.audit;
 
+import javax.annotation.Nonnull;
+
+import se.swedenconnect.signservice.core.SignServiceHandler;
+
 /**
  * Interface for the Audit Logger used within the SignService system.
  *
  * @see AuditLoggerSingleton
  */
-public interface AuditLogger {
+public interface AuditLogger extends SignServiceHandler {
 
   /**
    * Audit logs the supplied event.
@@ -28,14 +32,26 @@ public interface AuditLogger {
    * @param event the event to be logged
    * @throws AuditLoggerException runtime exception that is thrown if logging fails
    */
-  void auditLog(final AuditEvent event) throws AuditLoggerException;
+  void auditLog(@Nonnull final AuditEvent event) throws AuditLoggerException;
 
   /**
    * Creates an event that may be assigned parameters.
    *
    * @param eventId the event ID for the event
    * @return an AuditEvent object
+   * @see #getAuditEventBuilder(String)
    */
-  AuditEvent createAuditEvent(final String eventId);
+  @Nonnull
+  AuditEvent createAuditEvent(@Nonnull final String eventId);
+
+  /**
+   * Gets a builder for building an {@link AuditEvent}.
+   *
+   * @param eventId the event ID for the event that is being built
+   * @return an AuditEventBuilder
+   * @see #createAuditEvent(String)
+   */
+  @Nonnull
+  AuditEventBuilder getAuditEventBuilder(@Nonnull final String eventId);
 
 }

@@ -17,6 +17,7 @@ package se.swedenconnect.signservice.spring.config;
 
 import lombok.Getter;
 import lombok.Setter;
+import se.swedenconnect.signservice.spring.config.audit.AuditLoggerConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.authn.AuthenticationConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.protocol.ProtocolConfigurationProperties;
 
@@ -38,5 +39,12 @@ public class SharedHandlerConfigurationProperties {
   @Getter
   @Setter
   private AuthenticationConfigurationProperties authn;
+
+  /**
+   * Default/shared audit logger configuration.
+   */
+  @Getter
+  @Setter
+  private AuditLoggerConfigurationProperties audit;
 
 }

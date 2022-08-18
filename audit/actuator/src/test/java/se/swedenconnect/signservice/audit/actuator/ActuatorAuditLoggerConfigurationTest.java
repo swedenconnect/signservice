@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.audit;
+package se.swedenconnect.signservice.audit.actuator;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * Defines audit logger events identifiers.
+ * Test cases for ActuatorAuditLoggerConfiguration.
  */
-public class AuditEventIds {
+public class ActuatorAuditLoggerConfigurationTest {
 
-  /** SignService system was started. */
-  public final static String EVENT_SYSTEM_STARTED = "audit.system.started";
+  @Test
+  public void testUse() {
+    final ActuatorAuditLoggerConfiguration config = new ActuatorAuditLoggerConfiguration();
+    Assertions.assertTrue(config.isActive());
+    Assertions.assertEquals(ActuatorAuditLoggerFactory.class.getName(), config.getFactoryClass());
 
-  /** A SignService engine instance (servicing a client) was started. */
-  public final static String EVENT_ENGINE_STARTED = "audit.engine.started";
-
-  // TODO: More
-
-  // Hidden constructor
-  private AuditEventIds() {
+    config.setActive(false);
+    Assertions.assertFalse(config.isActive());
   }
 
 }

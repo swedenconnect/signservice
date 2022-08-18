@@ -1,117 +1,122 @@
 package se.swedenconnect.signservice.audit.file;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.slf4j.LoggerFactory;
-import se.swedenconnect.signservice.audit.base.events.AuditEventFactory;
-import se.swedenconnect.signservice.audit.AuditEvent;
-import se.swedenconnect.signservice.audit.AuditLoggerException;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.mockito.Mockito;
+
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import se.swedenconnect.signservice.audit.AuditEvent;
+import se.swedenconnect.signservice.audit.AuditLoggerException;
+import se.swedenconnect.signservice.audit.MemoryAppender;
+import se.swedenconnect.signservice.audit.base.events.DefaultAuditEventFactory;
+
+/**
+ * Test cases for FileAuditLogger.
+ */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class FileAuditLoggerTest {
 
-  private MemoryAppender memoryAppender;
+  private static final String LOG_FILE = "target/fileaudit.log";
 
-  @BeforeAll
+  private MemoryAppender memoryAppenderDebug;
+
+  @BeforeEach
   public void setup() {
-    memoryAppender = new MemoryAppender();
-    memoryAppender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
+    this.memoryAppenderDebug = new MemoryAppender();
+    this.memoryAppenderDebug
+        .setContext((ch.qos.logback.classic.LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory());
 
-    final Logger auditLogger = (Logger) LoggerFactory.getLogger(FileAuditLogger.AUDIT_LOGGER_NAME);
-    auditLogger.setLevel(Level.INFO);
-    auditLogger.addAppender(memoryAppender);
+    final ch.qos.logback.classic.Logger logger =
+        (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(FileAuditLogger.class);
+    logger.setLevel(ch.qos.logback.classic.Level.DEBUG);
+    logger.addAppender(this.memoryAppenderDebug);
 
-    final Logger logger = (Logger) LoggerFactory.getLogger(FileAuditLogger.class);
-    logger.setLevel(Level.DEBUG);
-    logger.addAppender(memoryAppender);
+    this.memoryAppenderDebug.start();
+  }
 
-    memoryAppender.start();
+  @AfterEach
+  public void cleanup() throws Exception {
+    this.memoryAppenderDebug.reset();
+    this.removeLogFile(LOG_FILE);
   }
 
   @Test
-  public void auditLog() {
-    final FileAuditLogger auditLogger = new FileAuditLogger();
+  public void testAuditLog() throws Exception {
+    final FileAuditLogger auditLogger = new FileAuditLogger(LOG_FILE);
+    auditLogger.setEventFactory(new DefaultAuditEventFactory());
+    auditLogger.setName("audit-logger");
 
-    final AuditEvent event = AuditEventFactory.createAuditEvent("id");
+    final AuditEvent event = auditLogger.createAuditEvent("ID");
+    event.addParameter("parameter", "value");
     auditLogger.auditLog(event);
 
-    assertThat(memoryAppender.search(Level.DEBUG))
-      .hasSize(1)
-      .extracting(ILoggingEvent::toString)
-      .anySatisfy(message -> assertThat(message).contains("Publish audit event [id]"));
+    assertThat(this.memoryAppenderDebug.search(ch.qos.logback.classic.Level.DEBUG))
+        .hasSize(1)
+        .extracting(ILoggingEvent::toString)
+        .anySatisfy(message -> assertThat(message).contains(
+            String.format("Audit logger '%s' publishing audit event 'ID'", auditLogger.getName())));
 
-    assertThat(memoryAppender.search(Level.INFO))
-      .hasSize(1)
-      .extracting(ILoggingEvent::toString)
-      .anySatisfy(message -> assertThat(message).contains("Audit event"));
+    auditLogger.close();
+
+    final String eventString = event.toString();
+
+    final Path logFile = Path.of(LOG_FILE);
+    final List<String> lines = Files.readAllLines(logFile);
+    Assertions.assertTrue(lines.size() == 1);
+    Assertions.assertEquals(eventString, lines.get(0));
   }
 
   @Test
-  public void testAuditLogNullEvent() {
-    final FileAuditLogger auditLogger = new FileAuditLogger();
+  public void auditLogLoggingThrows() throws Exception {
+    final FileAuditLogger auditLogger = new FileAuditLogger(LOG_FILE);
+    auditLogger.setEventFactory(new DefaultAuditEventFactory());
+    auditLogger.setName("audit-logger");
+
+    final AuditEvent event = Mockito.mock(AuditEvent.class);
+    Mockito.when(event.getId()).thenReturn("ID");
+    Mockito.when(event.toString()).thenThrow(IllegalArgumentException.class);
+
+    Assertions.assertThrows(AuditLoggerException.class, () -> {
+      auditLogger.auditLog(event);
+    });
+
+    auditLogger.close();
+  }
+
+  @Test
+  public void testMissingLogFile() {
+    assertThatThrownBy(() -> {
+      new FileAuditLogger(null);
+    }).isInstanceOf(NullPointerException.class)
+        .hasMessageContaining("logFile must not be null");
+  }
+
+  @Test
+  public void testAuditLogNullEvent() throws Exception {
+    final FileAuditLogger auditLogger = new FileAuditLogger(LOG_FILE);
     assertThatThrownBy(() -> {
       auditLogger.auditLog(null);
     }).isInstanceOf(AuditLoggerException.class)
-      .hasMessageContaining("event must not be null");
+        .hasMessageContaining("event must not be null");
+
+    auditLogger.close();
   }
 
-  //TODO: Refactor to TestUtils?
-  class MemoryAppender extends ListAppender<ILoggingEvent> {
-
-    public void reset() {
-      this.list.clear();
-    }
-
-    public boolean contains(String string, Level level) {
-      return this.list.stream()
-        .anyMatch(event -> event.toString().contains(string)
-          && event.getLevel().equals(level));
-    }
-
-    public int countEventsForLogger(String loggerName) {
-      return (int) this.list.stream()
-        .filter(event -> event.getLoggerName().contains(loggerName))
-        .count();
-    }
-
-    public List<ILoggingEvent> search(String string) {
-      return this.list.stream()
-        .filter(event -> event.toString().contains(string))
-        .collect(Collectors.toList());
-    }
-
-    public List<ILoggingEvent> search(String string, Level level) {
-      return this.list.stream()
-        .filter(event -> event.toString().contains(string)
-          && event.getLevel().equals(level))
-        .collect(Collectors.toList());
-    }
-
-    public List<ILoggingEvent> search(Level level) {
-      return this.list.stream()
-        .filter(event -> event.getLevel().equals(level))
-        .collect(Collectors.toList());
-    }
-
-    public int getSize() {
-      return this.list.size();
-    }
-
-    public List<ILoggingEvent> getLoggedEvents() {
-      return Collections.unmodifiableList(this.list);
-    }
+  private void removeLogFile(@Nonnull final String file) throws IOException {
+    final Path logFile = Path.of(file);
+    Files.deleteIfExists(logFile);
   }
 }

@@ -19,11 +19,13 @@ import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationProperties;
+import se.swedenconnect.signservice.spring.config.audit.AuditLoggerConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.engine.EngineConfigurationProperties;
 
 /**
@@ -56,6 +58,11 @@ public class SignServiceConfigurationProperties implements InitializingBean {
   private SharedHandlerConfigurationProperties defaultHandlerConfig;
 
   /**
+   * System audit logger configuration.
+   */
+  private AuditLoggerConfigurationProperties systemAudit;
+
+  /**
    * A list of engine configurations.
    */
   private List<EngineConfigurationProperties> engines;
@@ -73,6 +80,10 @@ public class SignServiceConfigurationProperties implements InitializingBean {
       this.baseUrl = String.format("https://%s", this.domain);
       log.info("signservice.base-url not set, using default: {}", this.baseUrl);
     }
+    Assert.notNull(this.systemAudit, "signservice.system-audit.* must be set");
+    // Assert we have a configuration ...
+    this.systemAudit.getHandlerConfiguration();
+
     if (this.engines != null) {
       for (final EngineConfigurationProperties e : this.engines) {
         e.afterPropertiesSet();
