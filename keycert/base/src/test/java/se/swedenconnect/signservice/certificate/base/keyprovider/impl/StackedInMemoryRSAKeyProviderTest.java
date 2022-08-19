@@ -51,7 +51,15 @@ class StackedInMemoryRSAKeyProviderTest {
       log.info("Reading key {} taking {} ms", i, readTime);
     }
 
-    keyGenerationThread.join();
+    // Wait until keys has filled up
+    log.info("Waiting for keys to fill up in stack...");
+    long startWait = System.currentTimeMillis();
+    long maxWaitTime = startWait + 10000L;
+    while (keyProvider.getCurrentStackSize() < keyProvider.getKeyStackSize() && System.currentTimeMillis() < maxWaitTime){
+      Thread.sleep(100);
+    }
+    log.info("Wait completed in {} ms with {} keys out of {} in stack", System.currentTimeMillis() - startWait, keyProvider.getCurrentStackSize(), keyProvider.getKeyStackSize());
+
     assertEquals(keySize, keyProvider.getKeySize());
     assertEquals(5, keyProvider.getCurrentStackSize());
 

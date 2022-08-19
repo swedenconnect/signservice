@@ -13,21 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.certificate.simple;
+
+package se.swedenconnect.signservice.certificate.cmc;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.cert.X509CertificateHolder;
-import se.idsec.signservice.security.certificate.CertificateUtils;
-import se.swedenconnect.ca.engine.ca.issuer.CAService;
+import se.swedenconnect.ca.cmc.api.CMCCertificateModelBuilder;
+import se.swedenconnect.ca.cmc.api.client.CMCClient;
+import se.swedenconnect.ca.cmc.api.data.CMCFailType;
+import se.swedenconnect.ca.cmc.api.data.CMCResponse;
+import se.swedenconnect.ca.cmc.api.data.CMCResponseStatus;
+import se.swedenconnect.ca.cmc.api.data.CMCStatusType;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.data.SAMLAuthContextBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.SubjDirectoryAttributesModel;
-import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.ObjectFactory;
@@ -52,16 +55,22 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
- * A simple key and certificate handler.
+ * CMC based key and certificate handler obtaining certificates from a remote CA using CMC
  */
 @Slf4j
-public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHandler {
+public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandler {
 
-  /** CA service used to issue certificates */
-  private final CAService caService;
+  /** CMC Client for remote CA service used to issue certificates */
+  private final CMCClient cmcClient;
 
   /** Attribute mapper mapping attribute data from assertion to Certificates */
   private final AttributeMapper attributeMapper;
@@ -75,39 +84,46 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
   private CertificatePolicyModel certificatePolicy;
 
   /**
-   * Constructor for the key and certificate handler
+   * The certificate type produced by this certificate handler. Default PKC certificates
+   */
+  @Setter
+  private CertificateType supportedCertificateType;
+
+  /**
+   * Constructor for the key and certificate handler.
    *
    * @param signingKeyProvider provider for providing signing keys
-   * @param defaultConfiguration default configuration
+   * @param defaultConfiguration default value configuration data
    * @param algorithmRegistry algorithm registry
-   * @param caService ca service
-   * @param attributeMapper attribute mapper
+   * @param cmcClient CMC client used to issue certificates using CMC
+   * @param attributeMapper mapper for mapping authentication attributes to certificate attributes
    */
-  public SimpleKeyAndCertificateHandler(
+  public CMCKeyAndCertificateHandler(
     final @Nonnull SignServiceSigningKeyProvider signingKeyProvider,
     final @Nonnull DefaultConfiguration defaultConfiguration,
     final @Nonnull AlgorithmRegistry algorithmRegistry,
-    final @Nonnull CAService caService,
+    final @Nonnull CMCClient cmcClient,
     final @Nonnull AttributeMapper attributeMapper) {
     super(signingKeyProvider, defaultConfiguration, algorithmRegistry);
-    this.caService = Objects.requireNonNull(caService, "caService must not be null");
+    this.supportedCertificateType = CertificateType.PKC;
+    this.cmcClient = Objects.requireNonNull(cmcClient, "CMC client must not be null");
     this.attributeMapper = Objects.requireNonNull(attributeMapper, "attributeMapper must not be null");
   }
 
   /** {@inheritDoc} */
   @Override
-  protected void specificRequirementTests(final SignRequestMessage signRequest, final SignServiceContext context)
-    throws InvalidRequestException {
+  protected void specificRequirementTests(final @Nonnull SignRequestMessage signRequest,
+    final @Nonnull SignServiceContext context) throws InvalidRequestException {
     // No additional tests
   }
 
   /** {@inheritDoc} */
   @Override
-  protected X509Certificate obtainSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
-    @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
-    @Nonnull final SignServiceContext context) throws CertificateException {
+  protected X509Certificate obtainSigningCertificate(final @Nonnull PkiCredential signingKeyPair,
+    final @Nonnull SignRequestMessage signRequest, final @Nonnull IdentityAssertion assertion,
+    final @Nonnull SignServiceContext context) throws CertificateException {
 
-    log.debug("Issuing certificate from internal CA ...");
+    log.debug("Issuing certificate from CA via CMC ...");
 
     // Test basic availability of essential data
     if (assertion.getIdentifier() == null) {
@@ -134,10 +150,16 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
     // Get certificate subject name
     final CertNameModel<?> certNameModel = this.getCertNameModel(mappedCertAttributes);
     // Get the certificate model builder
-    final DefaultCertificateModelBuilder certificateModelBuilder =
-      (DefaultCertificateModelBuilder) this.caService.getCertificateModelBuilder(
-        certNameModel,
-        signingKeyPair.getPublicKey());
+    final CMCCertificateModelBuilder certificateModelBuilder;
+    try {
+      certificateModelBuilder = this.cmcClient.getCertificateModelBuilder(
+        signingKeyPair.getPublicKey(),
+        certNameModel, true, true
+      );
+    }
+    catch (IOException e) {
+      throw new CertificateException("Error obtaining certificate model from CMC client", e);
+    }
 
     // Obtain attribute mapping for the AuthContextExtension
     final List<AttributeMapping> attributeMappings = this.getAuthContextExtAttributeMappings(mappedCertAttributes);
@@ -165,14 +187,24 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
 
     // Issue certificate
     log.debug("Issuing certificate from certificate model");
-    final X509CertificateHolder certificateHolder = this.caService.issueCertificate(certificateModelBuilder.build());
+
     try {
-      // Return X509 Certificate
-      return CertificateUtils.decodeCertificate(certificateHolder.getEncoded());
+      CMCResponse cmcResponse = this.cmcClient.issueCertificate(certificateModelBuilder.build());
+      final CMCResponseStatus responseStatus = cmcResponse.getResponseStatus();
+      if (!responseStatus.getStatus().equals(CMCStatusType.success)) {
+        final CMCFailType failType = responseStatus.getFailType();
+        final String failTypeMessage =
+          responseStatus.getMessage() != null ? ", Message: " + responseStatus.getMessage() : "";
+        String message =
+          "Status: " + responseStatus.getStatus().name() + ", Failtype: " + failType.name() + failTypeMessage;
+        log.debug("Failed to issue requested certificate: {}", message);
+        throw new CertificateException(message);
+      }
+      return cmcResponse.getReturnCertificates().get(0);
     }
     catch (final IOException e) {
-      final String msg = "Failed to encode X509Certificate from X509CertificateModel";
-      log.info("{}", e);
+      final String msg = "Failed to complete CMC request";
+      log.info("Failed to complete CMC request to issue certificate: {}", e.getMessage());
       throw new CertificateException(msg, e);
     }
   }
@@ -184,7 +216,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
    * @param mappedCertAttributes mapped attributes from authentication source with mapping information
    * @throws CertificateException on error processing subject directory attribute data
    */
-  private void addSubjDirAttributesToCertModel(final DefaultCertificateModelBuilder certificateModelBuilder,
+  private void addSubjDirAttributesToCertModel(final CMCCertificateModelBuilder certificateModelBuilder,
     final List<AttributeMappingData> mappedCertAttributes)
     throws CertificateException {
     final List<AttributeModel> sanAttributeList = new ArrayList<>();
@@ -215,7 +247,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
    * @param mappedCertAttributes mapped attributes from authentication source with mapping information
    * @throws CertificateException error parsing subject alt name data
    */
-  private void addSANToCertModel(final DefaultCertificateModelBuilder certificateModelBuilder,
+  private void addSANToCertModel(final CMCCertificateModelBuilder certificateModelBuilder,
     final List<AttributeMappingData> mappedCertAttributes)
     throws CertificateException {
     final Map<Integer, String> subjectAltNameMap = new HashMap<>();
@@ -290,11 +322,11 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
 
   /** {@inheritDoc} */
   @Override
-  protected void isCertificateTypeSupported(@Nonnull final CertificateType certificateType,
-    @Nullable final String certificateProfile) throws InvalidRequestException {
-    if (!certificateType.equals(CertificateType.PKC)) {
+  protected void isCertificateTypeSupported(@Nonnull CertificateType certificateType,
+    @Nullable String certificateProfile) throws InvalidRequestException {
+    if (!supportedCertificateType.equals(certificateType)) {
       throw new InvalidRequestException(
-        "This simple key and certificate handler can only produce non qualified certificates");
+        "This CMC key and certificate handler can only produce certificates of type " + supportedCertificateType);
     }
   }
 }

@@ -1,19 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>signservice-keycert-parent</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>signservice-keycert-cmc</artifactId>
 
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
-    <artifactId>signservice-parent</artifactId>
+    <artifactId>signservice-keycert-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
 
-  <name>Sweden Connect :: SignService :: KeyAndCertificate</name>
-  <description>SignService KeyAndCertificate Parent</description>
+  <name>Sweden Connect :: SignService :: KeyAndCertificate :: CMC</name>
+  <description>SignService KeyAndCertificate CMC Implementation</description>
   <url>https://github.com/swedenconnect/signservice</url>
 
   <licenses>
@@ -66,28 +65,60 @@
 
   </developers>
 
+
   <properties>
   </properties>
-
-  <modules>
-    <module>base</module>
-    <module>simple</module>
-      <module>cmc</module>
-  </modules>
 
   <dependencies>
 
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-core</artifactId>
+      <artifactId>signservice-keycert-base</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
+      <groupId>se.swedenconnect.ca</groupId>
+      <artifactId>ca-engine</artifactId>
+      <version>1.2.1</version>
     </dependency>
-
+    <dependency>
+      <groupId>se.swedenconnect.ca</groupId>
+      <artifactId>cmc</artifactId>
+      <version>1.3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>se.idsec.utils</groupId>
+      <artifactId>print-cert</artifactId>
+      <version>[1.0.4,)</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <doctitle>SignService KeyAndCertificate CMC - ${project.version}</doctitle>
+          <windowtitle>SignService KeyAndCertificate CMC - ${project.version}</windowtitle>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M5</version>
+      </plugin>
+
+    </plugins>
+
+  </build>
 
 </project>
