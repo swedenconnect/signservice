@@ -16,15 +16,18 @@
 
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
-import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
-import se.swedenconnect.signservice.certificate.base.utils.TestUtils;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.interfaces.RSAPublicKey;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
+import se.swedenconnect.signservice.certificate.base.utils.TestUtils;
 
 /**
  * Test for on demand RSA key generator
@@ -44,8 +47,6 @@ class OnDemandInMemoryRSAKeyProviderTest {
     assertEquals(((RSAPublicKey)keyPair.getPublicKey()).getModulus().bitLength(), 2048);
     log.info("Generated key pair with private key:\n{}", TestUtils.base64Print(keyPair.getPrivateKey().getEncoded(), 80));
     log.info("Generated key pair with public key:\n{}", TestUtils.base64Print(keyPair.getPublicKey().getEncoded(), 80));
-
-    assertEquals(2048, ((OnDemandInMemoryRSAKeyProvider)keyProvider).getKeySize());
   }
 
 }

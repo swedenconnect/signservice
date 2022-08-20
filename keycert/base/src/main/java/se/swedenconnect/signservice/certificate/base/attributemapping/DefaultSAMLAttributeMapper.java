@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.certificate.base.attributemapping.impl;
+package se.swedenconnect.signservice.certificate.base.attributemapping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +27,6 @@ import org.apache.commons.lang.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMapper;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMappingData;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMappingException;
-import se.swedenconnect.signservice.certificate.base.attributemapping.DefaultValuePolicy;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
@@ -45,21 +41,21 @@ import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 public class DefaultSAMLAttributeMapper implements AttributeMapper {
 
   /** Policy to validate if default values in sign request are acceptable for inclusion in certificates. */
-  private final DefaultValuePolicy defaultValuePolicy;
+  private final DefaultValuePolicyChecker defaultValuePolicy;
 
   /**
    * Constructor.
    *
    * @param defaultValuePolicy default value policy to test if default values from sign request are acceptable
    */
-  public DefaultSAMLAttributeMapper(@Nonnull final DefaultValuePolicy defaultValuePolicy) {
+  public DefaultSAMLAttributeMapper(@Nonnull final DefaultValuePolicyChecker defaultValuePolicy) {
     this.defaultValuePolicy = Objects.requireNonNull(defaultValuePolicy, "defaultValuePolicy must not be null");
   }
 
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public List<AttributeMappingData> getMappedCertAttributes(@Nonnull final SignRequestMessage signRequest,
+  public List<AttributeMappingData> mapCertificateAttributes(@Nonnull final SignRequestMessage signRequest,
       @Nonnull final IdentityAssertion assertion) throws AttributeMappingException {
 
     final SigningCertificateRequirements certificateRequirements = Optional.ofNullable(
@@ -79,7 +75,6 @@ public class DefaultSAMLAttributeMapper implements AttributeMapper {
       }
     }
 
-    // Return result
     return attrMappingDataList;
   }
 
@@ -95,9 +90,9 @@ public class DefaultSAMLAttributeMapper implements AttributeMapper {
   private AttributeMappingData getMappingData(@Nonnull final CertificateAttributeMapping mappingRequirement,
       @Nonnull final IdentityAssertion assertion) throws AttributeMappingException {
 
-    final RequestedCertificateAttribute requestedCertificateAttribute = Optional.ofNullable(
-        mappingRequirement.getDestination())
-        .orElseThrow(() -> new AttributeMappingException("Attribute mapping requirement lacks requirement data"));
+    final RequestedCertificateAttribute requestedCertificateAttribute =
+        Optional.ofNullable(mappingRequirement.getDestination())
+            .orElseThrow(() -> new AttributeMappingException("Attribute mapping requirement lacks requirement data"));
     final List<IdentityAttributeIdentifier> sources = mappingRequirement.getSources();
     if (sources == null || sources.isEmpty()) {
       if (requestedCertificateAttribute.isRequired()) {

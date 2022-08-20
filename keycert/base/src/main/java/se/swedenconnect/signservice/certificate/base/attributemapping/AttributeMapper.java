@@ -36,7 +36,7 @@ public interface AttributeMapper {
    * @throws AttributeMappingException error processing attribute mapping data
    */
   @Nonnull
-  List<AttributeMappingData> getMappedCertAttributes(@Nonnull SignRequestMessage signRequest,
+  List<AttributeMappingData> mapCertificateAttributes(@Nonnull SignRequestMessage signRequest,
     @Nonnull IdentityAssertion assertion) throws AttributeMappingException;
 
 }

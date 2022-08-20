@@ -18,8 +18,11 @@ package se.swedenconnect.signservice.certificate;
 import java.security.KeyException;
 import java.security.cert.CertificateException;
 
+import javax.annotation.Nonnull;
+
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
+import se.swedenconnect.signservice.core.SignServiceHandler;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
@@ -27,14 +30,7 @@ import se.swedenconnect.signservice.session.SignServiceContext;
 /**
  * Defines the handler that is responsible of generating keys and issuing signing certificates.
  */
-public interface KeyAndCertificateHandler {
-
-  /**
-   * Gets the name of the handler.
-   *
-   * @return the handler name
-   */
-  String getName();
+public interface KeyAndCertificateHandler extends SignServiceHandler {
 
   /**
    * Verifies that the requirements put in the supplied SignRequest is correct and the handler can process the request.
@@ -44,7 +40,7 @@ public interface KeyAndCertificateHandler {
    * @param context the SignService context
    * @throws InvalidRequestException if the requirements cannot be met
    */
-  void checkRequirements(final SignRequestMessage signRequest, final SignServiceContext context)
+  void checkRequirements(@Nonnull final SignRequestMessage signRequest, @Nonnull final SignServiceContext context)
       throws InvalidRequestException;
 
   /**
@@ -57,10 +53,9 @@ public interface KeyAndCertificateHandler {
    * @throws KeyException for key generation errors
    * @throws CertificateException for certificate issuance errors
    */
+  @Nonnull
   PkiCredential generateSigningCredential(
-      final SignRequestMessage signRequest, final IdentityAssertion assertion, final SignServiceContext context)
-      throws KeyException, CertificateException;
-
-  // TODO: We may want to pass along some sort of client policy object as well.
+      @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
+      @Nonnull final SignServiceContext context) throws KeyException, CertificateException;
 
 }

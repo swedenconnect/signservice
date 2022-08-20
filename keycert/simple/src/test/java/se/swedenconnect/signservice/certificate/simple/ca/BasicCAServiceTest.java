@@ -30,8 +30,8 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.SigningKeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.impl.DefaultCACertificateFactory;
@@ -61,10 +61,10 @@ class BasicCAServiceTest {
 
   @Test
   void caServiceTest() throws Exception {
-    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(
+    SigningKeyProvider keyProvider = new DefaultSigningKeyProvider(
       new OnDemandInMemoryRSAKeyProvider(2048),
       new InMemoryECKeyProvider(new ECGenParameterSpec("P-256")));
-    PkiCredential keyPair = keyProvider.getSigningKeyPair("EC");
+    PkiCredential keyPair = keyProvider.getKeyPair("EC");
     CACertificateFactory caCertificateFactory = new DefaultCACertificateFactory();
     X509CertificateHolder caCertificate = caCertificateFactory.getCACertificate(
       new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10),

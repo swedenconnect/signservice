@@ -28,8 +28,8 @@ import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.SigningKeyProvider;
+import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.CACertificateFactory;
@@ -59,7 +59,7 @@ class DefaultCACertificateFactoryTest {
   @Test
   void getCACertificate() throws Exception {
 
-    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(
+    SigningKeyProvider keyProvider = new DefaultSigningKeyProvider(
       new OnDemandInMemoryRSAKeyProvider(2048),
       new InMemoryECKeyProvider(new ECGenParameterSpec("P-256")));
 
@@ -72,19 +72,19 @@ class DefaultCACertificateFactoryTest {
 
     testCACertFactory(
       "EC key pair test case",
-      keyProvider.getSigningKeyPair("EC"),
+      keyProvider.getKeyPair("EC"),
       new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10),
       caNameModel, null
     );
     testCACertFactory(
       "RSA key pair test case",
-      keyProvider.getSigningKeyPair("RSA"),
+      keyProvider.getKeyPair("RSA"),
       new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1, 10),
       caNameModel, null
     );
     testCACertFactory(
       "RSA key with EC algorithm test case",
-      keyProvider.getSigningKeyPair("RSA"),
+      keyProvider.getKeyPair("RSA"),
       new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10),
       caNameModel, CertificateIssuanceException.class
     );
@@ -96,13 +96,13 @@ class DefaultCACertificateFactoryTest {
     );
     testCACertFactory(
       "Null cert issuer model",
-      keyProvider.getSigningKeyPair("EC"),
+      keyProvider.getKeyPair("EC"),
       null,
       caNameModel, NullPointerException.class
     );
     testCACertFactory(
       "Null CA name model",
-      keyProvider.getSigningKeyPair("EC"),
+      keyProvider.getKeyPair("EC"),
       new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10),
       null, NullPointerException.class
     );

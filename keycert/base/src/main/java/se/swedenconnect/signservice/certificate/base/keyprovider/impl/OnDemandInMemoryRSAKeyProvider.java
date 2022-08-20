@@ -15,31 +15,18 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
-import lombok.Getter;
-import se.swedenconnect.security.credential.BasicCredential;
-import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
+import java.security.KeyException;
 
 import javax.annotation.Nonnull;
-import java.security.KeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
+
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * RSA key provider generating RSA keys on demand. This differs from the stacked RSA key
  * provider that pre-generates RSA keys in a background thread to optimize the time
  * it takes to obtain a key.
  */
-public class OnDemandInMemoryRSAKeyProvider implements KeyProvider {
-
-  /**
-   * The RSA key size served by this key provider.
-   *
-   * @return RSA key size served by this key provider
-   */
-  @Getter
-  private final int keySize;
+public class OnDemandInMemoryRSAKeyProvider extends AbstractRSAKeyProvider {
 
   /**
    * Constructor for the on-demand RSA key provider.
@@ -47,22 +34,14 @@ public class OnDemandInMemoryRSAKeyProvider implements KeyProvider {
    * @param keySize key size for generated RSA keys
    */
   public OnDemandInMemoryRSAKeyProvider(final int keySize) {
-    this.keySize = keySize;
+    super(keySize);
   }
 
   /** {@inheritDoc} */
   @Override
   @Nonnull
   public PkiCredential getKeyPair() throws KeyException {
-    try {
-      KeyPairGenerator generator;
-      generator = KeyPairGenerator.getInstance("RSA");
-      generator.initialize(this.keySize);
-      KeyPair keyPair = generator.generateKeyPair();
-      return new BasicCredential(keyPair.getPublic(), keyPair.getPrivate());
-    }
-    catch (final NoSuchAlgorithmException e) {
-      throw new KeyException("Error generating RSA key pair", e);
-    }
+    return this.generateKeyPair();
   }
+
 }

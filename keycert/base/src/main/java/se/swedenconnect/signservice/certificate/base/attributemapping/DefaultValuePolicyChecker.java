@@ -22,7 +22,8 @@ import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 /**
  * Interface for checking if a default value for a certificate attribute is acceptable.
  */
-public interface DefaultValuePolicy {
+@FunctionalInterface
+public interface DefaultValuePolicyChecker {
 
   /**
    * Checks if a default certificate value taken from the sign request is allowed according to the policy of the sign

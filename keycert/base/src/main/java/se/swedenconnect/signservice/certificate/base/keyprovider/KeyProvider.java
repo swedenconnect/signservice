@@ -15,16 +15,18 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider;
 
-import se.swedenconnect.security.credential.PkiCredential;
-
 import java.security.KeyException;
+
+import javax.annotation.Nonnull;
+
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * Interface for a key provider.
  *
- * The key pair is returned as a {@link PkiCredential} to accommodate for the situation
- * where the key may be provided as a key from an HSM where the access to the key need special support
- * in order to assure that the key is till available etc.
+ * The key pair is returned as a {@link PkiCredential} to accommodate for the situation where the key may be provided as
+ * a key from an HSM where the access to the key need special support in order to assure that the key is still available
+ * etc.
  */
 public interface KeyProvider {
 
@@ -34,6 +36,15 @@ public interface KeyProvider {
    * @return a key pair delivered as {@link PkiCredential}
    * @throws KeyException on error obtaining a key pair
    */
+  @Nonnull
   PkiCredential getKeyPair() throws KeyException;
+
+  /**
+   * Predicate that tells whether the supplied key type is supported by the provider.
+   *
+   * @param keyType the key type to test
+   * @return true if the key type is supported and false otherwise
+   */
+  boolean supports(@Nonnull final String keyType);
 
 }

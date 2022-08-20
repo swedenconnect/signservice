@@ -14,21 +14,29 @@
  * limitations under the License.
  */
 
-package se.swedenconnect.signservice.certificate.base.attributemapping.impl;
+package se.swedenconnect.signservice.certificate.base.attributemapping;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.junit.jupiter.api.Test;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.authn.impl.SimpleAuthnContextIdentifier;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.CertificateType;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMapper;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMappingData;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMappingException;
-import se.swedenconnect.signservice.certificate.base.attributemapping.DefaultValuePolicy;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
@@ -38,17 +46,6 @@ import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultCertificateAttributeMapping;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificateAttribute;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Test for the default SAML attribute mapper
@@ -60,19 +57,19 @@ class DefaultSAMLAttributeMapperTest {
   void getMappedCertAttributes() throws Exception {
 
     log.info("Attribute mapping tests");
-    AttributeMapper attributeMapper = new DefaultSAMLAttributeMapper(new DefaultValuePolicy() {
+    AttributeMapper attributeMapper = new DefaultSAMLAttributeMapper(new DefaultValuePolicyChecker() {
       @Override public boolean isDefaultValueAllowed(CertificateAttributeType attributeType, String ref, String value) {
         return attributeType.equals(CertificateAttributeType.RDN) && ref.equalsIgnoreCase("2.5.4.6") && value.equalsIgnoreCase("SE");
       }
     });
 
-    AttributeMapper noDefaultsAttributeMapper = new DefaultSAMLAttributeMapper(new DefaultValuePolicy() {
+    AttributeMapper noDefaultsAttributeMapper = new DefaultSAMLAttributeMapper(new DefaultValuePolicyChecker() {
       @Override public boolean isDefaultValueAllowed(CertificateAttributeType attributeType, String ref, String value) {
         return false;
       }
     });
 
-    List<AttributeMappingData> mappedCertAttributes = attributeMapper.getMappedCertAttributes(getSignRequest(
+    List<AttributeMappingData> mappedCertAttributes = attributeMapper.mapCertificateAttributes(getSignRequest(
       XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
       "client01", CertificateType.PKC,
       null, TestData.allAttributeMappings
@@ -89,7 +86,7 @@ class DefaultSAMLAttributeMapperTest {
     log.info("Successfully mapped attributes");
 
     AttributeMappingException exception = assertThrows(AttributeMappingException.class,
-      () -> noDefaultsAttributeMapper.getMappedCertAttributes(getSignRequest(
+      () -> noDefaultsAttributeMapper.mapCertificateAttributes(getSignRequest(
         XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
         "client01", CertificateType.PKC,
         null, TestData.allAttributeMappings

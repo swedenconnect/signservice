@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 
 /**
- * Data for a mapped attribute value to be included in a signer certificate
+ * Data for a mapped attribute value to be included in a signer certificate.
  */
 @Data
 @AllArgsConstructor
@@ -76,7 +76,7 @@ public class AttributeMappingData {
    * The attribute value.
    *
    * @param value the attribute value
-   * @retur the attribute value
+   * @return the attribute value
    */
   String value;
 
