@@ -15,51 +15,34 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import se.swedenconnect.security.credential.BasicCredential;
-import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
+import java.security.KeyException;
+import java.util.EmptyStackException;
+import java.util.Stack;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.security.KeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * Default in memory RSA key provider.
  *
  * <p>
- * This key provider produces and holds a stock of pre-produced RSA keys. It is therefore important that this
- * class is instantiated as a singleton
+ * This key provider produces and holds a stock of pre-produced RSA keys. It is therefore important that this class is
+ * instantiated as a singleton
  * </p>
  */
 @Slf4j
-public class StackedInMemoryRSAKeyProvider implements KeyProvider {
-
-  /**
-   * The RSA key size served by this key provider.
-   *
-   * @return RSA key size served by this key provider
-   */
-  @Getter
-  private final int keySize;
+public class StackedInMemoryRSAKeyProvider extends AbstractRSAKeyProvider {
 
   /**
    * The number of keys stored in this key stack.
-   *
-   * @return the number of keys stored in this key stack
    */
-  @Getter
   private final int keyStackSize;
 
-  /** The key stack holding stored keys. */
-  private final List<PkiCredential> keyStack;
+  /** The key stack holding stored keys. Note that the Stack is synchronized. */
+  private final Stack<PkiCredential> keyStack;
 
   /**
    * The thread responsible for filling up the key stack in the background. The purpose of making it possible to get
@@ -78,45 +61,46 @@ public class StackedInMemoryRSAKeyProvider implements KeyProvider {
    * @param keyStackSize key stack size
    */
   public StackedInMemoryRSAKeyProvider(final int keySize, final int keyStackSize) {
-    this.keySize = keySize;
+    super(keySize);
     this.keyStackSize = keyStackSize;
-    this.keyStack = new ArrayList<>();
+    this.keyStack = new Stack<>();
     this.fillUpKeyStack();
   }
 
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public synchronized PkiCredential getKeyPair() throws KeyException {
-    final PkiCredential pkiCredential = Optional.ofNullable(this.addOrRetrieveStackedKey(null)).orElse(this.generateKeyPair());
+  public PkiCredential getKeyPair() throws KeyException {
+    final PkiCredential pkiCredential = this.getStackedKey();
     this.fillUpKeyStack();
     return pkiCredential;
   }
 
   /**
-   * Add or remove a key from the key stack. This single synchronized function handles all changes to the key stack to
-   * avoid conflicts.
+   * Gets a stacked key, or if not key pair is stacked, generates a new key pair.
    *
-   * @param pkiCredential adds this key to the stack if this parameter is not null
-   * @return A key pair if the stack was not empty and the provided key pair is null
+   * @return a PkiCredential
+   * @throws KeyException for generation errors
    */
-  @Nullable
-  private synchronized PkiCredential addOrRetrieveStackedKey(@Nullable final PkiCredential pkiCredential) {
-
-    if (pkiCredential == null) {
-      // retrieve key
-      if (this.keyStack.isEmpty()) {
-        return null;
+  @Nonnull
+  private PkiCredential getStackedKey() throws KeyException {
+    try {
+      if (!this.keyStack.isEmpty()) {
+        return this.keyStack.pop();
       }
-      final PkiCredential keyPairFromStack = this.keyStack.get(0);
-      this.keyStack.remove(0);
-      return keyPairFromStack;
     }
+    catch (final EmptyStackException e) {
+    }
+    return this.generateKeyPair();
+  }
 
-    // Add key
-    this.keyStack.add(pkiCredential);
-    return null;
-
+  /**
+   * Adds a newly generated key pair to the stack
+   *
+   * @param pkiCredential the credential to add
+   */
+  private void addStackedKey(@Nonnull final PkiCredential pkiCredential) {
+    this.keyStack.push(pkiCredential);
   }
 
   /**
@@ -128,6 +112,9 @@ public class StackedInMemoryRSAKeyProvider implements KeyProvider {
     return this.keyStack.size();
   }
 
+  /**
+   * Is called to start a thread filling up the key stack.
+   */
   private void fillUpKeyStack() {
     if (this.keyGenerationThread != null && this.keyGenerationThread.isAlive()) {
       return;
@@ -136,19 +123,9 @@ public class StackedInMemoryRSAKeyProvider implements KeyProvider {
     this.keyGenerationThread.start();
   }
 
-  private PkiCredential generateKeyPair() throws KeyException {
-    try {
-      KeyPairGenerator generator;
-      generator = KeyPairGenerator.getInstance("RSA");
-      generator.initialize(this.keySize);
-      KeyPair keyPair = generator.generateKeyPair();
-      return new BasicCredential(keyPair.getPublic(), keyPair.getPrivate());
-    }
-    catch (final NoSuchAlgorithmException e) {
-      throw new KeyException("Error generating RSA key pair", e);
-    }
-  }
-
+  /**
+   * Class implementing building of key pairs.
+   */
   class KeyBuilder implements Runnable {
 
     /**
@@ -156,11 +133,10 @@ public class StackedInMemoryRSAKeyProvider implements KeyProvider {
      */
     @Override
     public void run() {
-      while (StackedInMemoryRSAKeyProvider.this.keyStack.size() < StackedInMemoryRSAKeyProvider.this.keyStackSize) {
+      while (getCurrentStackSize() < keyStackSize) {
         final long startTime = System.currentTimeMillis();
         try {
-          StackedInMemoryRSAKeyProvider.this
-              .addOrRetrieveStackedKey(StackedInMemoryRSAKeyProvider.this.generateKeyPair());
+          addStackedKey(generateKeyPair());
         }
         catch (final KeyException e) {
           log.error("Error creating RSA key", e);
@@ -168,10 +144,9 @@ public class StackedInMemoryRSAKeyProvider implements KeyProvider {
         }
         final long keyGenTime = System.currentTimeMillis() - startTime;
         log.debug("Generated new RSA key with key size {} in {} ms. Keys in stack: {}",
-            StackedInMemoryRSAKeyProvider.this.keySize, keyGenTime,
-            StackedInMemoryRSAKeyProvider.this.keyStack.size());
+            getKeySize(), keyGenTime, getCurrentStackSize());
       }
-      log.debug("Completed RSA key generation at stick size {}", StackedInMemoryRSAKeyProvider.this.keyStackSize);
+      log.debug("Completed RSA key generation to fill stack");
     }
   }
 
