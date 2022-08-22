@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.xml.security.signature.XMLSignature;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
@@ -43,11 +42,9 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import se.idsec.utils.printcert.PrintCertificate;
 import se.swedenconnect.ca.cmc.api.client.CMCClient;
-import se.swedenconnect.ca.cmc.api.client.impl.PreConfiguredCMCClient;
 import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.credential.PkiCredential;
@@ -58,9 +55,11 @@ import se.swedenconnect.signservice.certificate.CertificateType;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.attributemapping.DefaultSAMLAttributeMapper;
+import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandInMemoryRSAKeyProvider;
+import se.swedenconnect.signservice.certificate.cmc.ca.SignServiceCMCClient;
 import se.swedenconnect.signservice.certificate.cmc.testutils.CMCApiFactory;
 import se.swedenconnect.signservice.certificate.cmc.testutils.TestCMCHttpConnector;
 import se.swedenconnect.signservice.certificate.cmc.testutils.TestCredentials;
@@ -124,7 +123,7 @@ class CMCKeyAndCertificateHandlerTest {
     assertEquals("TestName", cmcKeyAndCertificateHandler.getName());
   }
 
-  private CMCClient getCMCClient(CAService caService) throws Exception {
+  private SignServiceCMCClient getCMCClient(CAService caService) throws Exception {
     StaticCAInformation staticCAInformation = StaticCAInformation.builder()
         .caAlgorithm(caService.getCaAlgorithm())
         .certificateChain(caService.getCACertificateChain().stream()
@@ -134,8 +133,8 @@ class CMCKeyAndCertificateHandlerTest {
         .crlDpURLs(caService.getCrlDpURLs())
         .ocspCertificate(getCertBytes(caService.getOCSPResponderCertificate()))
         .build();
-    CMCClient cmcClient =
-        new PreConfiguredCMCClient("http://example.com/test", TestCredentials.privateCMCClientSignerECKey,
+    SignServiceCMCClient cmcClient =
+        new SignServiceCMCClient("http://example.com/test", TestCredentials.privateCMCClientSignerECKey,
             TestCredentials.cMCClientSignerCertificate, XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
             TestCredentials.cMCCaSignerCertificate, staticCAInformation);
     return cmcClient;
@@ -150,13 +149,15 @@ class CMCKeyAndCertificateHandlerTest {
   void obtainSigningCertificate() throws Exception {
 
     TestCAHolder caHolder = TestServices.getTestCAs().get(TestCA.INSTANCE1);
-    CMCClient rsaCaCmcClient = getCMCClient(caHolder.getCscaService());
+    SignServiceCMCClient rsaCaCmcClient = getCMCClient(caHolder.getCscaService());
     rsaCaCmcClient
         .setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(caHolder.getCscaService())));
     CMCKeyAndCertificateHandler keyAndCertificateHandler = new CMCKeyAndCertificateHandler(
         Arrays.asList(rsaProvider, ecProvider), attributeMapper, algorithmRegistry, rsaCaCmcClient);
-    keyAndCertificateHandler
-        .setCertificatePolicy(new CertificatePolicyModel(false, new ASN1ObjectIdentifier("1.2.3.4.5.6.7.8.9")));
+    rsaCaCmcClient
+        .setProfileConfiguration(CertificateProfileConfiguration.getBuilderWithDefaultValues()
+          .policy(List.of("1.2.3.4.5.6.7.8.9"))
+          .build());
     log.info("Created CMC key and certificate handler");
 
     CMCClient badRsaCaCmcClient = getCMCClient(caHolder.getCscaService());

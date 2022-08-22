@@ -73,14 +73,6 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
   private final CMCClient cmcClient;
 
   /**
-   * Optional certificate policy to be included in issued certificates.
-   *
-   * @param certificatePolicy policy to be included in issued certificates
-   */
-  @Setter
-  private CertificatePolicyModel certificatePolicy;
-
-  /**
    * The certificate type produced by this certificate handler. Default PKC certificates
    */
   @Setter
@@ -151,12 +143,6 @@ public class CMCKeyAndCertificateHandler extends AbstractKeyAndCertificateHandle
             .identityProvider(assertion.getIssuer())
             .attributeMappings(attributeMappings)
             .build());
-
-    // Add policy if available
-    if (this.certificatePolicy != null) {
-      certificateModelBuilder.certificatePolicy(this.certificatePolicy);
-      log.debug("Adding certificate policy {}", this.certificatePolicy.toString());
-    }
 
     // Add Subject Alt Name if present
     this.addSANToCertModel(certificateModelBuilder, certAttributes);

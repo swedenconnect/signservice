@@ -70,14 +70,6 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
   private final CAService caService;
 
   /**
-   * Optional certificate policy to be included in issued certificates.
-   *
-   * @param certificatePolicy policy to be included in issued certificates
-   */
-  @Setter
-  private CertificatePolicyModel certificatePolicy;
-
-  /**
    * Constructor for the key and certificate handler
    *
    * @param keyProviders a list of key providers that this handler uses
@@ -135,12 +127,6 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
             .identityProvider(assertion.getIssuer())
             .attributeMappings(attributeMappings)
             .build());
-
-    // Add policy if available
-    if (this.certificatePolicy != null) {
-      certificateModelBuilder.certificatePolicy(this.certificatePolicy);
-      log.debug("Adding certificate policy {}", this.certificatePolicy.toString());
-    }
 
     // Add Subject Alt Name if present
     this.addSANToCertModel(certificateModelBuilder, certAttributes);
