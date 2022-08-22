@@ -15,61 +15,84 @@
  */
 package se.swedenconnect.signservice.certificate.base.config;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.Collections;
-import java.util.List;
+import lombok.NoArgsConstructor;
 
 /**
- * Configuration data for a certificate profile
+ * Configuration data for a certificate profile.
  */
 @Data
-@AllArgsConstructor
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CertificateProfileConfiguration {
 
-  /** List of certificate policy object identifier values */
-  private List<String> policy;
-  /** Criticality for certificate policies extension */
-  private Boolean policyCritical;
-  /** List of extended key usage object identifier values */
+  /**
+   * List of certificate policy object identifier values.
+   */
+  private List<String> policies;
+
+  /**
+   * Criticality for certificate policies extension. The default is {@code false}.
+   */
+  @Builder.Default
+  private boolean policiesCritical = false;
+
+  /**
+   * List of extended key usage object identifier values.
+   */
   private List<String> extendedKeyUsages;
-  /** Criticality of extended key usage extension */
-  private Boolean extendedKeyUsageCritical;
-  /** Optional settings for certificate key usage */
-  private List<OptionalUsageEnum> usageType;
-  /** Criticality of key usage extension */
-  private Boolean keyUsageCritical;
-  /** Criticality of basic constraints extension */
-  private Boolean basicConstraintsCritical;
 
   /**
-   * Get instance of default certificate profile configuration data for sign services
-   *
-   * @return default certificate profile configuration
+   * Criticality of extended key usage extension. The default is {@code false}.
    */
-  public static CertificateProfileConfiguration getDefaultConfiguration() {
-    return getBuilderWithDefaultValues().build();
-  }
+  @Builder.Default
+  private boolean extendedKeyUsageCritical = false;
 
   /**
-   * Get instance of certificate profile configuration data builder for sign services with default values
-   *
-   * @return certificate profile configuration data builder with default values
+   * Optional settings for certificate key usage.
    */
-  public static CertificateProfileConfigurationBuilder getBuilderWithDefaultValues(){
-    return CertificateProfileConfiguration.builder()
-      .policy(Collections.emptyList())
-      .policyCritical(false)
-      .extendedKeyUsages(Collections.emptyList())
-      .extendedKeyUsageCritical(false)
-      .usageType(Collections.emptyList())
-      .keyUsageCritical(true)
-      .basicConstraintsCritical(false);
-  }
+  private SigningKeyUsageDirective usageType;
 
+  /**
+   * Criticality of key usage extension. The default is {@code true}.
+   */
+  @Builder.Default
+  private boolean keyUsageCritical = true;
+
+  /**
+   * Criticality of basic constraints extension.
+   */
+  @Builder.Default
+  private boolean basicConstraintsCritical = false;
+
+//  /**
+//   * Get instance of default certificate profile configuration data for sign services
+//   *
+//   * @return default certificate profile configuration
+//   */
+//  public static CertificateProfileConfiguration getDefaultConfiguration() {
+//    return getBuilderWithDefaultValues().build();
+//  }
+//
+//  /**
+//   * Get instance of certificate profile configuration data builder for sign services with default values
+//   *
+//   * @return certificate profile configuration data builder with default values
+//   */
+//  public static CertificateProfileConfigurationBuilder getBuilderWithDefaultValues() {
+//    return CertificateProfileConfiguration.builder()
+//        .policies(Collections.emptyList())
+//        .policiesCritical(false)
+//        .extendedKeyUsages(Collections.emptyList())
+//        .extendedKeyUsageCritical(false)
+//        .usageType(null)
+//        .keyUsageCritical(true)
+//        .basicConstraintsCritical(false);
+//  }
 
 }
-

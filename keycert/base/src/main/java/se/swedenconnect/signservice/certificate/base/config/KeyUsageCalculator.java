@@ -16,32 +16,33 @@
 
 package se.swedenconnect.signservice.certificate.base.config;
 
-import org.bouncycastle.asn1.x509.KeyUsage;
-
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.bouncycastle.asn1.x509.KeyUsage;
 
 /**
  * Key usage calculator
  */
 public class KeyUsageCalculator {
 
-  public static int getKeyUsageValue(PublicKey publicKey, List<OptionalUsageEnum> optionalUsageList) {
-    int keyUsageVal = KeyUsage.digitalSignature + KeyUsage.nonRepudiation;
+  public static int getKeyUsageValue(
+      @Nonnull final PublicKey publicKey, @Nullable final SigningKeyUsageDirective usageDirective) {
 
-    for (OptionalUsageEnum setting : optionalUsageList) {
-      switch (setting) {
-      case excludeNr:
-        keyUsageVal -= KeyUsage.nonRepudiation;
-        break;
-      case encrypt:
-        int encryptVal = publicKey instanceof RSAPublicKey ? KeyUsage.keyEncipherment : KeyUsage.keyAgreement;
-        keyUsageVal += encryptVal;
-        break;
+    int keyUsage = KeyUsage.digitalSignature + KeyUsage.nonRepudiation;
+
+    if (usageDirective != null) {
+      if (usageDirective.isEncrypt()) {
+        keyUsage += (RSAPublicKey.class.isInstance(publicKey) ? KeyUsage.keyEncipherment : KeyUsage.keyAgreement);
+      }
+      else {
+        keyUsage -= KeyUsage.nonRepudiation;
       }
     }
-    return keyUsageVal;
+    return keyUsage;
   }
 
 }

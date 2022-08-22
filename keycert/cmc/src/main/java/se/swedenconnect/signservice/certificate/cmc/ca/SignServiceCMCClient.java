@@ -16,26 +16,6 @@
 
 package se.swedenconnect.signservice.certificate.cmc.ca;
 
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.operator.OperatorCreationException;
-import se.swedenconnect.ca.cmc.api.CMCCertificateModelBuilder;
-import se.swedenconnect.ca.cmc.api.client.impl.PreConfiguredCMCClient;
-import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
-import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
-import se.swedenconnect.ca.engine.ca.models.cert.CertificateModelBuilder;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.ExtendedKeyUsageModel;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
-import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
-import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.KeyUsageCalculator;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
@@ -44,7 +24,29 @@ import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.operator.OperatorCreationException;
+
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.ca.cmc.api.CMCCertificateModelBuilder;
+import se.swedenconnect.ca.cmc.api.client.impl.PreConfiguredCMCClient;
+import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
+import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.ExtendedKeyUsageModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
+import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
+import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
+import se.swedenconnect.signservice.certificate.base.config.KeyUsageCalculator;
 
 /**
  * CMC Client for certificate services
@@ -55,7 +57,8 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
   /**
    * Optional certificate profile to be adopted in issued certificates.
    *
-   * @param profileConfiguration certificate profile configuration
+   * @param profileConfiguration
+   *          certificate profile configuration
    */
   @Setter
   private CertificateProfileConfiguration profileConfiguration;
@@ -63,38 +66,55 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
   /**
    * Constructor for the CMC Client
    *
-   * @param cmcRequestUrl URL where CMC requests are sent to the remote CA
-   * @param cmcSigningKey CMC client signing key
-   * @param cmcSigningCert CMC client signing certificate
-   * @param algorithm CMC signing algorithm
-   * @param cmcResponseCert signing certificate of the remote CA CMC responder
-   * @param staticCaInformation Static information about the issuing CA
-   * @throws MalformedURLException malformed URL
-   * @throws NoSuchAlgorithmException algorithm is not supported or recognized
-   * @throws OperatorCreationException error setting up CMC client
-   * @throws CertificateEncodingException error parsing provided certificates
+   * @param cmcRequestUrl
+   *          URL where CMC requests are sent to the remote CA
+   * @param cmcSigningKey
+   *          CMC client signing key
+   * @param cmcSigningCert
+   *          CMC client signing certificate
+   * @param algorithm
+   *          CMC signing algorithm
+   * @param cmcResponseCert
+   *          signing certificate of the remote CA CMC responder
+   * @param staticCaInformation
+   *          Static information about the issuing CA
+   * @throws MalformedURLException
+   *           malformed URL
+   * @throws NoSuchAlgorithmException
+   *           algorithm is not supported or recognized
+   * @throws OperatorCreationException
+   *           error setting up CMC client
+   * @throws CertificateEncodingException
+   *           error parsing provided certificates
    */
   public SignServiceCMCClient(String cmcRequestUrl, PrivateKey cmcSigningKey,
-    X509Certificate cmcSigningCert, String algorithm,
-    X509Certificate cmcResponseCert,
-    StaticCAInformation staticCaInformation)
-    throws MalformedURLException, NoSuchAlgorithmException, OperatorCreationException, CertificateEncodingException {
+      X509Certificate cmcSigningCert, String algorithm,
+      X509Certificate cmcResponseCert,
+      StaticCAInformation staticCaInformation)
+      throws MalformedURLException, NoSuchAlgorithmException, OperatorCreationException, CertificateEncodingException {
     super(cmcRequestUrl, cmcSigningKey, cmcSigningCert, algorithm, cmcResponseCert, staticCaInformation);
   }
 
   /**
-   * Return a certificate model builder prepared for creating certificate models for certificate requests to this CA service via CMC
+   * Return a certificate model builder prepared for creating certificate models for certificate requests to this CA
+   * service via CMC
    *
-   * @param subjectPublicKey the public key of the subject
-   * @param subject          subject name data
-   * @param includeCrlDPs    true to include CRL distribution point URLs in the issued certificate
-   * @param includeOcspURL   true to include OCSP URL (if present) in the issued certificate
+   * @param subjectPublicKey
+   *          the public key of the subject
+   * @param subject
+   *          subject name data
+   * @param includeCrlDPs
+   *          true to include CRL distribution point URLs in the issued certificate
+   * @param includeOcspURL
+   *          true to include OCSP URL (if present) in the issued certificate
    * @return certificate model builder
-   * @throws IOException errors obtaining the certificate model builder
+   * @throws IOException
+   *           errors obtaining the certificate model builder
    */
-  @Override public CMCCertificateModelBuilder getCertificateModelBuilder(PublicKey subjectPublicKey,
-    CertNameModel<?> subject,
-    boolean includeCrlDPs, boolean includeOcspURL) throws IOException {
+  @Override
+  public CMCCertificateModelBuilder getCertificateModelBuilder(PublicKey subjectPublicKey,
+      CertNameModel<?> subject,
+      boolean includeCrlDPs, boolean includeOcspURL) throws IOException {
 
     try {
       final StaticCAInformation caInformation = getStaticCAInformation();
@@ -123,23 +143,21 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
     }
   }
 
-  private void updateProfileConfiguration(PublicKey subjectPublicKey, AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>> certModelBuilder) {
-    CertificateProfileConfiguration conf = Optional.ofNullable(profileConfiguration).orElseGet(
-      CertificateProfileConfiguration::getDefaultConfiguration);
-    if (conf.getExtendedKeyUsages() != null && !conf.getExtendedKeyUsages().isEmpty()){
-      certModelBuilder.extendedKeyUsage(new ExtendedKeyUsageModel(conf.getExtendedKeyUsageCritical(), conf.getExtendedKeyUsages().stream()
-        .map(s -> KeyPurposeId.getInstance(new ASN1ObjectIdentifier(s)))
-        .toArray(KeyPurposeId[]::new)
-      ));
+  private void updateProfileConfiguration(
+      @Nonnull final PublicKey subjectPublicKey,
+      @Nonnull final AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>> certModelBuilder) {
+    CertificateProfileConfiguration conf = Optional.ofNullable(profileConfiguration).orElseGet(() -> new CertificateProfileConfiguration());
+
+    if (CollectionUtils.isNotEmpty(conf.getExtendedKeyUsages())) {
+      certModelBuilder.extendedKeyUsage(new ExtendedKeyUsageModel(conf.isExtendedKeyUsageCritical(),
+        conf.getExtendedKeyUsages().stream().map(s -> KeyPurposeId.getInstance(new ASN1ObjectIdentifier(s))).toArray(KeyPurposeId[]::new)));
     }
-    if (conf.getPolicy() != null && !conf.getPolicy().isEmpty()) {
-      certModelBuilder.certificatePolicy(new CertificatePolicyModel(conf.getPolicyCritical(), conf.getPolicy().stream()
-        .map(ASN1ObjectIdentifier::new)
-        .toArray(ASN1ObjectIdentifier[]::new)
-      ));
+    if (CollectionUtils.isNotEmpty(conf.getPolicies())) {
+      certModelBuilder.certificatePolicy(new CertificatePolicyModel(conf.isPoliciesCritical(),
+        conf.getPolicies().stream().map(ASN1ObjectIdentifier::new).toArray(ASN1ObjectIdentifier[]::new)));
     }
     certModelBuilder
-      .basicConstraints(new BasicConstraintsModel(false, conf.getBasicConstraintsCritical()))
+      .basicConstraints(new BasicConstraintsModel(false, conf.isBasicConstraintsCritical()))
       .keyUsage(new KeyUsageModel(KeyUsageCalculator.getKeyUsageValue(subjectPublicKey, conf.getUsageType())));
   }
 

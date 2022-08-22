@@ -15,11 +15,22 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.Nonnull;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.cert.X509CertificateHolder;
+
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -30,6 +41,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolic
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.ExtendedKeyUsageModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
+import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuer;
@@ -38,13 +50,6 @@ import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.KeyUsageCalculator;
-
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Basic CA service implementation equipped to issue certificates to signers.
@@ -173,23 +178,21 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
     return certModelBuilder;
   }
 
-  private void updateProfileConfiguration(PublicKey subjectPublicKey, DefaultCertificateModelBuilder certModelBuilder) {
-    CertificateProfileConfiguration conf = Optional.ofNullable(profileConfiguration).orElseGet(
-      CertificateProfileConfiguration::getDefaultConfiguration);
-    if (conf.getExtendedKeyUsages() != null && !conf.getExtendedKeyUsages().isEmpty()){
-      certModelBuilder.extendedKeyUsage(new ExtendedKeyUsageModel(conf.getExtendedKeyUsageCritical(), conf.getExtendedKeyUsages().stream()
-        .map(s -> KeyPurposeId.getInstance(new ASN1ObjectIdentifier(s)))
-        .toArray(KeyPurposeId[]::new)
-      ));
+  private void updateProfileConfiguration(
+      @Nonnull final PublicKey subjectPublicKey,
+      @Nonnull final AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>> certModelBuilder) {
+    final CertificateProfileConfiguration conf = Optional.ofNullable(this.profileConfiguration).orElseGet(() -> new CertificateProfileConfiguration());
+
+    if (CollectionUtils.isNotEmpty(conf.getExtendedKeyUsages())) {
+      certModelBuilder.extendedKeyUsage(new ExtendedKeyUsageModel(conf.isExtendedKeyUsageCritical(),
+        conf.getExtendedKeyUsages().stream().map(s -> KeyPurposeId.getInstance(new ASN1ObjectIdentifier(s))).toArray(KeyPurposeId[]::new)));
     }
-    if (conf.getPolicy() != null && !conf.getPolicy().isEmpty()) {
-      certModelBuilder.certificatePolicy(new CertificatePolicyModel(conf.getPolicyCritical(), conf.getPolicy().stream()
-        .map(ASN1ObjectIdentifier::new)
-        .toArray(ASN1ObjectIdentifier[]::new)
-      ));
+    if (CollectionUtils.isNotEmpty(conf.getPolicies())) {
+      certModelBuilder.certificatePolicy(new CertificatePolicyModel(conf.isPoliciesCritical(),
+        conf.getPolicies().stream().map(ASN1ObjectIdentifier::new).toArray(ASN1ObjectIdentifier[]::new)));
     }
     certModelBuilder
-      .basicConstraints(new BasicConstraintsModel(false, conf.getBasicConstraintsCritical()))
+      .basicConstraints(new BasicConstraintsModel(false, conf.isBasicConstraintsCritical()))
       .keyUsage(new KeyUsageModel(KeyUsageCalculator.getKeyUsageValue(subjectPublicKey, conf.getUsageType())));
   }
 
