@@ -18,11 +18,7 @@ package se.swedenconnect.signservice.certificate.base.config;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.bouncycastle.asn1.x509.KeyUsage;
 
-import java.security.PublicKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,18 +26,24 @@ import java.util.List;
  * Configuration data for a certificate profile
  */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class CertificateProfileConfiguration {
 
+  /** List of certificate policy object identifier values */
   private List<String> policy;
+  /** Criticality for certificate policies extension */
   private Boolean policyCritical;
-  private List<String> eku;
-  private Boolean ekuCritical;
-  private Boolean bcCritical;
-  private List<KeyUsageType> keyUsages;
+  /** List of extended key usage object identifier values */
+  private List<String> extendedKeyUsages;
+  /** Criticality of extended key usage extension */
+  private Boolean extendedKeyUsageCritical;
+  /** Optional settings for certificate key usage */
+  private List<OptionalUsageEnum> usageType;
+  /** Criticality of key usage extension */
   private Boolean keyUsageCritical;
+  /** Criticality of basic constraints extension */
+  private Boolean basicConstraintsCritical;
 
   /**
    * Get instance of default certificate profile configuration data for sign services
@@ -57,39 +59,17 @@ public class CertificateProfileConfiguration {
    *
    * @return certificate profile configuration data builder with default values
    */
-  public static CertificateProfileConfiguration.CertificateProfileConfigurationBuilder getBuilderWithDefaultValues() {
+  public static CertificateProfileConfigurationBuilder getBuilderWithDefaultValues(){
     return CertificateProfileConfiguration.builder()
       .policy(Collections.emptyList())
       .policyCritical(false)
-      .eku(Collections.emptyList())
-      .ekuCritical(false)
-      .bcCritical(false)
-      .keyUsages(List.of(KeyUsageType.sign, KeyUsageType.nr));
+      .extendedKeyUsages(Collections.emptyList())
+      .extendedKeyUsageCritical(false)
+      .usageType(Collections.emptyList())
+      .keyUsageCritical(true)
+      .basicConstraintsCritical(false);
   }
 
-  public enum KeyUsageType{
-    sign, encrypt, nr
-  }
-
-  public int getKeyUsageValue(PublicKey publicKey) {
-    int keyUsageVal = 0;
-    for (KeyUsageType keyUsageType : keyUsages) {
-      switch (keyUsageType) {
-
-      case sign:
-        keyUsageVal += KeyUsage.digitalSignature;
-        break;
-      case encrypt:
-        int encryptVal = publicKey instanceof RSAPublicKey ? KeyUsage.keyEncipherment : KeyUsage.keyAgreement;
-        keyUsageVal += encryptVal;
-        break;
-      case nr:
-        keyUsageVal += KeyUsage.nonRepudiation;
-        break;
-      }
-    }
-    return keyUsageVal;
-  }
 
 }
 

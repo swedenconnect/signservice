@@ -27,11 +27,14 @@ import se.swedenconnect.ca.cmc.api.CMCCertificateModelBuilder;
 import se.swedenconnect.ca.cmc.api.client.impl.PreConfiguredCMCClient;
 import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
+import se.swedenconnect.ca.engine.ca.models.cert.CertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.ExtendedKeyUsageModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
+import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
+import se.swedenconnect.signservice.certificate.base.config.KeyUsageCalculator;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -45,9 +48,6 @@ import java.util.stream.Collectors;
 
 /**
  * CMC Client for certificate services
- *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
 public class SignServiceCMCClient extends PreConfiguredCMCClient {
@@ -123,11 +123,11 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
     }
   }
 
-  private void updateProfileConfiguration(PublicKey subjectPublicKey, CMCCertificateModelBuilder certModelBuilder) {
+  private void updateProfileConfiguration(PublicKey subjectPublicKey, AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>> certModelBuilder) {
     CertificateProfileConfiguration conf = Optional.ofNullable(profileConfiguration).orElseGet(
       CertificateProfileConfiguration::getDefaultConfiguration);
-    if (conf.getEku() != null && !conf.getEku().isEmpty()){
-      certModelBuilder.extendedKeyUsage(new ExtendedKeyUsageModel(conf.getEkuCritical(), conf.getEku().stream()
+    if (conf.getExtendedKeyUsages() != null && !conf.getExtendedKeyUsages().isEmpty()){
+      certModelBuilder.extendedKeyUsage(new ExtendedKeyUsageModel(conf.getExtendedKeyUsageCritical(), conf.getExtendedKeyUsages().stream()
         .map(s -> KeyPurposeId.getInstance(new ASN1ObjectIdentifier(s)))
         .toArray(KeyPurposeId[]::new)
       ));
@@ -139,8 +139,8 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
       ));
     }
     certModelBuilder
-      .basicConstraints(new BasicConstraintsModel(false, conf.getBcCritical()))
-      .keyUsage(new KeyUsageModel(conf.getKeyUsageValue(subjectPublicKey)));
+      .basicConstraints(new BasicConstraintsModel(false, conf.getBasicConstraintsCritical()))
+      .keyUsage(new KeyUsageModel(KeyUsageCalculator.getKeyUsageValue(subjectPublicKey, conf.getUsageType())));
   }
 
 }

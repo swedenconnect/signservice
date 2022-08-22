@@ -37,6 +37,7 @@ import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
+import se.swedenconnect.signservice.certificate.base.config.KeyUsageCalculator;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -175,8 +176,8 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
   private void updateProfileConfiguration(PublicKey subjectPublicKey, DefaultCertificateModelBuilder certModelBuilder) {
     CertificateProfileConfiguration conf = Optional.ofNullable(profileConfiguration).orElseGet(
       CertificateProfileConfiguration::getDefaultConfiguration);
-    if (conf.getEku() != null && !conf.getEku().isEmpty()){
-      certModelBuilder.extendedKeyUsage(new ExtendedKeyUsageModel(conf.getEkuCritical(), conf.getEku().stream()
+    if (conf.getExtendedKeyUsages() != null && !conf.getExtendedKeyUsages().isEmpty()){
+      certModelBuilder.extendedKeyUsage(new ExtendedKeyUsageModel(conf.getExtendedKeyUsageCritical(), conf.getExtendedKeyUsages().stream()
         .map(s -> KeyPurposeId.getInstance(new ASN1ObjectIdentifier(s)))
         .toArray(KeyPurposeId[]::new)
       ));
@@ -188,8 +189,8 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
       ));
     }
     certModelBuilder
-      .basicConstraints(new BasicConstraintsModel(false, conf.getBcCritical()))
-      .keyUsage(new KeyUsageModel(conf.getKeyUsageValue(subjectPublicKey)));
+      .basicConstraints(new BasicConstraintsModel(false, conf.getBasicConstraintsCritical()))
+      .keyUsage(new KeyUsageModel(KeyUsageCalculator.getKeyUsageValue(subjectPublicKey, conf.getUsageType())));
   }
 
 }

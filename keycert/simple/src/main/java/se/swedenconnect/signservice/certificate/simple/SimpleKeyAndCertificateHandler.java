@@ -42,6 +42,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.data.SAMLAuthContextBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.SubjDirectoryAttributesModel;
+import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
@@ -154,7 +155,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
    * @param mappedCertAttributes mapped attributes from authentication source with mapping information
    * @throws CertificateException on error processing subject directory attribute data
    */
-  private void addSubjDirAttributesToCertModel(final DefaultCertificateModelBuilder certificateModelBuilder,
+  private void addSubjDirAttributesToCertModel(final AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>> certificateModelBuilder,
       final List<AttributeMappingData> mappedCertAttributes)
       throws CertificateException {
     final List<AttributeModel> sanAttributeList = new ArrayList<>();
@@ -185,7 +186,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
    * @param mappedCertAttributes mapped attributes from authentication source with mapping information
    * @throws CertificateException error parsing subject alt name data
    */
-  private void addSANToCertModel(final DefaultCertificateModelBuilder certificateModelBuilder,
+  private void addSANToCertModel(final AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>> certificateModelBuilder,
       final List<AttributeMappingData> mappedCertAttributes)
       throws CertificateException {
     final Map<Integer, String> subjectAltNameMap = new HashMap<>();
