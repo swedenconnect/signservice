@@ -15,24 +15,9 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.xml.security.signature.XMLSignature;
-import org.bouncycastle.cert.X509CRLHolder;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Base64;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
-import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
-import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
-import se.swedenconnect.ca.engine.ca.repository.SortBy;
-import se.swedenconnect.signservice.certificate.base.keyprovider.SigningKeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSigningKeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandInMemoryRSAKeyProvider;
-import se.swedenconnect.signservice.certificate.simple.ca.impl.DefaultCACertificateFactory;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -40,7 +25,22 @@ import java.security.Security;
 import java.security.spec.ECGenParameterSpec;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.apache.xml.security.signature.XMLSignature;
+import org.bouncycastle.cert.X509CRLHolder;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Base64;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
+import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
+import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
+import se.swedenconnect.ca.engine.ca.repository.SortBy;
+import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
+import se.swedenconnect.signservice.certificate.simple.ca.impl.DefaultCACertificateFactory;
 
 /**
  * No storage repository test
@@ -58,10 +58,6 @@ class NoStorageCARepositoryTest {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
 
-    SigningKeyProvider keyProvider = new DefaultSigningKeyProvider(
-      new OnDemandInMemoryRSAKeyProvider(2048),
-      new InMemoryECKeyProvider(new ECGenParameterSpec("P-256")));
-
     ExplicitCertNameModel caNameModel = new ExplicitCertNameModel(List.of(
       new AttributeTypeAndValueModel(CertAttributes.C, "SE"),
       new AttributeTypeAndValueModel(CertAttributes.O, "Test Org"),
@@ -70,10 +66,10 @@ class NoStorageCARepositoryTest {
     ));
 
     CACertificateFactory caf = new DefaultCACertificateFactory();
+
     caCertificate = caf.getCACertificate(
       new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10), caNameModel,
-      keyProvider.getKeyPair("EC"));
-
+      (new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))).getKeyPair());
   }
 
   @Test

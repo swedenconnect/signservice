@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.signservice.certificate.base.keyprovider.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,7 +38,8 @@ class StackedInMemoryRSAKeyProviderTest {
     int keySize = 2048;
 
     log.info("Default in memory RSA Key provider tests");
-    StackedInMemoryRSAKeyProvider keyProvider = new StackedInMemoryRSAKeyProvider(keySize, 5);
+    final int stackSize = 5;
+    StackedInMemoryRSAKeyProvider keyProvider = new StackedInMemoryRSAKeyProvider(keySize, stackSize);
     log.info("Created new key provider");
 
     Thread keyGenerationThread = keyProvider.getKeyGenerationThread();
@@ -45,7 +47,7 @@ class StackedInMemoryRSAKeyProviderTest {
     assertNotNull(keyGenerationThread);
     assertTrue(keyGenerationThread.isAlive());
     Thread.sleep(500);
-    //Read 15 keys
+    // Read 15 keys
     for (int i = 0; i < 7; i++) {
       long readStart = System.currentTimeMillis();
       assertNotNull(keyProvider.getKeyPair());
@@ -53,7 +55,18 @@ class StackedInMemoryRSAKeyProviderTest {
       log.info("Reading key {} taking {} ms", i, readTime);
     }
 
-    keyGenerationThread.join();
+    // Wait until keys has filled up
+    log.info("Waiting for keys to fill up in stack...");
+    long startWait = System.currentTimeMillis();
+    long maxWaitTime = startWait + 10000L;
+    while (keyProvider.getCurrentStackSize() < stackSize && System.currentTimeMillis() < maxWaitTime) {
+      Thread.sleep(100);
+    }
+    log.info("Wait completed in {} ms with {} keys out of {} in stack", System.currentTimeMillis() - startWait,
+        keyProvider.getCurrentStackSize(), stackSize);
+
+    assertEquals(keySize, keyProvider.getKeySize());
+    assertEquals(5, keyProvider.getCurrentStackSize());
 
     assertFalse(keyGenerationThread.isAlive());
 

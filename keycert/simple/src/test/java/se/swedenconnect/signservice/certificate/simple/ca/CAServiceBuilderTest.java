@@ -15,12 +15,21 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.io.File;
+import java.security.Security;
+import java.security.spec.ECGenParameterSpec;
+import java.time.Duration;
+import java.util.List;
+
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
 import se.idsec.utils.printcert.PrintCertificate;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -29,19 +38,8 @@ import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBui
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.certificate.base.keyprovider.SigningKeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSigningKeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.impl.DefaultCACertificateFactory;
-
-import java.io.File;
-import java.security.Security;
-import java.security.spec.ECGenParameterSpec;
-import java.time.Duration;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * CA service builder test
@@ -61,10 +59,8 @@ class CAServiceBuilderTest {
 
   @Test
   void getInstance() throws Exception {
-    SigningKeyProvider keyProvider = new DefaultSigningKeyProvider(
-      new OnDemandInMemoryRSAKeyProvider(2048),
-      new InMemoryECKeyProvider(new ECGenParameterSpec("P-256")));
-    PkiCredential keyPair = keyProvider.getKeyPair("EC");
+    InMemoryECKeyProvider ecProvider = new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"));
+    PkiCredential keyPair = ecProvider.getKeyPair();
     CACertificateFactory caCertificateFactory = new DefaultCACertificateFactory();
     X509CertificateHolder caCertificate = caCertificateFactory.getCACertificate(
       new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10),
@@ -144,7 +140,7 @@ class CAServiceBuilderTest {
       .build();
     log.info("CA service created with provided CA repository");
 
-    PkiCredential subjectKeys = keyProvider.getKeyPair("EC");
+    PkiCredential subjectKeys = ecProvider.getKeyPair();
     DefaultCertificateModelBuilder certificateModelBuilder = caService.getBaseCertificateModelBuilder(
       new ExplicitCertNameModel(List.of()),
       subjectKeys.getPublicKey(),

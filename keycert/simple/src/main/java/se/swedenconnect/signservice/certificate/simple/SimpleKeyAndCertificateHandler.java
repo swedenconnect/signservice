@@ -55,7 +55,6 @@ import se.swedenconnect.signservice.certificate.CertificateType;
 import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMappingData;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMappingException;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
@@ -97,18 +96,10 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
 
   /** {@inheritDoc} */
   @Override
-  protected void specificRequirementTests(
-      @Nonnull final SignRequestMessage signRequest, @Nonnull final SignServiceContext context)
-      throws InvalidRequestException {
-    // No additional tests
-  }
-
-  /** {@inheritDoc} */
-  @Override
   protected X509Certificate obtainSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
       @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
-      @Nonnull final CertificateType certificateType, @Nullable final String certificateProfile,
-      @Nonnull final SignServiceContext context) throws CertificateException {
+      @Nonnull final List<AttributeMappingData> certAttributes, @Nonnull final CertificateType certificateType,
+      @Nullable final String certificateProfile, @Nonnull final SignServiceContext context) throws CertificateException {
 
     log.debug("Issuing certificate from internal CA ...");
 
@@ -123,19 +114,9 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
       throw new CertificateException("Assertion issuer must not be null");
     }
 
-    List<AttributeMappingData> mappedCertAttributes;
-    try {
-      log.debug("Get mapping data from configured attribute mapper");
-      mappedCertAttributes = this.getAttributeMapper().mapCertificateAttributes(signRequest, assertion);
-    }
-    catch (final AttributeMappingException e) {
-      log.debug("Attribute mapping failed: {}", e.toString());
-      throw new CertificateException("Attribute mapping failed", e);
-    }
-
     log.debug("Creating certificate model");
     // Get certificate subject name
-    final CertNameModel<?> certNameModel = this.getCertNameModel(mappedCertAttributes);
+    final CertNameModel<?> certNameModel = this.getCertNameModel(certAttributes);
     // Get the certificate model builder
     final DefaultCertificateModelBuilder certificateModelBuilder =
         (DefaultCertificateModelBuilder) this.caService.getCertificateModelBuilder(
@@ -143,7 +124,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
             signingKeyPair.getPublicKey());
 
     // Obtain attribute mapping for the AuthContextExtension
-    final List<AttributeMapping> attributeMappings = this.getAuthContextExtAttributeMappings(mappedCertAttributes);
+    final List<AttributeMapping> attributeMappings = this.getAuthContextExtAttributeMappings(certAttributes);
     // Add AuthContextExtension
     certificateModelBuilder
         .authenticationContext(SAMLAuthContextBuilder.instance()
@@ -162,9 +143,9 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
     }
 
     // Add Subject Alt Name if present
-    this.addSANToCertModel(certificateModelBuilder, mappedCertAttributes);
+    this.addSANToCertModel(certificateModelBuilder, certAttributes);
     // Add Subject Directory Attributes if present
-    this.addSubjDirAttributesToCertModel(certificateModelBuilder, mappedCertAttributes);
+    this.addSubjDirAttributesToCertModel(certificateModelBuilder, certAttributes);
 
     // Issue certificate
     log.debug("Issuing certificate from certificate model");
@@ -282,9 +263,9 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
               .value(attributeMapping.getValue())
               .build());
         }
-        catch (final Exception ex) {
+        catch (final Exception e) {
           throw new CertificateException(
-              "Certificate attribute from authentication contains illegal data - aborting certificate issuance", ex);
+              "Certificate attribute from authentication contains illegal data - aborting certificate issuance", e);
         }
       }
     }
@@ -296,8 +277,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
   protected void isCertificateTypeSupported(@Nonnull final CertificateType certificateType,
       @Nullable final String certificateProfile) throws InvalidRequestException {
     if (!certificateType.equals(CertificateType.PKC)) {
-      throw new InvalidRequestException(
-          "This simple key and certificate handler can only produce non qualified certificates");
+      throw new InvalidRequestException("This handler can only produce non qualified certificates");
     }
   }
 

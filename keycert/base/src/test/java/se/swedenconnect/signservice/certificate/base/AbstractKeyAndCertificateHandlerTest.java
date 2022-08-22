@@ -43,6 +43,7 @@ import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.CertificateType;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
+import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMappingData;
 import se.swedenconnect.signservice.certificate.base.attributemapping.DefaultSAMLAttributeMapper;
 import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
@@ -208,8 +209,8 @@ class AbstractKeyAndCertificateHandlerTest {
     @Override
     protected X509Certificate obtainSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
         @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
-        @Nonnull final CertificateType certificateType, @Nullable final String certificateProfile,
-        @Nonnull final SignServiceContext context) throws CertificateException {
+        @Nonnull final List<AttributeMappingData> certAttributes, @Nonnull final CertificateType certificateType,
+        @Nullable final String certificateProfile, @Nonnull final SignServiceContext context) throws CertificateException {
 
       try {
         isCertificateTypeSupported(certificateType, certificateProfile);
