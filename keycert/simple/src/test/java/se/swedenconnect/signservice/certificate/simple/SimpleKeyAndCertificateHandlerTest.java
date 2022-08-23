@@ -123,7 +123,7 @@ class SimpleKeyAndCertificateHandlerTest {
     KeyAndCertificateHandler keyAndCertificateHandler = new SimpleKeyAndCertificateHandler(
         Arrays.asList(new OnDemandInMemoryRSAKeyProvider(2048),
             new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))),
-        algorithmRegistry, caService, attributeMapper);
+        attributeMapper, algorithmRegistry, caService);
     assertEquals("SimpleKeyAndCertificateHandler", keyAndCertificateHandler.getName());
     log.info("Created key and certificate handler with name: {}", keyAndCertificateHandler.getName());
     ((SimpleKeyAndCertificateHandler) keyAndCertificateHandler).setName("test-cert-and-key-handler");

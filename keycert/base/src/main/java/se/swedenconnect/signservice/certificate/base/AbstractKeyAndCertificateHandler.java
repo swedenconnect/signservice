@@ -91,7 +91,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
   }
 
   /**
-   * Constructor for the key and certificate handler.
+   * Constructor.
    *
    * @param keyProviders a list of key providers that this handler uses
    * @param attributeMapper the attribute mapper
@@ -148,7 +148,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
         .orElseGet(() -> this.getDefaultCertificateProfile());
 
     // Check that certificate type and profile is supported
-    this.isCertificateTypeSupported(certificateType, signingCertificateProfile);
+    this.assertCertificateTypeSupported(certificateType, signingCertificateProfile);
     log.debug("Certificate issuing requirement checks passed");
 
     // We will not make any specific checks on authentication requirements as they will be tested and accepted by the
@@ -211,7 +211,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
         .orElseGet(() -> this.getDefaultCertificateProfile());
 
     final X509Certificate signerCertificate =
-        this.obtainSigningCertificate(signingKeyCredentials, signRequest, assertion, certAttributes,
+        this.issueSigningCertificate(signingKeyCredentials, signRequest, assertion, certAttributes,
             certificateType, certificateProfile, context);
 
     // TODO: Remove this check when PkiCredential interface is updated to add certificates
@@ -227,7 +227,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
   }
 
   /**
-   * Obtaining the signing certificate for the signing credentials. Note that the context parameter holds information
+   * Issues the signing certificate for the signing credentials. Note that the context parameter holds information
    * about algorithm, cert type and profile where default values as been taken into account. The signRequest only holds
    * the values from the actual request.
    *
@@ -241,7 +241,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
    * @return the certificate of the signer
    * @throws CertificateException error obtaining a certificate for the signer
    */
-  protected abstract X509Certificate obtainSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
+  protected abstract X509Certificate issueSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
       @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
       @Nonnull final List<AttributeMappingData> certAttributes, @Nonnull final CertificateType certificateType,
       @Nullable final String certificateProfile, @Nonnull final SignServiceContext context) throws CertificateException;
@@ -253,7 +253,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
    * @param certificateProfile the profile requested for the certificate or null
    * @throws InvalidRequestException if the requested certificate type is not supported
    */
-  protected abstract void isCertificateTypeSupported(@Nonnull final CertificateType certificateType,
+  protected abstract void assertCertificateTypeSupported(@Nonnull final CertificateType certificateType,
       @Nullable final String certificateProfile) throws InvalidRequestException;
 
   /**

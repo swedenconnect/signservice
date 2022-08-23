@@ -207,13 +207,13 @@ class AbstractKeyAndCertificateHandlerTest {
     }
 
     @Override
-    protected X509Certificate obtainSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
+    protected X509Certificate issueSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
         @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
         @Nonnull final List<AttributeMappingData> certAttributes, @Nonnull final CertificateType certificateType,
         @Nullable final String certificateProfile, @Nonnull final SignServiceContext context) throws CertificateException {
 
       try {
-        isCertificateTypeSupported(certificateType, certificateProfile);
+        assertCertificateTypeSupported(certificateType, certificateProfile);
       }
       catch (InvalidRequestException e) {
         throw new CertificateException(e.getMessage());
@@ -261,7 +261,7 @@ class AbstractKeyAndCertificateHandlerTest {
     }
 
     @Override
-    protected void isCertificateTypeSupported(@NonNull CertificateType certificateType,
+    protected void assertCertificateTypeSupported(@NonNull CertificateType certificateType,
         String certificateProfile) throws InvalidRequestException {
       if (!certificateType.equals(CertificateType.PKC)) {
         throw new InvalidRequestException("Unsupported certificate type " + certificateType.getType());
