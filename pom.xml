@@ -105,13 +105,7 @@
       <dependency>
         <groupId>se.swedenconnect.security</groupId>
         <artifactId>credentials-support</artifactId>
-        <version>1.2.2</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-          </exclusion>
-        </exclusions>
+        <version>1.2.3</version>
       </dependency>    
 
       <dependency>

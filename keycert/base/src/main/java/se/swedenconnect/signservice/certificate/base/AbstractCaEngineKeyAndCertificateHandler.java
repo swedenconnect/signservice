@@ -45,12 +45,12 @@ import se.swedenconnect.schemas.saml_2_0.assertion.Attribute;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.authn.AuthnContextIdentifier;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
-import se.swedenconnect.signservice.certificate.CertificateType;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMapper;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMappingData;
-import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
+import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
+import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappingData;
+import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
@@ -91,18 +91,21 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
   protected X509Certificate issueSigningCertificate(
       @Nonnull final PkiCredential signingKeyPair, @Nonnull final SignRequestMessage signRequest,
       @Nonnull final IdentityAssertion assertion, @Nonnull final List<AttributeMappingData> certAttributes,
-      @Nonnull final CertificateType certificateType, @Nullable final String certificateProfile,
-      @Nonnull final SignServiceContext context) throws CertificateException {
+      @Nullable final String certificateProfile, @Nonnull final SignServiceContext context)
+      throws CertificateException {
 
     // Test basic availability of essential data
     if (assertion.getIdentifier() == null) {
-      throw new CertificateException("Assertion identifier must not be null");
+      throw new IllegalArgumentException("Assertion identifier must be set");
     }
-    if (assertion.getAuthnContext() == null || assertion.getAuthnContext().getIdentifier() == null) {
-      throw new CertificateException("Assertion authentication LoA identifier must not be null");
+    if (Optional.ofNullable(assertion.getAuthnContext()).map(AuthnContextIdentifier::getIdentifier).isEmpty()) {
+      throw new IllegalArgumentException("Assertion authentication LoA identifier must be present");
     }
     if (assertion.getIssuer() == null) {
-      throw new CertificateException("Assertion issuer must not be null");
+      throw new IllegalArgumentException("Assertion issuer must not be present");
+    }
+    if (assertion.getAuthnInstant() == null) {
+      throw new IllegalArgumentException("Missing authentication instant from assertion");
     }
 
     // Get certificate subject name model.
@@ -134,20 +137,21 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
       certificateModelBuilder.subjectDirectoryAttributes(subjectDirectoryAttributes);
     }
 
-    return this.issueSigningCertificate(certificateModelBuilder.build(), context);
+    return this.issueSigningCertificate(certificateModelBuilder.build(), certificateProfile, context);
   }
 
   /**
    * Issues the signing certificate based on the supplied certificate model.
    *
    * @param certificateModel the certificate model
+   * @param certificateProfile the certificate profile (may be null)
    * @param context the SignService context
    * @return an X509Certificate
    * @throws CertificateException for issuance errors
    */
   @Nonnull
   protected abstract X509Certificate issueSigningCertificate(@Nonnull final CertificateModel certificateModel,
-      @Nonnull final SignServiceContext context) throws CertificateException;
+      @Nullable final String certificateProfile, @Nonnull final SignServiceContext context) throws CertificateException;
 
   /**
    * Creates a {@link CertificateModelBuilder} based on the supplied public key and certificate name model object.

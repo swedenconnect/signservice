@@ -26,7 +26,8 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import lombok.Setter;
+import org.apache.commons.lang.StringUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.cmc.api.client.CMCClient;
 import se.swedenconnect.ca.cmc.api.data.CMCFailType;
@@ -37,27 +38,20 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
-import se.swedenconnect.signservice.certificate.CertificateType;
+import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMapper;
-import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
+import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
- * CMC based key and certificate handler obtaining certificates from a remote CA using CMC
+ * CMC based key and certificate handler obtaining certificates from a remote CA using CMC.
  */
 @Slf4j
 public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertificateHandler {
 
-  /** CMC Client for remote CA service used to issue certificates */
+  /** CMC Client for remote CA service used to issue certificates. */
   private final CMCClient cmcClient;
-
-  /**
-   * The certificate type produced by this certificate handler. Default PKC certificates
-   */
-  @Setter
-  private CertificateType supportedCertificateType;
 
   /**
    * Constructor.
@@ -71,7 +65,6 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
       @Nonnull final AttributeMapper attributeMapper,
       @Nonnull final CMCClient cmcClient) {
     super(keyProviders, attributeMapper);
-    this.supportedCertificateType = CertificateType.PKC;
     this.cmcClient = Objects.requireNonNull(cmcClient, "cmcClient must not be null");
   }
 
@@ -89,7 +82,6 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
       @Nonnull final AlgorithmRegistry algorithmRegistry,
       @Nonnull final CMCClient cmcClient) {
     super(keyProviders, attributeMapper, algorithmRegistry);
-    this.supportedCertificateType = CertificateType.PKC;
     this.cmcClient = Objects.requireNonNull(cmcClient, "cmcClient must not be null");
   }
 
@@ -97,7 +89,9 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
   @Override
   @Nonnull
   protected X509Certificate issueSigningCertificate(@Nonnull final CertificateModel certificateModel,
-      @Nonnull final SignServiceContext context) throws CertificateException {
+      @Nullable final String certificateProfile, @Nonnull final SignServiceContext context)
+      throws CertificateException {
+
     try {
       final CMCResponse cmcResponse = this.cmcClient.issueCertificate(certificateModel);
       final CMCResponseStatus responseStatus = cmcResponse.getResponseStatus();
@@ -135,12 +129,11 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
 
   /** {@inheritDoc} */
   @Override
-  protected void assertCertificateTypeSupported(@Nonnull final CertificateType certificateType,
+  protected void assertCertificateProfileSupported(
       @Nullable final String certificateProfile) throws InvalidRequestException {
-    if (!this.supportedCertificateType.equals(certificateType)) {
+    if (StringUtils.isNotBlank(certificateProfile)) {
       throw new InvalidRequestException(
-          "This CMC key and certificate handler can only produce certificates of type "
-              + this.supportedCertificateType);
+          "The CMS key and certificate handler does not support the profile: " + certificateProfile);
     }
   }
 

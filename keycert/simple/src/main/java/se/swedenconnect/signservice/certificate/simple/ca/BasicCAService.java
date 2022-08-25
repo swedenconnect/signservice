@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2022. Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,22 @@
 package se.swedenconnect.signservice.certificate.simple.ca;
 
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.cert.X509CertificateHolder;
 
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -41,58 +42,67 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolic
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.ExtendedKeyUsageModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
-import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuer;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
-import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.KeyUsageCalculator;
+import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.certificate.config.CertificateProfileConfiguration;
+import se.swedenconnect.signservice.certificate.config.KeyUsageCalculator;
 
 /**
  * Basic CA service implementation equipped to issue certificates to signers.
  */
-@Slf4j
 public class BasicCAService extends AbstractCAService<DefaultCertificateModelBuilder> {
 
+  /** The certificate issuer component. */
   private final CertificateIssuer certificateIssuer;
+
+  /** The CRL issuer component. */
   private CRLIssuer crlIssuer;
+
+  /** The CRL distribution points. */
   private List<String> crlDistributionPoints;
+
+  /** The OCSP responder. */
   private OCSPResponder ocspResponder;
-  private X509CertificateHolder ocspResponderCertificate;
+
+  /** The certificate for the OCSP responder. */
+  private X509Certificate ocspResponderCertificate;
+
+  /** The URL that the OCSP responder listens to. */
   private String ocspResponderUrl;
 
   /**
    * Optional certificate profile to be adopted in issued certificates.
-   *
-   * @param profileConfiguration certificate profile configuration
    */
-  @Setter
   private CertificateProfileConfiguration profileConfiguration;
 
   /**
    * Constructor.
    *
-   * @param privateKey private key of the CA service
-   * @param caCertificateChain Certificate chain representing this CA with the ca certificate of this CA being the first
-   *          certificate
+   * @param caCredential the CA credential (private key and certificates)
    * @param caRepository repository for storing issued certificates
    * @param issuerModel model for issuing certificates
-   * @param crlIssuerModel model for publishing CRL:s
+   * @param crlIssuerModel model for publishing CRL:s (optional)
    * @throws NoSuchAlgorithmException algorithm is not supported
    */
-  public BasicCAService(final PrivateKey privateKey, final List<X509CertificateHolder> caCertificateChain,
-      final CARepository caRepository, final CertificateIssuerModel issuerModel, final CRLIssuerModel crlIssuerModel)
-      throws NoSuchAlgorithmException {
-    super(caCertificateChain, caRepository);
+  public BasicCAService(@Nonnull final PkiCredential caCredential,
+      @Nonnull final CARepository caRepository, @Nonnull final CertificateIssuerModel issuerModel,
+      @Nullable final CRLIssuerModel crlIssuerModel) throws NoSuchAlgorithmException {
+
+    super(Optional.ofNullable(caCredential).map(PkiCredential::getCertificateChain)
+        .map(chain -> chain.stream().map(BcFunctions.toX509CertificateHolder).collect(Collectors.toList()))
+        .orElse(null), caRepository);
 
     // Setup service
-    this.certificateIssuer = new BasicCertificateIssuer(issuerModel, this.getCaCertificate().getSubject(), privateKey);
+    this.certificateIssuer =
+        new BasicCertificateIssuer(issuerModel, this.getCaCertificate().getSubject(), caCredential.getPrivateKey());
     this.crlDistributionPoints = new ArrayList<>();
     if (crlIssuerModel != null) {
-      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, privateKey);
+      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, caCredential.getPrivateKey());
       this.crlDistributionPoints = List.of(crlIssuerModel.getDistributionPointUrl());
       this.publishNewCrl();
     }
@@ -100,70 +110,82 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public CertificateIssuer getCertificateIssuer() {
     return this.certificateIssuer;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nullable
   protected CRLIssuer getCrlIssuer() {
     return this.crlIssuer;
   }
 
   /** {@inheritDoc} */
   @Override
-  public X509CertificateHolder getOCSPResponderCertificate() {
-    return this.ocspResponderCertificate;
-  }
-
-  /** {@inheritDoc} */
-  @Override
+  @Nonnull
   public String getCaAlgorithm() {
     return this.certificateIssuer.getCertificateIssuerModel().getAlgorithm();
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public List<String> getCrlDpURLs() {
     return this.crlDistributionPoints;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nullable
+  public X509CertificateHolder getOCSPResponderCertificate() {
+    return Optional.ofNullable(this.ocspResponderCertificate)
+        .map(BcFunctions.toX509CertificateHolder)
+        .orElse(null);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Nullable
   public String getOCSPResponderURL() {
     return this.ocspResponderUrl;
   }
 
-  /**
-   * Set OCSP responder for this CA service
-   *
-   * @param ocspResponder ocsp responder implementation
-   * @param ocspResponderUrl URL for sending requests to the OCSP responder
-   * @param ocspResponderCertificate OCSP responder certificate
-   */
-  public void setOcspResponder(final OCSPResponder ocspResponder, final String ocspResponderUrl,
-      final X509CertificateHolder ocspResponderCertificate) {
-    this.ocspResponder = ocspResponder;
-    this.ocspResponderUrl = ocspResponderUrl;
-    this.ocspResponderCertificate = ocspResponderCertificate;
-  }
-
   /** {@inheritDoc} */
   @Override
+  @Nullable
   public OCSPResponder getOCSPResponder() {
     return this.ocspResponder;
   }
 
+  /**
+   * Assigns the OCSP responder for this CA service.
+   *
+   * @param ocspResponder the OCSP responder implementation
+   * @param ocspResponderUrl the URL for sending requests to the OCSP responder
+   * @param ocspResponderCertificate the OCSP responder certificate
+   */
+  public void setOcspResponder(@Nonnull final OCSPResponder ocspResponder,
+      @Nonnull final String ocspResponderUrl, @Nonnull final X509Certificate ocspResponderCertificate) {
+    this.ocspResponder = Objects.requireNonNull(ocspResponder, "ocspResponder must not be null");
+    this.ocspResponderUrl = Objects.requireNonNull(ocspResponderUrl, "ocspResponderUrl must not be null");
+    this.ocspResponderCertificate =
+        Objects.requireNonNull(ocspResponderCertificate, "ocspResponderCertificate must not be null");
+  }
+
   /** {@inheritDoc} */
   @Override
-  protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(final CertNameModel subject,
-      final PublicKey subjectPublicKey, final X509CertificateHolder issuerCertificate,
-      final CertificateIssuerModel certificateIssuerModel)
-      throws CertificateIssuanceException {
+  protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(
+      @Nonnull final CertNameModel<?> subject, @Nonnull final PublicKey subjectPublicKey,
+      @Nullable final X509CertificateHolder issuerCertificate,
+      @Nonnull final CertificateIssuerModel certificateIssuerModel) throws CertificateIssuanceException {
 
-    final DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(subjectPublicKey,
+    final DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(
+        subjectPublicKey,
         this.getCaCertificate(),
         certificateIssuerModel);
+
     certModelBuilder
         .subject(subject)
         .includeAki(true)
@@ -172,28 +194,33 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
         .ocspServiceUrl(this.ocspResponder != null ? this.ocspResponderUrl : null);
 
     // Apply certificate profile
-    updateProfileConfiguration(subjectPublicKey, certModelBuilder);
+    //
+    final CertificateProfileConfiguration conf =
+        Optional.ofNullable(this.profileConfiguration).orElseGet(() -> new CertificateProfileConfiguration());
 
+    if (CollectionUtils.isNotEmpty(conf.getExtendedKeyUsages())) {
+      certModelBuilder.extendedKeyUsage(new ExtendedKeyUsageModel(conf.isExtendedKeyUsageCritical(),
+          conf.getExtendedKeyUsages().stream().map(s -> KeyPurposeId.getInstance(new ASN1ObjectIdentifier(s)))
+              .toArray(KeyPurposeId[]::new)));
+    }
+    if (CollectionUtils.isNotEmpty(conf.getPolicies())) {
+      certModelBuilder.certificatePolicy(new CertificatePolicyModel(conf.isPoliciesCritical(),
+          conf.getPolicies().stream().map(ASN1ObjectIdentifier::new).toArray(ASN1ObjectIdentifier[]::new)));
+    }
+    certModelBuilder
+        .basicConstraints(new BasicConstraintsModel(false, conf.isBasicConstraintsCritical()))
+        .keyUsage(new KeyUsageModel(KeyUsageCalculator.getKeyUsageValue(subjectPublicKey, conf.getUsageType())));
 
     return certModelBuilder;
   }
 
-  private void updateProfileConfiguration(
-      @Nonnull final PublicKey subjectPublicKey,
-      @Nonnull final AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>> certModelBuilder) {
-    final CertificateProfileConfiguration conf = Optional.ofNullable(this.profileConfiguration).orElseGet(() -> new CertificateProfileConfiguration());
-
-    if (CollectionUtils.isNotEmpty(conf.getExtendedKeyUsages())) {
-      certModelBuilder.extendedKeyUsage(new ExtendedKeyUsageModel(conf.isExtendedKeyUsageCritical(),
-        conf.getExtendedKeyUsages().stream().map(s -> KeyPurposeId.getInstance(new ASN1ObjectIdentifier(s))).toArray(KeyPurposeId[]::new)));
-    }
-    if (CollectionUtils.isNotEmpty(conf.getPolicies())) {
-      certModelBuilder.certificatePolicy(new CertificatePolicyModel(conf.isPoliciesCritical(),
-        conf.getPolicies().stream().map(ASN1ObjectIdentifier::new).toArray(ASN1ObjectIdentifier[]::new)));
-    }
-    certModelBuilder
-      .basicConstraints(new BasicConstraintsModel(false, conf.isBasicConstraintsCritical()))
-      .keyUsage(new KeyUsageModel(KeyUsageCalculator.getKeyUsageValue(subjectPublicKey, conf.getUsageType())));
+  /**
+   * Assigns the certificate profile to be adopted in issued certificates.
+   *
+   * @param profileConfiguration certificate profile configuration
+   */
+  public void setProfileConfiguration(@Nullable final CertificateProfileConfiguration profileConfiguration) {
+    this.profileConfiguration = profileConfiguration;
   }
 
 }

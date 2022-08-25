@@ -15,38 +15,36 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
+import java.time.Duration;
 import java.util.List;
 
 import org.apache.xml.security.signature.XMLSignature;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import lombok.extern.slf4j.Slf4j;
 import se.idsec.utils.printcert.PrintCertificate;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
+import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
-import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
 
 /**
- * Basic CA service test
+ * CA service builder test
  */
 @Slf4j
-class BasicCAServiceTest {
+class BasicCAServiceBuilderTest {
 
   private static File caDir;
 
@@ -59,9 +57,8 @@ class BasicCAServiceTest {
   }
 
   @Test
-  void caServiceTest() throws Exception {
+  void getInstance() throws Exception {
     final InMemoryECKeyProvider ecProvider = new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"));
-
     final PkiCredential caCredential = ecProvider.getKeyPair();
     final SelfSignedCaCertificateGenerator caCertificateFactory = new DefaultSelfSignedCaCertificateGenerator();
     final X509Certificate caCertificate = caCertificateFactory.generate(
@@ -72,20 +69,42 @@ class BasicCAServiceTest {
             new AttributeTypeAndValueModel(CertAttributes.O, "Test Org"),
             new AttributeTypeAndValueModel(CertAttributes.CN, "Test CA"),
             new AttributeTypeAndValueModel(CertAttributes.SERIALNUMBER, "1234567890"))));
-    caCredential.setCertificate(caCertificate);
     log.info("CA Certificate:\n{}", new PrintCertificate(caCertificate).toString(true, true, true));
 
-    final BasicCAService caService = BasicCAServiceBuilder.getInstance(caCredential, "http://localhost/test",
-        XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, new File(caDir, "ca.crl").getAbsolutePath()).build();
+    assertThrows(IllegalArgumentException.class, () -> BasicCAServiceBuilder.getInstance(caCredential,
+        "http://localhost/testCa.crl",
+        XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
+        new File(caDir, "testCa.crl").toString())
+        .build());
+    log.info("Test acceptance of empty CA certificate list");
 
-    caService.setOcspResponder(Mockito.mock(OCSPResponder.class), "http:localhost/ocsp", caCertificate);
-    assertEquals(caCertificate, BcFunctions.toX509Certificate.apply(caService.getCaCertificate()));
-    assertEquals(caCertificate, BcFunctions.toX509Certificate.apply(caService.getOCSPResponderCertificate()));
-    assertEquals("http:localhost/ocsp", caService.getOCSPResponderURL());
-    assertEquals("http://localhost/test", caService.getCrlDpURLs().get(0));
-    assertNotNull(caService.getOCSPResponder());
-    assertEquals(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, caService.getCaAlgorithm());
-    assertTrue(caService.getCertificateIssuer() instanceof CertificateIssuer);
+    caCredential.setCertificate(caCertificate);
 
+    BasicCAServiceBuilder.getInstance(caCredential,
+        "http://localhost/testCa.crl",
+        XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
+        new File(caDir, "testCa.crl").toString())
+        .certificateStartOffset(Duration.ofSeconds(60))
+        .certificateValidity(Duration.ofDays(730))
+        .crlStartOffset(Duration.ofMinutes(20))
+        .crlValidity(Duration.ofDays(60))
+        .build();
+    log.info("created instance with default CA repository");
+
+    final BasicCAService caService = BasicCAServiceBuilder.getInstance(caCredential,
+        "http://localhost/testCa.crl",
+        XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
+        new NoStorageCARepository(new File(caDir, "testCa.crl").getAbsolutePath()))
+        .build();
+    log.info("CA service created with provided CA repository");
+
+    final PkiCredential subjectKeys = ecProvider.getKeyPair();
+    final DefaultCertificateModelBuilder certificateModelBuilder = caService.getBaseCertificateModelBuilder(
+        new ExplicitCertNameModel(List.of()),
+        subjectKeys.getPublicKey(),
+        caService.getCaCertificate(), caService.getCertificateIssuer().getCertificateIssuerModel());
+    final X509CertificateHolder issuedCert = caService.issueCertificate(certificateModelBuilder.build());
+    final PrintCertificate printCert = new PrintCertificate(issuedCert);
+    log.info("issued certificate:\n{}", printCert.toString(true, true, true));
   }
 }

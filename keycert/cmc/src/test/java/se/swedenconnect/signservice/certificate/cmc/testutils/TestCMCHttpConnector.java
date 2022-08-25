@@ -16,17 +16,16 @@
 
 package se.swedenconnect.signservice.certificate.cmc.testutils;
 
+import java.io.IOException;
+import java.net.URL;
+
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.cmc.api.CMCCaApi;
-import se.swedenconnect.ca.cmc.api.CMCRequestParser;
 import se.swedenconnect.ca.cmc.api.CMCResponseParser;
 import se.swedenconnect.ca.cmc.api.client.CMCClientHttpConnector;
 import se.swedenconnect.ca.cmc.api.client.CMCHttpResponseData;
 import se.swedenconnect.ca.cmc.api.data.CMCRequest;
 import se.swedenconnect.ca.cmc.api.data.CMCResponse;
-
-import java.io.IOException;
-import java.net.URL;
 
 /**
  * Http connector for CMC tests. This connector will skip using HTTP to a CMC responder and instead

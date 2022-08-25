@@ -25,20 +25,22 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
-import se.swedenconnect.security.credential.AbstractPkiCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.CertificateType;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMapper;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMappingData;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMappingException;
-import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
+import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
+import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappingData;
+import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappingException;
+import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
@@ -62,21 +64,14 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
   /** Attribute mapper mapping attribute data from assertion to certificates. */
   private final AttributeMapper attributeMapper;
 
+  /** The type of certificates that the underlying CA issues. */
+  private CertificateType caCertificateType = CertificateType.PKC;
+
   /**
    * Service name placed in AuthnContextExtensions. If this value is null, then the service name is set according to
    * local policy which by default should be to use the requesting client ID.
    */
   private String serviceName;
-
-  /**
-   * The certificate type to use if none has been specified in the request. Default is {@link CertificateType#PKC}.
-   */
-  private CertificateType defaultCertificateType = CertificateType.PKC;
-
-  /**
-   * The default certificate profile to use. May be {@code null}.
-   */
-  private String defaultCertificateProfile;
 
   /**
    * Constructor. The algorithm registry will be set to {@link AlgorithmRegistrySingleton#getInstance()}.
@@ -116,24 +111,24 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
       @Nonnull final SignServiceContext context) throws InvalidRequestException {
     log.debug("Checking generic key and certificate issuing requirements on SignRequest");
 
-    Optional.ofNullable(signRequest.getClientId())
-        .orElseThrow(() -> new InvalidRequestException("No client ID available"));
-
     // Algorithm tests
-    final SignatureRequirements signatureRequirements = Optional.ofNullable(signRequest.getSignatureRequirements())
-        .orElseThrow(() -> new InvalidRequestException("Signature requirements must not be null"));
-    final String signatureAlgorithm = Optional.ofNullable(signatureRequirements.getSignatureAlgorithm())
-        .orElseThrow(() -> new InvalidRequestException("Signature algorithm must not be null"));
+    final String signatureAlgorithm = Optional.ofNullable(signRequest.getSignatureRequirements())
+        .filter(r -> StringUtils.isNotBlank(r.getSignatureAlgorithm()))
+        .map(SignatureRequirements::getSignatureAlgorithm)
+        .orElseThrow(() -> new InvalidRequestException("Signature algorithm must be set in sign request"));
 
     final Algorithm algorithm = this.getAlgorithmRegistry().getAlgorithm(signatureAlgorithm);
+    if (algorithm == null) {
+      throw new InvalidRequestException("Unsupported signature algorithm: " + signatureAlgorithm);
+    }
     if (!(algorithm instanceof SignatureAlgorithm)) {
-      throw new InvalidRequestException("Defined signature algorithm is not a signature algorithm");
+      throw new InvalidRequestException("Requested signature algorithm is not a valid signature algorithm");
     }
     log.debug("Signature algorithm checks passed for {}", algorithm.getUri());
 
     final String keyType = ((SignatureAlgorithm) algorithm).getKeyType();
     if (this.keyProviders.stream().noneMatch(p -> p.supports(keyType))) {
-      throw new InvalidRequestException("Unsupported key type " + keyType);
+      throw new InvalidRequestException("Unsupported key type: " + keyType);
     }
     log.debug("Key type checks passed for {}", keyType);
 
@@ -141,14 +136,22 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
         signRequest.getSigningCertificateRequirements())
         .orElseThrow(() -> new InvalidRequestException("Missing certificate requirements"));
 
-    final CertificateType certificateType = Optional.ofNullable(certificateRequirements.getCertificateType())
-        .orElseGet(() -> this.getDefaultCertificateType());
+    // Check certificate type.
+    if (certificateRequirements.getCertificateType() != null) {
+      if (!certificateRequirements.getCertificateType().equals(this.getCaCertificateType())) {
+        throw new InvalidRequestException("Handler does not support certificate type " +
+            certificateRequirements.getCertificateType());
+      }
+    }
 
-    final String signingCertificateProfile = Optional.ofNullable(certificateRequirements.getSigningCertificateProfile())
-        .orElseGet(() -> this.getDefaultCertificateProfile());
+    // Attribute mappings ...
+    // TODO: Later we may want to apply a default mapping if none is passed ...
+    if (CollectionUtils.isEmpty(certificateRequirements.getAttributeMappings())) {
+      throw new InvalidRequestException("Missing attribute mappings in sign request");
+    }
 
-    // Check that certificate type and profile is supported
-    this.assertCertificateTypeSupported(certificateType, signingCertificateProfile);
+    // Check that certificate profile is supported.
+    this.assertCertificateProfileSupported(certificateRequirements.getSigningCertificateProfile());
     log.debug("Certificate issuing requirement checks passed");
 
     // We will not make any specific checks on authentication requirements as they will be tested and accepted by the
@@ -190,7 +193,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
       throw new CertificateException("Attribute mapping failed", e);
     }
 
-    // Determine signature algorithm
+    // Get signature algorithm
     final SignatureAlgorithm algorithm = (SignatureAlgorithm) this.getAlgorithmRegistry().getAlgorithm(
         Optional.ofNullable(signRequest.getSignatureRequirements())
             .map(SignatureRequirements::getSignatureAlgorithm)
@@ -203,39 +206,29 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
 
     // Get the signer certificate for the public key
     //
-    final CertificateType certificateType = Optional.ofNullable(signRequest.getSigningCertificateRequirements())
-        .map(SigningCertificateRequirements::getCertificateType)
-        .orElseGet(() -> this.getDefaultCertificateType());
     final String certificateProfile = Optional.ofNullable(signRequest.getSigningCertificateRequirements())
         .map(SigningCertificateRequirements::getSigningCertificateProfile)
-        .orElseGet(() -> this.getDefaultCertificateProfile());
+        .orElse(null);
 
     final X509Certificate signerCertificate =
         this.issueSigningCertificate(signingKeyCredentials, signRequest, assertion, certAttributes,
-            certificateType, certificateProfile, context);
+            certificateProfile, context);
 
-    // TODO: Remove this check when PkiCredential interface is updated to add certificates
-    if (!(signingKeyCredentials instanceof AbstractPkiCredential)) {
-      log.debug("Key pair credentials is not of type AbstractPkiCredential and can not be extended");
-      throw new KeyException("Unknown credential type " + signingKeyCredentials.getClass().getSimpleName());
-    }
-    log.debug("Extending generated keys with issued signing certificate");
     // Add signer certificate to key credentials
-    // TODO: Extend PkiCredential directly when the interface is updated
-    ((AbstractPkiCredential) signingKeyCredentials).setCertificate(signerCertificate);
+    signingKeyCredentials.setCertificate(signerCertificate);
+
     return signingKeyCredentials;
   }
 
   /**
-   * Issues the signing certificate for the signing credentials. Note that the context parameter holds information
-   * about algorithm, cert type and profile where default values as been taken into account. The signRequest only holds
-   * the values from the actual request.
+   * Issues the signing certificate for the signing credentials. Note that the context parameter holds information about
+   * algorithm, cert type and profile where default values as been taken into account. The signRequest only holds the
+   * values from the actual request.
    *
    * @param signingKeyPair signing key pair
    * @param signRequest sign request
    * @param assertion assertion providing asserted user identity
    * @param certAttributes the certificate attributes to include in the certificate
-   * @param certificateType the certificate type
    * @param certificateProfile the certificate profile (may be null)
    * @param context signature context providing additional information
    * @return the certificate of the signer
@@ -243,18 +236,17 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
    */
   protected abstract X509Certificate issueSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
       @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
-      @Nonnull final List<AttributeMappingData> certAttributes, @Nonnull final CertificateType certificateType,
-      @Nullable final String certificateProfile, @Nonnull final SignServiceContext context) throws CertificateException;
+      @Nonnull final List<AttributeMappingData> certAttributes, @Nullable final String certificateProfile,
+      @Nonnull final SignServiceContext context) throws CertificateException;
 
   /**
-   * Test if the requested certificate type is supported.
+   * Test if the requested certificate profile is supported.
    *
-   * @param certificateType the certificate type (PKC , QC or QC with SSCD)
    * @param certificateProfile the profile requested for the certificate or null
-   * @throws InvalidRequestException if the requested certificate type is not supported
+   * @throws InvalidRequestException if the requested certificate profile is not supported
    */
-  protected abstract void assertCertificateTypeSupported(@Nonnull final CertificateType certificateType,
-      @Nullable final String certificateProfile) throws InvalidRequestException;
+  protected abstract void assertCertificateProfileSupported(@Nullable final String certificateProfile)
+      throws InvalidRequestException;
 
   /**
    * Gets the {@link KeyProvider} to service key generation given a key type.
@@ -292,43 +284,24 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
   }
 
   /**
-   * Gets the certificate type to use if none has been specified in the request.
+   * Gets the type of certificates that the underlying CA issues.
    *
-   * @return the default certificate type
+   * @return the certificate type
    */
   @Nonnull
-  protected CertificateType getDefaultCertificateType() {
-    return this.defaultCertificateType;
+  protected CertificateType getCaCertificateType() {
+    return this.caCertificateType;
   }
 
   /**
-   * Assigns the certificate type to use if none has been specified in the request.
+   * Assigns the type of certificates that the underlying CA issues.
    *
-   * @param defaultCertificateType the default certificate type
+   * @param certificateType the certificate type
    */
-  public void setDefaultCertificateType(@Nonnull final CertificateType defaultCertificateType) {
-    if (defaultCertificateType != null) {
-      this.defaultCertificateType = defaultCertificateType;
+  public void setCaCertificateType(@Nonnull final CertificateType certificateType) {
+    if (certificateType != null) {
+      this.caCertificateType = certificateType;
     }
-  }
-
-  /**
-   * Gets the default certificate profile to use if none has been specified in the request.
-   *
-   * @return the default certificate profile, or null if not set
-   */
-  @Nullable
-  protected String getDefaultCertificateProfile() {
-    return this.defaultCertificateProfile;
-  }
-
-  /**
-   * Assigns the default certificate profile to use if none has been specified in the request.
-   *
-   * @param defaultCertificateProfile the default certificate profile
-   */
-  public void setDefaultCertificateProfile(@Nullable final String defaultCertificateProfile) {
-    this.defaultCertificateProfile = defaultCertificateProfile;
   }
 
   /**

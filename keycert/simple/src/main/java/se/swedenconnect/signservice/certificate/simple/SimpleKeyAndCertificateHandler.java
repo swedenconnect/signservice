@@ -25,6 +25,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.cert.X509CertificateHolder;
 
 import lombok.extern.slf4j.Slf4j;
@@ -34,10 +35,9 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
-import se.swedenconnect.signservice.certificate.CertificateType;
+import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.base.attributemapping.AttributeMapper;
-import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
+import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
@@ -86,7 +86,8 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
   @Override
   @Nonnull
   protected X509Certificate issueSigningCertificate(@Nonnull final CertificateModel certificateModel,
-      @Nonnull final SignServiceContext context) throws CertificateException {
+      @Nullable final String certificateProfile, @Nonnull final SignServiceContext context)
+      throws CertificateException {
 
     log.debug("Issuing certificate from certificate model");
     final X509CertificateHolder certificateHolder = this.caService.issueCertificate(certificateModel);
@@ -94,7 +95,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
       return CertificateUtils.decodeCertificate(certificateHolder.getEncoded());
     }
     catch (final IOException e) {
-      final String msg = "Failed to encode X509Certificate from X509CertificateModel";
+      final String msg = "Failed to decode issued X509 certificate";
       log.info("{}", e);
       throw new CertificateException(msg, e);
     }
@@ -112,10 +113,10 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
 
   /** {@inheritDoc} */
   @Override
-  protected void assertCertificateTypeSupported(@Nonnull final CertificateType certificateType,
+  protected void assertCertificateProfileSupported(
       @Nullable final String certificateProfile) throws InvalidRequestException {
-    if (!certificateType.equals(CertificateType.PKC)) {
-      throw new InvalidRequestException("This handler can only produce non qualified certificates");
+    if (StringUtils.isNotBlank(certificateProfile)) {
+      throw new InvalidRequestException("This handler does not support profile: " + certificateProfile);
     }
   }
 
