@@ -49,8 +49,8 @@ import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.certificate.config.CertificateProfileConfiguration;
-import se.swedenconnect.signservice.certificate.config.KeyUsageCalculator;
+import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
+import se.swedenconnect.signservice.certificate.base.config.KeyUsageCalculator;
 
 /**
  * Basic CA service implementation equipped to issue certificates to signers.
@@ -209,7 +209,7 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
     }
     certModelBuilder
         .basicConstraints(new BasicConstraintsModel(false, conf.isBasicConstraintsCritical()))
-        .keyUsage(new KeyUsageModel(KeyUsageCalculator.getKeyUsageValue(subjectPublicKey, conf.getUsageType())));
+        .keyUsage(new KeyUsageModel(KeyUsageCalculator.getKeyUsageValue(subjectPublicKey, conf.getUsageDirective())));
 
     return certModelBuilder;
   }

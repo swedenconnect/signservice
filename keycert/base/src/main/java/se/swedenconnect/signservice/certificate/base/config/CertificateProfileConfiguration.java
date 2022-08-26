@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.certificate.config;
+package se.swedenconnect.signservice.certificate.base.config;
 
 import java.util.List;
 
@@ -56,7 +56,7 @@ public class CertificateProfileConfiguration {
   /**
    * Optional settings for certificate key usage.
    */
-  private SigningKeyUsageDirective usageType;
+  private SigningKeyUsageDirective usageDirective;
 
   /**
    * Criticality of key usage extension. The default is {@code true}.
@@ -69,30 +69,5 @@ public class CertificateProfileConfiguration {
    */
   @Builder.Default
   private boolean basicConstraintsCritical = false;
-
-//  /**
-//   * Get instance of default certificate profile configuration data for sign services
-//   *
-//   * @return default certificate profile configuration
-//   */
-//  public static CertificateProfileConfiguration getDefaultConfiguration() {
-//    return getBuilderWithDefaultValues().build();
-//  }
-//
-//  /**
-//   * Get instance of certificate profile configuration data builder for sign services with default values
-//   *
-//   * @return certificate profile configuration data builder with default values
-//   */
-//  public static CertificateProfileConfigurationBuilder getBuilderWithDefaultValues() {
-//    return CertificateProfileConfiguration.builder()
-//        .policies(Collections.emptyList())
-//        .policiesCritical(false)
-//        .extendedKeyUsages(Collections.emptyList())
-//        .extendedKeyUsageCritical(false)
-//        .usageType(null)
-//        .keyUsageCritical(true)
-//        .basicConstraintsCritical(false);
-//  }
 
 }

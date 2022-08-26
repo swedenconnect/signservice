@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.certificate.config;
+package se.swedenconnect.signservice.certificate.base.config;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
@@ -72,10 +75,19 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
   @Setter
   private DefaultValuePolicyCheckerConfiguration defaultValuePolicyChecker;
 
-  /** The type of certificates that the underlying CA issues. */
+  /**
+   * The type of certificates that the underlying CA issues.
+   */
   @Getter
   @Setter
   private CertificateType caCertificateType;
+
+  /**
+   * Certificate issuance profile configuration.
+   */
+  @Getter
+  @Setter
+  private CertificateProfileConfiguration profileConfiguration;
 
   /**
    * Service name placed in AuthnContextExtensions.
@@ -93,7 +105,7 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
     /**
      * Configuration data for the default value policy checker.
      */
-    private List<DefaultValuePolicyCheckerImpl.DefaultValuePolicyCheckerConfig> c;
+    private List<DefaultValuePolicyCheckerImpl.DefaultValuePolicyCheckerConfig> rules;
 
     /**
      * If no configuration exists for a supplied item (attribute type and reference), we reply with a default (true or
@@ -106,6 +118,9 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
    * Configuration for an RSA key provider.
    */
   @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
   public static class RsaProviderConfiguration {
 
     /**
@@ -123,6 +138,9 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
    * Configuration for an EC key provider.
    */
   @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
   public static class ECProviderConfiguration {
 
     /**

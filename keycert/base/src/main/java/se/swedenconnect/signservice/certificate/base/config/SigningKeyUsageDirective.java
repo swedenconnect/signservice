@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package se.swedenconnect.signservice.certificate.config;
+package se.swedenconnect.signservice.certificate.base.config;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Directive when configuring signing keys. Signing keys are given the key usages for signing by default, including
@@ -26,6 +28,8 @@ import lombok.Data;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SigningKeyUsageDirective {
 
   /**

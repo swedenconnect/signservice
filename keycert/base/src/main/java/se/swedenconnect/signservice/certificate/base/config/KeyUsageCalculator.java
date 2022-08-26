@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package se.swedenconnect.signservice.certificate.config;
+package se.swedenconnect.signservice.certificate.base.config;
 
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
@@ -25,10 +25,18 @@ import javax.annotation.Nullable;
 import org.bouncycastle.asn1.x509.KeyUsage;
 
 /**
- * Key usage calculator
+ * Utility class that is used to calculate the key usage value based on the key type and {link
+ * SigningKeyUsageDirective}.
  */
 public class KeyUsageCalculator {
 
+  /**
+   * Calculates the key usage value based on the key type and {link SigningKeyUsageDirective}.
+   *
+   * @param publicKey the public key
+   * @param usageDirective the usage directive (may be null)
+   * @return a key usage value
+   */
   public static int getKeyUsageValue(
       @Nonnull final PublicKey publicKey, @Nullable final SigningKeyUsageDirective usageDirective) {
 
@@ -38,11 +46,14 @@ public class KeyUsageCalculator {
       if (usageDirective.isEncrypt()) {
         keyUsage += (RSAPublicKey.class.isInstance(publicKey) ? KeyUsage.keyEncipherment : KeyUsage.keyAgreement);
       }
-      else {
+      if (usageDirective.isExcludeNonRepudiation()) {
         keyUsage -= KeyUsage.nonRepudiation;
       }
     }
     return keyUsage;
   }
+
+  // Private constructor
+  private KeyUsageCalculator() {}
 
 }

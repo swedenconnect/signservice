@@ -23,8 +23,10 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang.StringUtils;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 
 /**
@@ -87,6 +89,8 @@ public class DefaultValuePolicyCheckerImpl implements DefaultValuePolicyChecker 
    */
   @Data
   @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
   public static class DefaultValuePolicyCheckerConfig {
 
     /**

@@ -19,7 +19,6 @@ package se.swedenconnect.signservice.certificate.cmc.ca;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -43,8 +42,9 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolic
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.ExtendedKeyUsageModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
-import se.swedenconnect.signservice.certificate.config.CertificateProfileConfiguration;
-import se.swedenconnect.signservice.certificate.config.KeyUsageCalculator;
+import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
+import se.swedenconnect.signservice.certificate.base.config.KeyUsageCalculator;
 
 /**
  * CMC Client for certificate services
@@ -60,8 +60,7 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
    * Constructor for the CMC Client
    *
    * @param cmcRequestUrl URL where CMC requests are sent to the remote CA
-   * @param cmcSigningKey CMC client signing key
-   * @param cmcSigningCert CMC client signing certificate
+   * @param cmcCredential the CMC credential (private key and certificate)
    * @param algorithm CMC signing algorithm
    * @param cmcResponseCert signing certificate of the remote CA CMC responder
    * @param staticCaInformation static information about the issuing CA
@@ -70,11 +69,11 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
    * @throws OperatorCreationException error setting up CMC client
    * @throws CertificateEncodingException error parsing provided certificates
    */
-  public SignServiceCMCClient(@Nonnull final String cmcRequestUrl, @Nonnull final PrivateKey cmcSigningKey,
-      @Nonnull final X509Certificate cmcSigningCert, @Nonnull final String algorithm,
+  public SignServiceCMCClient(@Nonnull final String cmcRequestUrl,
+      @Nonnull final PkiCredential cmcCredential, @Nonnull final String algorithm,
       @Nonnull final X509Certificate cmcResponseCert, @Nonnull final CMCCaInformation staticCaInformation)
       throws MalformedURLException, NoSuchAlgorithmException, OperatorCreationException, CertificateEncodingException {
-    super(cmcRequestUrl, cmcSigningKey, cmcSigningCert, algorithm, cmcResponseCert,
+    super(cmcRequestUrl, cmcCredential.getPrivateKey(), cmcCredential.getCertificate(), algorithm, cmcResponseCert,
         Optional.ofNullable(staticCaInformation).map(CMCCaInformation::toStaticCAInformation).orElse(null));
   }
 
@@ -119,7 +118,7 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
       }
       certModelBuilder
           .basicConstraints(new BasicConstraintsModel(false, conf.isBasicConstraintsCritical()))
-          .keyUsage(new KeyUsageModel(KeyUsageCalculator.getKeyUsageValue(subjectPublicKey, conf.getUsageType())));
+          .keyUsage(new KeyUsageModel(KeyUsageCalculator.getKeyUsageValue(subjectPublicKey, conf.getUsageDirective())));
 
       if (includeCrlDPs) {
         certModelBuilder.crlDistributionPoints(caInformation.getCrlDpURLs());
