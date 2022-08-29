@@ -15,12 +15,24 @@
  */
 package se.swedenconnect.signservice.signature.tbsdata.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
+import java.security.SignatureException;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.PkiCredential;
@@ -33,14 +45,6 @@ import se.swedenconnect.signservice.signature.signer.TestCredentials;
 import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 import se.swedenconnect.signservice.signature.testutils.TestData;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
-
-import java.io.IOException;
-import java.security.SignatureException;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * PDF To Be Signed data processor tests
@@ -212,9 +216,6 @@ class PDFTBSDataProcessorTest {
       TestAlgorithms.getEcdsaSha256(),
       TestData.resultNoPadesNoTime, null
     );
-
-    int sdf = 0;
-
   }
 
   @Test
