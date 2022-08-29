@@ -44,6 +44,7 @@ import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean;
 import se.swedenconnect.signservice.api.engine.DefaultSignServiceEngine;
 import se.swedenconnect.signservice.api.engine.config.impl.DefaultEngineConfiguration;
+import se.swedenconnect.signservice.application.SignServiceEngineManager;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerConfiguration;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
@@ -120,7 +121,8 @@ public class SignServiceConfiguration {
    * Creates the {@code signservice.ContextPath} bean holding the SignService context path
    * ({@code server.servlet.context-path}).
    *
-   * @param contextPath the context path
+   * @param contextPath
+   *          the context path
    * @return the context path
    */
   @ConditionalOnMissingBean(name = "signservice.ContextPath")
@@ -133,14 +135,14 @@ public class SignServiceConfiguration {
    * If a SignService default credential has been configured, this is created.
    *
    * @return a PkiCredential or null
-   * @throws Exception for init errors
+   * @throws Exception
+   *           for init errors
    */
   @ConditionalOnMissingBean(name = "signservice.DefaultCredential")
   @Bean("signservice.DefaultCredential")
   public PkiCredential defaultCredential() throws Exception {
     if (this.properties.getDefaultCredential() != null) {
-      final PkiCredentialFactoryBean credentialFactory =
-          new PkiCredentialFactoryBean(this.properties.getDefaultCredential());
+      final PkiCredentialFactoryBean credentialFactory = new PkiCredentialFactoryBean(this.properties.getDefaultCredential());
       credentialFactory.afterPropertiesSet();
       return credentialFactory.getObject();
     }
@@ -154,7 +156,8 @@ public class SignServiceConfiguration {
    * Gets the system audit logger bean.
    *
    * @return the system audit logger bean
-   * @throws Exception for init errors
+   * @throws Exception
+   *           for init errors
    */
   @ConditionalOnMissingBean(name = "signservice.SystemAuditLogger")
   @Bean("signservice.SystemAuditLogger")
@@ -166,7 +169,7 @@ public class SignServiceConfiguration {
     auditConf.init();
 
     final HandlerFactory<AuditLogger> auditFactory = this.handlerFactoryRegistry.getFactory(
-        auditConf.getFactoryClass(), AuditLogger.class);
+      auditConf.getFactoryClass(), AuditLogger.class);
     return auditFactory.create(auditConf);
   }
 
@@ -199,12 +202,28 @@ public class SignServiceConfiguration {
   public ProtocolHandler dssProtocolHandler() {
     return new DssProtocolHandler();
   }
-
+  
   @ConditionalOnMissingBean(name = "signservice.DefaultSignatureHandler")
   @Bean("signservice.DefaultSignatureHandler")
   public SignatureHandler defaultSignatureHandler() {
     return new DefaultSignatureHandler(Arrays.asList(new XMLTBSDataProcessor(), new PDFTBSDataProcessor()));
   }
+
+  /**
+   * Creates the {@link SignServiceEngineManager} bean.
+   *
+   * @param engines
+   *          the engines
+   * @param systemAuditLogger
+   *          the system audit logger
+   * @return a SignServiceEngineManager bean
+   */
+  @ConditionalOnMissingBean
+  @Bean("signservice.SignServiceEngineManager")
+  public SignServiceEngineManager signServiceEngineManager(
+      @Qualifier("signservice.Engines") final List<SignServiceEngine> engines,
+      @Qualifier("signservice.SystemAuditLogger") final AuditLogger systemAuditLogger) {
+    return new SignServiceEngineManager(engines, systemAuditLogger);
 
   @ConditionalOnMissingBean(name = "signservice.Engines")
   @Bean("signservice.Engines")
@@ -249,7 +268,7 @@ public class SignServiceConfiguration {
       else {
         if (defaultCredential == null) {
           throw new BeanCreationException(
-              String.format("Could not create an engine for '%s' - no credential configured", ecp.getName()));
+            String.format("Could not create an engine for '%s' - no credential configured", ecp.getName()));
         }
         conf.setSignServiceCredential(defaultCredential);
       }
@@ -265,14 +284,14 @@ public class SignServiceConfiguration {
       final HandlerConfiguration<ProtocolHandler> protocolConf = ecp.getProtocol().getHandlerConfiguration();
       if (protocolConf.needsDefaultConfigResolving()) {
         protocolConf.resolveDefaultConfigRef(this.getResolver("protocol",
-            Optional.ofNullable(this.properties.getDefaultHandlerConfig())
-                .map(SharedHandlerConfigurationProperties::getProtocol)
-                .orElse(null)));
+          Optional.ofNullable(this.properties.getDefaultHandlerConfig())
+            .map(SharedHandlerConfigurationProperties::getProtocol)
+            .orElse(null)));
       }
       protocolConf.init();
 
       final HandlerFactory<ProtocolHandler> protocolFactory = this.handlerFactoryRegistry.getFactory(
-          protocolConf.getFactoryClass(), ProtocolHandler.class);
+        protocolConf.getFactoryClass(), ProtocolHandler.class);
       conf.setProtocolHandler(protocolFactory.create(protocolConf, protocolBeanLoader));
 
       // Signature handler
@@ -294,9 +313,9 @@ public class SignServiceConfiguration {
       final HandlerConfiguration<AuditLogger> auditConf = ecp.getAudit().getHandlerConfiguration();
       if (auditConf.needsDefaultConfigResolving()) {
         auditConf.resolveDefaultConfigRef(this.getResolver("audit",
-            Optional.ofNullable(this.properties.getDefaultHandlerConfig())
-                .map(SharedHandlerConfigurationProperties::getAudit)
-                .orElse(null)));
+          Optional.ofNullable(this.properties.getDefaultHandlerConfig())
+            .map(SharedHandlerConfigurationProperties::getAudit)
+            .orElse(null)));
       }
       if (AbstractAuditLoggerConfiguration.class.isInstance(auditConf)) {
         final AbstractAuditLoggerConfiguration _auditConf = AbstractAuditLoggerConfiguration.class.cast(auditConf);
@@ -307,7 +326,7 @@ public class SignServiceConfiguration {
       auditConf.init();
 
       final HandlerFactory<AuditLogger> auditFactory = this.handlerFactoryRegistry.getFactory(
-          auditConf.getFactoryClass(), AuditLogger.class);
+        auditConf.getFactoryClass(), AuditLogger.class);
       conf.setAuditLogger(auditFactory.create(auditConf, auditBeanLoader));
 
       // Authentication handler
@@ -315,9 +334,9 @@ public class SignServiceConfiguration {
       final HandlerConfiguration<AuthenticationHandler> authnConf = ecp.getAuthn().getHandlerConfiguration();
       if (authnConf.needsDefaultConfigResolving()) {
         authnConf.resolveDefaultConfigRef(this.getResolver("authn",
-            Optional.ofNullable(this.properties.getDefaultHandlerConfig())
-                .map(SharedHandlerConfigurationProperties::getAuthn)
-                .orElse(null)));
+          Optional.ofNullable(this.properties.getDefaultHandlerConfig())
+            .map(SharedHandlerConfigurationProperties::getAuthn)
+            .orElse(null)));
       }
       if (SamlAuthenticationHandlerConfiguration.class.isInstance(authnConf)) {
         final SamlAuthenticationHandlerConfiguration _authnConf = SamlAuthenticationHandlerConfiguration.class.cast(authnConf);
@@ -326,15 +345,14 @@ public class SignServiceConfiguration {
       authnConf.init();
 
       final HandlerFactory<AuthenticationHandler> authnFactory = this.handlerFactoryRegistry.getFactory(
-          authnConf.getFactoryClass(), AuthenticationHandler.class);
+        authnConf.getFactoryClass(), AuthenticationHandler.class);
       conf.setAuthenticationHandler(authnFactory.create(authnConf, authnBeanLoader));
 
       conf.setKeyAndCertificateHandler(null); // TODO: change
 
-//      conf.init();
+      // conf.init();
 
-      final DefaultSignServiceEngine engine =
-          new DefaultSignServiceEngine(conf, sessionHandler, messageReplayChecker, systemAuditLogger);
+      final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(conf, sessionHandler, messageReplayChecker, systemAuditLogger);
       engine.init();
 
       engines.add(engine);
@@ -351,8 +369,8 @@ public class SignServiceConfiguration {
       }
       final String handlerRef = ref.substring(prefix.length() + 1);
       return Optional.ofNullable(defaultConfig)
-          .map(c -> c.getHandlerConfiguration(handlerRef))
-          .orElse(null);
+        .map(c -> c.getHandlerConfiguration(handlerRef))
+        .orElse(null);
     };
   }
 

@@ -81,6 +81,19 @@
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
     </dependency>
+    
+    <!-- Test -->
+    <dependency>
+      <groupId>se.swedenconnect.signservice</groupId>
+      <artifactId>signservice-audit-base</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+        
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>    
   
   </dependencies>
 

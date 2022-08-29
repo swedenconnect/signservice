@@ -15,7 +15,6 @@
  */
 package se.swedenconnect.signservice.app;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,18 +26,21 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.Setter;
+import se.swedenconnect.signservice.application.SignServiceEngineManager;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
-import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
 import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
 
 /**
- * The SignService controller that dispatches the requests to the different engines.
+ * The SignService controller uses the SignServiceEngineManager to handle each request.
  */
 @Controller
-@Slf4j
 public class SignServiceController {
+
+  @Setter
+  @Autowired
+  private SignServiceEngineManager manager;
 
   @Autowired
   @Qualifier("signservice.Engines")
@@ -46,37 +48,15 @@ public class SignServiceController {
 
   @RequestMapping("/sign/**")
   public ModelAndView processRequest(final HttpServletRequest request, final HttpServletResponse response)
-      throws IOException, UnrecoverableSignServiceException {
+      throws UnrecoverableSignServiceException {
 
-    log.debug("Received {} request [path: '{}', client-ip: '{}']",
-        request.getMethod(), request.getRequestURI(), request.getRemoteAddr());
-
-    // Find an engine that can process the request ...
-    //
-    final SignServiceEngine engine = this.dispatch(request);
-    if (engine == null) {
-      log.info("No SignServiceEngine can service {} request on {}", request.getMethod(), request.getRequestURI());
-      throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.NOT_FOUND, "No such resource");
-    }
-
-    // Hand the request over to the engine ...
-    //
-    final HttpRequestMessage result = engine.processRequest(request, response);
+    final HttpRequestMessage result = manager.processRequest(request, response);
 
     if (result == null) {
-      // If the result from the processing is null, it means that the engine, or any of its
-      // sub-components, has served a resource and written it to the HttpServletResponse. All we
-      // have to do now is commit the response ...
-      //
-      log.debug("Engine has served resource, flushing buffer ...");
-      response.flushBuffer();
       return null;
     }
     else {
       if ("GET".equals(result.getMethod())) {
-        // We should send a redirect ...
-        //
-        log.debug("Redirecting to: {}", result.getUrl());
         return new ModelAndView("redirect:" + result.getUrl());
       }
       else { // POST
@@ -86,15 +66,6 @@ public class SignServiceController {
         return mav;
       }
     }
-  }
-
-  private SignServiceEngine dispatch(final HttpServletRequest request) {
-    for (final var e : this.engines) {
-      if (e.canProcess(request)) {
-        return e;
-      }
-    }
-    return null;
   }
 
 }

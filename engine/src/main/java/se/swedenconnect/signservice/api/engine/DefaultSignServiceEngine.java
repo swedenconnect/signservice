@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -129,7 +131,16 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
 
   /** {@inheritDoc} */
   @Override
-  public HttpRequestMessage processRequest(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse)
+  @Nonnull
+  public String getName() {
+    return this.engineConfiguration.getName();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Nullable
+  public HttpRequestMessage processRequest(
+      @Nonnull final HttpServletRequest httpRequest, @Nonnull final HttpServletResponse httpResponse)
       throws UnrecoverableSignServiceException {
 
     log.debug("{}: Received request [path: '{}', client-ip: '{}']",
@@ -602,7 +613,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
 
   /** {@inheritDoc} */
   @Override
-  public boolean canProcess(final HttpServletRequest httpRequest) {
+  public boolean canProcess(@Nonnull final HttpServletRequest httpRequest) {
     AuditLoggerSingleton.init(this.engineConfiguration.getAuditLogger());
 
     if (this.isSignRequestEndpoint(httpRequest)) {
