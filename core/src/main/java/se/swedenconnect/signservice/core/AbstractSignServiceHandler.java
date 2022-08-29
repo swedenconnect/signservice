@@ -32,7 +32,7 @@ public abstract class AbstractSignServiceHandler implements SignServiceHandler {
   @Override
   @Nonnull
   public String getName() {
-    return Optional.ofNullable(this.name).orElse(this.getClass().getSimpleName());
+    return Optional.ofNullable(this.name).orElseGet(() -> this.getClass().getSimpleName());
   }
 
   /**

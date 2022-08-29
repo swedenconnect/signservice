@@ -17,7 +17,10 @@ package se.swedenconnect.signservice.signature;
 
 import java.security.SignatureException;
 
+import javax.annotation.Nonnull;
+
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.core.SignServiceHandler;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
@@ -26,14 +29,7 @@ import se.swedenconnect.signservice.session.SignServiceContext;
  * A {@code SignatureHandler} instance is responsible of signing a supplied signature task using the provided
  * credential.
  */
-public interface SignatureHandler {
-
-  /**
-   * Gets the name of the handler.
-   *
-   * @return handler name
-   */
-  String getName();
+public interface SignatureHandler extends SignServiceHandler {
 
   /**
    * Verifies that the requirements put in the supplied SignRequest is correct and the handler can process the request.
@@ -43,7 +39,7 @@ public interface SignatureHandler {
    * @param context the SignService context
    * @throws InvalidRequestException if the requirements cannot be met
    */
-  void checkRequirements(final SignRequestMessage signRequest, final SignServiceContext context)
+  void checkRequirements(@Nonnull final SignRequestMessage signRequest, @Nonnull final SignServiceContext context)
       throws InvalidRequestException;
 
   /**
@@ -56,7 +52,8 @@ public interface SignatureHandler {
    * @return a completed signature task
    * @throws SignatureException for signing errors
    */
-  CompletedSignatureTask sign(final RequestedSignatureTask signatureTask, final PkiCredential signingCredential,
-      final SignRequestMessage signRequest, final SignServiceContext context) throws SignatureException;
+  CompletedSignatureTask sign(@Nonnull final RequestedSignatureTask signatureTask,
+      @Nonnull final PkiCredential signingCredential, @Nonnull final SignRequestMessage signRequest,
+      @Nonnull final SignServiceContext context) throws SignatureException;
 
 }

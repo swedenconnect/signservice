@@ -15,22 +15,25 @@
  */
 package se.swedenconnect.signservice.signature.signer.crypto;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.signservice.signature.signer.TestAlgorithms;
 import se.swedenconnect.signservice.signature.signer.TestCredentials;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
-
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test PK Crypto implementation
@@ -51,27 +54,30 @@ class PkCryptoTest {
     byte[] decrypted = PkCrypto.rsaVerify(signatureBytes, TestCredentials.publicRSAKey);
     log.info("Decrypted signature value: {}", Hex.toHexString(decrypted));
 
-    ASN1InputStream asn1InputStream = new ASN1InputStream(decrypted);
-    ASN1Sequence asn1Sequence = ASN1Sequence.getInstance(asn1InputStream.readObject());
-    ASN1OctetString octetString = ASN1OctetString.getInstance(asn1Sequence.getObjectAt(1));
+    try (ASN1InputStream asn1InputStream = new ASN1InputStream(decrypted)) {
+      ASN1Sequence asn1Sequence = ASN1Sequence.getInstance(asn1InputStream.readObject());
+      ASN1OctetString octetString = ASN1OctetString.getInstance(asn1Sequence.getObjectAt(1));
 
-    assertArrayEquals(messageHash, octetString.getOctets());
-    log.info("Decrypted value match");
+      assertArrayEquals(messageHash, octetString.getOctets());
+      log.info("Decrypted value match");
 
-    byte[] rawMessageHashSignature = PkCrypto.rsaSignEncodedMessage(messageHash, TestCredentials.privateRSAKey);
-    log.info("Raw RSA signing message hash: \n{}", TestUtils.base64Print(rawMessageHashSignature, 74));
-    byte[] decryptedEmSigned = PkCrypto.rsaVerifyEncodedMessage(rawMessageHashSignature, TestCredentials.publicRSAKey);
-    log.info("Decrypted raw signed signature value: {}", Hex.toHexString(decryptedEmSigned));
-    assertArrayEquals(messageHash, decryptedEmSigned);
-    log.info("Raw encrypted data verification succeeded");
+      byte[] rawMessageHashSignature = PkCrypto.rsaSignEncodedMessage(messageHash, TestCredentials.privateRSAKey);
+      log.info("Raw RSA signing message hash: \n{}", TestUtils.base64Print(rawMessageHashSignature, 74));
+      byte[] decryptedEmSigned =
+          PkCrypto.rsaVerifyEncodedMessage(rawMessageHashSignature, TestCredentials.publicRSAKey);
+      log.info("Decrypted raw signed signature value: {}", Hex.toHexString(decryptedEmSigned));
+      assertArrayEquals(messageHash, decryptedEmSigned);
+      log.info("Raw encrypted data verification succeeded");
+    }
   }
 
   @Test
   void ecdsaVerifyDigest() throws Exception {
     log.info("ECDSA sign and verify test");
     log.info("Signing string: \"Data to be signed\"");
-    EcdsaSigValue ecdsaSigValue = PkCrypto.ecdsaSignData("Data to be signed".getBytes(StandardCharsets.UTF_8), TestCredentials.privateECKey,
-      TestAlgorithms.ecdsaSha256);
+    EcdsaSigValue ecdsaSigValue =
+        PkCrypto.ecdsaSignData("Data to be signed".getBytes(StandardCharsets.UTF_8), TestCredentials.privateECKey,
+            TestAlgorithms.ecdsaSha256);
     log.info("Concatenated signature bytes: \n{}", TestUtils.base64Print(ecdsaSigValue.toByteArray(), 74));
     log.info("DER encoded signature value: \n{}", TestUtils.base64Print(ecdsaSigValue.getDEREncodedSigValue(), 74));
 
@@ -90,7 +96,7 @@ class PkCryptoTest {
     log.info("Testing to derive algorithm from hash and key type");
     log.info("Getting algorithm for SHA-256 and EC");
     Algorithm algorithm = PkCrypto.getAlgorithmFromTypeAndDigestMethod(TestAlgorithms.sha256, "EC",
-      AlgorithmRegistrySingleton.getInstance());
+        AlgorithmRegistrySingleton.getInstance());
     log.info("Found algorithm: {}", algorithm.getUri());
     assertEquals("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", algorithm.getUri());
   }

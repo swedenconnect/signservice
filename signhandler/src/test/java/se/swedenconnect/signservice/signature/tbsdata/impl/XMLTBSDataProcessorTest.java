@@ -15,11 +15,16 @@
  */
 package se.swedenconnect.signservice.signature.tbsdata.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.security.MessageDigest;
+import java.security.SignatureException;
+import java.util.Date;
+
 import org.apache.xml.security.binding.xmldsig.ObjectType;
 import org.apache.xml.security.binding.xmldsig.ReferenceType;
 import org.apache.xml.security.binding.xmldsig.SignedInfoType;
@@ -29,6 +34,12 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.xml.DOMUtils;
 import se.idsec.signservice.xml.JAXBMarshaller;
 import se.idsec.signservice.xml.JAXBUnmarshaller;
@@ -49,12 +60,6 @@ import se.swedenconnect.signservice.signature.signer.TestCredentials;
 import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 import se.swedenconnect.signservice.signature.testutils.TestData;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
-
-import java.security.MessageDigest;
-import java.security.SignatureException;
-import java.util.Date;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * XML To Be Signed data processor tests
@@ -306,7 +311,7 @@ class XMLTBSDataProcessorTest {
       XMLTBSDataProcessor.nodeToBytes(signedPropertiesNode),
       "http://www.w3.org/2001/10/xml-exc-c14n#");
 
-    byte[] sigPropDigest = md.digest(signedPropertyBytes);
+    md.digest(signedPropertyBytes);
 
     assertArrayEquals(md.digest(signedPropertyBytes), xadesRef.getDigestValue());
     log.info("Digest value match");

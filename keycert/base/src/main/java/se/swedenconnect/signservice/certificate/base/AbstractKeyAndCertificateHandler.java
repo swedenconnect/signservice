@@ -28,6 +28,7 @@ import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.configuration.DefaultConfiguration;
 import se.swedenconnect.signservice.certificate.base.configuration.DefaultParameter;
 import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
+import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
@@ -47,7 +48,7 @@ import java.util.Optional;
  * Abstract base class for the {@link KeyAndCertificateHandler} interface.
  */
 @Slf4j
-public abstract class AbstractKeyAndCertificateHandler implements KeyAndCertificateHandler {
+public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServiceHandler implements KeyAndCertificateHandler{
 
   /** Provider of generated signing key pairs */
   protected final SignServiceSigningKeyProvider signingKeyProvider;

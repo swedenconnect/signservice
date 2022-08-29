@@ -18,21 +18,22 @@ package se.swedenconnect.signservice.spring.config.engine;
 import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.Assert;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationProperties;
 import se.swedenconnect.signservice.client.impl.DefaultClientConfiguration;
 import se.swedenconnect.signservice.spring.config.audit.AuditLoggerConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.authn.AuthenticationConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.protocol.ProtocolConfigurationProperties;
+import se.swedenconnect.signservice.spring.config.sign.SignatureHandlerConfigurationProperties;
 
 /**
  * Configuration properties for an engine configuration.
  */
 @Data
-@ConfigurationProperties
 public class EngineConfigurationProperties implements InitializingBean {
 
   /**
@@ -71,6 +72,13 @@ public class EngineConfigurationProperties implements InitializingBean {
   private AuthenticationConfigurationProperties authn;
 
   /**
+   * Signature handler configuration.
+   */
+  @Getter
+  @Setter
+  private SignatureHandlerConfigurationProperties sign;
+
+  /**
    * Audit logger configuration.
    */
   private AuditLoggerConfigurationProperties audit;
@@ -88,6 +96,7 @@ public class EngineConfigurationProperties implements InitializingBean {
 
     Assert.notNull(this.protocol, "protocol must be assigned");
     Assert.notNull(this.authn, "authn must be assigned");
+    Assert.notNull(this.sign, "sign must be assigned");
     Assert.notNull(this.audit, "audit must be assigned");
   }
 

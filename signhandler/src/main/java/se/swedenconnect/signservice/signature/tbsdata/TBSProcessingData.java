@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import se.swedenconnect.signservice.signature.AdESObject;
 
 /**
- * Data class holding data related to a sign task that is the result of preparing data for signing
+ * Data class holding data related to a sign task that is the result of preparing data for signing.
  */
 @Data
 @AllArgsConstructor
@@ -36,7 +36,7 @@ public class TBSProcessingData {
    * @param tBSBytes data to be signed
    * @return data to be signed
    */
-  byte[] tBSBytes;
+  private byte[] tBSBytes;
 
   /**
    * The ETSI advanced electronic signature data object (if applicable)
@@ -44,7 +44,7 @@ public class TBSProcessingData {
    * @param tBSBytes ETSI advanced electronic signature data object (if applicable)
    * @return ETSI advanced electronic signature data object (if applicable) or null
    */
-  AdESObject adESObject;
+  private AdESObject adESObject;
 
   /**
    * The processing rules if set
@@ -52,5 +52,5 @@ public class TBSProcessingData {
    * @param tBSBytes processing rules URI
    * @return data processing rules URI if set or null
    */
-  String processingRules;
+  private String processingRules;
 }

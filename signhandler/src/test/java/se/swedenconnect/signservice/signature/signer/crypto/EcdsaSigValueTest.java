@@ -15,17 +15,20 @@
  */
 package se.swedenconnect.signservice.signature.signer.crypto;
 
-import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.util.encoders.Hex;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.util.encoders.Hex;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Testing Ecdsa signature value parser
@@ -67,7 +70,7 @@ class EcdsaSigValueTest {
 
     EcdsaSigValue ecdsaSigValue = EcdsaSigValue.getInstance(ec256SigBytes);
     BigInteger r = ecdsaSigValue.getR();
-    BigInteger s = ecdsaSigValue.getS();
+    ecdsaSigValue.getS();
 
     assertThrows(IOException.class, () -> {
       EcdsaSigValue.getInstance(r, BigInteger.TEN).toByteArray();
@@ -123,8 +126,8 @@ class EcdsaSigValueTest {
 
     for (byte[] sigValue : sigValueList) {
       EcdsaSigValue ecdsaSigValue = EcdsaSigValue.getInstance(sigValue);
-      String rBytes = Hex.toHexString(ecdsaSigValue.getR().toByteArray());
-      String sBytes = Hex.toHexString(ecdsaSigValue.getS().toByteArray());
+      Hex.toHexString(ecdsaSigValue.getR().toByteArray());
+      Hex.toHexString(ecdsaSigValue.getS().toByteArray());
       assertArrayEquals(sigValue, ecdsaSigValue.toByteArray());
     }
   }

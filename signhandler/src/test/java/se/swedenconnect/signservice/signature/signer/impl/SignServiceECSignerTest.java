@@ -15,12 +15,21 @@
  */
 package se.swedenconnect.signservice.signature.signer.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.security.MessageDigest;
+import java.security.PrivateKey;
+import java.security.SignatureException;
+import java.security.cert.X509Certificate;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
@@ -31,14 +40,6 @@ import se.swedenconnect.signservice.signature.signer.TestCredentials;
 import se.swedenconnect.signservice.signature.signer.crypto.EcdsaSigValue;
 import se.swedenconnect.signservice.signature.signer.crypto.PkCrypto;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
-
-import java.security.MessageDigest;
-import java.security.PrivateKey;
-import java.security.SignatureException;
-import java.security.cert.X509Certificate;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for ECDSA signer
@@ -175,6 +176,8 @@ class SignServiceECSignerTest {
     case PDF:
       ecdsaSigValue = EcdsaSigValue.getInstance(new ASN1InputStream(signature));
       break;
+    default:
+      break;
     }
     boolean verifiedSignedData = PkCrypto.ecdsaVerifyDigest(messageHash, ecdsaSigValue, TestCredentials.publicECKey);
     assertTrue(verifiedSignedData);
@@ -192,11 +195,11 @@ class SignServiceECSignerTest {
       signerCert.getPublicKey());
     assertTrue(verifiedSignedData);
     log.info("Decrypted signature verifies the signed message digest");
-    boolean verifySignedData = PkCrypto.ecdsaVerifySignedData(tbsData, EcdsaSigValue.getInstance(signature),
+    assertTrue(PkCrypto.ecdsaVerifySignedData(tbsData, EcdsaSigValue.getInstance(signature),
       signerCert.getPublicKey(),
       ecdsaSha256.getMessageDigestAlgorithm(),
-      AlgorithmRegistrySingleton.getInstance());
-    assertTrue(verifiedSignedData);
+      AlgorithmRegistrySingleton.getInstance()));
+
     log.info("Decrypted signature verifies the signed message");
 
   }

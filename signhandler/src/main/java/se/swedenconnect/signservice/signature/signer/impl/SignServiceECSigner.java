@@ -15,21 +15,23 @@
  */
 package se.swedenconnect.signservice.signature.signer.impl;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.SignatureException;
+
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.signer.SignServiceSigner;
 import se.swedenconnect.signservice.signature.signer.crypto.EcdsaSigValue;
 import se.swedenconnect.signservice.signature.signer.crypto.PkCrypto;
 
-import java.io.IOException;
-import java.security.*;
-
 /**
  * Implementation of EC signer for calculating the EC signature values
  */
-@Slf4j
 public class SignServiceECSigner implements SignServiceSigner {
 
   /** Signature type for signatures created by this signer */

@@ -63,13 +63,6 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
   /** CA service used to issue certificates */
   private final CAService caService;
 
-  /**
-   * Name of this key and certificate handler.
-   *
-   * @param name the name of this key and certificate handler
-   */
-  @Setter private String name;
-
   /** Attribute mapper mapping attribute data from assertion to Certificates */
   private final AttributeMapper attributeMapper;
 
@@ -99,13 +92,6 @@ public class SimpleKeyAndCertificateHandler extends AbstractKeyAndCertificateHan
     super(signingKeyProvider, defaultConfiguration, algorithmRegistry);
     this.caService = Objects.requireNonNull(caService, "caService must not be null");
     this.attributeMapper = Objects.requireNonNull(attributeMapper, "attributeMapper must not be null");
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  @Nonnull
-  public String getName() {
-    return Optional.ofNullable(name).orElse(this.getClass().getSimpleName());
   }
 
   /** {@inheritDoc} */

@@ -15,19 +15,20 @@
  */
 package se.swedenconnect.signservice.signature.signer;
 
-import se.swedenconnect.security.algorithms.SignatureAlgorithm;
-
-import javax.annotation.Nonnull;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 
+import javax.annotation.Nonnull;
+
+import se.swedenconnect.security.algorithms.SignatureAlgorithm;
+
 /**
- * Interface for sign service signer used to create signature values
+ * Interface for sign service signer used to create signature values.
  */
 public interface SignServiceSigner {
 
   /**
-   * Create a signature value
+   * Creates a signature value.
    *
    * @param toBeSignedBytes the bytes to be hashed and signed by this signer
    * @param privateKey the private key used to sign
@@ -36,7 +37,6 @@ public interface SignServiceSigner {
    * @throws SignatureException on errors creating the signature
    */
   byte[] sign(@Nonnull final byte[] toBeSignedBytes, @Nonnull final PrivateKey privateKey,
-    @Nonnull final SignatureAlgorithm signatureAlgorithm)
-    throws SignatureException;
+      @Nonnull final SignatureAlgorithm signatureAlgorithm) throws SignatureException;
 
 }

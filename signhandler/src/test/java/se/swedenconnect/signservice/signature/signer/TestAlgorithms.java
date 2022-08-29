@@ -15,12 +15,12 @@
  */
 package se.swedenconnect.signservice.signature.signer;
 
-import lombok.Getter;
 import org.apache.xml.security.signature.XMLSignature;
+
+import lombok.Getter;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.algorithms.MessageDigestAlgorithm;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
-import se.swedenconnect.security.algorithms.impl.StaticAlgorithmRegistry;
 
 /**
  * Algorithms used in tests

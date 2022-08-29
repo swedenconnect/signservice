@@ -15,12 +15,20 @@
  */
 package se.swedenconnect.signservice.signature.impl;
 
-import lombok.Setter;
+import java.security.SignatureException;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.annotation.Nonnull;
+
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
+import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
@@ -33,93 +41,91 @@ import se.swedenconnect.signservice.signature.signer.SignServiceSigner;
 import se.swedenconnect.signservice.signature.signer.SignServiceSignerProvider;
 import se.swedenconnect.signservice.signature.signer.impl.DefaultSignServiceSignerProvider;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
-import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessorProvider;
 import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
-import se.swedenconnect.signservice.signature.tbsdata.impl.DefaultTBSDataProcessorProvider;
-
-import javax.annotation.Nonnull;
-import java.security.SignatureException;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Default implementation of the {@link SignatureHandler} interface.
  */
 @Slf4j
-public class DefaultSignatureHandler implements SignatureHandler {
+public class DefaultSignatureHandler extends AbstractSignServiceHandler implements SignatureHandler {
 
   /** sign service signer provider */
   private final SignServiceSignerProvider signServiceSignerProvider;
 
-  /** To be signed data processor provider */
-  private final TBSDataProcessorProvider tbsDataProcessorProvider;
-
   /** Algorithm registry */
   private final AlgorithmRegistry algorithmRegistry;
 
-  /**
-   * The name of this handler.
-   *
-   * @param name the handler name
-   */
-  @Setter
-  private String name;
+  /** The TBS data processors. */
+  private List<TBSDataProcessor> tbsDataProcessors;
 
   /**
-   * Constructor with default sign service signer provider and default TBS data processor
+   * Constructor assigning the {@link TBSDataProcessor} instances to use. A default algorithm registry
+   * ({@link AlgorithmRegistrySingleton#getInstance()}) and signer provider ({@link DefaultSignServiceSignerProvider})
+   * is used.
    *
-   * @param algorithmRegistry algorithm registry
+   * @param tbsDataProcessors a list of TBS data processors
    */
-  public DefaultSignatureHandler(@Nonnull final AlgorithmRegistry algorithmRegistry) {
-    this(algorithmRegistry, new DefaultSignServiceSignerProvider(algorithmRegistry),
-      new DefaultTBSDataProcessorProvider());
+  public DefaultSignatureHandler(@Nonnull final List<TBSDataProcessor> tbsDataProcessors) {
+    this(tbsDataProcessors, AlgorithmRegistrySingleton.getInstance());
   }
 
   /**
-   * Constructor
+   * Constructor assigning the {@link TBSDataProcessor} instances to use and an algorithm registry. A default signer
+   * provider ({@link DefaultSignServiceSignerProvider}) is used.
    *
+   * @param tbsDataProcessors a list of TBS data processors
+   * @param algorithmRegistry algorithm registry
+   */
+  public DefaultSignatureHandler(@Nonnull final List<TBSDataProcessor> tbsDataProcessors,
+      @Nonnull final AlgorithmRegistry algorithmRegistry) {
+    this(tbsDataProcessors, Objects.requireNonNull(algorithmRegistry, "algorithmRegistry must not be null"),
+        new DefaultSignServiceSignerProvider(algorithmRegistry));
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param tbsDataProcessors a list of TBS data processors
    * @param algorithmRegistry algorithm registry
    * @param signServiceSignerProvider sign service signer provider
-   * @param tbsDataProcessorProvider To Be Signed data processor provider
    */
-  public DefaultSignatureHandler(@Nonnull final AlgorithmRegistry algorithmRegistry,
-    @Nonnull final SignServiceSignerProvider signServiceSignerProvider,
-    @Nonnull final TBSDataProcessorProvider tbsDataProcessorProvider) {
-    this.signServiceSignerProvider = signServiceSignerProvider;
-    this.algorithmRegistry = algorithmRegistry;
-    this.tbsDataProcessorProvider = tbsDataProcessorProvider;
+  public DefaultSignatureHandler(
+      @Nonnull final List<TBSDataProcessor> tbsDataProcessors,
+      @Nonnull final AlgorithmRegistry algorithmRegistry,
+      @Nonnull final SignServiceSignerProvider signServiceSignerProvider) {
+    this.tbsDataProcessors = Objects.requireNonNull(tbsDataProcessors, "tbsDataProcessors must not be null");
+    this.signServiceSignerProvider =
+        Objects.requireNonNull(signServiceSignerProvider, "signServiceSignerProvider must not be null");
+    this.algorithmRegistry = Objects.requireNonNull(algorithmRegistry, "algorithmRegistry must not be null");
 
-    Objects.requireNonNull(algorithmRegistry, "Algorithm registry must not be null");
-    Objects.requireNonNull(signServiceSignerProvider, "Signer provider must not be null");
-    Objects.requireNonNull(tbsDataProcessorProvider, "TBS data processor must not be null");
+    if (this.tbsDataProcessors.isEmpty()) {
+      throw new IllegalArgumentException("tbsDataProcessors must not be empty");
+    }
   }
 
   /** {@inheritDoc} */
   @Override
-  public String getName() {
-    return Optional.ofNullable(this.name).orElse(this.getClass().getSimpleName());
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void checkRequirements(@Nonnull final SignRequestMessage signRequest, final SignServiceContext context)
-    throws InvalidRequestException {
+  public void checkRequirements(@Nonnull final SignRequestMessage signRequest,
+      @Nonnull final SignServiceContext context) throws InvalidRequestException {
 
     log.debug("Checking signature process requirements on sign request input");
 
-    Objects.requireNonNull(signRequest, "SignRequest must not be null");
+    Objects.requireNonNull(signRequest, "signRequest must not be null");
 
     // Check signature algorithm
-    SignatureRequirements signatureRequirements = Optional.ofNullable(signRequest.getSignatureRequirements())
-      .orElseThrow(() -> new InvalidRequestException("Signature requirements must be present"));
-    String sigAlgorithmUri = Optional.ofNullable(signatureRequirements.getSignatureAlgorithm())
-      .orElseThrow(() -> new InvalidRequestException("Signature algorithm in request must not be null"));
-    Algorithm algorithm = Optional.ofNullable(algorithmRegistry.getAlgorithm(sigAlgorithmUri))
-      .orElseThrow(() -> new InvalidRequestException("Signature algorithm is not in the algorithm registry"));
+    final SignatureRequirements signatureRequirements = Optional.ofNullable(signRequest.getSignatureRequirements())
+        .orElseThrow(() -> new InvalidRequestException("Signature requirements must be present"));
+
+    final String sigAlgorithmUri = Optional.ofNullable(signatureRequirements.getSignatureAlgorithm())
+        .orElseThrow(() -> new InvalidRequestException("Signature algorithm in request must not be null"));
+
+    final Algorithm algorithm = Optional.ofNullable(this.algorithmRegistry.getAlgorithm(sigAlgorithmUri))
+        .orElseThrow(() -> new InvalidRequestException("Signature algorithm is not in the algorithm registry"));
     if (!(algorithm instanceof SignatureAlgorithm)) {
       throw new InvalidRequestException("Requested algorithm is not a signature algorithm");
     }
-    SignatureAlgorithm signatureAlgorithm = (SignatureAlgorithm) algorithm;
+
+    final SignatureAlgorithm signatureAlgorithm = (SignatureAlgorithm) algorithm;
     if (signatureAlgorithm.isBlacklisted()) {
       throw new InvalidRequestException("Specified signature algorithm is blacklisted");
     }
@@ -130,13 +136,12 @@ public class DefaultSignatureHandler implements SignatureHandler {
       throw new InvalidRequestException("No sign tasks are available");
     }
     log.debug("Found {} sign task(s) to process", signRequest.getSignatureTasks().size());
-    for (RequestedSignatureTask signTask : signRequest.getSignatureTasks()) {
+    for (final RequestedSignatureTask signTask : signRequest.getSignatureTasks()) {
       try {
-        TBSDataProcessor tbsDataProcessor = tbsDataProcessorProvider.getTBSDataProcessor(signTask.getSignatureType());
-        tbsDataProcessor.checkSignTask(signTask, signatureAlgorithm);
+        this.getTBSDataProcessor(signTask.getSignatureType()).checkSignTask(signTask, signatureAlgorithm);
       }
-      catch (SignatureException e) {
-        throw new InvalidRequestException(e.getMessage());
+      catch (final SignatureException e) {
+        throw new InvalidRequestException(e.getMessage(), e);
       }
     }
     log.debug("All sign tasks pass all compliance checks");
@@ -145,41 +150,43 @@ public class DefaultSignatureHandler implements SignatureHandler {
   /** {@inheritDoc} */
   @Override
   public CompletedSignatureTask sign(@Nonnull final RequestedSignatureTask signatureTask,
-    @Nonnull final PkiCredential signingCredential,
-    @Nonnull final SignRequestMessage signRequest, final SignServiceContext context) throws SignatureException {
+      @Nonnull final PkiCredential signingCredential,
+      @Nonnull final SignRequestMessage signRequest,
+      @Nonnull final SignServiceContext context) throws SignatureException {
     log.debug("Starting process to sign data");
 
     Objects.requireNonNull(signatureTask, "SignatureTask must not be null");
     Objects.requireNonNull(signingCredential, "Signing credentials must not be null");
     Objects.requireNonNull(signRequest, "SignRequest must not be null");
 
-    SignatureType signatureType = signatureTask.getSignatureType();
+    final SignatureType signatureType = signatureTask.getSignatureType();
     log.debug("Requested signature type: {}", signatureType);
 
     try {
       // Check the requirements on the sign request data
-      checkRequirements(signRequest, context);
+      this.checkRequirements(signRequest, context);
     }
-    catch (InvalidRequestException e) {
-      throw new SignatureException(e.getMessage());
+    catch (final InvalidRequestException e) {
+      throw new SignatureException(e.getMessage(), e);
     }
 
-    String signatureAlgorithmUri = signRequest.getSignatureRequirements().getSignatureAlgorithm();
-    SignatureAlgorithm signatureAlgorithm = (SignatureAlgorithm) algorithmRegistry.getAlgorithm(signatureAlgorithmUri);
+    final String signatureAlgorithmUri = signRequest.getSignatureRequirements().getSignatureAlgorithm();
+    final SignatureAlgorithm signatureAlgorithm =
+        (SignatureAlgorithm) this.algorithmRegistry.getAlgorithm(signatureAlgorithmUri);
     log.debug("Signature algorithm: {}", signatureAlgorithm.getJcaName());
 
-    SignServiceSigner signer = signServiceSignerProvider.getSigner(signatureAlgorithmUri, signatureType);
+    final SignServiceSigner signer = this.signServiceSignerProvider.getSigner(signatureAlgorithmUri, signatureType);
     log.debug("Obtained signer of class {}", signer.getClass().getSimpleName());
 
-    TBSDataProcessor tbsDataProcessor = tbsDataProcessorProvider.getTBSDataProcessor(signatureType);
+    final TBSDataProcessor tbsDataProcessor = this.getTBSDataProcessor(signatureType);
     log.debug("Obtained TBS data processor of type: {}", tbsDataProcessor.getClass().getSimpleName());
-    TBSProcessingData tbsProcessingData = tbsDataProcessor.processSignTaskData(signatureTask,
-      signingCredential.getCertificate(),
-      signatureAlgorithm);
+    final TBSProcessingData tbsProcessingData = tbsDataProcessor.processSignTaskData(signatureTask,
+        signingCredential.getCertificate(),
+        signatureAlgorithm);
 
-    byte[] signature = signer.sign(tbsProcessingData.getTBSBytes(), signingCredential.getPrivateKey(),
-      signatureAlgorithm);
-    DefaultCompletedSignatureTask completedSignatureTask = new DefaultCompletedSignatureTask(signatureTask);
+    final byte[] signature = signer.sign(tbsProcessingData.getTBSBytes(), signingCredential.getPrivateKey(),
+        signatureAlgorithm);
+    final DefaultCompletedSignatureTask completedSignatureTask = new DefaultCompletedSignatureTask(signatureTask);
     completedSignatureTask.setSignature(signature);
     completedSignatureTask.setSignatureAlgorithmUri(signatureAlgorithmUri);
     completedSignatureTask.setTbsData(tbsProcessingData.getTBSBytes());
@@ -188,6 +195,20 @@ public class DefaultSignatureHandler implements SignatureHandler {
     log.debug("Sign task completed");
 
     return completedSignatureTask;
+  }
+
+  /**
+   * Gets the {@link TBSDataProcessor} that supports the given signature type.
+   *
+   * @param signatureType the signature type
+   * @return a TBSDataProcessor
+   * @throws SignatureException if no matching processor is found
+   */
+  private TBSDataProcessor getTBSDataProcessor(@Nonnull final SignatureType signatureType) throws SignatureException {
+    return this.tbsDataProcessors.stream()
+        .filter(p -> p.supportsType(signatureType))
+        .findFirst()
+        .orElseThrow(() -> new SignatureException("Signature type " + signatureType + " is not supported"));
   }
 
 }
