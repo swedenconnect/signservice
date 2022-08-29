@@ -224,6 +224,7 @@ public class SignServiceConfiguration {
       @Qualifier("signservice.Engines") final List<SignServiceEngine> engines,
       @Qualifier("signservice.SystemAuditLogger") final AuditLogger systemAuditLogger) {
     return new SignServiceEngineManager(engines, systemAuditLogger);
+  }
 
   @ConditionalOnMissingBean(name = "signservice.Engines")
   @Bean("signservice.Engines")
