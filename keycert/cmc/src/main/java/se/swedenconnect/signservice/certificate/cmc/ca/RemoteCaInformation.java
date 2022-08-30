@@ -20,8 +20,10 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
 
 /**
@@ -29,15 +31,19 @@ import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
  */
 @Data
 @Builder
-public class CMCCaInformation {
-
-  /** The CA certificate chain */
-  private List<X509Certificate> certificateChain;
+@NoArgsConstructor
+@AllArgsConstructor
+public class RemoteCaInformation {
 
   /**
-   * The optional OCSP certificate used by the OCSP responder of the CA.
+   * The CA certificate chain.
    */
-  private X509Certificate ocspCertificate;
+  private List<X509Certificate> caCertificateChain;
+
+  /**
+   * The algorithm used by this CA to sign certificates.
+   */
+  private String caAlgorithm;
 
   /**
    * The location(s) of the CRL of the CA service.
@@ -49,36 +55,22 @@ public class CMCCaInformation {
    */
   private String ocspResponserUrl;
 
-  /**
-   * The algorithm used by this CA to sign certificates.
-   */
-  private String caAlgorithm;
-
   public StaticCAInformation toStaticCAInformation() {
     final StaticCAInformation info = new StaticCAInformation();
-    if (this.certificateChain != null) {
-      info.setCertificateChain(this.certificateChain.stream()
-          .map(c -> {
+    if (this.caCertificateChain != null) {
+      info.setCertificateChain(
+          this.caCertificateChain.stream().map(c -> {
             try {
               return c.getEncoded();
             }
             catch (final CertificateEncodingException e) {
               throw new SecurityException("Invalid certificate encoding", e);
             }
-          })
-          .collect(Collectors.toList()));
+          }).collect(Collectors.toList()));
     }
-    if (this.ocspCertificate != null) {
-      try {
-        info.setOcspCertificate(this.ocspCertificate.getEncoded());
-      }
-      catch (final CertificateEncodingException e) {
-        throw new SecurityException("Invalid certificate encoding", e);
-      }
-    }
+    info.setCaAlgorithm(this.caAlgorithm);
     info.setCrlDpURLs(this.crlDpUrls);
     info.setOcspResponserUrl(this.ocspResponserUrl);
-    info.setCaAlgorithm(this.caAlgorithm);
     return info;
   }
 

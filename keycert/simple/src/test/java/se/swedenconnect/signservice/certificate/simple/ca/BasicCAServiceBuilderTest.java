@@ -24,9 +24,11 @@ import java.security.spec.ECGenParameterSpec;
 import java.time.Duration;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -47,6 +49,7 @@ import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvide
 class BasicCAServiceBuilderTest {
 
   private static File caDir;
+  private static String TEST_CRL = "testCa.crl";
 
   @BeforeAll
   private static void init() {
@@ -54,6 +57,11 @@ class BasicCAServiceBuilderTest {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
     caDir = new File(System.getProperty("user.dir"), "target/test/ca-repo");
+  }
+
+  @AfterAll
+  private static void clean() throws Exception {
+    FileUtils.deleteDirectory(caDir);
   }
 
   @Test
@@ -74,7 +82,7 @@ class BasicCAServiceBuilderTest {
     assertThrows(IllegalArgumentException.class, () -> BasicCAServiceBuilder.getInstance(caCredential,
         "http://localhost/testCa.crl",
         XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
-        new File(caDir, "testCa.crl").toString())
+        new File(caDir, TEST_CRL).toString())
         .build());
     log.info("Test acceptance of empty CA certificate list");
 
@@ -83,7 +91,7 @@ class BasicCAServiceBuilderTest {
     BasicCAServiceBuilder.getInstance(caCredential,
         "http://localhost/testCa.crl",
         XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
-        new File(caDir, "testCa.crl").toString())
+        new File(caDir, TEST_CRL).toString())
         .certificateStartOffset(Duration.ofSeconds(60))
         .certificateValidity(Duration.ofDays(730))
         .crlStartOffset(Duration.ofMinutes(20))
@@ -94,7 +102,7 @@ class BasicCAServiceBuilderTest {
     final BasicCAService caService = BasicCAServiceBuilder.getInstance(caCredential,
         "http://localhost/testCa.crl",
         XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
-        new NoStorageCARepository(new File(caDir, "testCa.crl").getAbsolutePath()))
+        new NoStorageCARepository(new File(caDir, TEST_CRL).getAbsolutePath()))
         .build();
     log.info("CA service created with provided CA repository");
 

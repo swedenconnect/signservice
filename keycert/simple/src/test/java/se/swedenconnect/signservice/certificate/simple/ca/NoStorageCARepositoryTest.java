@@ -26,10 +26,12 @@ import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -70,6 +72,11 @@ class NoStorageCARepositoryTest {
         (new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))).getKeyPair(),
       new CertificateIssuerModel(
           XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10), caNameModel);
+  }
+
+  @AfterAll
+  private static void clean() throws Exception {
+    FileUtils.deleteDirectory(caDir);
   }
 
   @Test

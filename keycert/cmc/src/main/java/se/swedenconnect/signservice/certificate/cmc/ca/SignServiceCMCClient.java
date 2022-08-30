@@ -71,10 +71,10 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
    */
   public SignServiceCMCClient(@Nonnull final String cmcRequestUrl,
       @Nonnull final PkiCredential cmcCredential, @Nonnull final String algorithm,
-      @Nonnull final X509Certificate cmcResponseCert, @Nonnull final CMCCaInformation staticCaInformation)
+      @Nonnull final X509Certificate cmcResponseCert, @Nonnull final RemoteCaInformation staticCaInformation)
       throws MalformedURLException, NoSuchAlgorithmException, OperatorCreationException, CertificateEncodingException {
     super(cmcRequestUrl, cmcCredential.getPrivateKey(), cmcCredential.getCertificate(), algorithm, cmcResponseCert,
-        Optional.ofNullable(staticCaInformation).map(CMCCaInformation::toStaticCAInformation).orElse(null));
+        Optional.ofNullable(staticCaInformation).map(RemoteCaInformation::toStaticCAInformation).orElse(null));
   }
 
   /**

@@ -25,8 +25,10 @@ import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -56,6 +58,11 @@ class BasicCAServiceTest {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
     caDir = new File(System.getProperty("user.dir"), "target/test/ca-repo");
+  }
+
+  @AfterAll
+  private static void clean() throws Exception {
+    FileUtils.deleteDirectory(caDir);
   }
 
   @Test

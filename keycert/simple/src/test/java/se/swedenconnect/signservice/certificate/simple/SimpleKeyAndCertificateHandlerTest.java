@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.security.Security;
@@ -32,12 +33,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.mock.web.DelegatingServletOutputStream;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +62,6 @@ import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.authn.impl.SimpleAuthnContextIdentifier;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.CertificateType;
-import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultAttributeMapper;
 import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
@@ -86,14 +93,20 @@ class SimpleKeyAndCertificateHandlerTest {
 
   private static AttributeMapper defaultAttributeMapper;
 
-  private static KeyAndCertificateHandler defaultHandler;
+  private static SimpleKeyAndCertificateHandler defaultHandler;
+
+  private static String crlPath = "/crl/cacrl.crl";
+
+  private static String TEST_PATH = "target/test/ca-repo";
+  private static String TEST_CRL = "kht-ca.crl";
 
   @BeforeAll
   private static void init() throws Exception {
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
-    final File caDir = new File("target/test/ca-repo");
+    final File caDir = new File(TEST_PATH);
+
 
     final InMemoryECKeyProvider ecProvider = new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"));
     final PkiCredential caCredential = ecProvider.getKeyPair();
@@ -110,7 +123,7 @@ class SimpleKeyAndCertificateHandlerTest {
     log.info("CA Certificate generated\n{}", new PrintCertificate(caCertificate).toString(true, true, true));
 
     caService = BasicCAServiceBuilder.getInstance(caCredential, "http://localhost://crldp",
-        XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, new File(caDir, "kht-ca.crl").getAbsolutePath()).build();
+        XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, new File(caDir, TEST_CRL).getAbsolutePath()).build();
 
     defaultAttributeMapper =
         new DefaultAttributeMapper((attributeType, ref, value) -> attributeType.equals(CertificateAttributeType.RDN)
@@ -120,7 +133,12 @@ class SimpleKeyAndCertificateHandlerTest {
     defaultHandler = new SimpleKeyAndCertificateHandler(
         Arrays.asList(new OnDemandInMemoryRSAKeyProvider(2048),
             new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))),
-        defaultAttributeMapper, caService);
+        defaultAttributeMapper, caService, crlPath);
+  }
+
+  @AfterAll
+  private static void clean() throws Exception {
+    FileUtils.deleteDirectory(new File(TEST_PATH));
   }
 
   @Test
@@ -217,7 +235,7 @@ class SimpleKeyAndCertificateHandlerTest {
     final SimpleKeyAndCertificateHandler handler = new SimpleKeyAndCertificateHandler(
         Arrays.asList(new OnDemandInMemoryRSAKeyProvider(2048),
             new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))),
-        defaultAttributeMapper, AlgorithmRegistrySingleton.getInstance(), mockedCa);
+        defaultAttributeMapper, AlgorithmRegistrySingleton.getInstance(), mockedCa, crlPath);
 
     assertThatThrownBy(() -> {
       handler.generateSigningCredential(
@@ -237,7 +255,56 @@ class SimpleKeyAndCertificateHandlerTest {
           new DefaultSignServiceContext("id"));
     }).isInstanceOf(CertificateException.class)
         .hasMessage("Failed to decode issued X509 certificate");
+  }
 
+  @Test
+  public void testSupports() throws Exception {
+    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    Mockito.when(request.getRemoteAddr()).thenReturn("227.123.34.21");
+    Mockito.when(request.getRequestURI()).thenReturn(crlPath);
+
+    Mockito.when(request.getMethod()).thenReturn("POST");
+    Assertions.assertFalse(defaultHandler.supports(request));
+
+    Mockito.when(request.getMethod()).thenReturn("GET");
+    Assertions.assertTrue(defaultHandler.supports(request));
+
+    Mockito.when(request.getRequestURI()).thenReturn("/other/path.crl");
+    Assertions.assertFalse(defaultHandler.supports(request));
+  }
+
+  @Test
+  public void testGetResource() throws Exception {
+    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    Mockito.when(request.getRemoteAddr()).thenReturn("227.123.34.21");
+    Mockito.when(request.getRequestURI()).thenReturn(crlPath);
+    Mockito.when(request.getMethod()).thenReturn("GET");
+
+    final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+
+    final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    final DelegatingServletOutputStream dos = new DelegatingServletOutputStream(bos);
+
+    Mockito.when(response.getOutputStream()).thenReturn(dos);
+
+    defaultHandler.getResource(request, response);
+
+    Assertions.assertTrue(bos.toByteArray().length > 0);
+  }
+
+  @Test
+  public void testGetResourceError() throws Exception {
+    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    Mockito.when(request.getRemoteAddr()).thenReturn("227.123.34.21");
+    Mockito.when(request.getRequestURI()).thenReturn(crlPath);
+    Mockito.when(request.getMethod()).thenReturn("POST");
+
+    final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+
+    assertThatThrownBy(() -> {
+      defaultHandler.getResource(request, response);
+    }).isInstanceOf(IOException.class)
+        .hasMessage("Invalid call");
   }
 
   private SignRequestMessage getSignRequest(final String signatureAlgorithm, final CertificateType certType,
