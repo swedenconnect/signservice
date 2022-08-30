@@ -62,6 +62,12 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
       protected String getDefaultFactoryClass() {
         return "dummy";
       }
+
+      @Override
+      public RsaProviderConfiguration getRsaProvider() {
+        return RsaProviderConfiguration.builder().keySize(4096).build();
+      }
+
     };
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
     assertThatThrownBy(() -> {

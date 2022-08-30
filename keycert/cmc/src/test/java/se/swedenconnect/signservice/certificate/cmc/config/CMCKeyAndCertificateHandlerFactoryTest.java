@@ -56,6 +56,12 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
       protected String getDefaultFactoryClass() {
         return "dummy";
       }
+
+      @Override
+      public RsaProviderConfiguration getRsaProvider() {
+        return RsaProviderConfiguration.builder().keySize(4096).build();
+      }
+
     };
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
     assertThatThrownBy(() -> {
