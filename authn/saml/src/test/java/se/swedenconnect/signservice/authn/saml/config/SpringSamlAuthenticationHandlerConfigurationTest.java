@@ -48,18 +48,27 @@ public class SpringSamlAuthenticationHandlerConfigurationTest {
     conf.setSignatureCredentialProps(props);
     conf.setDecryptionCredentialProps(props);
 
-    PkiCredential cred = conf.getDefaultCredential();
+    final PkiCredential cred = conf.getDefaultCredential();
     Assertions.assertEquals("CRED", cred.getName());
     // Assert that the same object is returned next time
     Assertions.assertTrue(cred == conf.getDefaultCredential());
 
-    cred = conf.getSignatureCredential();
-    Assertions.assertEquals("CRED", cred.getName());
-    Assertions.assertTrue(cred == conf.getSignatureCredential());
+    final PkiCredential cred2 = conf.getSignatureCredential();
+    Assertions.assertEquals("CRED", cred2.getName());
+    Assertions.assertTrue(cred2 == conf.getSignatureCredential());
 
-    cred = conf.getDecryptionCredential();
-    Assertions.assertEquals("CRED", cred.getName());
-    Assertions.assertTrue(cred == conf.getDecryptionCredential());
+    final PkiCredential cred3 = conf.getDecryptionCredential();
+    Assertions.assertEquals("CRED", cred3.getName());
+    Assertions.assertTrue(cred3 == conf.getDecryptionCredential());
+
+    // Assert that a new object is returned ...
+    conf.getDefaultCredentialProps().setAlias("encrypt");
+    conf.getSignatureCredentialProps().setAlias("encrypt");
+    conf.getDecryptionCredentialProps().setAlias("encrypt");
+
+    Assertions.assertFalse(cred == conf.getDefaultCredential());
+    Assertions.assertFalse(cred2 == conf.getSignatureCredential());
+    Assertions.assertFalse(cred3 == conf.getDecryptionCredential());
   }
 
   @Test

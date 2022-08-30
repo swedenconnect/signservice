@@ -32,21 +32,23 @@ public class SpringCMCKeyAndCertificateHandlerConfiguration extends CMCKeyAndCer
    * The CMC client credential properties.
    */
   @Getter
-  private PkiCredentialConfigurationProperties clientCredentialProps;
+  private PkiCredentialConfigurationProperties cmcClientCredentialProps;
 
   // Internal
   private PkiCredentialFactoryBean clientCredentialFactory;
+  private int clientCredentialPropsHash;
 
   /** {@inheritDoc} */
   @Override
   @Nullable
-  public PkiCredential getClientCredential() {
-    if (this.clientCredentialProps != null) {
+  public PkiCredential getCmcClientCredential() {
+    if (this.cmcClientCredentialProps != null) {
       try {
-        if (this.clientCredentialFactory == null) {
-          this.clientCredentialFactory = new PkiCredentialFactoryBean(this.clientCredentialProps);
+        if (this.clientCredentialFactory == null || this.clientCredentialPropsHash != this.cmcClientCredentialProps.hashCode()) {
+          this.clientCredentialFactory = new PkiCredentialFactoryBean(this.cmcClientCredentialProps);
           this.clientCredentialFactory.setSingleton(true);
           this.clientCredentialFactory.afterPropertiesSet();
+          this.clientCredentialPropsHash = this.cmcClientCredentialProps.hashCode();
         }
         return this.clientCredentialFactory.getObject();
       }
@@ -54,7 +56,7 @@ public class SpringCMCKeyAndCertificateHandlerConfiguration extends CMCKeyAndCer
         throw new IllegalArgumentException("Failed to initialize CMC client credential - " + e.getMessage(), e);
       }
     }
-    return super.getClientCredential();
+    return super.getCmcClientCredential();
   }
 
   /**
@@ -62,8 +64,8 @@ public class SpringCMCKeyAndCertificateHandlerConfiguration extends CMCKeyAndCer
    *
    * @param clientCredentialProps the properties
    */
-  public void setClientCredentialProps(@Nullable final PkiCredentialConfigurationProperties clientCredentialProps) {
-    this.clientCredentialProps = clientCredentialProps;
+  public void setCmcClientCredentialProps(@Nullable final PkiCredentialConfigurationProperties clientCredentialProps) {
+    this.cmcClientCredentialProps = clientCredentialProps;
     this.clientCredentialFactory = null;
   }
 

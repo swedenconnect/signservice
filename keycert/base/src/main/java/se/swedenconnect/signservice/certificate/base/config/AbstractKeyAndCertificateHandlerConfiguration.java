@@ -15,7 +15,10 @@
  */
 package se.swedenconnect.signservice.certificate.base.config;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nonnull;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -76,7 +79,7 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
   private DefaultValuePolicyCheckerConfiguration defaultValuePolicyChecker;
 
   /**
-   * The type of certificates that the underlying CA issues.
+   * The type of certificates that the CA issues.
    */
   @Getter
   @Setter
@@ -95,6 +98,21 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
   @Getter
   @Setter
   private String serviceName;
+
+  // Internal
+  private List<Class<?>> excludeFromRecursiveMergeCache = null;
+
+  /** {@inheritDoc} */
+  @Override
+  @Nonnull
+  protected List<Class<?>> excludeFromRecursiveMerge() {
+    if (this.excludeFromRecursiveMergeCache == null) {
+      final List<Class<?>> list = new ArrayList<>(super.excludeFromRecursiveMerge());
+      list.addAll(List.of(AlgorithmRegistry.class, AttributeMapper.class));
+      this.excludeFromRecursiveMergeCache = list;
+    }
+    return this.excludeFromRecursiveMergeCache;
+  }
 
   /**
    * For configuration of a {@link DefaultValuePolicyCheckerImpl} that is used to set up an attribute mapper.

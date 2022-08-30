@@ -27,6 +27,7 @@ import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationPr
 import se.swedenconnect.signservice.client.impl.DefaultClientConfiguration;
 import se.swedenconnect.signservice.spring.config.audit.AuditLoggerConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.authn.AuthenticationConfigurationProperties;
+import se.swedenconnect.signservice.spring.config.keycert.KeyAndCertificateHandlerConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.protocol.ProtocolConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.sign.SignatureHandlerConfigurationProperties;
 
@@ -79,11 +80,16 @@ public class EngineConfigurationProperties implements InitializingBean {
   private SignatureHandlerConfigurationProperties sign;
 
   /**
+   * Key and certificate handler configuration.
+   */
+  @Getter
+  @Setter
+  private KeyAndCertificateHandlerConfigurationProperties cert;
+
+  /**
    * Audit logger configuration.
    */
   private AuditLoggerConfigurationProperties audit;
-
-  // TODO: more settings
 
   /** {@inheritDoc} */
   @Override
@@ -97,6 +103,7 @@ public class EngineConfigurationProperties implements InitializingBean {
     Assert.notNull(this.protocol, "protocol must be assigned");
     Assert.notNull(this.authn, "authn must be assigned");
     Assert.notNull(this.sign, "sign must be assigned");
+    Assert.notNull(this.cert, "cert must be assigned");
     Assert.notNull(this.audit, "audit must be assigned");
   }
 

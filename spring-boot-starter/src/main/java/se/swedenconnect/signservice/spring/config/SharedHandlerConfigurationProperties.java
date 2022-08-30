@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.signservice.spring.config.audit.AuditLoggerConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.authn.AuthenticationConfigurationProperties;
+import se.swedenconnect.signservice.spring.config.keycert.KeyAndCertificateHandlerConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.protocol.ProtocolConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.sign.SignatureHandlerConfigurationProperties;
 
@@ -47,6 +48,13 @@ public class SharedHandlerConfigurationProperties {
   @Getter
   @Setter
   private SignatureHandlerConfigurationProperties sign;
+
+  /**
+   * Default/shared key and certificate configuration.
+   */
+  @Getter
+  @Setter
+  private KeyAndCertificateHandlerConfigurationProperties cert;
 
   /**
    * Default/shared audit logger configuration.

@@ -26,7 +26,7 @@ import lombok.Setter;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.cmc.ca.CMCCaInformation;
+import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
 
 /**
  * Configuration class for {@link CMCKeyAndCertificateHandler}.
@@ -38,14 +38,14 @@ public class CMCKeyAndCertificateHandlerConfiguration extends AbstractKeyAndCert
    */
   @Getter
   @Setter
-  private String requestUrl;
+  private String cmcRequestUrl;
 
   /**
    * The CMC client credential.
    */
   @Getter
   @Setter
-  private PkiCredential clientCredential;
+  private PkiCredential cmcClientCredential;
 
   /**
    * The CMC signing algorithm. Defaults to {@value XMLSignature#ALGO_ID_SIGNATURE_RSA_SHA256} or
@@ -60,14 +60,14 @@ public class CMCKeyAndCertificateHandlerConfiguration extends AbstractKeyAndCert
    */
   @Getter
   @Setter
-  private X509Certificate responderCertificate;
+  private X509Certificate cmcResponderCertificate;
 
   /**
-   * Static information about the CA.
+   * The CA information needed by the CMC client.
    */
   @Getter
   @Setter
-  private CMCCaInformation caInformation;
+  private RemoteCaInformation remoteCaInfo;
 
   /** {@inheritDoc} */
   @Override

@@ -49,6 +49,7 @@ import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerConfiguration;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.authn.saml.config.SamlAuthenticationHandlerConfiguration;
+import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.core.SignServiceHandler;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.core.config.HandlerFactory;
@@ -202,7 +203,7 @@ public class SignServiceConfiguration {
   public ProtocolHandler dssProtocolHandler() {
     return new DssProtocolHandler();
   }
-  
+
   @ConditionalOnMissingBean(name = "signservice.DefaultSignatureHandler")
   @Bean("signservice.DefaultSignatureHandler")
   public SignatureHandler defaultSignatureHandler() {
@@ -242,6 +243,8 @@ public class SignServiceConfiguration {
         new SpringBeanLoader<>(this.applicationContext, AuditLogger.class);
     final SpringBeanLoader<SignatureHandler> sigHandlerBeanLoader =
         new SpringBeanLoader<>(this.applicationContext, SignatureHandler.class);
+    final SpringBeanLoader<KeyAndCertificateHandler> keyAndCertBeanLoader =
+        new SpringBeanLoader<>(this.applicationContext, KeyAndCertificateHandler.class);
 
     List<SignServiceEngine> engines = new ArrayList<>();
 
@@ -309,6 +312,20 @@ public class SignServiceConfiguration {
           sigHandlerConf.getFactoryClass(), SignatureHandler.class);
       conf.setSignatureHandler(sigHandlerFactory.create(sigHandlerConf, sigHandlerBeanLoader));
 
+      // Key and certificate handler
+      final HandlerConfiguration<KeyAndCertificateHandler> keyAndCertConf = ecp.getCert().getHandlerConfiguration();
+      if (keyAndCertConf.needsDefaultConfigResolving()) {
+        keyAndCertConf.resolveDefaultConfigRef(this.getResolver("cert",
+            Optional.ofNullable(this.properties.getDefaultHandlerConfig())
+                .map(SharedHandlerConfigurationProperties::getCert)
+                .orElse(null)));
+      }
+      keyAndCertConf.init();
+
+      final HandlerFactory<KeyAndCertificateHandler> keyAndCertHandlerFactory = this.handlerFactoryRegistry.getFactory(
+          keyAndCertConf.getFactoryClass(), KeyAndCertificateHandler.class);
+      conf.setKeyAndCertificateHandler(keyAndCertHandlerFactory.create(keyAndCertConf, keyAndCertBeanLoader));
+
       // Audit logger
       //
       final HandlerConfiguration<AuditLogger> auditConf = ecp.getAudit().getHandlerConfiguration();
@@ -348,8 +365,6 @@ public class SignServiceConfiguration {
       final HandlerFactory<AuthenticationHandler> authnFactory = this.handlerFactoryRegistry.getFactory(
         authnConf.getFactoryClass(), AuthenticationHandler.class);
       conf.setAuthenticationHandler(authnFactory.create(authnConf, authnBeanLoader));
-
-      conf.setKeyAndCertificateHandler(null); // TODO: change
 
       // conf.init();
 

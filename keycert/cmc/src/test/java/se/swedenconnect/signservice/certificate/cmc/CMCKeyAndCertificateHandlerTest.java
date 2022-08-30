@@ -57,7 +57,7 @@ import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultAttributeMapper;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
-import se.swedenconnect.signservice.certificate.cmc.ca.CMCCaInformation;
+import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
 import se.swedenconnect.signservice.certificate.cmc.ca.SignServiceCMCClient;
 import se.swedenconnect.signservice.certificate.cmc.testutils.CMCApiFactory;
 import se.swedenconnect.signservice.certificate.cmc.testutils.TestCMCHttpConnector;
@@ -122,10 +122,9 @@ class CMCKeyAndCertificateHandlerTest {
   };
 
   private SignServiceCMCClient getCMCClient(CAService caService) throws Exception {
-    CMCCaInformation caInformation = CMCCaInformation.builder()
+    RemoteCaInformation caInformation = RemoteCaInformation.builder()
         .caAlgorithm(caService.getCaAlgorithm())
-        .certificateChain(caService.getCACertificateChain().stream().map(mapCert).collect(Collectors.toList()))
-        .ocspCertificate(mapCert.apply(caService.getOCSPResponderCertificate()))
+        .caCertificateChain(caService.getCACertificateChain().stream().map(mapCert).collect(Collectors.toList()))
         .ocspResponserUrl(caService.getOCSPResponderURL())
         .crlDpUrls(caService.getCrlDpURLs())
         .build();

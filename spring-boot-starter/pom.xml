@@ -135,7 +135,19 @@
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-signhandler</artifactId>
       <version>${project.version}</version>
-    </dependency>    
+    </dependency>
+
+    <dependency>
+      <groupId>se.swedenconnect.signservice</groupId>
+      <artifactId>signservice-keycert-simple</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>se.swedenconnect.signservice</groupId>
+      <artifactId>signservice-keycert-cmc</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     
     <dependency>
       <groupId>se.swedenconnect.security</groupId>

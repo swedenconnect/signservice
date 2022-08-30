@@ -38,7 +38,7 @@ import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHa
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerFactory;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.cmc.ca.CMCCaInformation;
+import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
 import se.swedenconnect.signservice.certificate.cmc.ca.SignServiceCMCClient;
 import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
@@ -64,11 +64,11 @@ public class CMCKeyAndCertificateHandlerFactory extends AbstractKeyAndCertificat
     }
     final CMCKeyAndCertificateHandlerConfiguration conf = CMCKeyAndCertificateHandlerConfiguration.class.cast(configuration);
 
-    final String requestURL = Optional.ofNullable(conf.getRequestUrl())
+    final String requestURL = Optional.ofNullable(conf.getCmcRequestUrl())
         .filter(s -> StringUtils.isNotBlank(s))
         .orElseThrow(() -> new IllegalArgumentException("Missing CMC request URL"));
 
-    final PkiCredential clientCredential = Optional.ofNullable(conf.getClientCredential())
+    final PkiCredential clientCredential = Optional.ofNullable(conf.getCmcClientCredential())
         .orElseThrow(() -> new IllegalArgumentException("Missing CMC client credential"));
 
     String signingAlgorithm = conf.getCmcSigningAlgorithm();
@@ -84,11 +84,11 @@ public class CMCKeyAndCertificateHandlerFactory extends AbstractKeyAndCertificat
       }
     }
 
-    final X509Certificate responderCertificate = Optional.ofNullable(conf.getResponderCertificate())
+    final X509Certificate responderCertificate = Optional.ofNullable(conf.getCmcResponderCertificate())
         .orElseThrow(() -> new IllegalArgumentException("Missing CMC responder certificate"));
 
-    final CMCCaInformation caInformation = Optional.ofNullable(conf.getCaInformation())
-        .orElseThrow(() -> new IllegalArgumentException("Missing CMC CA information"));
+    final RemoteCaInformation caInformation = Optional.ofNullable(conf.getRemoteCaInfo())
+        .orElseThrow(() -> new IllegalArgumentException("Missing remote CA information"));
 
     try {
       final SignServiceCMCClient cmcClient = new SignServiceCMCClient(

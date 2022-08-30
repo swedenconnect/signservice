@@ -56,11 +56,9 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
     if (configuration == null) {
       throw new IllegalArgumentException("Missing configuration");
     }
-    if (configuration != null) {
-      if (!AbstractKeyAndCertificateHandlerConfiguration.class.isInstance(configuration)) {
-        throw new IllegalArgumentException(
-            "Unknown configuration object supplied - " + configuration.getClass().getSimpleName());
-      }
+    if (!AbstractKeyAndCertificateHandlerConfiguration.class.isInstance(configuration)) {
+      throw new IllegalArgumentException(
+          "Unknown configuration object supplied - " + configuration.getClass().getSimpleName());
     }
     final AbstractKeyAndCertificateHandlerConfiguration conf =
         AbstractKeyAndCertificateHandlerConfiguration.class.cast(configuration);
@@ -84,6 +82,9 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
     if (conf.getEcProvider() != null) {
       keyProviders.add(new InMemoryECKeyProvider(new ECGenParameterSpec(conf.getEcProvider().getCurveName())));
     }
+    if (keyProviders.isEmpty()) {
+      throw new IllegalArgumentException("At least one key provider must be supplied");
+    }
 
     // Attribute mappings
     //
@@ -102,6 +103,9 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
       }
       attributeMapper = new DefaultAttributeMapper(checker);
     }
+    else if (conf.getDefaultValuePolicyChecker() != null) {
+      log.warn("Configured default value policy checker will be ignored since an AttributeMapper was supplied");
+    }
 
     // Certificate profile configuration
     //
@@ -111,14 +115,14 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
     final AbstractKeyAndCertificateHandler handler = this.createKeyAndCertificateHandler(configuration, keyProviders,
         attributeMapper, algorithmRegistry, profileConfiguration);
 
+    // Certificate type
+    if (conf.getCaCertificateType() != null) {
+      handler.setCaCertificateType(conf.getCaCertificateType());
+    }
+
     // Handler name
     if (StringUtils.isNotBlank(conf.getName())) {
       handler.setName(conf.getName());
-    }
-
-    // CA certificate type issuance
-    if (conf.getCaCertificateType() != null) {
-      handler.setCaCertificateType(conf.getCaCertificateType());
     }
 
     // Service name
@@ -132,7 +136,7 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
   /**
    * Creates a handler.
    * <p>
-   * Note that the handler name, CA certificate type and service name does not have to be assigned. This is done by the
+   * Note that the handler name, certificate type and service name does not have to be assigned. This is done by the
    * main method.
    * </p>
    *

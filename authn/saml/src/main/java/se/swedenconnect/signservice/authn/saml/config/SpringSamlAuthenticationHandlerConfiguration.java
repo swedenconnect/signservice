@@ -40,6 +40,7 @@ public class SpringSamlAuthenticationHandlerConfiguration extends SamlAuthentica
 
   // Internal
   private PkiCredentialFactoryBean defaultCredentialFactory;
+  private int defaultCredentialPropsHash;
 
   /**
    * The SAML SP signature credential.
@@ -50,6 +51,7 @@ public class SpringSamlAuthenticationHandlerConfiguration extends SamlAuthentica
 
   // Internal
   private PkiCredentialFactoryBean signatureCredentialFactory;
+  private int signatureCredentialPropsHash;
 
   /**
    * The SAML SP decryption credential.
@@ -60,14 +62,17 @@ public class SpringSamlAuthenticationHandlerConfiguration extends SamlAuthentica
 
   // Internal
   private PkiCredentialFactoryBean decryptionCredentialFactory;
+  private int decryptionCredentialPropsHash;
 
   /** {@inheritDoc} */
   @Override
   @Nullable
   public PkiCredential getDefaultCredential() {
     if (this.defaultCredentialProps != null) {
-      if (this.defaultCredentialFactory == null) {
+      if (this.defaultCredentialFactory == null
+          || this.defaultCredentialPropsHash != this.defaultCredentialProps.hashCode()) {
         this.defaultCredentialFactory = this.initCredentialFactory(this.defaultCredentialProps);
+        this.defaultCredentialPropsHash = this.defaultCredentialProps.hashCode();
       }
       try {
         return this.defaultCredentialFactory.getObject();
@@ -84,8 +89,10 @@ public class SpringSamlAuthenticationHandlerConfiguration extends SamlAuthentica
   @Nullable
   public PkiCredential getSignatureCredential() {
     if (this.signatureCredentialProps != null) {
-      if (this.signatureCredentialFactory == null) {
+      if (this.signatureCredentialFactory == null
+          || this.signatureCredentialPropsHash != this.signatureCredentialProps.hashCode()) {
         this.signatureCredentialFactory = this.initCredentialFactory(this.signatureCredentialProps);
+        this.signatureCredentialPropsHash = this.signatureCredentialProps.hashCode();
       }
       try {
         return this.signatureCredentialFactory.getObject();
@@ -102,8 +109,10 @@ public class SpringSamlAuthenticationHandlerConfiguration extends SamlAuthentica
   @Nullable
   public PkiCredential getDecryptionCredential() {
     if (this.decryptionCredentialProps != null) {
-      if (this.decryptionCredentialFactory == null) {
+      if (this.decryptionCredentialFactory == null
+          || this.decryptionCredentialPropsHash != this.decryptionCredentialProps.hashCode()) {
         this.decryptionCredentialFactory = this.initCredentialFactory(this.decryptionCredentialProps);
+        this.decryptionCredentialPropsHash = this.decryptionCredentialProps.hashCode();
       }
       try {
         return this.decryptionCredentialFactory.getObject();
@@ -117,6 +126,7 @@ public class SpringSamlAuthenticationHandlerConfiguration extends SamlAuthentica
 
   /**
    * Helper method to create a {@link PkiCredentialFactoryBean} given a properties object.
+   *
    * @param props the properties
    * @return a credential factory
    */

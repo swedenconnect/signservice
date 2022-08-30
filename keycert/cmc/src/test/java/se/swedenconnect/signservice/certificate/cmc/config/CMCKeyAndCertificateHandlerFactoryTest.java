@@ -33,7 +33,6 @@ import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationPr
 import se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean;
 import se.swedenconnect.security.credential.utils.X509Utils;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
-import se.swedenconnect.signservice.certificate.CertificateType;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyCheckerImpl;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration;
@@ -42,7 +41,7 @@ import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertif
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.RsaProviderConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.cmc.ca.CMCCaInformation;
+import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 
 /**
@@ -51,7 +50,7 @@ import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 public class CMCKeyAndCertificateHandlerFactoryTest {
 
   @Test
-  public void testBadConfigType() {
+  public void testBadConfigType() throws Exception {
     HandlerConfiguration<KeyAndCertificateHandler> config = new AbstractKeyAndCertificateHandlerConfiguration() {
       @Override
       protected String getDefaultFactoryClass() {
@@ -94,7 +93,7 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
 
     final PkiCredentialConfigurationProperties ecProps = this.getCmcClientCredentialProperties();
     ecProps.setAlias("cmc-ec");
-    ((SpringCMCKeyAndCertificateHandlerConfiguration) config).setClientCredentialProps(ecProps);
+    ((SpringCMCKeyAndCertificateHandlerConfiguration) config).setCmcClientCredentialProps(ecProps);
 
     final KeyAndCertificateHandler handler2 = factory.create(config);
     Assertions.assertTrue(CMCKeyAndCertificateHandler.class.isInstance(handler2));
@@ -103,7 +102,7 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
   @Test
   public void testMissingRequestUrl() throws Exception {
     final CMCKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
-    config.setRequestUrl(null);
+    config.setCmcRequestUrl(null);
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
     assertThatThrownBy(() -> {
@@ -115,7 +114,7 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
   @Test
   public void testMissingClientCredentials() throws Exception {
     final SpringCMCKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
-    config.setClientCredentialProps(null);
+    config.setCmcClientCredentialProps(null);
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
     assertThatThrownBy(() -> {
@@ -128,14 +127,14 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
   public void testMissingUnknownClientCredentials() throws Exception {
     final SpringCMCKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
     config.setCmcSigningAlgorithm(null);
-    config.setClientCredentialProps(null);
+    config.setCmcClientCredentialProps(null);
 
     final PkiCredential cred = Mockito.mock(PkiCredential.class);
     final PublicKey pk = Mockito.mock(PublicKey.class);
     Mockito.when(pk.getAlgorithm()).thenReturn("UNKNOWN");
     Mockito.when(cred.getPublicKey()).thenReturn(pk);
 
-    config.setClientCredential(cred);
+    config.setCmcClientCredential(cred);
 
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
@@ -148,7 +147,7 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
   @Test
   public void testMissingResponderCertificate() throws Exception {
     final SpringCMCKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
-    config.setResponderCertificate(null);
+    config.setCmcResponderCertificate(null);
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
     assertThatThrownBy(() -> {
@@ -160,19 +159,19 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
   @Test
   public void testMissingCaInfo() throws Exception {
     final SpringCMCKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
-    config.setCaInformation(null);
+    config.setRemoteCaInfo(null);
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
     assertThatThrownBy(() -> {
       factory.create(config);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Missing CMC CA information");
+        .hasMessage("Missing remote CA information");
   }
 
   @Test
   public void testFailedCreateClient() throws Exception {
     final SpringCMCKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
-    config.setRequestUrl("not-a-valid-url");
+    config.setCmcRequestUrl("not-a-valid-url");
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
     assertThatThrownBy(() -> {
@@ -200,14 +199,13 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
     config.setProfileConfiguration(new CertificateProfileConfiguration());
     config.setDefaultValuePolicyChecker(checkerConfig);
     config.setServiceName("SERVICE_NAME");
-    config.setCaCertificateType(CertificateType.PKC);
-    config.setRequestUrl("https://cmc.example.com");
-    config.setClientCredentialProps(this.getCmcClientCredentialProperties());
+    config.setCmcRequestUrl("https://cmc.example.com");
+    config.setCmcClientCredentialProps(this.getCmcClientCredentialProperties());
     config.setCmcSigningAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256);
-    config.setResponderCertificate(this.getCmcResponderCert());
-    config.setCaInformation(CMCCaInformation.builder()
+    config.setCmcResponderCertificate(this.getCmcResponderCert());
+    config.setRemoteCaInfo(RemoteCaInformation.builder()
         .caAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256)
-        .certificateChain(List.of(this.getCmcCaCert()))
+        .caCertificateChain(List.of(this.getCmcCaCert()))
         .build());
     return config;
   }
@@ -221,6 +219,7 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
     return props;
   }
 
+  @SuppressWarnings("unused")
   private PkiCredential getCmcClientCredential() throws Exception {
     final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean(this.getCmcClientCredentialProperties());
     factory.afterPropertiesSet();

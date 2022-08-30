@@ -37,14 +37,20 @@ public class SpringCMCKeyAndCertificateHandlerConfigurationTest {
     props.setAlias("cmc");
     props.setKeyPassword("secret".toCharArray());
 
-    config.setClientCredentialProps(props);
+    config.setCmcClientCredentialProps(props);
 
-    final PkiCredential cred = config.getClientCredential();
-
+    final PkiCredential cred = config.getCmcClientCredential();
     Assertions.assertNotNull(cred);
 
     // Assert that the same object is returned
-    Assertions.assertEquals(cred, config.getClientCredential());
+    Assertions.assertEquals(cred, config.getCmcClientCredential());
+
+    // Assert that a new object is created
+    props.setAlias("cmc-ec");
+
+    final PkiCredential cred2 = config.getCmcClientCredential();
+    Assertions.assertNotNull(cred2);
+    Assertions.assertNotEquals(cred, cred2);
   }
 
   @Test
@@ -56,15 +62,15 @@ public class SpringCMCKeyAndCertificateHandlerConfigurationTest {
     props.setAlias("cmc");
     props.setKeyPassword("secret".toCharArray());
 
-    config.setClientCredentialProps(props);
+    config.setCmcClientCredentialProps(props);
 
-    Assertions.assertThrows(Exception.class, () -> config.getClientCredential());
+    Assertions.assertThrows(Exception.class, () -> config.getCmcClientCredential());
   }
 
   @Test
   public void testNull() {
     SpringCMCKeyAndCertificateHandlerConfiguration config = new SpringCMCKeyAndCertificateHandlerConfiguration();
-    Assertions.assertNull(config.getClientCredential());
+    Assertions.assertNull(config.getCmcClientCredential());
   }
 
 }

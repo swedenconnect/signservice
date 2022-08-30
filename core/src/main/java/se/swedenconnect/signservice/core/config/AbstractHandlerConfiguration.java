@@ -18,7 +18,6 @@ package se.swedenconnect.signservice.core.config;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -211,14 +210,14 @@ public abstract class AbstractHandlerConfiguration<T extends SignServiceHandler>
    * should be seen as 'atomic' and that we shouldn't recurse down into them. By providing these types by overriding
    * this method, the {@link #mergeConfigObject(Object, Object)} will not recurse into them.
    * <p>
-   * The default implementation returns an empty list.
+   * The default implementation returns a list containing one element - {@code PkiCredential}.
    * </p>
    *
    * @return the classes to exclude from recursive merging
    */
   @Nonnull
   protected List<Class<?>> excludeFromRecursiveMerge() {
-    return Collections.emptyList();
+    return List.of(PkiCredential.class);
   }
 
   /**
@@ -257,11 +256,6 @@ public abstract class AbstractHandlerConfiguration<T extends SignServiceHandler>
       // If this object is a non-complex class (for example a String) we shouldn't merge
       // since 'thisObject' already has a value.
       if (targetObject.getClass().getPackageName().startsWith("java.")) {
-        log.trace("Since the objects are of type '{}' no merge will be attempted", targetObject.getClass().getName());
-        return;
-      }
-      // Special case...
-      if (PkiCredential.class.isAssignableFrom(targetObject.getClass())) {
         log.trace("Since the objects are of type '{}' no merge will be attempted", targetObject.getClass().getName());
         return;
       }
