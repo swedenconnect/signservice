@@ -29,27 +29,16 @@ public class DefaultSignerAuthnInfo implements SignerAuthnInfo {
   /** For serializing. */
   private static final long serialVersionUID = 5480035129919906816L;
 
-  /** The authentication scheme. */
-  private final String scheme;
-
   /** The identity assertion. */
   private final IdentityAssertion identityAssertion;
 
   /**
    * Constructor.
    *
-   * @param scheme the authentication scheme
    * @param identityAssertion the identity assertion
    */
-  public DefaultSignerAuthnInfo(final String scheme, final IdentityAssertion identityAssertion) {
-    this.scheme = Objects.requireNonNull(scheme, "scheme must not be null");
+  public DefaultSignerAuthnInfo(final IdentityAssertion identityAssertion) {
     this.identityAssertion = Objects.requireNonNull(identityAssertion, "identityAssertion must not be null");
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public String getScheme() {
-    return this.scheme;
   }
 
   /** {@inheritDoc} */
@@ -62,7 +51,7 @@ public class DefaultSignerAuthnInfo implements SignerAuthnInfo {
   @Override
   @GeneratedMethod
   public int hashCode() {
-    return Objects.hash(this.identityAssertion, this.scheme);
+    return Objects.hash(this.identityAssertion);
   }
 
   /** {@inheritDoc} */
@@ -76,14 +65,13 @@ public class DefaultSignerAuthnInfo implements SignerAuthnInfo {
       return false;
     }
     final SignerAuthnInfo other = (SignerAuthnInfo) obj;
-    return Objects.equals(this.identityAssertion, other.getIdentityAssertion())
-        && Objects.equals(this.scheme, other.getScheme());
+    return Objects.equals(this.identityAssertion, other.getIdentityAssertion());
   }
 
   /** {@inheritDoc} */
   @Override
   public String toString() {
-    return String.format("scheme='%s', identity-assertion=[%s]", this.scheme, this.identityAssertion);
+    return String.format("identity-assertion=[%s]", this.identityAssertion);
   }
 
 }

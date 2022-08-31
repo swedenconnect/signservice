@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.security.KeyException;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -29,6 +30,8 @@ import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.PkiCredential;
@@ -62,6 +65,7 @@ import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.CertificateAttributeMapping;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
+import se.swedenconnect.signservice.protocol.msg.impl.DefaultSignerAuthnInfo;
 import se.swedenconnect.signservice.session.SessionHandler;
 import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.SignServiceSession;
@@ -117,16 +121,13 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   public void init() throws Exception {
     if (this.signRequestMessageVerifier == null) {
       log.debug("{}: Setting default signRequestMessageVerifier to {}",
-          this.engineConfiguration.getName(), DefaultSignRequestMessageVerifier.class.getSimpleName());
+          this.getName(), DefaultSignRequestMessageVerifier.class.getSimpleName());
       this.signRequestMessageVerifier = new DefaultSignRequestMessageVerifier();
     }
-
-    this.systemAuditLogger.auditLog(
-        this.systemAuditLogger
-            .getAuditEventBuilder(AuditEventIds.EVENT_ENGINE_STARTED)
-            .parameter("engine-name", this.engineConfiguration.getName())
-            .parameter("client-id", this.engineConfiguration.getClientConfiguration().getClientId())
-            .build());
+    this.systemAuditLogger.auditLog(AuditEventIds.EVENT_ENGINE_STARTED, (b) -> b
+        .parameter("engine-name", this.getName())
+        .parameter("client-id", this.engineConfiguration.getClientConfiguration().getClientId())
+        .build());
   }
 
   /** {@inheritDoc} */
@@ -144,7 +145,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       throws UnrecoverableSignServiceException {
 
     log.debug("{}: Received request [path: '{}', client-ip: '{}']",
-        this.engineConfiguration.getName(), httpRequest.getRequestURI(), httpRequest.getRemoteAddr());
+        this.getName(), httpRequest.getRequestURI(), httpRequest.getRemoteAddr());
 
     // Assign the audit logger to TLS so that any underlying component can get hold of the logger.
     //
@@ -159,13 +160,13 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
     if (resourceProvider != null) {
       try {
         log.debug("{}: Getting resource ... [path: '{}']",
-            this.engineConfiguration.getName(), httpRequest.getRequestURI());
+            this.getName(), httpRequest.getRequestURI());
         resourceProvider.getResource(httpRequest, httpResponse);
         return null;
       }
       catch (final IOException e) {
         log.info("{}: Error getting HTTP resource '{}' - {}",
-            this.engineConfiguration.getName(), httpRequest.getRequestURI(), e.getMessage(), e);
+            this.getName(), httpRequest.getRequestURI(), e.getMessage(), e);
         throw new UnrecoverableSignServiceException(
             UnrecoverableErrorCodes.HTTP_GET_ERROR, "Failed to get resource", e);
       }
@@ -189,10 +190,10 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
         //
         log.info("{}: Abandoning ongoing operation - "
             + "A new SignRequest has been received in the same session [id: '{}']",
-            this.engineConfiguration.getName(), context.getId());
+            this.getName(), context.getId());
 
         context = this.resetContext(httpRequest);
-        log.info("{}: New context has been created [id: '{}']", this.engineConfiguration.getName(), context.getId());
+        log.info("{}: New context has been created [id: '{}']", this.getName(), context.getId());
 
         return this.processSignRequest(httpRequest, context);
       }
@@ -210,7 +211,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       }
     }
     log.info("{}: State error - Engine is is '{}' state. Can not process request '{}' [id: '{}']",
-        this.engineConfiguration.getName(), context.getState(), httpRequest.getRequestURI(), context.getId());
+        this.getName(), context.getState(), httpRequest.getRequestURI(), context.getId());
 
     throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.STATE_ERROR, "State error");
   }
@@ -238,7 +239,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       }
       catch (final MessageReplayException e) {
         log.warn("{}: Replay attack detected for message '{}' [id: '{}']",
-            this.engineConfiguration.getName(), signRequestMessage.getRequestId(), context.getId());
+            this.getName(), signRequestMessage.getRequestId(), context.getId());
 
         throw new UnrecoverableSignServiceException(
             UnrecoverableErrorCodes.REPLAY_ATTACK, "Message is already being processed");
@@ -257,7 +258,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       }
       catch (final InvalidRequestException e) {
         log.info("{}: Cannot process request - {} [id: '{}', request-id: '{}']",
-            this.engineConfiguration.getName(), e.getMessage(), context.getId(), signRequestMessage.getRequestId());
+            this.getName(), e.getMessage(), context.getId(), signRequestMessage.getRequestId());
         throw new SignServiceErrorException(
             new SignServiceError(SignServiceErrorCode.REQUEST_INCORRECT, "Can not process request", e.getMessage()), e);
       }
@@ -272,7 +273,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       if (authnResult.getHttpRequestMessage() != null) {
         log.debug(
             "{}: Authentication handler '{}' re-directing user for authentication ... [id: '{}', request-id: '{}']",
-            this.engineConfiguration.getName(), this.engineConfiguration.getAuthenticationHandler().getName(),
+            this.getName(), this.engineConfiguration.getAuthenticationHandler().getName(),
             context.getId(), signRequestMessage.getRequestId());
 
         return authnResult.getHttpRequestMessage();
@@ -280,7 +281,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       else {
         log.debug("{}: Authentication handler '{}' successfully authenticated user, "
             + "proceeding with additional checks ... [id: '{}', request-id: '{}']",
-            this.engineConfiguration.getName(), this.engineConfiguration.getAuthenticationHandler().getName(),
+            this.getName(), this.engineConfiguration.getAuthenticationHandler().getName(),
             context.getId(), signRequestMessage.getRequestId());
 
         return this.finalizeSignRequest(httpRequest, authnResult.getAuthenticationResult(), context);
@@ -328,17 +329,77 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
         tasks.add(signatureHandler.sign(task, signingCredential, signRequestMessage, context.getContext()));
       }
 
-      // TODO: Encode response
+      // Create, sign and encode the sign response message ...
+      //
+      final ProtocolHandler protocolHandler = this.engineConfiguration.getProtocolHandler();
+      final SignResponseMessage signResponseMessage =
+          protocolHandler.createSignResponseMessage(context.getContext(), signRequestMessage);
 
-      return null;
+      signResponseMessage.setSignResponseResult(protocolHandler.createSuccessResult());
+      signResponseMessage.setRelayState(signRequestMessage.getRelayState());
+
+      signResponseMessage.setInResponseTo(signRequestMessage.getRequestId());
+      signResponseMessage.setIssuerId(this.engineConfiguration.getSignServiceId());
+
+      if (StringUtils.isNotBlank(signRequestMessage.getResponseUrl())) {
+        // The URL should have been checked against client configuration (if active) ...
+        signResponseMessage.setDestinationUrl(signRequestMessage.getResponseUrl());
+      }
+      else {
+        final String url = Optional.ofNullable(this.engineConfiguration.getClientConfiguration().getResponseUrls())
+            .filter(urls -> !urls.isEmpty())
+            .map(urls -> urls.get(0))
+            .orElseThrow(
+                () -> new ProtocolException("No response URL given in request and no URL configured for client"));
+        signResponseMessage.setDestinationUrl(url);
+      }
+
+      signResponseMessage.setIssuedAt(Instant.now());
+      signResponseMessage.setSignatureCertificateChain(signingCredential.getCertificateChain());
+      signResponseMessage.setSignatureTasks(tasks);
+
+      // TODO: We should strip of some of the authentication attributes from the assertion (if not asked for).
+      signResponseMessage.setSignerAuthnInfo(new DefaultSignerAuthnInfo(authnResult.getAssertion()));
+
+      // Sign
+      if (signResponseMessage.getProcessingRequirements()
+          .getResponseSignatureRequirement() == SignatureRequirement.REQUIRED) {
+        signResponseMessage.sign(this.engineConfiguration.getSignServiceCredential());
+      }
+
+      // Get the result ...
+      final HttpRequestMessage result = protocolHandler.encodeResponse(signResponseMessage, context.getContext());
+
+      // TODO: Audit log
+
+      // Clean up the context
+      this.removeContext(httpRequest);
+
+      return result;
     }
     catch (final SignatureException e) {
-      // TODO: Log and set correct error
-      return null;
+      log.info("{}: Failed to sign response message - {}. [id: '{}']",
+          this.getName(), e.getMessage(), context.getId(), e);
+      throw new UnrecoverableSignServiceException(
+          UnrecoverableErrorCodes.INTERNAL_ERROR, "Failed to sign response message", e);
     }
-    catch (final KeyException | CertificateException e) {
-      // TODO: Log and set correct error
-      return null;
+    catch (final KeyException e) {
+      log.info("{}: Failed to generate signing key - {}. [id: '{}']",
+          this.getName(), e.getMessage(), context.getId(), e);
+      return this.sendErrorResponse(httpRequest, context,
+          new SignServiceError(SignServiceErrorCode.KEY_GENERATION_FAILED));
+    }
+    catch (final CertificateException e) {
+      log.info("{}: Failed to generate signing certificate - {}. [id: '{}']",
+          this.getName(), e.getMessage(), context.getId(), e);
+      return this.sendErrorResponse(httpRequest, context,
+          new SignServiceError(SignServiceErrorCode.CERT_ISSUANCE_FAILED));
+    }
+    catch (final ProtocolException e) {
+      log.info("{}: Failed to produce response message - {}. [id: '{}']",
+          this.getName(), e.getMessage(), context.getId(), e);
+      throw new UnrecoverableSignServiceException(
+          UnrecoverableErrorCodes.PROTOCOL_ERROR, "Failed to produce response message", e);
     }
     catch (final SignServiceErrorException e) {
       return this.sendErrorResponse(httpRequest, context, e.getError());
@@ -357,23 +418,23 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       final HttpServletRequest httpRequest, final EngineContext context) throws UnrecoverableSignServiceException {
     try {
       log.debug("{}: Decoding sign request message ... [id: '{}']",
-          this.engineConfiguration.getName(), context.getId());
+          this.getName(), context.getId());
 
       final SignRequestMessage requestMessage = this.engineConfiguration.getProtocolHandler()
           .decodeRequest(httpRequest, context.getContext());
 
       log.debug("{}: Successfully decoded incoming sign request message. [id: '{}', request-id: '{}']",
-          this.engineConfiguration.getName(), context.getId(), requestMessage.getRequestId());
+          this.getName(), context.getId(), requestMessage.getRequestId());
       if (log.isTraceEnabled()) {
         log.trace("{}: [id: '{}'] {}",
-            this.engineConfiguration.getName(), context.getId(), requestMessage);
+            this.getName(), context.getId(), requestMessage);
       }
 
       return requestMessage;
     }
     catch (final ProtocolException e) {
       log.info("{}: Failed to decode incoming sign request - {}. [id: '{}']",
-          this.engineConfiguration.getName(), e.getMessage(), context.getId(), e);
+          this.getName(), e.getMessage(), context.getId(), e);
       throw new UnrecoverableSignServiceException(
           UnrecoverableErrorCodes.PROTOCOL_ERROR, "Failed to decode sign request", e);
     }
@@ -393,7 +454,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       throws SignServiceErrorException {
 
     log.debug("{}: Initializing authentication ... [id: '{}', request-id: '{}']",
-        this.engineConfiguration.getName(), context.getId(), signRequest.getRequestId());
+        this.getName(), context.getId(), signRequest.getRequestId());
 
     try {
       // TODO: The authentication requirements may also be controlled by a policy ...
@@ -405,7 +466,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
           reqs, signRequest.getSignMessage(), context.getContext());
     }
     catch (final UserAuthenticationException e) {
-      log.info("{}: Authentication error: {} - {} [id: '{}', request-id: '{}']", this.engineConfiguration.getName(),
+      log.info("{}: Authentication error: {} - {} [id: '{}', request-id: '{}']", this.getName(),
           e.getErrorCode(), e.getMessage(), context.getId(), signRequest.getRequestId());
 
       throw this.mapAuthenticationError(e);
@@ -431,7 +492,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
     //
     if (!this.engineConfiguration.getAuthenticationHandler().canProcess(httpRequest, context.getContext())) {
       log.info("{}: Unexpected path '{}' [id: '{}']",
-          this.engineConfiguration.getName(), httpRequest.getRequestURI(), context.getId());
+          this.getName(), httpRequest.getRequestURI(), context.getId());
 
       throw new UnrecoverableSignServiceException(
           UnrecoverableErrorCodes.NOT_FOUND, "Not found - " + httpRequest.getRequestURI());
@@ -451,7 +512,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       }
     }
     catch (final UserAuthenticationException e) {
-      log.info("{}: Authentication error: {} - {} [id: '{}', request-id: '{}']", this.engineConfiguration.getName(),
+      log.info("{}: Authentication error: {} - {} [id: '{}', request-id: '{}']", this.getName(),
           e.getErrorCode(), e.getMessage(), context.getId(), context.getSignRequest().getRequestId());
 
       throw this.mapAuthenticationError(e);
@@ -500,7 +561,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       throws UnrecoverableSignServiceException, SignServiceErrorException {
 
     log.debug("{}: Authentication result: {} [id: '{}', request-id: '{}']",
-        this.engineConfiguration.getName(), authnResult,
+        this.getName(), authnResult,
         context.getId(), context.getSignRequest().getRequestId());
 
     // First we need to assert that the sign message really was displayed by the authentication
@@ -511,7 +572,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
         && !authnResult.signMessageDisplayed()) {
       log.info("{}: No sign message was displayed to the user during authentication - "
           + "this was required by client [id: '{}', request-id: '{}']",
-          this.engineConfiguration.getName(), context.getId(), signRequest.getRequestId());
+          this.getName(), context.getId(), signRequest.getRequestId());
 
       throw new SignServiceErrorException(new SignServiceError(SignServiceErrorCode.AUTHN_SIGNMESSAGE_NOT_DISPLAYED));
     }
@@ -542,7 +603,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
             final String msg = String.format("None of the source attributes for certificate attribute '%s' "
                 + "was received from user authentication", m.getDestination().getIdentifier());
             log.info("{}: {} [id: '{}', request-id: '{}']",
-                this.engineConfiguration.getName(), msg, context.getId(), signRequest.getRequestId());
+                this.getName(), msg, context.getId(), signRequest.getRequestId());
 
             // TODO: Which error code to use?
             throw new SignServiceErrorException(new SignServiceError(
@@ -552,7 +613,18 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       }
     }
 
-    // TODO: Audit log
+    // Audit log
+    //
+    this.engineConfiguration.getAuditLogger().auditLog(AuditEventIds.EVENT_ENGINE_USER_AUTHENTICATED, (b) -> b
+        .parameter("engine-name", this.getName())
+        .parameter("client-id", this.engineConfiguration.getClientConfiguration().getClientId())
+        .parameter("request-id", signRequest.getRequestId())
+        .parameter("authn-id", authnResult.getAssertion().getIdentifier())
+        .parameter("authn-server", authnResult.getAssertion().getIssuer())
+        .parameter("authn-instant", authnResult.getAssertion().getAuthnInstant().toString())
+        .parameter("authn-context-id", authnResult.getAssertion().getAuthnContext().getIdentifier())
+        .parameter("authn-sign-message-displayed", authnResult.signMessageDisplayed() ? "true" : "false")
+        .build());
 
     // Save authentication information for later ...
     //
@@ -593,19 +665,25 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
         responseMessage.sign(this.engineConfiguration.getSignServiceCredential());
       }
 
-      // Finally, let the protocol handler encode the return message.
+      // Let the protocol handler encode the return message.
       //
-      return handler.encodeResponse(responseMessage, context.getContext());
+      final HttpRequestMessage result = handler.encodeResponse(responseMessage, context.getContext());
+
+      // Clear the sign service context ...
+      //
+      this.removeContext(httpRequest);
+
+      return result;
     }
     catch (final SignatureException e) {
       log.info("{}: Failed to sign error response message - {}. [id: '{}']",
-          this.engineConfiguration.getName(), e.getMessage(), context.getId(), e);
+          this.getName(), e.getMessage(), context.getId(), e);
       throw new UnrecoverableSignServiceException(
           UnrecoverableErrorCodes.INTERNAL_ERROR, "Failed to sign response message", e);
     }
     catch (final ProtocolException e) {
       log.info("{}: Failed to encode error response message - {}. [id: '{}']",
-          this.engineConfiguration.getName(), e.getMessage(), context.getId(), e);
+          this.getName(), e.getMessage(), context.getId(), e);
       throw new UnrecoverableSignServiceException(
           UnrecoverableErrorCodes.INTERNAL_ERROR, "Failed to encode response message", e);
     }
@@ -663,6 +741,18 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
     }
     session.setSignServiceContext(context);
     return new EngineContext(context);
+  }
+
+  /**
+   * Given a HTTP request the method removed the current SignService context.
+   *
+   * @param httpRequest the HTTP request
+   */
+  protected void removeContext(final HttpServletRequest httpRequest) {
+    final SignServiceSession session = this.sessionHandler.getSession(httpRequest, false);
+    if (session != null) {
+      session.removeSignServiceContext();
+    }
   }
 
   /**

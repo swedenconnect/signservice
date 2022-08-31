@@ -64,13 +64,15 @@ public interface SignServiceSession {
    * Gets the {@link SignServiceContext} object.
    * <p>
    * This method is a utility method for easy access to the context. It corresponds to the call
-   * {@code getSessionAttribute(SignServiceSession.CONTEXT_SESSION_NAME, SignServiceContext.class)}.
+   * {@code getSessionAttribute(SignServiceSession.CONTEXT_NAME, SignServiceContext.class)}.
    * </p>
    *
    * @return the SignServiceContext
    * @throws IllegalStateException if this method is called on an invalidated session
    */
-  SignServiceContext getSignServiceContext() throws IllegalStateException;
+  default SignServiceContext getSignServiceContext() throws IllegalStateException {
+    return this.getAttribute(CONTEXT_NAME, SignServiceContext.class);
+  }
 
   /**
    * Returns a list of all attribute names that this session holds.
@@ -94,13 +96,15 @@ public interface SignServiceSession {
    * Adds the {@link SignServiceContext} to the session.
    * <p>
    * This method is a convenience method that corresponds to the call
-   * {@code setAttribute(SignServiceSession.CONTEXT_SESSION_NAME, context)}.
+   * {@code setAttribute(SignServiceSession.CONTEXT_NAME, context)}.
    * </p>
    *
    * @param context the context to add
    * @throws IllegalStateException if this method is called on an invalidated session
    */
-  void setSignServiceContext(final SignServiceContext context) throws IllegalStateException;
+  default void setSignServiceContext(final SignServiceContext context) throws IllegalStateException {
+    this.setAttribute(CONTEXT_NAME, context);
+  }
 
   /**
    * Removes the named attribute from the session.
@@ -109,6 +113,17 @@ public interface SignServiceSession {
    * @throws IllegalStateException if this method is called on an invalidated session
    */
   void removeAttribute(final String name) throws IllegalStateException;
+
+  /**
+   * This method is a convenience method that corresponds to the call
+   * {@code removeAttribute(SignServiceSession.CONTEXT_NAME)}.
+   * </p>
+   *
+   * @throws IllegalStateException if this method is called on an invalidated session
+   */
+  default void removeSignServiceContext() throws IllegalStateException {
+    this.removeAttribute(CONTEXT_NAME);
+  }
 
   /**
    * Invalidates this session then unbinds any objects bound to it.

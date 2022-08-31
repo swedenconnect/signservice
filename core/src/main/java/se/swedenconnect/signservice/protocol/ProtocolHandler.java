@@ -78,6 +78,14 @@ public interface ProtocolHandler extends SignServiceHandler {
       throws ProtocolException;
 
   /**
+   * Creates a {@link SignResponseResult} object indicating a successful response.
+   *
+   * @return a SignResponseResult object
+   */
+  @Nonnull
+  SignResponseResult createSuccessResult();
+
+  /**
    * Translates from the generic {@link SignServiceError} object to a protocol specific {@link SignResponseResult}
    * object.
    *

@@ -747,6 +747,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
     final DefaultIdentityAssertion assertion = new DefaultIdentityAssertion();
     final Assertion samlAssertion = result.getAssertion();
 
+    assertion.setScheme("SAML");
     assertion.setIdentifier(samlAssertion.getID());
     assertion.setIssuer(result.getIssuer());
     assertion.setIssuanceInstant(result.getIssueInstant());

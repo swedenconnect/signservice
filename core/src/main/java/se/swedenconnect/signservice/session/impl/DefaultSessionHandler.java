@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import se.swedenconnect.signservice.session.SessionHandler;
-import se.swedenconnect.signservice.session.SessionMaintainer;
 import se.swedenconnect.signservice.session.SignServiceSession;
 
 /**
@@ -53,19 +52,4 @@ public class DefaultSessionHandler implements SessionHandler {
     return (httpSession == null) ? null : new DefaultSignServiceSession(httpSession);
   }
 
-  /**
-   * Throws {@link UnsupportedOperationException}.
-   */
-  @Override
-  public SignServiceSession getSession(final SessionMaintainer input) {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Throws {@link UnsupportedOperationException}.
-   */
-  @Override
-  public SignServiceSession getSession(final SessionMaintainer input, final boolean create) {
-    throw new UnsupportedOperationException();
-  }
 }

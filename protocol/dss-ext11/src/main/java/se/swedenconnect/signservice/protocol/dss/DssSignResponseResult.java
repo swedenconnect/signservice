@@ -18,6 +18,9 @@ package se.swedenconnect.signservice.protocol.dss;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import se.idsec.signservice.dss.DSSStatusCodes;
 import se.swedenconnect.schemas.dss_1_0.InternationalStringType;
 import se.swedenconnect.schemas.dss_1_0.Result;
@@ -87,6 +90,14 @@ class DssSignResponseResult implements SignResponseResult {
       this.resultMajor = DSSStatusCodes.DSS_REQUESTER_ERROR;
       this.resultMinor = DSSStatusCodes.DSS_MINOR_REQUESTER_NOT_SUPPORTED;
       break;
+    case KEY_GENERATION_FAILED:
+      this.resultMajor = DSSStatusCodes.DSS_RESPONDER_ERROR;
+      this.resultMinor = DSSStatusCodes.DSS_MINOR_RESPONDER_ERROR_KEY_LOOKUP_FAILED;
+      break;
+    case CERT_ISSUANCE_FAILED:
+      this.resultMajor = DSSStatusCodes.DSS_RESPONDER_ERROR;
+      this.resultMinor = DSSStatusCodes.DSS_MINOR_RESPONDER_ERROR_GENERAL_ERROR;
+      break;
     case INTERNAL_ERROR:
       this.resultMajor = DSSStatusCodes.DSS_RESPONDER_ERROR;
       this.resultMinor = DSSStatusCodes.DSS_MINOR_RESPONDER_ERROR_GENERAL_ERROR;
@@ -115,20 +126,32 @@ class DssSignResponseResult implements SignResponseResult {
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public String getErrorCode() {
     return this.resultMajor;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nullable
   public String getMinorErrorCode() {
     return this.resultMinor;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nullable
   public String getMessage() {
     return this.resultMessage;
+  }
+
+  /**
+   * Assigns the status message.
+   *
+   * @param resultMessage the status message
+   */
+  public void setMessage(@Nullable final String resultMessage) {
+    this.resultMessage = resultMessage;
   }
 
   /** {@inheritDoc} */

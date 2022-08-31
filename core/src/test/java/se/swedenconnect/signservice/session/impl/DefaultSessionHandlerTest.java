@@ -13,57 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.session.impl;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import se.swedenconnect.signservice.session.SessionHandler;
-import se.swedenconnect.signservice.session.SessionMaintainer;
-import se.swedenconnect.signservice.session.SignServiceSession;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.junit.jupiter.api.Test;
+
+import se.swedenconnect.signservice.session.SessionHandler;
+import se.swedenconnect.signservice.session.SignServiceSession;
+
 /**
  * Test class for {@link DefaultSessionHandler}.
  */
 public class DefaultSessionHandlerTest {
 
-    @Test
-    void testGetSession() {
-        final HttpServletRequest servletRequest = mock(HttpServletRequest.class);
-        when(servletRequest.getSession(false)).thenReturn(mock(HttpSession.class));
+  @Test
+  void testGetSession() {
+    final HttpServletRequest servletRequest = mock(HttpServletRequest.class);
+    when(servletRequest.getSession(false)).thenReturn(mock(HttpSession.class));
 
-        final SessionHandler sh = new DefaultSessionHandler();
-        final SignServiceSession session = sh.getSession(servletRequest);
+    final SessionHandler sh = new DefaultSessionHandler();
+    final SignServiceSession session = sh.getSession(servletRequest);
 
-        assertInstanceOf(DefaultSignServiceSession.class, session);
-    }
+    assertInstanceOf(DefaultSignServiceSession.class, session);
+  }
 
-    @Test
-    void testGetNullSession() {
-        final HttpServletRequest servletRequest = mock(HttpServletRequest.class);
-        when(servletRequest.getSession(false)).thenReturn(null);
+  @Test
+  void testGetNullSession() {
+    final HttpServletRequest servletRequest = mock(HttpServletRequest.class);
+    when(servletRequest.getSession(false)).thenReturn(null);
 
-        final SessionHandler sh = new DefaultSessionHandler();
-        final SignServiceSession session = sh.getSession(servletRequest);
+    final SessionHandler sh = new DefaultSessionHandler();
+    final SignServiceSession session = sh.getSession(servletRequest);
 
-        assertNull(session);
-    }
+    assertNull(session);
+  }
 
-    @Test()
-    void testSessionUnsupported() {
-        final SessionHandler sh = new DefaultSessionHandler();
-        final SessionMaintainer maintainer = new SessionMaintainer() {
-        };
-
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> sh.getSession(maintainer));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> sh.getSession(maintainer, false));
-    }
 }
