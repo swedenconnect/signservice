@@ -17,6 +17,9 @@ package se.swedenconnect.signservice.certificate;
 
 import java.io.Serializable;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Representation of the identifier of a "certificate identity attribute", i.e., identity information that is included
  * in a certificate.
@@ -28,6 +31,7 @@ public interface CertificateAttributeIdentifier extends Serializable {
    *
    * @return the type
    */
+  @Nonnull
   CertificateAttributeType getType();
 
   /**
@@ -47,6 +51,7 @@ public interface CertificateAttributeIdentifier extends Serializable {
    *
    * @return the attribute identifier
    */
+  @Nonnull
   String getIdentifier();
 
   /**
@@ -54,6 +59,7 @@ public interface CertificateAttributeIdentifier extends Serializable {
    *
    * @return the friendly name, or null if none has been provided
    */
+  @Nullable
   String getFriendlyName();
 
 }

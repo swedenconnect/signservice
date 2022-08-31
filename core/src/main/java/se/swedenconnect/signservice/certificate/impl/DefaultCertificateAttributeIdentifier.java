@@ -18,6 +18,9 @@ package se.swedenconnect.signservice.certificate.impl;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang.StringUtils;
 
 import se.swedenconnect.signservice.certificate.CertificateAttributeIdentifier;
@@ -47,7 +50,8 @@ public class DefaultCertificateAttributeIdentifier implements CertificateAttribu
    * @param type the type of attribute
    * @param identifier the attribute identifier (name)
    */
-  public DefaultCertificateAttributeIdentifier(final CertificateAttributeType type, final String identifier) {
+  public DefaultCertificateAttributeIdentifier(
+      @Nonnull final CertificateAttributeType type, @Nonnull final String identifier) {
     this(type, identifier, null);
   }
 
@@ -58,8 +62,8 @@ public class DefaultCertificateAttributeIdentifier implements CertificateAttribu
    * @param identifier the attribute identifier (name)
    * @param friendlyName the attribute friendly name (optional)
    */
-  public DefaultCertificateAttributeIdentifier(
-      final CertificateAttributeType type, final String identifier, final String friendlyName) {
+  public DefaultCertificateAttributeIdentifier(@Nonnull final CertificateAttributeType type,
+      @Nonnull final String identifier, @Nullable final String friendlyName) {
     this.type = Objects.requireNonNull(type, "type must not be null");
     this.identifier = Optional.ofNullable(identifier).filter(StringUtils::isNotBlank)
         .orElseThrow(() -> new IllegalArgumentException("identifier must not be null or blank"));
@@ -68,18 +72,21 @@ public class DefaultCertificateAttributeIdentifier implements CertificateAttribu
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public CertificateAttributeType getType() {
     return this.type;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public String getIdentifier() {
     return this.identifier;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nullable
   public String getFriendlyName() {
     return this.friendlyName;
   }

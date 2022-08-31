@@ -20,9 +20,9 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.utils.X509Utils;
-import se.swedenconnect.signservice.certificate.base.keyprovider.KeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandInMemoryRSAKeyProvider;
+import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
+import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
+import se.swedenconnect.signservice.certificate.keyprovider.OnDemandInMemoryRSAKeyProvider;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;

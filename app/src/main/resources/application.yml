@@ -51,6 +51,38 @@ signservice:
           strict-processing: false
           include-issuer-serial: true
         - type: pdf
+    cert:
+      cmc:
+        rsa-provider:
+          key-size: 4096
+          stack-size: 10
+        ec-provider:
+          curve-name: P-256        
+        cmc-client-credential-props:
+          resource: classpath:sandbox/cmc-client.jks
+          alias: cmc
+          password: secret
+          key-password: secret
+          type: JKS        
+        cmc-request-url: https://sandbox.swedenconnect.se/sigca/cmc/ca01
+        cmc-responder-certificate: classpath:sandbox/cmc-responder.crt
+        ca-certificate-type: PKC
+        remote-ca-info:
+          ca-certificate-chain:
+          - classpath:sandbox/sandbox-ca.crt
+          - classpath:sandbox/sandbox-root-ca.crt
+          ca-algorithm: http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256
+          crl-dp-urls:
+          - https://sandbox.swedenconnect.se/sigca/crl/ca01.crl
+          ocsp-responser-url: https://sandbox.swedenconnect.se/sigca/ocsp/ca01
+        cmc-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256         
+        default-value-policy-checker:
+          default-reply: false
+          rules:
+          - attribute-type: rdn
+            ref: "2.5.4.6"
+            allowed-values:
+            - SE
     authn:
       saml:
         saml-type: sweden-connect
@@ -160,7 +192,10 @@ signservice:
             - "sv-Sweden Connect testapplikation för underskriftstjänster"
     sign:
       default-handler:
-        default-config-ref: sign.default-handler        
+        default-config-ref: sign.default-handler
+    cert:
+      cmc:
+        default-config-ref: cert.cmc        
     audit:
       log-system:
         name: "Sandbox SignService Test Application Audit Logger"
@@ -183,10 +218,34 @@ signservice:
     sign:
       external:
         bean-name: signservice.DefaultSignatureHandler
+    cert:
+      built-in-ca:
+        base-url: ${signservice.base-url}
+        ca-credential-props:
+          resource: classpath:ca/test-ca.jks
+          alias: test-ca
+          type: JKS
+          password: secret
+          key-password: secret
+        ca-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256
+        ca-certificate-type: PKC
+        crl-dp-path: /sign/sandbox2/ca/testca.crl
+        crl-file-location: ${SIGNSERVICE_HOME}/sandbox2/testca.crl        
+        rsa-provider:
+          key-size: 4096
+        ec-provider:
+          curve-name: P-256                
+        default-value-policy-checker:
+          default-reply: false
+          rules:
+          - attribute-type: rdn
+            ref: "2.5.4.6"
+            allowed-values:
+            - SE
     audit:
       file:
         name: "Sandbox2 Audit Logger"
-        file-name: target/audit/sandbox2-audit.log
+        file-name: ${SIGNSERVICE_HOME}/sandbox2/audit.log
 
 #
 # Logging

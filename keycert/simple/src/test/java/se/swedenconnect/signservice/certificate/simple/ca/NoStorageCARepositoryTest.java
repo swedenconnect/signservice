@@ -15,32 +15,33 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.File;
+import java.math.BigInteger;
+import java.security.Security;
+import java.security.cert.X509Certificate;
+import java.security.spec.ECGenParameterSpec;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CRLHolder;
-import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.ca.engine.ca.repository.SortBy;
-import se.swedenconnect.signservice.certificate.base.keyprovider.SignServiceSigningKeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.impl.DefaultSignServiceSigningKeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.impl.InMemoryECKeyProvider;
-import se.swedenconnect.signservice.certificate.base.keyprovider.impl.OnDemandInMemoryRSAKeyProvider;
-import se.swedenconnect.signservice.certificate.simple.ca.impl.DefaultCACertificateFactory;
-
-import java.io.File;
-import java.math.BigInteger;
-import java.security.Security;
-import java.security.spec.ECGenParameterSpec;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
 
 /**
  * No storage repository test
@@ -49,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class NoStorageCARepositoryTest {
 
   private static File caDir;
-  private static X509CertificateHolder caCertificate;
+  private static X509Certificate caCertificate;
 
   @BeforeAll
   private static void init() throws Exception {
@@ -58,10 +59,6 @@ class NoStorageCARepositoryTest {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
 
-    SignServiceSigningKeyProvider keyProvider = new DefaultSignServiceSigningKeyProvider(
-      new OnDemandInMemoryRSAKeyProvider(2048),
-      new InMemoryECKeyProvider(new ECGenParameterSpec("P-256")));
-
     ExplicitCertNameModel caNameModel = new ExplicitCertNameModel(List.of(
       new AttributeTypeAndValueModel(CertAttributes.C, "SE"),
       new AttributeTypeAndValueModel(CertAttributes.O, "Test Org"),
@@ -69,20 +66,26 @@ class NoStorageCARepositoryTest {
       new AttributeTypeAndValueModel(CertAttributes.SERIALNUMBER, "1234567890")
     ));
 
-    CACertificateFactory caf = new DefaultCACertificateFactory();
-    caCertificate = caf.getCACertificate(
-      new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10), caNameModel,
-      keyProvider.getSigningKeyPair("EC"));
+    SelfSignedCaCertificateGenerator caf = new DefaultSelfSignedCaCertificateGenerator();
 
+    caCertificate = caf.generate(
+        (new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))).getKeyPair(),
+      new CertificateIssuerModel(
+          XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10), caNameModel);
+  }
+
+  @AfterAll
+  private static void clean() throws Exception {
+    FileUtils.deleteDirectory(caDir);
   }
 
   @Test
   void noStorageRepoTest() throws Exception {
     log.info("Testing NO Storage repository");
-    NoStorageCARepository repository = new NoStorageCARepository(new File(caDir, "test.crl"));
+    NoStorageCARepository repository = new NoStorageCARepository(new File(caDir, "test.crl").getAbsolutePath());
 
     BigInteger certSerial = caCertificate.getSerialNumber();
-    repository.addCertificate(caCertificate);
+    repository.addCertificate(BcFunctions.toX509CertificateHolder.apply(caCertificate));
 
     assertEquals(null, repository.getCertificate(certSerial));
     assertTrue(repository.getAllCertificates().isEmpty());
@@ -94,12 +97,12 @@ class NoStorageCARepositoryTest {
     assertEquals(0, repository.removeExpiredCerts(0).size());
 
     X509CRLHolder crlHolder = new X509CRLHolder(Base64.decode(
-      "MIIBmzCCAUECAQEwCgYIKoZIzj0EAwIwRzELMAkGA1UEBhMCU0UxETAPBgNVBAoMCFRlc3QgT3JnMRAwDgYDVQQDDAdUZXN0IENBMRMwE"
-        + "QYDVQQFEwoxMjM0NTY3ODkwFw0yMjA1MjMxMzIzMThaFw0yMjA1MjMxNTM4MThaoIHIMIHFMAoGA1UdFAQDAgEBMIGNBgNVHSMEgYUwgYK"
-        + "AIHnBnDC4QMV30wMSjzjxj/IQvEVGOtN1plycLKtDKnakoUukSTBHMQswCQYDVQQGEwJTRTERMA8GA1UECgwIVGVzdCBPcmcxEDAOBgNVBA"
-        + "MMB1Rlc3QgQ0ExEzARBgNVBAUTCjEyMzQ1Njc4OTCCEQDvirAKZksU7Zy+QK3S3Br1MCcGA1UdHAEB/wQdMBugGaAXhhVodHRwOi8vbG9j"
-        + "YWxob3N0L3Rlc3QwCgYIKoZIzj0EAwIDSAAwRQIhANOOJ1oNrxtU0jMIXym/zAtiiYW7De5HsrJYK5PTldB+AiAQ/vY9J2JN/Wv9J6TgiQ"
-        + "kPJHhuPMG1zJxtTtHDwRGWaQ=="));
+        "MIIBmzCCAUECAQEwCgYIKoZIzj0EAwIwRzELMAkGA1UEBhMCU0UxETAPBgNVBAoMCFRlc3QgT3JnMRAwDgYDVQQDDAdUZXN0IENBMRMwE"
+            + "QYDVQQFEwoxMjM0NTY3ODkwFw0yMjA1MjMxMzIzMThaFw0yMjA1MjMxNTM4MThaoIHIMIHFMAoGA1UdFAQDAgEBMIGNBgNVHSMEgYUwgYK"
+            + "AIHnBnDC4QMV30wMSjzjxj/IQvEVGOtN1plycLKtDKnakoUukSTBHMQswCQYDVQQGEwJTRTERMA8GA1UECgwIVGVzdCBPcmcxEDAOBgNVBA"
+            + "MMB1Rlc3QgQ0ExEzARBgNVBAUTCjEyMzQ1Njc4OTCCEQDvirAKZksU7Zy+QK3S3Br1MCcGA1UdHAEB/wQdMBugGaAXhhVodHRwOi8vbG9j"
+            + "YWxob3N0L3Rlc3QwCgYIKoZIzj0EAwIDSAAwRQIhANOOJ1oNrxtU0jMIXym/zAtiiYW7De5HsrJYK5PTldB+AiAQ/vY9J2JN/Wv9J6TgiQ"
+            + "kPJHhuPMG1zJxtTtHDwRGWaQ=="));
     repository.publishNewCrl(crlHolder);
     assertEquals(crlHolder, repository.getCurrentCrl());
   }

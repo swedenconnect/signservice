@@ -76,21 +76,32 @@
       <artifactId>signservice-keycert-base</artifactId>
       <version>${project.version}</version>
     </dependency>
+    
     <dependency>
       <groupId>se.swedenconnect.ca</groupId>
       <artifactId>ca-engine</artifactId>
       <version>1.2.1</version>
     </dependency>
+    
     <dependency>
       <groupId>se.idsec.utils</groupId>
       <artifactId>print-cert</artifactId>
       <version>[1.0.4,)</version>
+      <scope>test</scope>
     </dependency>
+    
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>      
+      <scope>test</scope>
+    </dependency>
+        
   </dependencies>
 
   <build>
@@ -105,10 +116,10 @@
           <windowtitle>SignService KeyAndCertificate Simple - ${project.version}</windowtitle>
         </configuration>
       </plugin>
+      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M5</version>
       </plugin>
 
     </plugins>

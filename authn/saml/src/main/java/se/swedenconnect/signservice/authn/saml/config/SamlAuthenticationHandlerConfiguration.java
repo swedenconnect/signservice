@@ -15,9 +15,12 @@
  */
 package se.swedenconnect.signservice.authn.saml.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -123,11 +126,26 @@ public class SamlAuthenticationHandlerConfiguration
   @Getter
   private ResponseValidationSettings responseValidation;
 
+  // Internal
+  private List<Class<?>> excludeFromRecursiveMergeCache = null;
+
   /** {@inheritDoc} */
   @Override
   @Nonnull
   protected String getDefaultFactoryClass() {
     return SamlAuthenticationHandlerFactory.class.getName();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Nonnull
+  protected List<Class<?>> excludeFromRecursiveMerge() {
+    if (this.excludeFromRecursiveMergeCache == null) {
+      final List<Class<?>> list = new ArrayList<>(super.excludeFromRecursiveMerge());
+      list.addAll(List.of(MessageReplayChecker.class, EntityDescriptor.class));
+      this.excludeFromRecursiveMergeCache = list;
+    }
+    return this.excludeFromRecursiveMergeCache;
   }
 
 }

@@ -103,15 +103,17 @@
     <dependencies>
     
       <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-framework-bom</artifactId>
+        <type>pom</type>
+        <version>5.3.22</version>
+        <scope>import</scope>
+      </dependency>
+    
+      <dependency>
         <groupId>se.swedenconnect.security</groupId>
         <artifactId>credentials-support</artifactId>
-        <version>1.2.2</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-          </exclusion>
-        </exclusions>
+        <version>1.2.3</version>
       </dependency>    
 
       <dependency>

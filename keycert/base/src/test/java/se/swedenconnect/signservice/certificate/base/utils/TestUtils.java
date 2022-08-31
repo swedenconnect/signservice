@@ -19,7 +19,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.KeyPair;
 import java.security.KeyStoreException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
@@ -40,6 +39,7 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.util.encoders.Base64;
+
 import se.swedenconnect.security.credential.PkiCredential;
 
 /**
@@ -54,8 +54,8 @@ public class TestUtils {
     return b64String.replaceAll("(?m)^", "      ");
   }
 
-  public static X509Certificate generateCertificate(PkiCredential pair, X500Name subjectDN, String algorithmJcaName) throws
-    OperatorCreationException, IOException, CertificateException, KeyStoreException {
+  public static X509Certificate generateCertificate(PkiCredential pair, X500Name subjectDN, String algorithmJcaName)
+      throws OperatorCreationException, IOException, CertificateException, KeyStoreException {
     BigInteger certSerial = BigInteger.valueOf(System.currentTimeMillis());
     Calendar startTime = Calendar.getInstance();
     startTime.setTime(new Date());
@@ -67,14 +67,15 @@ public class TestUtils {
     Date notAfter = expiryTime.getTime();
     PublicKey pubKey = pair.getPublicKey();
     JcaX509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(subjectDN, certSerial, notBefore, notAfter,
-      subjectDN, pubKey);
+        subjectDN, pubKey);
     ContentSigner signer = (new JcaContentSignerBuilder(algorithmJcaName)).build(pair.getPrivateKey());
     byte[] encoded = certGen.build(signer).getEncoded();
     CertificateFactory fact = CertificateFactory.getInstance("X.509");
-    InputStream is = new ByteArrayInputStream(encoded);
-    X509Certificate certificate = (X509Certificate) fact.generateCertificate(is);
-    is.close();
-    return certificate;
+    try (InputStream is = new ByteArrayInputStream(encoded)) {
+      X509Certificate certificate = (X509Certificate) fact.generateCertificate(is);
+      return certificate;
+    }
+
   }
 
   public static X500Name getDn(Map<X509DnNameType, String> nameMap) {
