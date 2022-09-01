@@ -418,7 +418,7 @@
             </executions>
             <configuration>
               <sourcepath>target/generated-sources/delombok</sourcepath>
-              <additionalparam>-Xdoclint:all -Xdoclint:-missing</additionalparam>
+              <doclint>all,-missing</doclint>
               <additionalOptions>-Xdoclint:all -Xdoclint:-missing</additionalOptions>
               <additionalJOptions>
                 <additionalJOption>-Xdoclint:all</additionalJOption>
@@ -500,7 +500,7 @@
             </executions>
             <configuration>
               <sourcepath>target/generated-sources/delombok</sourcepath>
-              <additionalparam>-Xdoclint:all -Xdoclint:-missing</additionalparam>
+              <doclint>all,-missing</doclint>
               <additionalOptions>-Xdoclint:all -Xdoclint:-missing</additionalOptions>
               <additionalJOptions>
                 <additionalJOption>-Xdoclint:all</additionalJOption>
