@@ -41,23 +41,4 @@ public interface SessionHandler {
    */
   SignServiceSession getSession(final HttpServletRequest httpRequest, final boolean create);
 
-  /**
-   * Corresponds to {@link #getSession(HttpServletRequest)} but does not use a HTTP request as the base of maintaining
-   * session.
-   *
-   * @param input the session maintainer
-   * @return a session object
-   */
-  SignServiceSession getSession(final SessionMaintainer input);
-
-  /**
-   * Corresponds to {@link #getSession(HttpServletRequest, boolean))} but does not use a HTTP request as the base of
-   * maintaining session.
-   *
-   * @param input the session maintainer
-   * @param create whether to create a new session object if no session object exists
-   * @return a session object, or null
-   */
-  SignServiceSession getSession(final SessionMaintainer input, final boolean create);
-
 }

@@ -32,6 +32,9 @@ public class AuditEventIds {
   /** A SignService engine instance (servicing a client) was started. */
   public final static String EVENT_ENGINE_STARTED = "audit.engine.started";
 
+  /** A user was successfully authenticated. */
+  public final static String EVENT_ENGINE_USER_AUTHENTICATED = "audit.engine.user.authn";
+
   // TODO: More
 
   // Hidden constructor

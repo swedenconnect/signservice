@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 
 /**
@@ -27,10 +29,19 @@ import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 public interface IdentityAssertion extends Serializable {
 
   /**
+   * Gets the authentication scheme for this assertion, e.g., "SAML".
+   *
+   * @return the "type" of assertion
+   */
+  @Nonnull
+  String getScheme();
+
+  /**
    * Gets the identifier for the assertion.
    *
    * @return the assertion ID
    */
+  @Nonnull
   String getIdentifier();
 
   /**
@@ -38,6 +49,7 @@ public interface IdentityAssertion extends Serializable {
    *
    * @return the ID of the authentication service that authenticated the user
    */
+  @Nonnull
   String getIssuer();
 
   /**
@@ -45,6 +57,7 @@ public interface IdentityAssertion extends Serializable {
    *
    * @return the assertion issuance time
    */
+  @Nonnull
   Instant getIssuanceInstant();
 
   /**
@@ -52,6 +65,7 @@ public interface IdentityAssertion extends Serializable {
    *
    * @return the authentication instant
    */
+  @Nonnull
   Instant getAuthnInstant();
 
   /**
@@ -59,6 +73,7 @@ public interface IdentityAssertion extends Serializable {
    *
    * @return the authentication context
    */
+  @Nonnull
   AuthnContextIdentifier getAuthnContext();
 
   /**
@@ -66,6 +81,7 @@ public interface IdentityAssertion extends Serializable {
    *
    * @return the identity attributes (may be an empty list)
    */
+  @Nonnull
   List<IdentityAttribute<?>> getIdentityAttributes();
 
   /**
@@ -73,6 +89,7 @@ public interface IdentityAssertion extends Serializable {
    *
    * @return the encoding of the assertion
    */
+  @Nonnull
   byte[] getEncodedAssertion();
 
 }

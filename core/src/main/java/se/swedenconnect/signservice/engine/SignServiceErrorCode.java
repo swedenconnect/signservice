@@ -45,7 +45,11 @@ public enum SignServiceErrorCode {
   /** General authentication error. */
   AUTHN_FAILURE("The user failed to authenticate"),
 
-  // TODO: Many more
+  /** Error generating the signing key. */
+  KEY_GENERATION_FAILED("The generation of the signature key failed"),
+
+  /** Failed to issue signing certificate. */
+  CERT_ISSUANCE_FAILED("The issuance of a signing certificate failed"),
 
   /** The catch-all case. Returned, if no other error is suitable. */
   INTERNAL_ERROR("An internal error occurred in the SignService");

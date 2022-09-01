@@ -25,13 +25,6 @@ import se.swedenconnect.signservice.authn.IdentityAssertion;
 public interface SignerAuthnInfo extends Serializable {
 
   /**
-   * Gets the authentication scheme for how the signer (user) was authenticated, e.g., "SAML".
-   *
-   * @return the "type" of authentication
-   */
-  String getScheme();
-
-  /**
    * Gets the identity assertion from the signer authentication.
    * <p>
    * Note that the SignService may choose to include only some of the attributes received in an assertion when passing

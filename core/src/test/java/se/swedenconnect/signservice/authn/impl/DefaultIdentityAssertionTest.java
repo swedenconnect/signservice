@@ -36,12 +36,14 @@ public class DefaultIdentityAssertionTest {
     final Instant ai = ii.minusMillis(1000L);
 
     final DefaultIdentityAssertion a = new DefaultIdentityAssertion();
+    a.setScheme("SAML");
     a.setIdentifier("id");
     a.setIssuer("issuer");
     a.setIssuanceInstant(ii);
     a.setAuthnInstant(ai);
     a.setAuthnContext(new SimpleAuthnContextIdentifier("ctx-id"));
 
+    Assertions.assertEquals("SAML", a.getScheme());
     Assertions.assertEquals("id", a.getIdentifier());
     Assertions.assertEquals("issuer", a.getIssuer());
     Assertions.assertEquals(ii, a.getIssuanceInstant());
