@@ -30,13 +30,13 @@ import se.swedenconnect.signservice.session.SignServiceSession;
 public class DefaultSessionHandler implements SessionHandler {
 
   /**
-   * Equivalent to {@code getSession(request, false)}.
+   * Equivalent to {@code getSession(request, true)}.
    *
    * @see DefaultSessionHandler#getSession(HttpServletRequest, boolean)
    */
   @Override
   public SignServiceSession getSession(final HttpServletRequest httpRequest) {
-    return this.getSession(httpRequest, false);
+    return this.getSession(httpRequest, true);
   }
 
   /**
