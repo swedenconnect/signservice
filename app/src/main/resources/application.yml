@@ -3,9 +3,21 @@
 #
 
 server:
-  port: 8080
+  port: 8443
   servlet:
     context-path: /
+  ssl:
+    enabled: true
+    key-store: classpath:localhost.jks
+    key-store-type: JKS
+    key-alias: localhost
+    key-store-password: secret
+    key-password: secret    
+    
+#spring:
+#  devtools:
+#    restart:
+#      enabled: false
     
 #
 # Management
@@ -164,6 +176,43 @@ signservice:
               company: "Sweden Connect"
               email-address: operations@swedenconnect.se
   engines:  
+  - name: "localhost"
+    sign-service-id: https://localhost.swedenconnect.se/signservice
+    processing-paths:
+    - /sign/localhost/eid2cssp
+    client:
+      client-id: https://eid2cssp.3xasecurity.com/sign
+      trusted-certificates:
+      - classpath:clients/eid2cssp.3xasecurity.com.crt
+    protocol:
+      dss:        
+        include-request-message: false
+        default-config-ref: protocol.dss
+    authn:
+      saml:
+        default-config-ref: authn.saml
+        entity-id: https://localhost.swedenconnect.se/eid2cssp        
+        sp-paths:
+          metadata-publishing-path: /sign/localhost/eid2cssp/saml/metadata
+          assertion-consumer-path: /sign/localhost/eid2cssp/saml/sso
+        metadata:
+          ui-info:
+            display-names:
+            - "en-Sweden Connect Localhost Signature Service Test"
+            - "sv-Sweden Connect test för underskriftstjänster (localhost)"
+            descriptions:
+            - "en-Sweden Connect test application for signature services running on localhost"
+            - "sv-Sweden Connect testapplikation för underskriftstjänster (localhost)"
+    sign:
+      default-handler:
+        default-config-ref: sign.default-handler
+    cert:
+      cmc:
+        default-config-ref: cert.cmc
+    audit:
+      file:
+        name: "Sandbox2 Audit Logger"
+        file-name: ${SIGNSERVICE_HOME}/localhost/audit.log
   - name: "Sandbox SignService Test Application"
     processing-paths:
     - /sign/sandbox/eid2cssp        
