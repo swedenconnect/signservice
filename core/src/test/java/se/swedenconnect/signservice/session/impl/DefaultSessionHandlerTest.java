@@ -36,7 +36,7 @@ public class DefaultSessionHandlerTest {
   @Test
   void testGetSession() {
     final HttpServletRequest servletRequest = mock(HttpServletRequest.class);
-    when(servletRequest.getSession(false)).thenReturn(mock(HttpSession.class));
+    when(servletRequest.getSession(true)).thenReturn(mock(HttpSession.class));
 
     final SessionHandler sh = new DefaultSessionHandler();
     final SignServiceSession session = sh.getSession(servletRequest);
