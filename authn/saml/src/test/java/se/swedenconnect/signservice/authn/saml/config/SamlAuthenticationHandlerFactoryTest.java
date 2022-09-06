@@ -106,6 +106,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
   public void testCreateDefault() throws Exception {
     final SamlAuthenticationHandlerConfiguration conf = this.buildConfiguration();
     conf.setSamlType(null);
+    conf.setPreferredBinding("redirect");
     final SamlAuthenticationHandlerFactory factory = new SamlAuthenticationHandlerFactory();
     final AuthenticationHandler handler = factory.create(conf);
     Assertions.assertTrue(DefaultSamlAuthenticationHandler.class.isInstance(handler));

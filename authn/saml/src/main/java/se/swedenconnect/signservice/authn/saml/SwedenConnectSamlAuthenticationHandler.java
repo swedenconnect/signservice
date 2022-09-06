@@ -107,6 +107,12 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
     return new SwedishEidAuthnRequestGeneratorContext() {
 
       @Override
+      @Nonnull
+      public String getPreferredBinding() {
+        return getPreferredBindingUri();
+      }
+
+      @Override
       @Nullable
       public PrincipalSelectionBuilderFunction getPrincipalSelectionBuilderFunction() {
         return () -> principalSelection != null ? principalSelection : null;
