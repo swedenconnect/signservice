@@ -13,12 +13,7 @@ server:
     key-alias: localhost
     key-store-password: secret
     key-password: secret    
-    
-#spring:
-#  devtools:
-#    restart:
-#      enabled: false
-    
+        
 #
 # Management
 #
@@ -37,7 +32,7 @@ management:
 
 signservice:
   domain: localhost
-  base-url: http://${signservice.domain}:${server.port}
+  base-url: https://${signservice.domain}:${server.port}
   system-audit:
     actuator:
       name: "SignService System Audit Logger"
@@ -67,7 +62,7 @@ signservice:
       cmc:
         rsa-provider:
           key-size: 4096
-          stack-size: 10
+#          stack-size: 10
         ec-provider:
           curve-name: P-256        
         cmc-client-credential-props:
@@ -102,7 +97,7 @@ signservice:
           base-url: ${signservice.base-url}
         metadata-providers:
         - url: https://eid.svelegtest.se/metadata/mdx/role/idp.xml
-          backup-file: ${java.io.tmpdir}/sandbox-metadata.xml
+          backup-file: ${SIGNSERVICE_HOME}/sandbox-metadata.xml
           validation-certificate: classpath:sandbox/sandbox-metadata.crt
         signature-credential-props:
           name: SignService SAML Signing
@@ -191,10 +186,12 @@ signservice:
     authn:
       saml:
         default-config-ref: authn.saml
+        saml-type: sweden-connect
         entity-id: https://localhost.swedenconnect.se/eid2cssp        
         sp-paths:
           metadata-publishing-path: /sign/localhost/eid2cssp/saml/metadata
           assertion-consumer-path: /sign/localhost/eid2cssp/saml/sso
+        preferred-binding: post
         metadata:
           ui-info:
             display-names:
