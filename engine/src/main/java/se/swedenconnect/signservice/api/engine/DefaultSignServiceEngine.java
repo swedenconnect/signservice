@@ -174,46 +174,52 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
 
     // Based on the context state and the URL on which we received the request do dispatching ...
     //
-    EngineContext context = this.getContext(httpRequest);
+    try {
+      EngineContext context = this.getContext(httpRequest);
 
-    if (this.isSignRequestEndpoint(httpRequest)) {
-      if (context.getState() == SignOperationState.NEW) {
-        // Initiate new operation ...
-        return this.processSignRequest(httpRequest, context);
+      if (this.isSignRequestEndpoint(httpRequest)) {
+        if (context.getState() == SignOperationState.NEW) {
+          // Initiate new operation ...
+          return this.processSignRequest(httpRequest, context);
+        }
+        else if (context.getState() == SignOperationState.AUTHN_ONGOING) {
+          // OK, it seems that we have received a SignRequest in a session that is not
+          // completed. This means that we abandon the previous context and start a new
+          // one. We can only serve one request per session, and it is more likely that
+          // a new SignRequest means that the user has terminated the previous operation
+          // before it is complete.
+          //
+          log.info("{}: Abandoning ongoing operation - "
+              + "A new SignRequest has been received in the same session [id: '{}']",
+              this.getName(), context.getId());
+
+          context = this.resetContext(httpRequest);
+          log.info("{}: New context has been created [id: '{}']", this.getName(), context.getId());
+
+          return this.processSignRequest(httpRequest, context);
+        }
+        // else: We are in state "SIGNING", and this is really odd. It must mean that the
+        // user after he/she has authenticated has opened a new web browser tab and initiated
+        // a new signature operation during the time the engine is performing the signature operation.
+        // In these cases we refuse to accept the new invocation and let the original operation finish.
       }
       else if (context.getState() == SignOperationState.AUTHN_ONGOING) {
-        // OK, it seems that we have received a SignRequest in a session that is not
-        // completed. This means that we abandon the previous context and start a new
-        // one. We can only serve one request per session, and it is more likely that
-        // a new SignRequest means that the user has terminated the previous operation
-        // before it is complete.
-        //
-        log.info("{}: Abandoning ongoing operation - "
-            + "A new SignRequest has been received in the same session [id: '{}']",
-            this.getName(), context.getId());
-
-        context = this.resetContext(httpRequest);
-        log.info("{}: New context has been created [id: '{}']", this.getName(), context.getId());
-
-        return this.processSignRequest(httpRequest, context);
+        try {
+          return this.resumeAuthentication(httpRequest, context);
+        }
+        catch (final SignServiceErrorException e) {
+          return this.sendErrorResponse(httpRequest, context, e.getError());
+        }
       }
-      // else: We are in state "SIGNING", and this is really odd. It must mean that the
-      // user after he/she has authenticated has opened a new web browser tab and initiated
-      // a new signature operation during the time the engine is performing the signature operation.
-      // In these cases we refuse to accept the new invocation and let the original operation finish.
+      log.info("{}: State error - Engine is is '{}' state. Can not process request '{}' [id: '{}']",
+          this.getName(), context.getState(), httpRequest.getRequestURI(), context.getId());
+
+      throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.STATE_ERROR, "State error");
     }
-    else if (context.getState() == SignOperationState.AUTHN_ONGOING) {
-      try {
-        return this.resumeAuthentication(httpRequest, context);
-      }
-      catch (final SignServiceErrorException e) {
-        return this.sendErrorResponse(httpRequest, context, e.getError());
-      }
+    catch (final UnrecoverableSignServiceException | RuntimeException e) {
+      this.removeContext(httpRequest);
+      throw e;
     }
-    log.info("{}: State error - Engine is is '{}' state. Can not process request '{}' [id: '{}']",
-        this.getName(), context.getState(), httpRequest.getRequestURI(), context.getId());
-
-    throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.STATE_ERROR, "State error");
   }
 
   /**
@@ -276,6 +282,10 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
             this.getName(), this.engineConfiguration.getAuthenticationHandler().getName(),
             context.getId(), signRequestMessage.getRequestId());
 
+        // Update the state ...
+        //
+        context.updateState(SignOperationState.AUTHN_ONGOING);
+
         return authnResult.getHttpRequestMessage();
       }
       else {
@@ -307,6 +317,8 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       throws UnrecoverableSignServiceException {
 
     try {
+      context.updateState(SignOperationState.SIGNING);
+
       // OK, we are called after the user has completed the authentication. However, we still have to
       // check that the authentication step gave us the information we need to continue the signature
       // operation. This is done in the "complete authentication" phase.
@@ -719,12 +731,9 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
    * @return true if the request is sent to a SignRequest endpoint and false otherwise
    */
   protected boolean isSignRequestEndpoint(final HttpServletRequest httpRequest) {
-    for (final String path : this.engineConfiguration.getProcessingPaths()) {
-      if (httpRequest.getRequestURI().startsWith(path)) {
-        return true;
-      }
-    }
-    return false;
+    final String request = httpRequest.getRequestURI();
+    return this.engineConfiguration.getProcessingPaths().stream()
+        .anyMatch(p -> p.equalsIgnoreCase(request));
   }
 
   /**
