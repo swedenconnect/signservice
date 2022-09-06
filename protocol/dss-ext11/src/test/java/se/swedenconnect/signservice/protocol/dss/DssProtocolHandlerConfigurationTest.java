@@ -26,8 +26,8 @@ public class DssProtocolHandlerConfigurationTest {
   @Test
   public void testDefaults() {
     final DssProtocolHandlerConfiguration conf = new DssProtocolHandlerConfiguration();
-    Assertions.assertTrue(conf.isIncludeAssertion());
-    Assertions.assertFalse(conf.isIncludeRequestMessage());
+    Assertions.assertNull(conf.getIncludeAssertion());
+    Assertions.assertNull(conf.getIncludeRequestMessage());
   }
 
   @Test
@@ -35,8 +35,8 @@ public class DssProtocolHandlerConfigurationTest {
     final DssProtocolHandlerConfiguration conf = new DssProtocolHandlerConfiguration();
     conf.setIncludeAssertion(false);
     conf.setIncludeRequestMessage(true);
-    Assertions.assertFalse(conf.isIncludeAssertion());
-    Assertions.assertTrue(conf.isIncludeRequestMessage());
+    Assertions.assertFalse(conf.getIncludeAssertion());
+    Assertions.assertTrue(conf.getIncludeRequestMessage());
   }
 
   @Test

@@ -87,8 +87,8 @@ public class DefaultSignatureHandlerFactory extends AbstractHandlerFactory<Signa
           else {
             throw new IllegalArgumentException("Unsupported type: " + c.getType());
           }
-          processor.setStrictProcessing(c.isStrictProcessing());
-          processor.setIncludeIssuerSerial(c.isIncludeIssuerSerial());
+          processor.setStrictProcessing(Optional.ofNullable(c.getStrictProcessing()).orElse(false));
+          processor.setIncludeIssuerSerial(Optional.ofNullable(c.getIncludeIssuerSerial()).orElse(false));
 
           final Class<?> clazz = processor.getClass();
           if (processors.stream().anyMatch(p -> p.getClass().equals(clazz))) {
