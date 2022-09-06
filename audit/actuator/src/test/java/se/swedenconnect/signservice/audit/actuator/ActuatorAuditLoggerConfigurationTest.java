@@ -26,11 +26,14 @@ public class ActuatorAuditLoggerConfigurationTest {
   @Test
   public void testUse() {
     final ActuatorAuditLoggerConfiguration config = new ActuatorAuditLoggerConfiguration();
-    Assertions.assertTrue(config.isActive());
+    Assertions.assertNull(config.getActive());
     Assertions.assertEquals(ActuatorAuditLoggerFactory.class.getName(), config.getFactoryClass());
 
+    config.setActive(true);
+    Assertions.assertTrue(config.getActive());
+
     config.setActive(false);
-    Assertions.assertFalse(config.isActive());
+    Assertions.assertFalse(config.getActive());
   }
 
 }
