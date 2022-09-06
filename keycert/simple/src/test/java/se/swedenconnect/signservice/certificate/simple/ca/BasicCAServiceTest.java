@@ -53,7 +53,7 @@ class BasicCAServiceTest {
   private static File caDir;
 
   @BeforeAll
-  private static void init() {
+  public static void init() {
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
@@ -61,7 +61,7 @@ class BasicCAServiceTest {
   }
 
   @AfterAll
-  private static void clean() throws Exception {
+  public static void clean() throws Exception {
     FileUtils.deleteDirectory(caDir);
   }
 

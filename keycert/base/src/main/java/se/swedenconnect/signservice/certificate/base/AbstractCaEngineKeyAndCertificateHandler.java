@@ -88,7 +88,7 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  protected X509Certificate issueSigningCertificate(
+  protected List<X509Certificate> issueSigningCertificateChain(
       @Nonnull final PkiCredential signingKeyPair, @Nonnull final SignRequestMessage signRequest,
       @Nonnull final IdentityAssertion assertion, @Nonnull final List<AttributeMappingData> certAttributes,
       @Nullable final String certificateProfile, @Nonnull final SignServiceContext context)
@@ -137,20 +137,20 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
       certificateModelBuilder.subjectDirectoryAttributes(subjectDirectoryAttributes);
     }
 
-    return this.issueSigningCertificate(certificateModelBuilder.build(), certificateProfile, context);
+    return this.issueSigningCertificateChain(certificateModelBuilder.build(), certificateProfile, context);
   }
 
   /**
-   * Issues the signing certificate based on the supplied certificate model.
+   * Issues the signing certificate chain based on the supplied certificate model.
    *
    * @param certificateModel the certificate model
    * @param certificateProfile the certificate profile (may be null)
    * @param context the SignService context
-   * @return an X509Certificate
+   * @return a certificate chain where the signer certificate is placed first
    * @throws CertificateException for issuance errors
    */
   @Nonnull
-  protected abstract X509Certificate issueSigningCertificate(@Nonnull final CertificateModel certificateModel,
+  protected abstract List<X509Certificate> issueSigningCertificateChain(@Nonnull final CertificateModel certificateModel,
       @Nullable final String certificateProfile, @Nonnull final SignServiceContext context) throws CertificateException;
 
   /**

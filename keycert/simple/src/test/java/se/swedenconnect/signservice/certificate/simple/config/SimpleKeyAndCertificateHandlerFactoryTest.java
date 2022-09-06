@@ -51,7 +51,7 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
   private static final String CRL_DIR = "target/test/ca-repo";
 
   @AfterAll
-  private static void clean() throws Exception {
+  public static void clean() throws Exception {
     FileUtils.deleteDirectory(new File(CRL_DIR));
   }
 

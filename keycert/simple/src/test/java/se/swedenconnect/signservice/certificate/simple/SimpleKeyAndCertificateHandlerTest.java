@@ -101,7 +101,7 @@ class SimpleKeyAndCertificateHandlerTest {
   private static String TEST_CRL = "kht-ca.crl";
 
   @BeforeAll
-  private static void init() throws Exception {
+  public static void init() throws Exception {
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
@@ -137,7 +137,7 @@ class SimpleKeyAndCertificateHandlerTest {
   }
 
   @AfterAll
-  private static void clean() throws Exception {
+  public static void clean() throws Exception {
     FileUtils.deleteDirectory(new File(TEST_PATH));
   }
 

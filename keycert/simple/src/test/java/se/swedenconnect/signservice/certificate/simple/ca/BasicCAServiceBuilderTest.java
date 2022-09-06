@@ -52,7 +52,7 @@ class BasicCAServiceBuilderTest {
   private static String TEST_CRL = "testCa.crl";
 
   @BeforeAll
-  private static void init() {
+  public static void init() {
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
@@ -60,7 +60,7 @@ class BasicCAServiceBuilderTest {
   }
 
   @AfterAll
-  private static void clean() throws Exception {
+  public static void clean() throws Exception {
     FileUtils.deleteDirectory(caDir);
   }
 
