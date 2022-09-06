@@ -17,9 +17,8 @@ package se.swedenconnect.signservice.audit.base.events;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -46,7 +45,7 @@ public class SignServiceAuditEvent implements AuditEvent {
   private String principal;
 
   /** The AuditEvent parameters. */
-  private final Map<String, AuditEventParameter> parameters;
+  private final List<AuditEventParameter> parameters;
 
   /**
    * Instantiates a new audit event.
@@ -56,7 +55,7 @@ public class SignServiceAuditEvent implements AuditEvent {
   public SignServiceAuditEvent(@Nonnull final String id) {
     this.id = Objects.requireNonNull(id, "id must not be null");
     this.timestamp = Instant.now();
-    this.parameters = new HashMap<>();
+    this.parameters = new ArrayList<>();
   }
 
   /**
@@ -104,28 +103,39 @@ public class SignServiceAuditEvent implements AuditEvent {
   @Override
   @Nonnull
   public List<AuditEventParameter> getParameters() {
-    return new ArrayList<>(this.parameters.values());
+    return Collections.unmodifiableList(this.parameters);
   }
 
   /** {@inheritDoc} */
   @Override
   public void addParameter(@Nonnull final AuditEventParameter parameter) {
     Objects.requireNonNull(parameter, "parameter must not be null");
-    this.parameters.put(parameter.getName(), parameter);
+    int pos = 0;
+    for (pos = 0; pos < this.parameters.size(); pos++) {
+      if (Objects.equals(this.parameters.get(pos).getName(), parameter.getName())) {
+        break;
+      }
+    }
+    if (pos < this.parameters.size()) {
+      this.parameters.set(pos, parameter);
+    }
+    else {
+      this.parameters.add(parameter);
+    }
   }
 
   /** {@inheritDoc} */
   @Override
   public void addParameter(@Nonnull final String name, @Nullable final String value) {
     Objects.requireNonNull(name, "name must not be null");
-    this.parameters.put(name, new AuditEventParameter(name, value));
+    this.addParameter(new AuditEventParameter(name, value));
   }
 
   /** {@inheritDoc} */
   @Override
   public String toString() {
     return String.format("%s | %s | %s %s",
-        this.timestamp, this.getPrincipal(), this.id, this.parameters.values());
+        this.timestamp, this.getPrincipal(), this.id, this.parameters);
   }
 
 }
