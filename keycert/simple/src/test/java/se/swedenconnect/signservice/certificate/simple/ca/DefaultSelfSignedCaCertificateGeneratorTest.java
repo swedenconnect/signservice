@@ -18,6 +18,7 @@ package se.swedenconnect.signservice.certificate.simple.ca;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.security.Security;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
 import java.time.Duration;
@@ -89,7 +90,7 @@ class DefaultSelfSignedCaCertificateGeneratorTest {
     assertThatThrownBy(() -> {
       generator.generate(rsaProvider.getKeyPair(),
           new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, Duration.ofDays(365)), caNameModel);
-    }).isInstanceOf(CertificateIssuanceException.class);
+    }).isInstanceOf(CertificateException.class);
   }
 
 }

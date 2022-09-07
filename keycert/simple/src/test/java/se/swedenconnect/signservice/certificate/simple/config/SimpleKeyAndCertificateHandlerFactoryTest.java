@@ -162,7 +162,7 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
     assertThatThrownBy(() -> {
       factory.create(config);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Failed to set up a CA service - unsupported algorithm");
+        .hasMessage("Failed to set up a CA service - Unsupported algorithm: http://not.a.valid.alg");
   }
 
   @Test
