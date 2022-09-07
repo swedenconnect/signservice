@@ -17,6 +17,8 @@ package se.swedenconnect.signservice.audit.actuator;
 
 import javax.annotation.Nonnull;
 
+import lombok.Getter;
+import lombok.Setter;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerConfiguration;
 
 /**
@@ -25,25 +27,11 @@ import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerConfiguration;
 public class ActuatorAuditLoggerConfiguration extends AbstractAuditLoggerConfiguration {
 
   /**
-   * Tells whether to Spring Boot Actuator for audit logging is active.
+   * Tells whether to Spring Boot Actuator for audit logging is active. Defaults to {@code true}.
    */
+  @Getter
+  @Setter
   private Boolean active;
-
-  /**
-   * Assigns whether to use Spring Boot Actuator for audit logging.
-   * @param active flag
-   */
-  public void setActive(final boolean active) {
-    this.active = active;
-  }
-
-  /**
-   * Gets the {@code active} parameter. If unset it defaults to true.
-   * @return the active parameter
-   */
-  public boolean isActive() {
-    return this.active != null ? this.active : true;
-  }
 
   /** {@inheritDoc} */
   @Override

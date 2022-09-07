@@ -397,8 +397,9 @@ class DssSignResponseMessage implements SignResponseMessage {
       }
       identityAssertion.setIdentityAttributes(attributes);
     }
+    identityAssertion.setScheme(Optional.ofNullable(ci.getAuthType()).orElseGet(() -> "SAML"));
 
-    return new DefaultSignerAuthnInfo(ci.getAuthType(), identityAssertion);
+    return new DefaultSignerAuthnInfo(identityAssertion);
   }
 
   /** {@inheritDoc} */
@@ -438,7 +439,7 @@ class DssSignResponseMessage implements SignResponseMessage {
         .orElse(null));
 
     // AuthType
-    contextInfo.setAuthType(signerAuthnInfo.getScheme());
+    contextInfo.setAuthType(signerAuthnInfo.getIdentityAssertion().getScheme());
 
     // AssertionRef
     contextInfo.setAssertionRef(signerAuthnInfo.getIdentityAssertion().getIdentifier());

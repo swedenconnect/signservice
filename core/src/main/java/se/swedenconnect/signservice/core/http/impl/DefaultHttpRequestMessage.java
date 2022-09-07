@@ -18,9 +18,7 @@ package se.swedenconnect.signservice.core.http.impl;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -163,16 +161,10 @@ public class DefaultHttpRequestMessage implements HttpRequestMessage {
    * @param value the value of the HTTP parameter
    */
   public void addHttpParameter(final String name, final String value) {
-    // Just to be sure. URL-decode the value.
-    // This only covers RFC3986 and not RFC2396 (that uses '+' for spaces), but
-    // hey, we told the user in the comment to not pass in a URL-encoded value.
-    //
-    final String checkedValue = URLDecoder.decode(value, StandardCharsets.UTF_8);
-
     if (this.httpParameters == null) {
       this.httpParameters = new ArrayList<>();
     }
-    this.httpParameters.add(new BasicNameValuePair(name, checkedValue));
+    this.httpParameters.add(new BasicNameValuePair(name, value));
   }
 
   /** {@inheritDoc} */

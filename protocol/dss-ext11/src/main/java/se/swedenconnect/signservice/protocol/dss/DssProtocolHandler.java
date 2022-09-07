@@ -193,4 +193,13 @@ public class DssProtocolHandler extends AbstractSignServiceHandler implements Pr
     return new DssSignResponseResult(error);
   }
 
+  /** {@inheritDoc} */
+  @Override
+  @Nonnull
+  public SignResponseResult createSuccessResult() {
+    final DssSignResponseResult result = new DssSignResponseResult();
+    result.setMessage("Success");
+    return result;
+  }
+
 }

@@ -12,13 +12,8 @@ server:
     key-store-type: JKS
     key-alias: localhost
     key-store-password: secret
-    key-password: secret    
-    
-#spring:
-#  devtools:
-#    restart:
-#      enabled: false
-    
+    key-password: secret
+
 #
 # Management
 #
@@ -37,7 +32,7 @@ management:
 
 signservice:
   domain: localhost
-  base-url: http://${signservice.domain}:${server.port}
+  base-url: https://${signservice.domain}:${server.port}
   system-audit:
     actuator:
       name: "SignService System Audit Logger"
@@ -49,7 +44,7 @@ signservice:
     alias: signservice
     type: JKS
     password: secret
-    key-password: secret  
+    key-password: secret
   default-handler-config:
     protocol:
       dss:
@@ -67,15 +62,15 @@ signservice:
       cmc:
         rsa-provider:
           key-size: 4096
-          stack-size: 10
+#          stack-size: 10
         ec-provider:
-          curve-name: P-256        
+          curve-name: P-256
         cmc-client-credential-props:
           resource: classpath:sandbox/cmc-client.jks
           alias: cmc
           password: secret
           key-password: secret
-          type: JKS        
+          type: JKS
         cmc-request-url: https://sandbox.swedenconnect.se/sigca/cmc/ca01
         cmc-responder-certificate: classpath:sandbox/cmc-responder.crt
         ca-certificate-type: PKC
@@ -87,7 +82,7 @@ signservice:
           crl-dp-urls:
           - https://sandbox.swedenconnect.se/sigca/crl/ca01.crl
           ocsp-responser-url: https://sandbox.swedenconnect.se/sigca/ocsp/ca01
-        cmc-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256         
+        cmc-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256
         default-value-policy-checker:
           default-reply: false
           rules:
@@ -102,7 +97,7 @@ signservice:
           base-url: ${signservice.base-url}
         metadata-providers:
         - url: https://eid.svelegtest.se/metadata/mdx/role/idp.xml
-          backup-file: ${java.io.tmpdir}/sandbox-metadata.xml
+          backup-file: ${SIGNSERVICE_HOME}/sandbox-metadata.xml
           validation-certificate: classpath:sandbox/sandbox-metadata.crt
         signature-credential-props:
           name: SignService SAML Signing
@@ -117,7 +112,7 @@ signservice:
           alias: encrypt
           type: JKS
           password: secret
-          key-password: secret          
+          key-password: secret
         sign-authn-requests: true
         require-encrypted-assertions: true
         response-validation:
@@ -144,7 +139,7 @@ signservice:
             required: false
           service-names:
           - "sv-SignService Demo"
-          - "en-SignService Demo"            
+          - "en-SignService Demo"
           ui-info:
             display-names:
             - "sv-Sweden Connect Demo SignService"
@@ -154,11 +149,11 @@ signservice:
             - "en-Sweden Connect SignService for test and demonstration"
             logos:
             - path: /images/logo.svg
-              height: 56 
+              height: 56
               width: 280
             - path: /images/logo-notext.svg
               height: 256
-              width: 256 
+              width: 256
           organization:
             names:
             - "sv-Sweden Connect"
@@ -175,7 +170,7 @@ signservice:
             technical:
               company: "Sweden Connect"
               email-address: operations@swedenconnect.se
-  engines:  
+  engines:
   - name: "localhost"
     sign-service-id: https://localhost.swedenconnect.se/signservice
     processing-paths:
@@ -185,13 +180,13 @@ signservice:
       trusted-certificates:
       - classpath:clients/eid2cssp.3xasecurity.com.crt
     protocol:
-      dss:        
+      dss:
         include-request-message: false
         default-config-ref: protocol.dss
     authn:
       saml:
         default-config-ref: authn.saml
-        entity-id: https://localhost.swedenconnect.se/eid2cssp        
+        entity-id: https://localhost.swedenconnect.se/eid2cssp
         sp-paths:
           metadata-publishing-path: /sign/localhost/eid2cssp/saml/metadata
           assertion-consumer-path: /sign/localhost/eid2cssp/saml/sso
@@ -215,19 +210,19 @@ signservice:
         file-name: ${SIGNSERVICE_HOME}/localhost/audit.log
   - name: "Sandbox SignService Test Application"
     processing-paths:
-    - /sign/sandbox/eid2cssp        
-    client:      
+    - /sign/sandbox/eid2cssp
+    client:
       client-id: https://eid2cssp.3xasecurity.com/sign
       trusted-certificates:
       - classpath:clients/eid2cssp.3xasecurity.com.crt
     protocol:
-      dss:        
+      dss:
         include-request-message: false
         default-config-ref: protocol.dss
     authn:
       saml:
         default-config-ref: authn.saml
-        entity-id: https://sandbox.swedenconnect.se/eid2cssp        
+        entity-id: https://sandbox.swedenconnect.se/eid2cssp
         sp-paths:
           metadata-publishing-path: /sign/sandbox/eid2cssp/saml/metadata
           assertion-consumer-path: /sign/sandbox/eid2cssp/saml/sso
@@ -244,12 +239,12 @@ signservice:
         default-config-ref: sign.default-handler
     cert:
       cmc:
-        default-config-ref: cert.cmc        
+        default-config-ref: cert.cmc
     audit:
       log-system:
         name: "Sandbox SignService Test Application Audit Logger"
         logger-name: SANDBOX_TEST_APP
-        
+
   - name: "Sandbox2"
     processing-paths:
     - /sign/sandbox2
@@ -279,11 +274,11 @@ signservice:
         ca-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256
         ca-certificate-type: PKC
         crl-dp-path: /sign/sandbox2/ca/testca.crl
-        crl-file-location: ${SIGNSERVICE_HOME}/sandbox2/testca.crl        
+        crl-file-location: ${SIGNSERVICE_HOME}/sandbox2/testca.crl
         rsa-provider:
           key-size: 4096
         ec-provider:
-          curve-name: P-256                
+          curve-name: P-256
         default-value-policy-checker:
           default-reply: false
           rules:

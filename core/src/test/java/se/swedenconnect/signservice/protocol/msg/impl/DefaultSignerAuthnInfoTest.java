@@ -29,10 +29,7 @@ public class DefaultSignerAuthnInfoTest {
   @Test
   public void testNull() {
     Assertions.assertThrows(NullPointerException.class, () -> {
-      new DefaultSignerAuthnInfo(null, null);
-    });
-    Assertions.assertThrows(NullPointerException.class, () -> {
-      new DefaultSignerAuthnInfo("SAML", null);
+      new DefaultSignerAuthnInfo(null);
     });
   }
 
@@ -41,10 +38,9 @@ public class DefaultSignerAuthnInfoTest {
     final IdentityAssertion ass = Mockito.mock(IdentityAssertion.class);
     Mockito.when(ass.toString()).thenReturn("assertion");
 
-    final DefaultSignerAuthnInfo authnInfo = new DefaultSignerAuthnInfo("SAML", ass);
-    Assertions.assertEquals("SAML", authnInfo.getScheme());
+    final DefaultSignerAuthnInfo authnInfo = new DefaultSignerAuthnInfo(ass);
     Assertions.assertNotNull(authnInfo.getIdentityAssertion());
-    Assertions.assertEquals("scheme='SAML', identity-assertion=[assertion]", authnInfo.toString());
+    Assertions.assertEquals("identity-assertion=[assertion]", authnInfo.toString());
   }
 
 }

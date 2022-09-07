@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
+
 import se.swedenconnect.signservice.authn.AuthnContextIdentifier;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
@@ -33,6 +35,9 @@ public class DefaultIdentityAssertion implements IdentityAssertion {
 
   /** For serializing. */
   private static final long serialVersionUID = 584212468203487968L;
+
+  /** The authentication scheme for this assertion, e.g., "SAML". */
+  private String scheme;
 
   /** The assertion identifier. */
   private String identifier;
@@ -55,8 +60,26 @@ public class DefaultIdentityAssertion implements IdentityAssertion {
   /** The encoded assertion. */
   private byte[] encodedAssertion;
 
+
+
   /** {@inheritDoc} */
   @Override
+  @Nonnull
+  public String getScheme() {
+    return this.scheme;
+  }
+
+  /**
+   * Assigns the authentication scheme for this assertion, e.g., "SAML".
+   * @param scheme the authentication scheme
+   */
+  public void setScheme(@Nonnull final String scheme) {
+    this.scheme = scheme;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Nonnull
   public String getIdentifier() {
     return this.identifier;
   }
@@ -66,12 +89,14 @@ public class DefaultIdentityAssertion implements IdentityAssertion {
    *
    * @param identifier the assertion identifier
    */
-  public void setIdentifier(final String identifier) {
+  @Nonnull
+  public void setIdentifier(@Nonnull final String identifier) {
     this.identifier = identifier;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public String getIssuer() {
     return this.issuer;
   }
@@ -81,12 +106,13 @@ public class DefaultIdentityAssertion implements IdentityAssertion {
    *
    * @param issuer the issuer ID
    */
-  public void setIssuer(final String issuer) {
+  public void setIssuer(@Nonnull final String issuer) {
     this.issuer = issuer;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public Instant getIssuanceInstant() {
     return this.issuanceInstant;
   }
@@ -96,12 +122,13 @@ public class DefaultIdentityAssertion implements IdentityAssertion {
    *
    * @param issuanceInstant the issuance instant
    */
-  public void setIssuanceInstant(final Instant issuanceInstant) {
+  public void setIssuanceInstant(@Nonnull final Instant issuanceInstant) {
     this.issuanceInstant = issuanceInstant;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public Instant getAuthnInstant() {
     return this.authnInstant;
   }
@@ -111,12 +138,13 @@ public class DefaultIdentityAssertion implements IdentityAssertion {
    *
    * @param authnInstant the authentication instant
    */
-  public void setAuthnInstant(final Instant authnInstant) {
+  public void setAuthnInstant(@Nonnull final Instant authnInstant) {
     this.authnInstant = authnInstant;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public AuthnContextIdentifier getAuthnContext() {
     return this.authnContextIdentifier;
   }
@@ -126,12 +154,13 @@ public class DefaultIdentityAssertion implements IdentityAssertion {
    *
    * @param authnContextIdentifier the authentication context ID
    */
-  public void setAuthnContext(final AuthnContextIdentifier authnContextIdentifier) {
+  public void setAuthnContext(@Nonnull final AuthnContextIdentifier authnContextIdentifier) {
     this.authnContextIdentifier = authnContextIdentifier;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public List<IdentityAttribute<?>> getIdentityAttributes() {
     return this.identityAttributes != null ? this.identityAttributes : Collections.emptyList();
   }
@@ -141,7 +170,7 @@ public class DefaultIdentityAssertion implements IdentityAssertion {
    *
    * @param identityAttributes the identity attributes
    */
-  public void setIdentityAttributes(final List<IdentityAttribute<?>> identityAttributes) {
+  public void setIdentityAttributes(@Nonnull final List<IdentityAttribute<?>> identityAttributes) {
     this.identityAttributes = identityAttributes != null
         ? Collections.unmodifiableList(identityAttributes)
         : null;
@@ -149,6 +178,7 @@ public class DefaultIdentityAssertion implements IdentityAssertion {
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public byte[] getEncodedAssertion() {
     return this.encodedAssertion != null ? this.encodedAssertion.clone() : null;
   }
@@ -158,7 +188,7 @@ public class DefaultIdentityAssertion implements IdentityAssertion {
    *
    * @param encodedAssertion the encoded assertion
    */
-  public void setEncodedAssertion(final byte[] encodedAssertion) {
+  public void setEncodedAssertion(@Nonnull final byte[] encodedAssertion) {
     this.encodedAssertion = encodedAssertion;
   }
 
@@ -169,7 +199,7 @@ public class DefaultIdentityAssertion implements IdentityAssertion {
     final int prime = 31;
     int result = 1;
     result = prime * result + Arrays.hashCode(this.encodedAssertion);
-    result = prime * result + Objects.hash(this.authnContextIdentifier, this.authnInstant,
+    result = prime * result + Objects.hash(this.scheme, this.authnContextIdentifier, this.authnInstant,
         this.identityAttributes, this.issuanceInstant, this.issuer, this.identifier);
     return result;
   }
@@ -191,16 +221,17 @@ public class DefaultIdentityAssertion implements IdentityAssertion {
         && Objects.equals(this.identityAttributes, other.getIdentityAttributes())
         && Objects.equals(this.issuanceInstant, other.getIssuanceInstant())
         && Objects.equals(this.issuer, other.getIssuer())
-        && Objects.equals(this.identifier, other.getIdentifier());
+        && Objects.equals(this.identifier, other.getIdentifier())
+        && Objects.equals(this.scheme, other.getScheme());
   }
 
   /** {@inheritDoc} */
   @Override
   public String toString() {
     return String.format(
-        "id='%s', issuer='%s', issuance-instant='%s', authn-instant='%s', "
+        "scheme='%s', id='%s', issuer='%s', issuance-instant='%s', authn-instant='%s', "
             + "authn-context-identifier=%s, identity-attributes=%s, encoded-assertion=[%d bytes]",
-        this.identifier, this.issuer, this.issuanceInstant, this.authnInstant, this.authnContextIdentifier,
+        this.scheme, this.identifier, this.issuer, this.issuanceInstant, this.authnInstant, this.authnContextIdentifier,
         this.getIdentityAttributes(), this.encodedAssertion != null ? this.encodedAssertion.length : 0);
   }
 

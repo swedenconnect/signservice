@@ -129,7 +129,7 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
      * If no configuration exists for a supplied item (attribute type and reference), we reply with a default (true or
      * false). The default is false.
      */
-    private boolean defaultReply = false;
+    private Boolean defaultReply;
   }
 
   /**
@@ -144,7 +144,7 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
     /**
      * The keysize in bits.
      */
-    private int keySize;
+    private Integer keySize;
 
     /**
      * The number of keys stored in this key stack. If not set, RSA keys will be generated on demand.

@@ -25,8 +25,8 @@ import se.swedenconnect.signservice.api.engine.session.EngineContext;
 import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
 import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
 import se.swedenconnect.signservice.protocol.ProtocolProcessingRequirements;
-import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.ProtocolProcessingRequirements.SignatureRequirement;
+import se.swedenconnect.signservice.protocol.SignRequestMessage;
 
 /**
  * Default implementation of the {@link SignRequestMessageVerifier} interface.
@@ -89,6 +89,8 @@ public class DefaultSignRequestMessageVerifier implements SignRequestMessageVeri
     // Replay
 
     // Other aspects ...
+
+    // URL:s...
 
 
   }

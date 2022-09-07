@@ -53,7 +53,7 @@ class NoStorageCARepositoryTest {
   private static X509Certificate caCertificate;
 
   @BeforeAll
-  private static void init() throws Exception {
+  public static void init() throws Exception {
     caDir = new File(System.getProperty("user.dir"), "target/test/ca-repo");
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
@@ -75,7 +75,7 @@ class NoStorageCARepositoryTest {
   }
 
   @AfterAll
-  private static void clean() throws Exception {
+  public static void clean() throws Exception {
     FileUtils.deleteDirectory(caDir);
   }
 

@@ -39,7 +39,7 @@ import se.swedenconnect.security.credential.PkiCredential;
 class InMemoryECKeyProviderTest {
 
   @BeforeAll
-  private static void init() {
+  public static void init() {
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }

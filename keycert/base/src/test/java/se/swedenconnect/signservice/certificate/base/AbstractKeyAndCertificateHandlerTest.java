@@ -472,7 +472,7 @@ public class AbstractKeyAndCertificateHandlerTest {
     }
 
     @Override
-    protected X509Certificate issueSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
+    protected List<X509Certificate> issueSigningCertificateChain(@Nonnull final PkiCredential signingKeyPair,
         @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
         @Nonnull final List<AttributeMappingData> certAttributes, @Nullable final String certificateProfile,
         @Nonnull final SignServiceContext context) throws CertificateException {
@@ -481,12 +481,12 @@ public class AbstractKeyAndCertificateHandlerTest {
       context.put("signingKeyPair", new PkiCredentialWrapper(signingKeyPair));
       context.put("algorithm", signRequest.getSignatureRequirements().getSignatureAlgorithm());
 
-      return super.issueSigningCertificate(signingKeyPair, signRequest, assertion, certAttributes, certificateProfile,
+      return super.issueSigningCertificateChain(signingKeyPair, signRequest, assertion, certAttributes, certificateProfile,
           context);
     }
 
     @Override
-    protected X509Certificate issueSigningCertificate(final CertificateModel certificateModel,
+    protected List<X509Certificate> issueSigningCertificateChain(final CertificateModel certificateModel,
         final String certificateProfile, final SignServiceContext context) throws CertificateException {
 
       final PkiCredential signingKeyPair = context.get("signingKeyPair", PkiCredentialWrapper.class).getCredential();
@@ -529,7 +529,7 @@ public class AbstractKeyAndCertificateHandlerTest {
       }
 
       try {
-        return TestUtils.generateCertificate(signingKeyPair, dnBuilder.build(), certSigningAlgoJcaName);
+        return List.of(TestUtils.generateCertificate(signingKeyPair, dnBuilder.build(), certSigningAlgoJcaName));
       }
       catch (final Exception e) {
         throw new CertificateException("Unable to generate certificate", e);

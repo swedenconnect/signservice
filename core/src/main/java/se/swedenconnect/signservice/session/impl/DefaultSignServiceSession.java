@@ -24,7 +24,6 @@ import java.util.Objects;
 
 import javax.servlet.http.HttpSession;
 
-import se.swedenconnect.signservice.session.SignServiceContext;
 import se.swedenconnect.signservice.session.SignServiceSession;
 
 /**
@@ -62,18 +61,6 @@ class DefaultSignServiceSession implements SignServiceSession {
   public <T extends Serializable> T getAttribute(final String name, final Class<T> type)
       throws IllegalStateException, ClassCastException {
     return type.cast(this.inner.getAttribute(name));
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public SignServiceContext getSignServiceContext() throws IllegalStateException {
-    return (SignServiceContext) this.inner.getAttribute(CONTEXT_NAME);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void setSignServiceContext(final SignServiceContext context) throws IllegalStateException {
-    this.inner.setAttribute(CONTEXT_NAME, context);
   }
 
   /** {@inheritDoc} */

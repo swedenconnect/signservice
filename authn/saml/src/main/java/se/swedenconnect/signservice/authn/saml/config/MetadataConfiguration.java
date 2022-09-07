@@ -56,9 +56,9 @@ public class MetadataConfiguration {
   private List<String> entityCategories;
 
   /**
-   * Whether AuthnRequest messages are signed by the SP.
+   * Whether AuthnRequest messages are signed by the SP. The default is true.
    */
-  private Boolean authnRequestsSigned = Boolean.TRUE;
+  private Boolean authnRequestsSigned;
 
   /**
    * Whether SAML assertions should be signed by the IdP.

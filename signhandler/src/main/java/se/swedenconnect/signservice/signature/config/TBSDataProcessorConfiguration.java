@@ -50,15 +50,15 @@ public class TBSDataProcessorConfiguration {
    */
   @Getter
   @Setter
-  private boolean strictProcessing = false;
+  private Boolean strictProcessing;
 
   /**
    * Defines if ESSCertID holding a hash of the signer certificate should include Issuer Serial data in addition to the
-   * certificate hash.
+   * certificate hash. The default is {@code false}.
    */
   @Getter
   @Setter
-  private boolean includeIssuerSerial = false;
+  private Boolean includeIssuerSerial;
 
   /**
    * Supported processing rules URI:s.

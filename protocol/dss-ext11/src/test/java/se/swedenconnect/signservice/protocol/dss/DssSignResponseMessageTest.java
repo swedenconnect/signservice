@@ -83,6 +83,7 @@ public class DssSignResponseMessageTest {
     final DssSignResponseMessage response = new DssSignResponseMessage(null, signRequest);
 
     final DefaultIdentityAssertion identityAssertion = new DefaultIdentityAssertion();
+    identityAssertion.setScheme("SAML");
     identityAssertion.setIdentifier("abc");
     identityAssertion.setAuthnInstant(Instant.now());
     identityAssertion.setAuthnContext(new SimpleAuthnContextIdentifier("loa3"));
@@ -91,7 +92,7 @@ public class DssSignResponseMessageTest {
     identityAssertion.setIdentityAttributes(Arrays.asList(
         new StringSamlIdentityAttribute("id", "friendly", "value")));
 
-    final DefaultSignerAuthnInfo sai = new DefaultSignerAuthnInfo("SAML", identityAssertion);
+    final DefaultSignerAuthnInfo sai = new DefaultSignerAuthnInfo(identityAssertion);
     response.setSignerAuthnInfo(sai);
 
     Assertions.assertNotNull(response.getSignerAuthnInfo());

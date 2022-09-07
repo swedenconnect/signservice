@@ -15,6 +15,8 @@
  */
 package se.swedenconnect.signservice.spring.config.audit;
 
+import java.util.Optional;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -78,15 +80,17 @@ public class AuditLoggerConfigurationProperties implements HandlerConfigurationP
   public HandlerConfiguration<AuditLogger> getHandlerConfiguration() throws IllegalArgumentException {
     final int noAssigned =
         (this.external != null ? 1 : 0) + (this.file != null ? 1 : 0) + (this.logSystem != null ? 1 : 0)
-        + (this.actuator != null && this.actuator.isActive() ? 1 : 0);
+            + (this.actuator != null && Optional.ofNullable(this.actuator.getActive()).orElse(true) ? 1 : 0);
     if (noAssigned > 1) {
       throw new IllegalArgumentException("Several audit configurations supplied, only one can be assigned");
     }
     else if (noAssigned == 0) {
       throw new IllegalArgumentException("Missing configuration");
     }
-    return this.file != null ? file : this.logSystem != null ? this.logSystem
-        : this.actuator != null && this.actuator.isActive() ? this.actuator : this.external;
+    return this.file != null ? file
+        : this.logSystem != null ? this.logSystem
+            : this.actuator != null && Optional.ofNullable(this.actuator.getActive()).orElse(true) ? this.actuator
+                : this.external;
   }
 
   /** {@inheritDoc} */
@@ -96,7 +100,8 @@ public class AuditLoggerConfigurationProperties implements HandlerConfigurationP
     if ("file".equalsIgnoreCase(name)) {
       return this.file;
     }
-    else if ("log-system".equalsIgnoreCase(name) || "logSystem".equalsIgnoreCase(name) || "LOG_SYSTEM".equalsIgnoreCase(name)) {
+    else if ("log-system".equalsIgnoreCase(name) || "logSystem".equalsIgnoreCase(name)
+        || "LOG_SYSTEM".equalsIgnoreCase(name)) {
       return this.logSystem;
     }
     else if ("actuator".equalsIgnoreCase(name)) {

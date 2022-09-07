@@ -99,6 +99,13 @@
       <artifactId>signservice-audit-base</artifactId>
       <version>${project.version}</version>
     </dependency>
+    
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
+      <version>1.12.14</version><!--$NO-MVN-MAN-VER$-->
+      <scope>test</scope>
+    </dependency>
 
   </dependencies>
 

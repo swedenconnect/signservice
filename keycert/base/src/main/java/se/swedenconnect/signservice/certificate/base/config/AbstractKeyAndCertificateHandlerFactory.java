@@ -71,6 +71,9 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
     // Key providers
     final List<KeyProvider> keyProviders = new ArrayList<>();
     if (conf.getRsaProvider() != null) {
+      if (conf.getRsaProvider().getKeySize() == null) {
+        throw new IllegalArgumentException("Illegal RSA provider configuration - missing key-size");
+      }
       if (conf.getRsaProvider().getStackSize() != null) {
         keyProviders.add(new StackedInMemoryRSAKeyProvider(
             conf.getRsaProvider().getKeySize(), conf.getRsaProvider().getStackSize()));
@@ -94,7 +97,8 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
       if (conf.getDefaultValuePolicyChecker() != null) {
         log.debug("Creating default attribute mapper using configuration for default value policy checker ...");
         checker = new DefaultValuePolicyCheckerImpl(
-            conf.getDefaultValuePolicyChecker().getRules(), conf.getDefaultValuePolicyChecker().isDefaultReply());
+            conf.getDefaultValuePolicyChecker().getRules(),
+            Optional.ofNullable(conf.getDefaultValuePolicyChecker().getDefaultReply()).orElse(false));
       }
       else {
         log.info("No attribute mapper and no default value policy checker configuration present " +

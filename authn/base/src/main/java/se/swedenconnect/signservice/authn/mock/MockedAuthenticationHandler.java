@@ -75,6 +75,7 @@ public class MockedAuthenticationHandler extends AbstractSignServiceHandler impl
         this.getName());
 
     final DefaultIdentityAssertion assertion = new DefaultIdentityAssertion();
+    assertion.setScheme("SAML");
     assertion.setIdentifier(UUID.randomUUID().toString());
     assertion.setIssuer(authnRequirements.getAuthnServiceID());
     assertion.setAuthnContext(authnRequirements.getAuthnContextIdentifiers().isEmpty()

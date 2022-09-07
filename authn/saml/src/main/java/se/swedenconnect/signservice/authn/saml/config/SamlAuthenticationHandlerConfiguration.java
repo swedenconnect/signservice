@@ -47,7 +47,7 @@ public class SamlAuthenticationHandlerConfiguration
    */
   @Setter
   @Getter
-  private String samlType = SAML_TYPE_DEFAULT;
+  private String samlType;
 
   /**
    * The SAML entityID.
@@ -106,18 +106,18 @@ public class SamlAuthenticationHandlerConfiguration
   private MessageReplayChecker messageReplayChecker;
 
   /**
-   * Whether AuthnRequest messages should be signed by the SP.
+   * Whether AuthnRequest messages should be signed by the SP. The default is {@code true}.
    */
   @Setter
   @Getter
-  private boolean signAuthnRequests = true;
+  private Boolean signAuthnRequests;
 
   /**
-   * Whether encrypted assertions are required.
+   * Whether encrypted assertions are required. The default is {@code true}
    */
   @Setter
   @Getter
-  private boolean requireEncryptedAssertions = true;
+  private Boolean requireEncryptedAssertions;
 
   /**
    * Response validation settings.
@@ -125,6 +125,14 @@ public class SamlAuthenticationHandlerConfiguration
   @Setter
   @Getter
   private ResponseValidationSettings responseValidation;
+
+  /**
+   * The preferred SAML binding to use when sending authenticaion requests. Possible values are "redirect" and "post".
+   * The default is "redirect".
+   */
+  @Setter
+  @Getter
+  private String preferredBinding;
 
   // Internal
   private List<Class<?>> excludeFromRecursiveMergeCache = null;

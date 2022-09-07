@@ -51,7 +51,7 @@ class DefaultSelfSignedCaCertificateGeneratorTest {
   private static CertNameModel<?> caNameModel;
 
   @BeforeAll
-  private static void init() {
+  public static void init() {
     generator = new DefaultSelfSignedCaCertificateGenerator();
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);

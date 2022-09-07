@@ -17,6 +17,8 @@ package se.swedenconnect.signservice.protocol;
 
 import java.io.Serializable;
 
+import javax.annotation.Nullable;
+
 /**
  * Representation of a result object that is included in a {@link SignResponseMessage}.
  */
@@ -34,6 +36,7 @@ public interface SignResponseResult extends Serializable {
    *
    * @return the error code
    */
+  @Nullable
   String getErrorCode();
 
   /**
@@ -41,6 +44,7 @@ public interface SignResponseResult extends Serializable {
    *
    * @return the minor error code, or null if none is available
    */
+  @Nullable
   String getMinorErrorCode();
 
   /**
@@ -48,6 +52,7 @@ public interface SignResponseResult extends Serializable {
    *
    * @return the message
    */
+  @Nullable
   String getMessage();
 
 }

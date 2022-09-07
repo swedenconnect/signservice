@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,6 +37,7 @@ import org.opensaml.core.xml.io.Unmarshaller;
 import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.saml.common.assertion.ValidationContext;
+import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
@@ -78,8 +81,8 @@ import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
 import se.swedenconnect.signservice.core.attribute.AttributeConverter;
 import se.swedenconnect.signservice.core.attribute.AttributeException;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
+import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
-import se.swedenconnect.signservice.core.http.impl.DefaultHttpRequestMessage;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
@@ -123,6 +126,9 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
 
   /** The URL configuration. */
   protected final SpUrlConfiguration urlConfiguration;
+
+  /** The preferred SAML binding to use for authentication requests. */
+  private String preferredBindingUri;
 
   /** For converting attributes between the generic representation and the OpenSAML representation. */
   protected static final AttributeConverter<Attribute> attributeConverter = new OpenSamlAttributeConverter();
@@ -197,14 +203,28 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
 
       // Build a return object (containing directions on how to redirect/POST the request).
       //
-      final DefaultHttpRequestMessage message =
-          new DefaultHttpRequestMessage(requestObject.getMethod(), requestObject.getSendUrl());
-      if (requestObject.getRequestParameters() != null) {
-        requestObject.getRequestParameters().entrySet()
-            .forEach(e -> message.addHttpParameter(e.getKey(), e.getValue()));
-      }
-      requestObject.getHttpHeaders().entrySet().stream()
-          .forEach(e -> message.addHttpHeader(e.getKey(), e.getValue()));
+      final HttpRequestMessage message = new HttpRequestMessage() {
+
+        @Override
+        public String getUrl() {
+          return requestObject.getSendUrl();
+        }
+
+        @Override
+        public String getMethod() {
+          return requestObject.getMethod();
+        }
+
+        @Override
+        public Map<String, String> getHttpParameters() {
+          return Optional.ofNullable(requestObject.getRequestParameters()).orElseGet(() -> Collections.emptyMap());
+        }
+
+        @Override
+        public Map<String, String> getHttpHeaders() {
+          return Optional.ofNullable(requestObject.getHttpHeaders()).orElseGet(() -> Collections.emptyMap());
+        }
+      };
 
       log.debug("{}: AuthnRequest generated - {}: {}", context.getId(), message.getMethod(), message.getUrl());
       return new AuthenticationResultChoice(message);
@@ -356,11 +376,11 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
     }
 
     final String requestPath = httpRequest.getRequestURI();
-    // TODO: Not complete ... Look over comparisons...
-    if (!(Objects.equals(requestPath, this.urlConfiguration.getAssertionConsumerPath())
-        || Objects.equals(requestPath, this.urlConfiguration.getAdditionalAssertionConsumerPath()))) {
+    if (!(requestPath.equalsIgnoreCase(this.urlConfiguration.getAssertionConsumerPath())
+        || (this.urlConfiguration.getAdditionalAssertionConsumerPath() != null
+            && requestPath.equalsIgnoreCase(this.urlConfiguration.getAdditionalAssertionConsumerPath())))) {
       log.info("{}: Path {} is not supported by handler '{}'",
-          Optional.ofNullable(context).map(SignServiceContext::getId).orElse(""), requestPath, this.getName());
+          Optional.ofNullable(context).map(SignServiceContext::getId).orElseGet(() -> ""), requestPath, this.getName());
       return false;
     }
 
@@ -425,9 +445,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
     if (!"GET".equals(httpRequest.getMethod())) {
       return false;
     }
-    // TODO: Not complete ...
-
-    return Objects.equals(httpRequest.getRequestURI(), this.urlConfiguration.getMetadataPublishingPath());
+    return httpRequest.getRequestURI().equalsIgnoreCase(this.urlConfiguration.getMetadataPublishingPath());
   }
 
   /**
@@ -463,6 +481,12 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
       throws UserAuthenticationException {
 
     return new AuthnRequestGeneratorContext() {
+
+      @Override
+      @Nonnull
+      public String getPreferredBinding() {
+        return getPreferredBindingUri();
+      }
 
       @Override
       @Nullable
@@ -530,7 +554,6 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
 
       @Override
       public String getReceiveURL() {
-        // TODO: This is probably not very safe ...
         return baseUrl + httpRequest.getRequestURI();
       }
 
@@ -747,6 +770,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
     final DefaultIdentityAssertion assertion = new DefaultIdentityAssertion();
     final Assertion samlAssertion = result.getAssertion();
 
+    assertion.setScheme("SAML");
     assertion.setIdentifier(samlAssertion.getID());
     assertion.setIssuer(result.getIssuer());
     assertion.setIssuanceInstant(result.getIssueInstant());
@@ -827,6 +851,25 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
       log.info("{}: {} - {}", context.getId(), msg, e.getMessage());
       throw new UserAuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHN_ERROR, msg, e);
     }
+  }
+
+  /**
+   * Gets the preferred SAML binding to use for authentication requests.
+   *
+   * @return the binding URI
+   */
+  @Nonnull
+  protected String getPreferredBindingUri() {
+    return Optional.ofNullable(this.preferredBindingUri).orElseGet(() -> SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+  }
+
+  /**
+   * Assigns the preferred SAML binding to use for authentication requests.
+   *
+   * @param preferredBindingUri the binding URI
+   */
+  public void setPreferredBindingUri(@Nonnull final String preferredBindingUri) {
+    this.preferredBindingUri = preferredBindingUri;
   }
 
 }
