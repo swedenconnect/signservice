@@ -15,14 +15,16 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.cert.CRLException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -88,23 +90,27 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
    * @param issuerModel model for issuing certificates
    * @param crlIssuerModel model for publishing CRL:s (optional)
    * @throws NoSuchAlgorithmException algorithm is not supported
+   * @throws CertificateException for certificate errors
+   * @throws CRLException if a CRL cannot be published
    */
   public BasicCAService(@Nonnull final PkiCredential caCredential,
       @Nonnull final CARepository caRepository, @Nonnull final CertificateIssuerModel issuerModel,
-      @Nullable final CRLIssuerModel crlIssuerModel) throws NoSuchAlgorithmException {
-
-    super(Optional.ofNullable(caCredential).map(PkiCredential::getCertificateChain)
-        .map(chain -> chain.stream().map(BcFunctions.toX509CertificateHolder).collect(Collectors.toList()))
-        .orElse(null), caRepository);
+      @Nullable final CRLIssuerModel crlIssuerModel)
+      throws NoSuchAlgorithmException, CertificateException, CRLException {
+    super(caCredential, caRepository);
 
     // Setup service
-    this.certificateIssuer =
-        new BasicCertificateIssuer(issuerModel, this.getCaCertificate().getSubject(), caCredential.getPrivateKey());
+    this.certificateIssuer = new BasicCertificateIssuer(issuerModel, caCredential);
     this.crlDistributionPoints = new ArrayList<>();
     if (crlIssuerModel != null) {
-      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, caCredential.getPrivateKey());
+      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, caCredential);
       this.crlDistributionPoints = List.of(crlIssuerModel.getDistributionPointUrl());
-      this.publishNewCrl();
+      try {
+        this.publishNewCrl();
+      }
+      catch (final IOException e) {
+        throw new CRLException("Failed to publish new CRL - " + e.getMessage(), e);
+      }
     }
   }
 

@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
+import java.time.Duration;
 import java.util.List;
 
 import org.apache.xml.security.signature.XMLSignature;
@@ -70,7 +71,7 @@ class DefaultSelfSignedCaCertificateGeneratorTest {
   @Test
   public void testEcdsa() throws Exception {
     final X509Certificate caCertificate = generator.generate(ecProvider.getKeyPair(),
-        new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10), caNameModel);
+        new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, Duration.ofDays(365)), caNameModel);
     log.info("Successfully created CA Certificate:\n{}",
         (new PrintCertificate(caCertificate)).toString(true, true, true));
   }
@@ -78,7 +79,7 @@ class DefaultSelfSignedCaCertificateGeneratorTest {
   @Test
   public void testRsa() throws Exception {
     final X509Certificate caCertificate = generator.generate(rsaProvider.getKeyPair(),
-        new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1, 10), caNameModel);
+        new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1, Duration.ofDays(365)), caNameModel);
     log.info("Successfully created CA Certificate:\n{}",
         (new PrintCertificate(caCertificate)).toString(true, true, true));
   }
@@ -87,7 +88,7 @@ class DefaultSelfSignedCaCertificateGeneratorTest {
   public void testRsaKeyWithEcAlgo() throws Exception {
     assertThatThrownBy(() -> {
       generator.generate(rsaProvider.getKeyPair(),
-          new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10), caNameModel);
+          new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, Duration.ofDays(365)), caNameModel);
     }).isInstanceOf(CertificateIssuanceException.class);
   }
 

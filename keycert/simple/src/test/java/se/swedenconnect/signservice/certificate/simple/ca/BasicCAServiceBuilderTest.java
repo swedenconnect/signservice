@@ -71,7 +71,7 @@ class BasicCAServiceBuilderTest {
     final SelfSignedCaCertificateGenerator caCertificateFactory = new DefaultSelfSignedCaCertificateGenerator();
     final X509Certificate caCertificate = caCertificateFactory.generate(
         caCredential,
-        new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10),
+        new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, Duration.ofDays(365)),
         new ExplicitCertNameModel(List.of(
             new AttributeTypeAndValueModel(CertAttributes.C, "SE"),
             new AttributeTypeAndValueModel(CertAttributes.O, "Test Org"),

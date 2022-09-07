@@ -27,6 +27,7 @@ import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -114,7 +115,7 @@ class SimpleKeyAndCertificateHandlerTest {
     final SelfSignedCaCertificateGenerator caCertGenerator = new DefaultSelfSignedCaCertificateGenerator();
     caCertificate = caCertGenerator.generate(
         caCredential,
-        new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10),
+        new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, Duration.ofDays(3650)),
         new ExplicitCertNameModel(List.of(
             new AttributeTypeAndValueModel(CertAttributes.CN, "Test CA"),
             new AttributeTypeAndValueModel(CertAttributes.O, "Test Org"),

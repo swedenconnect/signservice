@@ -17,8 +17,9 @@ package se.swedenconnect.signservice.certificate.simple.ca;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CRLException;
+import java.security.cert.CertificateException;
 import java.time.Duration;
-import java.util.Calendar;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -124,11 +125,13 @@ public class BasicCAServiceBuilder {
    *
    * @return CA service
    * @throws NoSuchAlgorithmException if the specified algorithm was not supported
+   * @throws CRLException if the CA cannot publish a CRL
+   * @throws CertificateException for certificate errors
    */
   @Nonnull
-  public BasicCAService build() throws NoSuchAlgorithmException {
-    return new BasicCAService(this.caCredential, this.caRepository,
-        this.getCertificateIssuerModel(), this.getCrlIssuerModel());
+  public BasicCAService build() throws NoSuchAlgorithmException, CertificateException, CRLException {
+    return new BasicCAService(
+        this.caCredential, this.caRepository, this.getCertificateIssuerModel(), this.getCrlIssuerModel());
   }
 
   /**
@@ -139,11 +142,8 @@ public class BasicCAServiceBuilder {
    */
   @Nonnull
   private CertificateIssuerModel getCertificateIssuerModel() throws NoSuchAlgorithmException {
-    final CertificateIssuerModel issuerModel =
-        new CertificateIssuerModel(this.algorithm, (int) this.certificateValidity.getSeconds(), Calendar.SECOND);
-
-    issuerModel.setStartOffsetType(Calendar.SECOND);
-    issuerModel.setStartOffsetAmount((int) this.certificateStartOffset.getSeconds());
+    final CertificateIssuerModel issuerModel = new CertificateIssuerModel(this.algorithm, this.certificateValidity);
+    issuerModel.setStartOffset(this.certificateStartOffset);
     return issuerModel;
   }
 
@@ -157,11 +157,8 @@ public class BasicCAServiceBuilder {
     final CRLRevocationDataProvider crlRevocationDataProvider = this.caRepository.getCRLRevocationDataProvider();
     final CRLIssuerModel crlIssuerModel = new CRLIssuerModel(
         BcFunctions.toX509CertificateHolder.apply(this.caCredential.getCertificate()),
-        this.algorithm,
-        (int) this.crlValidity.getSeconds(), crlRevocationDataProvider, this.crlDpUrl);
-    crlIssuerModel.setExpiryOffsetType(Calendar.SECOND);
-    crlIssuerModel.setStartOffsetType(Calendar.SECOND);
-    crlIssuerModel.setStartOffsetAmount((int) this.crlStartOffset.getSeconds());
+        this.algorithm, this.crlValidity, crlRevocationDataProvider, this.crlDpUrl);
+    crlIssuerModel.setStartOffset(this.crlStartOffset);
     return crlIssuerModel;
   }
 

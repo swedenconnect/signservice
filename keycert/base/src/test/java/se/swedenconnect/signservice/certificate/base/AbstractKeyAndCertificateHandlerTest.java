@@ -44,7 +44,6 @@ import org.mockito.Mockito;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
@@ -615,30 +614,18 @@ public class AbstractKeyAndCertificateHandlerTest {
 
     private final PublicKey publicKey;
 
-    private final CertNameModel<?> subject;
-
     public TestCertificateModelBuilder(final PublicKey publicKey, final CertNameModel<?> subject) {
       this.publicKey = publicKey;
       this.subject = subject;
     }
 
-    // TODO: Change when AbstractCertificateModelBuilder has been cleaned up
     @Override
-    public CertificateModel build() throws CertificateIssuanceException {
-      try {
-        return CertificateModel.builder()
-            .publicKey(this.publicKey)
-            .subject(this.subject)
-            .extensionModels(this.getExtensionModels())
-            .build();
-      }
-      catch (final Exception e) {
-        throw new CertificateIssuanceException("Failed to prepare certificate data", e);
-      }
+    protected PublicKey getPublicKey() {
+      return this.publicKey;
     }
 
     @Override
-    protected void getKeyIdentifierExtensionsModels(final List<ExtensionModel> extm) throws IOException {
+    protected void addKeyIdentifierExtensionsModels(List<ExtensionModel> extensionModelList) throws IOException {
     }
 
   }

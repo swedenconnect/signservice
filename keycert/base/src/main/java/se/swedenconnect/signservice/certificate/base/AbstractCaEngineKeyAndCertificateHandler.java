@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
@@ -66,8 +67,7 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
    * @param attributeMapper the attribute mapper
    */
   public AbstractCaEngineKeyAndCertificateHandler(
-      @Nonnull final List<KeyProvider> keyProviders,
-      @Nonnull final AttributeMapper attributeMapper) {
+      @Nonnull final List<KeyProvider> keyProviders, @Nonnull final AttributeMapper attributeMapper) {
     super(keyProviders, attributeMapper);
   }
 
@@ -108,36 +108,42 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
       throw new IllegalArgumentException("Missing authentication instant from assertion");
     }
 
-    // Get certificate subject name model.
-    final CertNameModel<?> certificateNameModel = this.createCertificateNameModel(certAttributes);
+    try {
+      // Get certificate subject name model.
+      final CertNameModel<?> certificateNameModel = this.createCertificateNameModel(certAttributes);
 
-    // Get the certificate model builder.
-    final AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>> certificateModelBuilder =
-        this.createCertificateModelBuilder(signingKeyPair.getPublicKey(), certificateNameModel);
+      // Get the certificate model builder.
+      final AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>> certificateModelBuilder =
+          this.createCertificateModelBuilder(signingKeyPair.getPublicKey(), certificateNameModel);
 
-    // Add the AuthContextExtension.
-    certificateModelBuilder.authenticationContext(SAMLAuthContextBuilder.instance()
-        .serviceID(Optional.ofNullable(this.getServiceName()).orElseGet(() -> signRequest.getClientId()))
-        .assertionRef(assertion.getIdentifier())
-        .authnContextClassRef(assertion.getAuthnContext().getIdentifier())
-        .authenticationInstant(new Date(assertion.getAuthnInstant().toEpochMilli()))
-        .identityProvider(assertion.getIssuer())
-        .attributeMappings(this.getAuthContextExtAttributeMappings(certAttributes))
-        .build());
+      // Add the AuthContextExtension.
+      certificateModelBuilder.authenticationContext(SAMLAuthContextBuilder.instance()
+          .serviceID(Optional.ofNullable(this.getServiceName()).orElseGet(() -> signRequest.getClientId()))
+          .assertionRef(assertion.getIdentifier())
+          .authnContextClassRef(assertion.getAuthnContext().getIdentifier())
+          .authenticationInstant(new Date(assertion.getAuthnInstant().toEpochMilli()))
+          .identityProvider(assertion.getIssuer())
+          .attributeMappings(this.getAuthContextExtAttributeMappings(certAttributes))
+          .build());
 
-    // Add Subject alternative names if present.
-    final Map<Integer, String> subjectAltNames = this.getSubjectAltNames(certAttributes);
-    if (subjectAltNames != null) {
-      certificateModelBuilder.subjectAltNames(subjectAltNames);
+      // Add Subject alternative names if present.
+      final Map<Integer, String> subjectAltNames = this.getSubjectAltNames(certAttributes);
+      if (subjectAltNames != null) {
+        certificateModelBuilder.subjectAltNames(subjectAltNames);
+      }
+
+      // Add Subject Directory Attributes if present.
+      final SubjDirectoryAttributesModel subjectDirectoryAttributes =
+          this.getSubjectDirectoryAttributes(certAttributes);
+      if (subjectDirectoryAttributes != null) {
+        certificateModelBuilder.subjectDirectoryAttributes(subjectDirectoryAttributes);
+      }
+
+      return this.issueSigningCertificateChain(certificateModelBuilder.build(), certificateProfile, context);
     }
-
-    // Add Subject Directory Attributes if present.
-    final SubjDirectoryAttributesModel subjectDirectoryAttributes = this.getSubjectDirectoryAttributes(certAttributes);
-    if (subjectDirectoryAttributes != null) {
-      certificateModelBuilder.subjectDirectoryAttributes(subjectDirectoryAttributes);
+    catch (final CertificateIssuanceException e) {
+      throw new CertificateException("Failed to issue certificate - " + e.getMessage(), e);
     }
-
-    return this.issueSigningCertificateChain(certificateModelBuilder.build(), certificateProfile, context);
   }
 
   /**
@@ -150,7 +156,8 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
    * @throws CertificateException for issuance errors
    */
   @Nonnull
-  protected abstract List<X509Certificate> issueSigningCertificateChain(@Nonnull final CertificateModel certificateModel,
+  protected abstract List<X509Certificate> issueSigningCertificateChain(
+      @Nonnull final CertificateModel certificateModel,
       @Nullable final String certificateProfile, @Nonnull final SignServiceContext context) throws CertificateException;
 
   /**

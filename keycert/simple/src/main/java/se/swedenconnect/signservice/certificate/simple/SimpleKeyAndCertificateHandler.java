@@ -37,6 +37,7 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
@@ -118,12 +119,17 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
       throws CertificateException {
 
     log.debug("Issuing certificate from certificate model");
-    final X509CertificateHolder certificateHolder = this.caService.issueCertificate(certificateModel);
     try {
+      final X509CertificateHolder certificateHolder = this.caService.issueCertificate(certificateModel);
       List<X509Certificate> chain = new ArrayList<>();
       chain.add(CertificateUtils.decodeCertificate(certificateHolder.getEncoded()));
       chain.addAll(this.caChain);
       return chain;
+    }
+    catch (final CertificateIssuanceException e) {
+      final String msg = String.format("Failed to issue certificate - %s", e.getMessage());
+      log.info("{}", msg, e);
+      throw new CertificateException(msg, e);
     }
     catch (final IOException e) {
       final String msg = "Failed to decode issued X509 certificate";
@@ -138,8 +144,13 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
   @Nonnull
   protected AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>> createCertificateModelBuilder(
       @Nonnull final PublicKey subjectPublicKey, @Nonnull final CertNameModel<?> subject) throws CertificateException {
-    return (AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>>) this.caService
-        .getCertificateModelBuilder(subject, subjectPublicKey);
+    try {
+      return (AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>>) this.caService
+          .getCertificateModelBuilder(subject, subjectPublicKey);
+    }
+    catch (final CertificateIssuanceException e) {
+      throw new CertificateException("Failed to get certificate model builder - " + e.getMessage(), e);
+    }
   }
 
   /** {@inheritDoc} */
