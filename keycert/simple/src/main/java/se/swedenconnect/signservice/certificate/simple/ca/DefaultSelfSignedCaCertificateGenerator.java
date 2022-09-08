@@ -27,7 +27,6 @@ import org.bouncycastle.cert.X509CertificateHolder;
 
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
-import se.swedenconnect.ca.engine.ca.issuer.impl.BasicCertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.impl.SelfIssuedCertificateIssuer;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;

@@ -109,6 +109,16 @@
         <version>5.3.22</version>
         <scope>import</scope>
       </dependency>
+      
+      <!-- 
+        The signservice-bom has a dependency to 1.9.3 which has reported
+        vulnerabilities. Until this is fixed, we include it here. 
+      -->
+      <dependency>
+        <groupId>common-beanutils</groupId>
+        <artifactId>common-beanutils</artifactId>
+        <version>1.9.4</version>
+      </dependency>
     
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
@@ -117,16 +127,7 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      
-      <!-- Should be moved to bom -->
-      <!-- 
-      <dependency>
-        <groupId>org.opensaml</groupId>
-        <artifactId>opensaml-messaging-api</artifactId>
-        <version>4.2.0</version>
-      </dependency>
-      -->      
-      
+            
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-commons</artifactId>

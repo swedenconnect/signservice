@@ -16,7 +16,6 @@
 
 package se.swedenconnect.signservice.certificate.cmc.ca;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -34,7 +33,9 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.operator.OperatorCreationException;
 
+import se.swedenconnect.ca.cmc.CMCException;
 import se.swedenconnect.ca.cmc.api.CMCCertificateModelBuilder;
+import se.swedenconnect.ca.cmc.api.CMCMessageException;
 import se.swedenconnect.ca.cmc.api.client.impl.PreConfiguredCMCClient;
 import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
@@ -73,7 +74,7 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
       @Nonnull final PkiCredential cmcCredential, @Nonnull final String algorithm,
       @Nonnull final X509Certificate cmcResponseCert, @Nonnull final RemoteCaInformation staticCaInformation)
       throws MalformedURLException, NoSuchAlgorithmException, OperatorCreationException, CertificateEncodingException {
-    super(cmcRequestUrl, cmcCredential.getPrivateKey(), cmcCredential.getCertificate(), algorithm, cmcResponseCert,
+    super(cmcRequestUrl, cmcCredential, algorithm, cmcResponseCert,
         Optional.ofNullable(staticCaInformation).map(RemoteCaInformation::toStaticCAInformation).orElse(null));
   }
 
@@ -86,13 +87,13 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
    * @param includeCrlDPs true to include CRL distribution point URLs in the issued certificate
    * @param includeOcspURL true to include OCSP URL (if present) in the issued certificate
    * @return certificate model builder
-   * @throws IOException errors obtaining the certificate model builder
+   * @throws CMCException errors obtaining the certificate model builder
    */
   @Override
   @Nonnull
   public CMCCertificateModelBuilder getCertificateModelBuilder(@Nonnull final PublicKey subjectPublicKey,
       @Nonnull final CertNameModel<?> subject, final boolean includeCrlDPs, final boolean includeOcspURL)
-      throws IOException {
+      throws CMCException {
 
     try {
       final StaticCAInformation caInformation = this.getStaticCAInformation();
@@ -130,7 +131,7 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
       return certModelBuilder;
     }
     catch (final CertificateEncodingException e) {
-      throw new IOException(e);
+      throw new CMCMessageException("Failed to create certificate model builder - " + e.getMessage(), e);
     }
   }
 

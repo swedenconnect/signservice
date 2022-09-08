@@ -16,10 +16,10 @@
 
 package se.swedenconnect.signservice.certificate.cmc.testutils;
 
-import java.io.IOException;
 import java.net.URL;
 
 import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.ca.cmc.CMCException;
 import se.swedenconnect.ca.cmc.api.CMCCaApi;
 import se.swedenconnect.ca.cmc.api.CMCResponseParser;
 import se.swedenconnect.ca.cmc.api.client.CMCClientHttpConnector;
@@ -52,7 +52,7 @@ public class TestCMCHttpConnector implements CMCClientHttpConnector {
       cmcRequest = CMCApiFactory.getCmcRequestParser().parseCMCrequest(cmcRequestBytes);
       log.debug("Sending CMC request from test CMC connector:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, false, true));
     }
-    catch (IOException e) {
+    catch (final CMCException e) {
       e.printStackTrace();
     }
     CMCResponse cmcResponse = cmcCaApi.processRequest(cmcRequestBytes);

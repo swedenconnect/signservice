@@ -184,12 +184,13 @@ signservice:
         include-request-message: false
         default-config-ref: protocol.dss
     authn:
-      saml:
+      saml:        
         default-config-ref: authn.saml
         entity-id: https://localhost.swedenconnect.se/eid2cssp
         sp-paths:
           metadata-publishing-path: /sign/localhost/eid2cssp/saml/metadata
           assertion-consumer-path: /sign/localhost/eid2cssp/saml/sso
+        preferred-binding: POST
         metadata:
           ui-info:
             display-names:

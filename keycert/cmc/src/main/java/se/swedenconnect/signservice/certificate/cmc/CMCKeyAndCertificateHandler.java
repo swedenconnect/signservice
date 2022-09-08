@@ -16,7 +16,6 @@
 
 package se.swedenconnect.signservice.certificate.cmc;
 
-import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -31,6 +30,7 @@ import org.apache.commons.lang.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.security.certificate.CertificateUtils;
+import se.swedenconnect.ca.cmc.CMCException;
 import se.swedenconnect.ca.cmc.api.client.CMCClient;
 import se.swedenconnect.ca.cmc.api.data.CMCFailType;
 import se.swedenconnect.ca.cmc.api.data.CMCResponse;
@@ -123,7 +123,7 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
       chain.addAll(this.caChain);
       return chain;
     }
-    catch (final IOException e) {
+    catch (final CMCException e) {
       final String msg = "Failed to complete CMC request - " + e.getMessage();
       log.info("{}", msg, e);
       throw new CertificateException(msg, e);
@@ -139,7 +139,7 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
       // TODO: Make configurable (OCSP and CRL DP)
       return this.cmcClient.getCertificateModelBuilder(subjectPublicKey, subject, true, true);
     }
-    catch (final IOException e) {
+    catch (final CMCException e) {
       throw new CertificateException("Error obtaining certificate model from CMC client", e);
     }
   }
