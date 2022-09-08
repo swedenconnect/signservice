@@ -119,6 +119,22 @@
         <artifactId>common-beanutils</artifactId>
         <version>1.9.4</version>
       </dependency>
+      
+      <!-- 
+        We want to force opensaml-addons to be 1.2.4 to avoid the dependency
+        to Velocity that appear in 1.2.3. 
+      -->
+      <dependency>
+        <groupId>se.swedenconnect.opensaml</groupId>
+        <artifactId>opensaml-addons</artifactId>
+        <version>1.2.4</version>       
+      </dependency>
+      
+      <dependency>
+        <groupId>se.swedenconnect.opensaml</groupId>
+        <artifactId>opensaml-security-ext</artifactId>
+        <version>3.1.0</version>
+      </dependency>
     
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
