@@ -19,6 +19,7 @@ import java.io.File;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,6 +29,7 @@ import org.bouncycastle.cert.X509CertificateHolder;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -45,6 +47,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.impl.SelfIssuedCertificateModel
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPModel;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.ca.engine.revocation.ocsp.impl.RepositoryBasedOCSPResponder;
+import se.swedenconnect.security.credential.BasicCredential;
 
 /**
  * This class when instantiated creates a test CA services.
@@ -65,52 +68,52 @@ public class TestCAHolder {
    *
    * @param caConfig Configuration parameters from the CSCA service
    */
-  public TestCAHolder(TestCA caConfig) {
+  public TestCAHolder(final TestCA caConfig) {
     this.dataDir = new File(System.getProperty("user.dir"), "target/test/ca-repo");
     this.caConfig = caConfig;
     try {
-      setupCAs();
+      this.setupCAs();
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       e.printStackTrace();
     }
   }
 
   private void setupCAs() throws Exception {
-    log.info("Setting up test CA {}", caConfig.getId());
-    cscaService = createCSCAService();
-    addOCSPResponder();
+    log.info("Setting up test CA {}", this.caConfig.getId());
+    this.cscaService = this.createCSCAService();
+    this.addOCSPResponder();
   }
 
   private TestCAService createCSCAService() throws Exception {
     // generate key and root CA cert
-    CertificateIssuer certificateIssuer = new SelfIssuedCertificateIssuer(new CertificateIssuerModel(
-        caConfig.getCaAlgo(),
-        20));
+    final CertificateIssuer certificateIssuer = new SelfIssuedCertificateIssuer(new CertificateIssuerModel(
+        this.caConfig.getCaAlgo(), Duration.ofDays(365)));
 
-    log.info("Generating root ca key for {}", caConfig.getId());
-    KeyPair kp = caConfig.getCaKeyPair();
-    CertNameModel<?> name = getCAName(caConfig.getCaName());
+    log.info("Generating root ca key for {}", this.caConfig.getId());
+    final KeyPair kp = this.caConfig.getCaKeyPair();
+    final CertNameModel<?> name = this.getCAName(this.caConfig.getCaName());
 
-    CertificateModelBuilder builder =
+    final CertificateModelBuilder builder =
         SelfIssuedCertificateModelBuilder.getInstance(kp, certificateIssuer.getCertificateIssuerModel())
             .subject(name)
             .basicConstraints(new BasicConstraintsModel(true, true))
             .includeSki(true)
             .keyUsage(new KeyUsageModel(KeyUsage.keyCertSign + KeyUsage.cRLSign, true))
             .certificatePolicy(new CertificatePolicyModel(true));
-    X509CertificateHolder rootCA01Cert = certificateIssuer.issueCertificate(builder.build());
-    File crlFile = new File(dataDir, caConfig.getId() + "/root-ca.crl");
+    final X509CertificateHolder rootCA01Cert = certificateIssuer.issueCertificate(builder.build());
+    final File crlFile = new File(this.dataDir, this.caConfig.getId() + "/root-ca.crl");
 
-    return new TestCAService(kp.getPrivate(), Arrays.asList(rootCA01Cert), new TestCARepository(crlFile), crlFile,
-        caConfig.getCaAlgo());
+    return new TestCAService(
+        new BasicCredential(CertificateUtils.decodeCertificate(rootCA01Cert.getEncoded()), kp.getPrivate()),
+        new TestCARepository(crlFile), crlFile, this.caConfig.getCaAlgo());
   }
 
-  private CertNameModel<?> getCAName(String commonName) {
+  private CertNameModel<?> getCAName(final String commonName) {
     return new ExplicitCertNameModel(Arrays.asList(
         AttributeTypeAndValueModel.builder()
             .attributeType(CertAttributes.C)
-            .value(caConfig.getCountry()).build(),
+            .value(this.caConfig.getCountry()).build(),
         AttributeTypeAndValueModel.builder()
             .attributeType(CertAttributes.O)
             .value("Test Org").build(),
@@ -121,17 +124,17 @@ public class TestCAHolder {
 
   private void addOCSPResponder() {
     try {
-      log.info("Generating ocsp responder key for {}", caConfig.getId());
+      log.info("Generating ocsp responder key for {}", this.caConfig.getId());
 
       KeyPair kp;
       String algorithm;
       List<X509CertificateHolder> ocspServiceChain;
-      if (caConfig.getOcspKeyPair() != null) {
+      if (this.caConfig.getOcspKeyPair() != null) {
         // There is a dedicated key for OCSP responses. Setup an authorized responder
-        kp = caConfig.getOcspKeyPair();
-        algorithm = caConfig.getOcspAlgo();
-        DefaultCertificateModelBuilder certModelBuilder = cscaService.getCertificateModelBuilder(
-            getTypicalServiceName(caConfig.getOcspName(), caConfig.getCountry()), kp.getPublic());
+        kp = this.caConfig.getOcspKeyPair();
+        algorithm = this.caConfig.getOcspAlgo();
+        final DefaultCertificateModelBuilder certModelBuilder = this.cscaService.getCertificateModelBuilder(
+            getTypicalServiceName(this.caConfig.getOcspName(), this.caConfig.getCountry()), kp.getPublic());
 
         certModelBuilder
             .qcStatements(null)
@@ -141,43 +144,44 @@ public class TestCAHolder {
             .ocspNocheck(true)
             .extendedKeyUsage(new ExtendedKeyUsageModel(true, KeyPurposeId.id_kp_OCSPSigning));
 
-        X509CertificateHolder ocspIssuerCert =
-            cscaService.getCertificateIssuer().issueCertificate(certModelBuilder.build());
+        final X509CertificateHolder ocspIssuerCert =
+            this.cscaService.getCertificateIssuer().issueCertificate(certModelBuilder.build());
         ocspServiceChain = Arrays.asList(
             ocspIssuerCert,
-            cscaService.getCaCertificate());
+            this.cscaService.getCaCertificate());
 
       }
       else {
         // We are issuing OCSP response directly from CA
-        kp = caConfig.getCaKeyPair();
-        algorithm = caConfig.getCaAlgo();
+        kp = this.caConfig.getCaKeyPair();
+        algorithm = this.caConfig.getCaAlgo();
         ocspServiceChain = Arrays.asList(
-            cscaService.getCaCertificate());
+            this.cscaService.getCaCertificate());
       }
 
-      OCSPModel ocspModel = new OCSPModel(ocspServiceChain, cscaService.getCaCertificate(), algorithm);
-      OCSPResponder ocspResponder =
-          new RepositoryBasedOCSPResponder(kp.getPrivate(), ocspModel, cscaService.getCaRepository());
-      cscaService.setOcspResponder(ocspResponder, "https://example.com/" + caConfig.getId() + "/ocsp",
+      final OCSPModel ocspModel = new OCSPModel(this.cscaService.getCaCertificate(), algorithm);
+      final OCSPResponder ocspResponder =
+          new RepositoryBasedOCSPResponder(new BasicCredential(kp.getPublic(), kp.getPrivate()), ocspModel,
+              this.cscaService.getCaRepository());
+      this.cscaService.setOcspResponder(ocspResponder, "https://example.com/" + this.caConfig.getId() + "/ocsp",
           ocspServiceChain.get(0));
     }
-    catch (Exception ex) {
+    catch (final Exception ex) {
       log.error("Error creating OCSP responder", ex);
     }
   }
 
-  public static String getFileUrl(File file) {
+  public static String getFileUrl(final File file) {
     return getFileUrl(file.getAbsolutePath());
   }
 
-  public static String getFileUrl(String path) {
-    String urlEncodedPath = URLEncoder.encode(path, StandardCharsets.UTF_8);
+  public static String getFileUrl(final String path) {
+    final String urlEncodedPath = URLEncoder.encode(path, StandardCharsets.UTF_8);
     return FILE_URL_PREFIX + urlEncodedPath;
   }
 
-  public static CertNameModel<?> getTypicalServiceName(String commonName, String country) {
-    CertNameModel<?> subjectName = new ExplicitCertNameModel(Arrays.asList(
+  public static CertNameModel<?> getTypicalServiceName(final String commonName, final String country) {
+    final CertNameModel<?> subjectName = new ExplicitCertNameModel(Arrays.asList(
         AttributeTypeAndValueModel.builder()
             .attributeType(CertAttributes.C)
             .value(country).build(),

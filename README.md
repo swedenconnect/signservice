@@ -10,9 +10,9 @@ Framework specifications - https://docs.swedenconnect.se/technical-framework.
 
 -----
 
-## What is a Signature Service?
+## Documentation
 
-> TODO
+Go to [https://docs.swedenconnect.se/signservice](docs/index.md) for documentation of how to understand and use this repository.
 
 ## Modules
 
@@ -33,15 +33,6 @@ This repository comprises of the following modules:
 * [spring-boot-starter](spring-boot-starter) - A Spring Boot Starter module that is useful when building a Signature Service using Spring Boot.
 
 * [app](app) - A sample Signature Service application built using Spring Boot.
-
-## Documentation
-
-* TODO: *Published documentation (architectural and configuration)*
-
-* [Internal documentation](internal-docs) - Designdocuments, code-style, etc.
-
-* TODO: *Java API documentation*
-
 
 
 -----

@@ -16,10 +16,10 @@
 
 package se.swedenconnect.signservice.certificate.cmc;
 
-import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,6 +29,8 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import se.idsec.signservice.security.certificate.CertificateUtils;
+import se.swedenconnect.ca.cmc.CMCException;
 import se.swedenconnect.ca.cmc.api.client.CMCClient;
 import se.swedenconnect.ca.cmc.api.data.CMCFailType;
 import se.swedenconnect.ca.cmc.api.data.CMCResponse;
@@ -38,6 +40,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
+import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
@@ -53,6 +56,9 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
   /** CMC Client for remote CA service used to issue certificates. */
   private final CMCClient cmcClient;
 
+  /** The CA chain. */
+  private final List<X509Certificate> caChain;
+
   /**
    * Constructor.
    *
@@ -64,8 +70,7 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
       @Nonnull final List<KeyProvider> keyProviders,
       @Nonnull final AttributeMapper attributeMapper,
       @Nonnull final CMCClient cmcClient) {
-    super(keyProviders, attributeMapper);
-    this.cmcClient = Objects.requireNonNull(cmcClient, "cmcClient must not be null");
+    this(keyProviders, attributeMapper, AlgorithmRegistrySingleton.getInstance(), cmcClient);
   }
 
   /**
@@ -83,12 +88,21 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
       @Nonnull final CMCClient cmcClient) {
     super(keyProviders, attributeMapper, algorithmRegistry);
     this.cmcClient = Objects.requireNonNull(cmcClient, "cmcClient must not be null");
+    this.caChain = new ArrayList<>();
+    try {
+      for (final byte[] encoding : cmcClient.getStaticCAInformation().getCertificateChain()) {
+        caChain.add(CertificateUtils.decodeCertificate(encoding));
+      }
+    }
+    catch (final Exception e) {
+      throw new SecurityException("Failed to get CA certificate chain", e);
+    }
   }
 
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  protected X509Certificate issueSigningCertificate(@Nonnull final CertificateModel certificateModel,
+  protected List<X509Certificate> issueSigningCertificateChain(@Nonnull final CertificateModel certificateModel,
       @Nullable final String certificateProfile, @Nonnull final SignServiceContext context)
       throws CertificateException {
 
@@ -104,9 +118,12 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
         log.debug("Failed to issue requested certificate: {}", message);
         throw new CertificateException(message);
       }
-      return cmcResponse.getReturnCertificates().get(0);
+      final List<X509Certificate> chain = new ArrayList<>();
+      chain.add(cmcResponse.getReturnCertificates().get(0));
+      chain.addAll(this.caChain);
+      return chain;
     }
-    catch (final IOException e) {
+    catch (final CMCException e) {
       final String msg = "Failed to complete CMC request - " + e.getMessage();
       log.info("{}", msg, e);
       throw new CertificateException(msg, e);
@@ -122,7 +139,7 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
       // TODO: Make configurable (OCSP and CRL DP)
       return this.cmcClient.getCertificateModelBuilder(subjectPublicKey, subject, true, true);
     }
-    catch (final IOException e) {
+    catch (final CMCException e) {
       throw new CertificateException("Error obtaining certificate model from CMC client", e);
     }
   }

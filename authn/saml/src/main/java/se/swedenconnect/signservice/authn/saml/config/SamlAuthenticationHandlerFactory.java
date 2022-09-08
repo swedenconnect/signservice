@@ -70,6 +70,7 @@ import se.swedenconnect.opensaml.xmlsec.encryption.support.SAMLObjectEncrypter;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.opensaml.OpenSamlCredential;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
+import se.swedenconnect.signservice.authn.saml.AbstractSamlAuthenticationHandler;
 import se.swedenconnect.signservice.authn.saml.DefaultSamlAuthenticationHandler;
 import se.swedenconnect.signservice.authn.saml.MessageReplayCheckerWrapper;
 import se.swedenconnect.signservice.authn.saml.SwedenConnectSamlAuthenticationHandler;
@@ -135,10 +136,18 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     final AuthnRequestGenerator authnRequestGenerator =
         this.createAuthnRequestGenerator(conf, metadataProvider, entityDescriptor);
 
+    // Request binding
+    //
+    final String requestBinding = conf.getPreferredBinding() != null
+        ? "post".equalsIgnoreCase(conf.getPreferredBinding())
+            ? SAMLConstants.SAML2_POST_BINDING_URI
+            : SAMLConstants.SAML2_REDIRECT_BINDING_URI
+        : SAMLConstants.SAML2_REDIRECT_BINDING_URI;
+
     // Create the handler
     //
     return this.createHandler(conf, metadataProvider, entityDescriptorContainer, responseProcessor,
-        authnRequestGenerator);
+        authnRequestGenerator, requestBinding);
   }
 
   /**
@@ -149,6 +158,7 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
    * @param entityDescriptorContainer the metadata publisher
    * @param responseProcessor the response processor
    * @param authnRequestGenerator the AuthnRequest generator
+   * @param preferredRequestBinding the preferred request binding URI
    * @return a SAML authention handler
    */
   protected AuthenticationHandler createHandler(
@@ -156,19 +166,23 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
       @Nonnull final MetadataProvider metadataProvider,
       @Nonnull final EntityDescriptorContainer entityDescriptorContainer,
       @Nonnull final ResponseProcessor responseProcessor,
-      @Nonnull final AuthnRequestGenerator authnRequestGenerator) {
+      @Nonnull final AuthnRequestGenerator authnRequestGenerator,
+      @Nonnull final String preferredRequestBinding) {
 
+    AbstractSamlAuthenticationHandler handler = null;
     if (SamlAuthenticationHandlerConfiguration.SAML_TYPE_SWEDEN_CONNECT.equals(config.getSamlType())) {
-      return new SwedenConnectSamlAuthenticationHandler(authnRequestGenerator, responseProcessor, metadataProvider,
+      handler = new SwedenConnectSamlAuthenticationHandler(authnRequestGenerator, responseProcessor, metadataProvider,
           entityDescriptorContainer, config.getSpPaths());
     }
     else if (SamlAuthenticationHandlerConfiguration.SAML_TYPE_DEFAULT.equals(config.getSamlType())) {
-      return new DefaultSamlAuthenticationHandler(authnRequestGenerator, responseProcessor, metadataProvider,
+      handler = new DefaultSamlAuthenticationHandler(authnRequestGenerator, responseProcessor, metadataProvider,
           entityDescriptorContainer, config.getSpPaths());
     }
     else {
       throw new IllegalArgumentException("Unknown saml-type - " + config.getSamlType());
     }
+    handler.setPreferredBindingUri(preferredRequestBinding);
+    return handler;
   }
 
   /**
@@ -234,7 +248,7 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
       desc.setWantAssertionsSigned(wantAssertionsSigned);
 
       // Is AuthnRequest messages signed?
-      desc.setAuthnRequestsSigned(config.isSignAuthnRequests());
+      desc.setAuthnRequestsSigned(Optional.ofNullable(config.getSignAuthnRequests()).orElse(true));
 
       // Extensions
       final Extensions descExtensions = Optional.ofNullable(desc.getExtensions())
@@ -347,7 +361,7 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
           : config.getDefaultCredential());
       objectDecrypter = new SAMLObjectDecrypter(cred);
     }
-    if (config.isRequireEncryptedAssertions() && objectDecrypter == null) {
+    if (Optional.ofNullable(config.getRequireEncryptedAssertions()).orElse(true) && objectDecrypter == null) {
       throw new IllegalArgumentException("No decryption (or default) credential specified - "
           + "required since require-encrypted-assertions is true");
     }
@@ -385,7 +399,7 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     processor.setDecrypter(decrypter);
     processor.setMessageReplayChecker(messageReplayChecker);
     processor.setMetadataResolver(metadataProvider.getMetadataResolver());
-    processor.setRequireEncryptedAssertions(config.isRequireEncryptedAssertions());
+    processor.setRequireEncryptedAssertions(Optional.ofNullable(config.getRequireEncryptedAssertions()).orElse(true));
     processor.setResponseValidationSettings(config.getResponseValidation());
     try {
       processor.initialize();
@@ -466,7 +480,7 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
 
     final PkiCredential signCred = Optional.ofNullable(config.getSignatureCredential())
         .orElseGet(() -> config.getDefaultCredential());
-    if (signCred == null && config.isSignAuthnRequests()) {
+    if (signCred == null && Optional.ofNullable(config.getSignAuthnRequests()).orElse(true)) {
       throw new IllegalArgumentException("No signature (or default) credential specified");
     }
     final OpenSamlCredential cred = signCred != null ? new OpenSamlCredential(signCred) : null;

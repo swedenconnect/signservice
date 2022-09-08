@@ -17,6 +17,8 @@ package se.swedenconnect.signservice.protocol.dss;
 
 import javax.annotation.Nonnull;
 
+import lombok.Getter;
+import lombok.Setter;
 import se.swedenconnect.signservice.core.config.AbstractHandlerConfiguration;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
 
@@ -29,6 +31,8 @@ public class DssProtocolHandlerConfiguration extends AbstractHandlerConfiguratio
    * Setting that tells whether SAML assertions should be included in the response messages. The default is to include
    * assertions.
    */
+  @Getter
+  @Setter
   private Boolean includeAssertion;
 
   /**
@@ -36,45 +40,9 @@ public class DssProtocolHandlerConfiguration extends AbstractHandlerConfiguratio
    * below this will always be included, but in greater versions the field is optional (actually the specs dissuade from
    * using it). The default is not no include the request in responses.
    */
+  @Getter
+  @Setter
   private Boolean includeRequestMessage;
-
-  /**
-   * Gets the setting that tells whether SAML assertions should be included in the response messages.
-   *
-   * @return whether to include SAML assertions
-   */
-  public boolean isIncludeAssertion() {
-    return this.includeAssertion != null ? this.includeAssertion : true;
-  }
-
-  /**
-   * Assigns the setting that tells whether SAML assertions should be included in the response messages.
-   *
-   * @param includeAssertion whether to include SAML assertions
-   */
-  public void setIncludeAssertion(final boolean includeAssertion) {
-    this.includeAssertion = includeAssertion;
-  }
-
-  /**
-   * Gets the setting that tells whether to include the request message in the response messages created.
-   *
-   * @return whether to include the request message in the response messages created
-   */
-  public boolean isIncludeRequestMessage() {
-    return this.includeRequestMessage != null ? this.includeRequestMessage : false;
-  }
-
-  /**
-   * Assigns the setting that tells whether to include the request message in the response messages created. For 1.1
-   * version and below this will always be included, but in greater versions the field is optional (actually the specs
-   * dissuade from using it). The default is not no include the request in responses.
-   *
-   * @param includeRequestMessage whether to include the request message in the response messages created
-   */
-  public void setIncludeRequestMessage(final boolean includeRequestMessage) {
-    this.includeRequestMessage = includeRequestMessage;
-  }
 
   /** {@inheritDoc} */
   @Override

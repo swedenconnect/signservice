@@ -16,8 +16,8 @@
 package se.swedenconnect.signservice.certificate.cmc.testutils.ca;
 
 import java.io.File;
-import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -45,6 +45,7 @@ import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * CA service for test
@@ -52,51 +53,54 @@ import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 public class TestCAService extends AbstractCAService<DefaultCertificateModelBuilder> {
 
   private final File crlFile;
-  private CertificateIssuer certificateIssuer;
+  private final CertificateIssuer certificateIssuer;
   private CRLIssuer crlIssuer;
   private List<String> crlDistributionPoints;
   private OCSPResponder ocspResponder;
   private X509CertificateHolder ocspResponderCertificate;
   private String ocspResponderUrl;
 
-  public TestCAService(PrivateKey privateKey, List<X509CertificateHolder> caCertificateChain, CARepository caRepository,
-      File crlFile, String algorithm) throws Exception {
-    super(caCertificateChain, caRepository);
+  public TestCAService(final PkiCredential caCredential, final CARepository caRepository, final File crlFile,
+      final String algorithm)
+      throws Exception {
+    super(caCredential, caRepository);
     this.crlFile = crlFile;
-    this.certificateIssuer = new BasicCertificateIssuer(
-        new CertificateIssuerModel(algorithm, 10), getCaCertificate().getSubject(), privateKey);
-    CRLIssuerModel crlIssuerModel = getCrlIssuerModel(getCaRepository().getCRLRevocationDataProvider(), algorithm);
+    this.certificateIssuer =
+        new BasicCertificateIssuer(new CertificateIssuerModel(algorithm, Duration.ofDays(365)), caCredential);
+    final CRLIssuerModel crlIssuerModel =
+        this.getCrlIssuerModel(this.getCaRepository().getCRLRevocationDataProvider(), algorithm);
     this.crlDistributionPoints = new ArrayList<>();
     if (crlIssuerModel != null) {
-      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, privateKey);
+      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, caCredential);
       this.crlDistributionPoints = Arrays.asList(crlIssuerModel.getDistributionPointUrl());
-      publishNewCrl();
+      this.publishNewCrl();
     }
   }
 
-  private CRLIssuerModel getCrlIssuerModel(CRLRevocationDataProvider crlRevocationDataProvider, String algorithm)
+  private CRLIssuerModel getCrlIssuerModel(final CRLRevocationDataProvider crlRevocationDataProvider,
+      final String algorithm)
       throws CertificateRevocationException {
     try {
-      return new CRLIssuerModel(getCaCertificate(), algorithm,
-          2, crlRevocationDataProvider, TestCAHolder.getFileUrl(crlFile));
+      return new CRLIssuerModel(this.getCaCertificate(), algorithm, Duration.ofDays(2), crlRevocationDataProvider,
+          TestCAHolder.getFileUrl(this.crlFile));
     }
-    catch (Exception e) {
+    catch (final Exception e) {
       throw new CertificateRevocationException(e);
     }
   }
 
   @Override
   public CertificateIssuer getCertificateIssuer() {
-    return certificateIssuer;
+    return this.certificateIssuer;
   }
 
   @Override
   protected CRLIssuer getCrlIssuer() {
-    return crlIssuer;
+    return this.crlIssuer;
   }
 
-  public void setOcspResponder(OCSPResponder ocspResponder, String ocspResponderUrl,
-      X509CertificateHolder ocspResponderCertificate) {
+  public void setOcspResponder(final OCSPResponder ocspResponder, final String ocspResponderUrl,
+      final X509CertificateHolder ocspResponderCertificate) {
     this.ocspResponder = ocspResponder;
     this.ocspResponderUrl = ocspResponderUrl;
     this.ocspResponderCertificate = ocspResponderCertificate;
@@ -104,35 +108,36 @@ public class TestCAService extends AbstractCAService<DefaultCertificateModelBuil
 
   @Override
   public OCSPResponder getOCSPResponder() {
-    return ocspResponder;
+    return this.ocspResponder;
   }
 
   @Override
   public X509CertificateHolder getOCSPResponderCertificate() {
-    return ocspResponderCertificate;
+    return this.ocspResponderCertificate;
   }
 
   @Override
   public String getCaAlgorithm() {
-    return certificateIssuer.getCertificateIssuerModel().getAlgorithm();
+    return this.certificateIssuer.getCertificateIssuerModel().getAlgorithm();
   }
 
   @Override
   public List<String> getCrlDpURLs() {
-    return crlDistributionPoints;
+    return this.crlDistributionPoints;
   }
 
   @Override
   public String getOCSPResponderURL() {
-    return ocspResponderUrl;
+    return this.ocspResponderUrl;
   }
 
   @Override
-  protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel<?> subject, PublicKey publicKey,
-      X509CertificateHolder issuerCertificate, CertificateIssuerModel certificateIssuerModel)
+  protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(final CertNameModel<?> subject,
+      final PublicKey publicKey,
+      final X509CertificateHolder issuerCertificate, final CertificateIssuerModel certificateIssuerModel)
       throws CertificateIssuanceException {
-    DefaultCertificateModelBuilder certModelBuilder =
-        DefaultCertificateModelBuilder.getInstance(publicKey, getCaCertificate(),
+    final DefaultCertificateModelBuilder certModelBuilder =
+        DefaultCertificateModelBuilder.getInstance(publicKey, this.getCaCertificate(),
             certificateIssuerModel);
     certModelBuilder
         .subject(subject)
@@ -140,8 +145,8 @@ public class TestCAService extends AbstractCAService<DefaultCertificateModelBuil
         .includeSki(true)
         .basicConstraints(new BasicConstraintsModel(true, true))
         .keyUsage(new KeyUsageModel(KeyUsage.digitalSignature))
-        .crlDistributionPoints(crlDistributionPoints.isEmpty() ? null : crlDistributionPoints)
-        .ocspServiceUrl(ocspResponder != null ? ocspResponderUrl : null)
+        .crlDistributionPoints(this.crlDistributionPoints.isEmpty() ? null : this.crlDistributionPoints)
+        .ocspServiceUrl(this.ocspResponder != null ? this.ocspResponderUrl : null)
         .authenticationContext(SAMLAuthContextBuilder.instance()
             .assertionRef("1234567890")
             .serviceID("SignService")

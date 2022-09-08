@@ -44,7 +44,6 @@ import org.mockito.Mockito;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
@@ -472,7 +471,7 @@ public class AbstractKeyAndCertificateHandlerTest {
     }
 
     @Override
-    protected X509Certificate issueSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
+    protected List<X509Certificate> issueSigningCertificateChain(@Nonnull final PkiCredential signingKeyPair,
         @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
         @Nonnull final List<AttributeMappingData> certAttributes, @Nullable final String certificateProfile,
         @Nonnull final SignServiceContext context) throws CertificateException {
@@ -481,12 +480,12 @@ public class AbstractKeyAndCertificateHandlerTest {
       context.put("signingKeyPair", new PkiCredentialWrapper(signingKeyPair));
       context.put("algorithm", signRequest.getSignatureRequirements().getSignatureAlgorithm());
 
-      return super.issueSigningCertificate(signingKeyPair, signRequest, assertion, certAttributes, certificateProfile,
+      return super.issueSigningCertificateChain(signingKeyPair, signRequest, assertion, certAttributes, certificateProfile,
           context);
     }
 
     @Override
-    protected X509Certificate issueSigningCertificate(final CertificateModel certificateModel,
+    protected List<X509Certificate> issueSigningCertificateChain(final CertificateModel certificateModel,
         final String certificateProfile, final SignServiceContext context) throws CertificateException {
 
       final PkiCredential signingKeyPair = context.get("signingKeyPair", PkiCredentialWrapper.class).getCredential();
@@ -529,7 +528,7 @@ public class AbstractKeyAndCertificateHandlerTest {
       }
 
       try {
-        return TestUtils.generateCertificate(signingKeyPair, dnBuilder.build(), certSigningAlgoJcaName);
+        return List.of(TestUtils.generateCertificate(signingKeyPair, dnBuilder.build(), certSigningAlgoJcaName));
       }
       catch (final Exception e) {
         throw new CertificateException("Unable to generate certificate", e);
@@ -615,30 +614,18 @@ public class AbstractKeyAndCertificateHandlerTest {
 
     private final PublicKey publicKey;
 
-    private final CertNameModel<?> subject;
-
     public TestCertificateModelBuilder(final PublicKey publicKey, final CertNameModel<?> subject) {
       this.publicKey = publicKey;
       this.subject = subject;
     }
 
-    // TODO: Change when AbstractCertificateModelBuilder has been cleaned up
     @Override
-    public CertificateModel build() throws CertificateIssuanceException {
-      try {
-        return CertificateModel.builder()
-            .publicKey(this.publicKey)
-            .subject(this.subject)
-            .extensionModels(this.getExtensionModels())
-            .build();
-      }
-      catch (final Exception e) {
-        throw new CertificateIssuanceException("Failed to prepare certificate data", e);
-      }
+    protected PublicKey getPublicKey() {
+      return this.publicKey;
     }
 
     @Override
-    protected void getKeyIdentifierExtensionsModels(final List<ExtensionModel> extm) throws IOException {
+    protected void addKeyIdentifierExtensionsModels(List<ExtensionModel> extensionModelList) throws IOException {
     }
 
   }

@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
+import java.time.Duration;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -53,7 +54,7 @@ class NoStorageCARepositoryTest {
   private static X509Certificate caCertificate;
 
   @BeforeAll
-  private static void init() throws Exception {
+  public static void init() throws Exception {
     caDir = new File(System.getProperty("user.dir"), "target/test/ca-repo");
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
@@ -71,11 +72,11 @@ class NoStorageCARepositoryTest {
     caCertificate = caf.generate(
         (new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))).getKeyPair(),
       new CertificateIssuerModel(
-          XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10), caNameModel);
+          XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, Duration.ofDays(365)), caNameModel);
   }
 
   @AfterAll
-  private static void clean() throws Exception {
+  public static void clean() throws Exception {
     FileUtils.deleteDirectory(caDir);
   }
 

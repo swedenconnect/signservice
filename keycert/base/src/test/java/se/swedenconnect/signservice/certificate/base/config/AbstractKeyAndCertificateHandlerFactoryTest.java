@@ -311,7 +311,7 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
 
     @Override
     @Nonnull
-    protected X509Certificate issueSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
+    protected List<X509Certificate> issueSigningCertificateChain(@Nonnull final PkiCredential signingKeyPair,
         @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
         @Nonnull final List<AttributeMappingData> certAttributes,
         @Nullable final String certificateProfile, @Nonnull final SignServiceContext context)

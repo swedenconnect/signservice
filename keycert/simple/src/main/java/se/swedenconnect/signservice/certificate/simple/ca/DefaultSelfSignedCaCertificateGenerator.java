@@ -25,16 +25,15 @@ import javax.annotation.Nonnull;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.cert.X509CertificateHolder;
 
-import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
-import se.swedenconnect.ca.engine.ca.issuer.impl.BasicCertificateIssuer;
+import se.swedenconnect.ca.engine.ca.issuer.impl.SelfIssuedCertificateIssuer;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.SelfIssuedCertificateModelBuilder;
-import se.swedenconnect.ca.engine.utils.CAUtils;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.utils.X509Utils;
 
@@ -51,9 +50,7 @@ public class DefaultSelfSignedCaCertificateGenerator implements SelfSignedCaCert
       @Nonnull final CertNameModel<?> name) throws CertificateException {
 
     try {
-      final BasicCertificateIssuer issuer = new BasicCertificateIssuer(certificateIssuerModel,
-          CAUtils.getX500Name(name, new AttributeValueEncoder()), keyPair.getPrivateKey());
-
+      final CertificateIssuer issuer = new SelfIssuedCertificateIssuer(certificateIssuerModel);
       final CertificateModel certificateModel = SelfIssuedCertificateModelBuilder.getInstance(
           new KeyPair(keyPair.getPublicKey(), keyPair.getPrivateKey()), certificateIssuerModel)
           .subject(name)

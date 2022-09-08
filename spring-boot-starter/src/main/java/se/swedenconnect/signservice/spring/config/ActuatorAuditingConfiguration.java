@@ -15,6 +15,8 @@
  */
 package se.swedenconnect.signservice.spring.config;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
@@ -92,10 +94,11 @@ public class ActuatorAuditingConfiguration implements InitializingBean {
   @Override
   public void afterPropertiesSet() throws Exception {
     this.actuatorAuditingConfigured = this.properties.getSystemAudit().getActuator() != null
-        && this.properties.getSystemAudit().getActuator().isActive();
+        && Optional.ofNullable(this.properties.getSystemAudit().getActuator().getActive()).orElse(true);
     if (!this.actuatorAuditingConfigured) {
       for (final EngineConfigurationProperties e : this.properties.getEngines()) {
-        if (e.getAudit().getActuator() != null && e.getAudit().getActuator().isActive()) {
+        if (e.getAudit().getActuator() != null
+            && Optional.ofNullable(e.getAudit().getActuator().getActive()).orElse(true)) {
           this.actuatorAuditingConfigured = true;
           return;
         }

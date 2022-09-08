@@ -23,6 +23,7 @@ import java.io.File;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
+import java.time.Duration;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -53,7 +54,7 @@ class BasicCAServiceTest {
   private static File caDir;
 
   @BeforeAll
-  private static void init() {
+  public static void init() {
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
@@ -61,7 +62,7 @@ class BasicCAServiceTest {
   }
 
   @AfterAll
-  private static void clean() throws Exception {
+  public static void clean() throws Exception {
     FileUtils.deleteDirectory(caDir);
   }
 
@@ -73,7 +74,7 @@ class BasicCAServiceTest {
     final SelfSignedCaCertificateGenerator caCertificateFactory = new DefaultSelfSignedCaCertificateGenerator();
     final X509Certificate caCertificate = caCertificateFactory.generate(
         caCredential,
-        new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10),
+        new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, Duration.ofDays(365)),
         new ExplicitCertNameModel(List.of(
             new AttributeTypeAndValueModel(CertAttributes.C, "SE"),
             new AttributeTypeAndValueModel(CertAttributes.O, "Test Org"),

@@ -136,32 +136,19 @@
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
+<!-- 
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>
       <scope>runtime</scope>
     </dependency>
+    -->
     
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-spring-boot-starter</artifactId>
       <version>${project.version}</version>    
     </dependency>
-
-<!-- 
-    <dependency>
-      <groupId>ch.qos.logback.contrib</groupId>
-      <artifactId>logback-json-classic</artifactId>
-      <version>0.1.5</version>
-    </dependency>
-
-    <dependency>
-      <groupId>ch.qos.logback.contrib</groupId>
-      <artifactId>logback-jackson</artifactId>
-      <version>0.1.5</version>
-    </dependency>
--->
-
 
     <dependency>
       <groupId>org.webjars</groupId>

@@ -27,6 +27,7 @@ import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,7 +102,7 @@ class SimpleKeyAndCertificateHandlerTest {
   private static String TEST_CRL = "kht-ca.crl";
 
   @BeforeAll
-  private static void init() throws Exception {
+  public static void init() throws Exception {
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
@@ -114,7 +115,7 @@ class SimpleKeyAndCertificateHandlerTest {
     final SelfSignedCaCertificateGenerator caCertGenerator = new DefaultSelfSignedCaCertificateGenerator();
     caCertificate = caCertGenerator.generate(
         caCredential,
-        new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, 10),
+        new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, Duration.ofDays(3650)),
         new ExplicitCertNameModel(List.of(
             new AttributeTypeAndValueModel(CertAttributes.CN, "Test CA"),
             new AttributeTypeAndValueModel(CertAttributes.O, "Test Org"),
@@ -137,7 +138,7 @@ class SimpleKeyAndCertificateHandlerTest {
   }
 
   @AfterAll
-  private static void clean() throws Exception {
+  public static void clean() throws Exception {
     FileUtils.deleteDirectory(new File(TEST_PATH));
   }
 

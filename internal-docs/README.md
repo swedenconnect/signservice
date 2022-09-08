@@ -4,10 +4,6 @@
 
 > Contains documents and information that are internal to the project and not published on the Web (/docs).
 
-## Presentations
-
-- Presentation from project kick-off - [20220215-Kick-off.pdf](archive/20220215-Kick-off.pdf)
-
 ## Planning
 
 The project planning is performed using Jira outside of this repository, so this repo doesn't contain any milestones or
@@ -30,10 +26,6 @@ tasks. However, the following milestones have been defined:
     - Supervision, PEN-testing, ...
     - Setup of an acceptance testing environment
     - Deploy- and project documentation
-
-## Design Documents
-
-* [Signature Service Design Documentation](Design.md)
 
 ## Useful packages
 

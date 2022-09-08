@@ -74,6 +74,28 @@
     <module>simple</module>
       <module>cmc</module>
   </modules>
+  
+  <dependencyManagement>
+    <dependencies>
+    
+      <!-- 
+        CA engine below has a tranistive dependency to commons-beanutils 1.9.3.
+        This version has a reported vulnerability so we use 1.9.4 instead. 
+      -->
+      <dependency>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>1.9.4</version>
+      </dependency>
+    
+      <dependency>
+        <groupId>se.swedenconnect.ca</groupId>
+        <artifactId>ca-engine</artifactId>
+        <version>1.2.2</version>
+      </dependency>      
+    
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
 

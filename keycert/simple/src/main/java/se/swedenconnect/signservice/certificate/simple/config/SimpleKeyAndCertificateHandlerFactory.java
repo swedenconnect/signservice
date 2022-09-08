@@ -17,6 +17,8 @@ package se.swedenconnect.signservice.certificate.simple.config;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CRLException;
+import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Optional;
 
@@ -114,8 +116,8 @@ public class SimpleKeyAndCertificateHandlerFactory extends AbstractKeyAndCertifi
       log.info("{}", msg, e);
       throw new IllegalArgumentException(msg, e);
     }
-    catch (final NoSuchAlgorithmException e) {
-      final String msg = "Failed to set up a CA service - unsupported algorithm";
+    catch (final NoSuchAlgorithmException | CRLException | CertificateException e) {
+      final String msg = "Failed to set up a CA service - " + e.getMessage();
       log.info("{}", msg, e);
       throw new IllegalArgumentException(msg, e);
     }

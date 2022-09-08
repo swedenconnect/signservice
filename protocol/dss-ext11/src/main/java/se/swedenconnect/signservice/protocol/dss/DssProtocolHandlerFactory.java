@@ -50,8 +50,8 @@ public class DssProtocolHandlerFactory extends AbstractHandlerFactory<ProtocolHa
         new DssSignResponseMessage.ResponseConfiguration();
 
     handler.setName(conf.getName());
-    responseConfig.includeAssertion = conf.isIncludeAssertion();
-    responseConfig.includeRequestMessage = conf.isIncludeRequestMessage();
+    responseConfig.includeAssertion = Optional.ofNullable(conf.getIncludeAssertion()).orElse(true);
+    responseConfig.includeRequestMessage = Optional.ofNullable(conf.getIncludeRequestMessage()).orElse(false);
     handler.setResponseConfiguration(responseConfig);
 
     return handler;

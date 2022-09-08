@@ -210,12 +210,12 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
         .map(SigningCertificateRequirements::getSigningCertificateProfile)
         .orElse(null);
 
-    final X509Certificate signerCertificate =
-        this.issueSigningCertificate(signingKeyCredentials, signRequest, assertion, certAttributes,
+    final List<X509Certificate> signerCertificateChain =
+        this.issueSigningCertificateChain(signingKeyCredentials, signRequest, assertion, certAttributes,
             certificateProfile, context);
 
-    // Add signer certificate to key credentials
-    signingKeyCredentials.setCertificate(signerCertificate);
+    // Add signer certificate chain to key credentials
+    signingKeyCredentials.setCertificateChain(signerCertificateChain);
 
     return signingKeyCredentials;
   }
@@ -231,10 +231,10 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
    * @param certAttributes the certificate attributes to include in the certificate
    * @param certificateProfile the certificate profile (may be null)
    * @param context signature context providing additional information
-   * @return the certificate of the signer
+   * @return the certificate chain where the signer certificate is placed first
    * @throws CertificateException error obtaining a certificate for the signer
    */
-  protected abstract X509Certificate issueSigningCertificate(@Nonnull final PkiCredential signingKeyPair,
+  protected abstract List<X509Certificate> issueSigningCertificateChain(@Nonnull final PkiCredential signingKeyPair,
       @Nonnull final SignRequestMessage signRequest, @Nonnull final IdentityAssertion assertion,
       @Nonnull final List<AttributeMappingData> certAttributes, @Nullable final String certificateProfile,
       @Nonnull final SignServiceContext context) throws CertificateException;

@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,10 +37,12 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
+import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
@@ -60,6 +63,9 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
   /** The CRL publishing path. */
   private final String crlPublishPath;
 
+  /** The CA chain. */
+  private final List<X509Certificate> caChain;
+
   /**
    * Constructor.
    *
@@ -73,9 +79,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
       @Nonnull final AttributeMapper attributeMapper,
       @Nonnull final CAService caService,
       @Nonnull final String crlPublishPath) {
-    super(keyProviders, attributeMapper);
-    this.caService = Objects.requireNonNull(caService, "caService must not be null");
-    this.crlPublishPath = Objects.requireNonNull(crlPublishPath, "crlPublishPath must not be null");
+    this(keyProviders, attributeMapper, AlgorithmRegistrySingleton.getInstance(), caService, crlPublishPath);
   }
 
   /**
@@ -96,19 +100,36 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
     super(keyProviders, attributeMapper, algorithmRegistry);
     this.caService = Objects.requireNonNull(caService, "caService must not be null");
     this.crlPublishPath = Objects.requireNonNull(crlPublishPath, "crlPublishPath must not be null");
+    this.caChain = new ArrayList<>();
+    try {
+      for (final X509CertificateHolder c : this.caService.getCACertificateChain()) {
+        this.caChain.add(CertificateUtils.decodeCertificate(c.getEncoded()));
+      }
+    }
+    catch (final CertificateException | IOException e) {
+      throw new SecurityException("Failed to get CA certificate chain", e);
+    }
   }
 
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  protected X509Certificate issueSigningCertificate(@Nonnull final CertificateModel certificateModel,
+  protected List<X509Certificate> issueSigningCertificateChain(@Nonnull final CertificateModel certificateModel,
       @Nullable final String certificateProfile, @Nonnull final SignServiceContext context)
       throws CertificateException {
 
     log.debug("Issuing certificate from certificate model");
-    final X509CertificateHolder certificateHolder = this.caService.issueCertificate(certificateModel);
     try {
-      return CertificateUtils.decodeCertificate(certificateHolder.getEncoded());
+      final X509CertificateHolder certificateHolder = this.caService.issueCertificate(certificateModel);
+      List<X509Certificate> chain = new ArrayList<>();
+      chain.add(CertificateUtils.decodeCertificate(certificateHolder.getEncoded()));
+      chain.addAll(this.caChain);
+      return chain;
+    }
+    catch (final CertificateIssuanceException e) {
+      final String msg = String.format("Failed to issue certificate - %s", e.getMessage());
+      log.info("{}", msg, e);
+      throw new CertificateException(msg, e);
     }
     catch (final IOException e) {
       final String msg = "Failed to decode issued X509 certificate";
@@ -123,8 +144,13 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
   @Nonnull
   protected AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>> createCertificateModelBuilder(
       @Nonnull final PublicKey subjectPublicKey, @Nonnull final CertNameModel<?> subject) throws CertificateException {
-    return (AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>>) this.caService
-        .getCertificateModelBuilder(subject, subjectPublicKey);
+    try {
+      return (AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>>) this.caService
+          .getCertificateModelBuilder(subject, subjectPublicKey);
+    }
+    catch (final CertificateIssuanceException e) {
+      throw new CertificateException("Failed to get certificate model builder - " + e.getMessage(), e);
+    }
   }
 
   /** {@inheritDoc} */
@@ -157,7 +183,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
       final byte[] buffer = new byte[4096];
       int numBytesRead;
       while ((numBytesRead = bis.read(buffer)) > 0) {
-          os.write(buffer, 0, numBytesRead);
+        os.write(buffer, 0, numBytesRead);
       }
     }
   }

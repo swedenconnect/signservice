@@ -47,7 +47,8 @@ public class ActuatorAuditLoggerFactory extends AbstractAuditLoggerFactory {
       throw new IllegalArgumentException(
           "Unknown configuration object supplied - " + configuration.getClass().getSimpleName());
     }
-    if (!((ActuatorAuditLoggerConfiguration) configuration).isActive()) {
+    final Boolean isActive = ((ActuatorAuditLoggerConfiguration) configuration).getActive();
+    if (isActive != null && !isActive.booleanValue()) {
       throw new IllegalArgumentException("The active property is false - factory should never has been called");
     }
     if (this.publisher == null) {
