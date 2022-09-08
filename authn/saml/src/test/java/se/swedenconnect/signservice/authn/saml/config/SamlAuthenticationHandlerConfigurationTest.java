@@ -15,9 +15,40 @@
  */
 package se.swedenconnect.signservice.authn.saml.config;
 
+import java.util.List;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+
+import se.swedenconnect.signservice.storage.MessageReplayChecker;
+
 /**
- * Test cases for AbstractSamlAuthenticationHandlerConfiguration.
+ * Test cases for SamlAuthenticationHandlerConfiguration.
  */
 public class SamlAuthenticationHandlerConfigurationTest {
+
+  @Test
+  public void testDefaultFactory() {
+    final SamlAuthenticationHandlerConfiguration config = new SamlAuthenticationHandlerConfiguration();
+    Assertions.assertEquals(SamlAuthenticationHandlerFactory.class.getName(), config.getFactoryClass());
+  }
+
+  @Test
+  public void testExcludeFromRecursiveMerge() {
+    final TestConfig config = new TestConfig();
+    final List<Class<?>> excluded = config.getExcludedClasses();
+    Assertions.assertEquals(MessageReplayChecker.class, excluded.get(excluded.size() - 2));
+    Assertions.assertEquals(EntityDescriptor.class, excluded.get(excluded.size() - 1));
+    Assertions.assertEquals(excluded, config.getExcludedClasses());
+  }
+
+  private static class TestConfig extends SamlAuthenticationHandlerConfiguration {
+
+    public List<Class<?>> getExcludedClasses() {
+      return this.excludeFromRecursiveMerge();
+    }
+
+  }
 
 }
