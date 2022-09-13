@@ -56,7 +56,7 @@ public class SpringBeanLoaderTest {
 
     final ApplicationContext context = Mockito.mock(ApplicationContext.class);
     Mockito.when(context.getBean(Mockito.anyString(), ArgumentMatchers.any(Class.class)))
-      .thenThrow(new FatalBeanException("error"));
+        .thenThrow(new FatalBeanException("error"));
 
     final SpringBeanLoader loader = new SpringBeanLoader(context);
 
@@ -67,7 +67,7 @@ public class SpringBeanLoaderTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testLoadLazily() {
+  public void testNotFound() {
     final DummyHandler handler = new DummyHandler();
     handler.setName("dummy");
 
@@ -77,13 +77,10 @@ public class SpringBeanLoaderTest {
 
     final SpringBeanLoader loader = new SpringBeanLoader(context);
 
-    final DummyHandler handler2 = loader.load("bean.name", DummyHandler.class);
-    Assertions.assertNotNull(handler2);
+    Assertions.assertThrows(NoSuchBeanDefinitionException.class, () -> {
+      loader.load("bean.name", DummyHandler.class);
+    });
 
-    Mockito.when(context.getBean(Mockito.anyString(), ArgumentMatchers.any(Class.class)))
-        .thenReturn(handler);
-
-    Assertions.assertEquals("dummy", handler2.getName());
   }
 
   public static class DummyHandler extends AbstractSignServiceHandler {
