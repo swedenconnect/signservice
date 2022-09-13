@@ -36,7 +36,7 @@ public abstract class AbstractHandlerFactory<T extends SignServiceHandler> imple
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public final T create(@Nullable final HandlerConfiguration<T> configuration, @Nullable final BeanLoader<T> beanLoader)
+  public final T create(@Nullable final HandlerConfiguration<T> configuration, @Nullable final BeanLoader beanLoader)
       throws IllegalArgumentException {
     if (configuration != null) {
       if (configuration.getBeanName() != null) {
@@ -47,7 +47,7 @@ public abstract class AbstractHandlerFactory<T extends SignServiceHandler> imple
         log.debug("Factory {} supplied with configuration that contains bean-name '{}', loading bean ...",
             this.getClass().getSimpleName(), configuration.getBeanName());
 
-        return beanLoader.apply(configuration.getBeanName());
+        return beanLoader.load(configuration.getBeanName(), this.getHandlerType());
       }
       if (configuration.needsDefaultConfigResolving()) {
         final String msg = "Configuration contains an unresolved default configuration reference";
@@ -55,21 +55,31 @@ public abstract class AbstractHandlerFactory<T extends SignServiceHandler> imple
         throw new IllegalArgumentException(msg);
       }
     }
-    return this.createHandler(configuration);
+    return this.createHandler(configuration, beanLoader);
   }
 
   /**
    * Creates a handler instance based on the supplied configuration. The method is invoked from
    * {@link #create(HandlerConfiguration)} that already has taken care of bean loading (if necessary) and checking the
-   * any references have been resolved.
+   * any references have been resolved. The {@code beanLoader} is supplied anyway since the implementation may need to
+   * load any other bean references.
    *
    * @param configuration the configuration. May be null if the factory can create a handler instance without any
    *          configuration
+   * @param beanLoader the bean loader (may be null)
    * @return a handler instance
    * @throws IllegalArgumentException if the supplied configuration is not correct
    */
   @Nonnull
-  protected abstract T createHandler(@Nullable final HandlerConfiguration<T> configuration)
+  protected abstract T createHandler(
+      @Nullable final HandlerConfiguration<T> configuration, @Nullable final BeanLoader beanLoader)
       throws IllegalArgumentException;
+
+  /**
+   * Gets the handler type.
+   *
+   * @return the handler type
+   */
+  protected abstract Class<T> getHandlerType();
 
 }

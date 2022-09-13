@@ -53,7 +53,10 @@ public interface EngineConfiguration {
   PkiCredential getSignServiceCredential();
 
   /**
-   * Gets the path, or paths, relative the application root/context path for the SignRequest processing endpoint(s).
+   * Gets the path, or paths, for the SignRequest processing endpoint(s).
+   * <p>
+   * Note: The paths should be relative to the application base URL, i.e., they should include the context path.
+   * </p>
    *
    * @return the processing path(s)
    */

@@ -270,9 +270,14 @@ public class AbstractHandlerConfigurationTest {
 
     @Override
     @Nonnull
-    protected DummyHandler createHandler(@Nonnull final HandlerConfiguration<DummyHandler> configuration)
-        throws IllegalArgumentException {
+    protected DummyHandler createHandler(@Nonnull final HandlerConfiguration<DummyHandler> configuration,
+        @Nonnull final BeanLoader beanLoader) throws IllegalArgumentException {
       throw new IllegalArgumentException("Only for test");
+    }
+
+    @Override
+    protected Class<DummyHandler> getHandlerType() {
+      return DummyHandler.class;
     }
 
   }
@@ -290,9 +295,15 @@ public class AbstractHandlerConfigurationTest {
 
     @Override
     @Nonnull
-    protected DummyHandler createHandler(@Nonnull final HandlerConfiguration<DummyHandler> configuration)
+    protected DummyHandler createHandler(
+        @Nonnull final HandlerConfiguration<DummyHandler> configuration, @Nonnull final BeanLoader beanLoader)
         throws IllegalArgumentException {
       throw new IllegalArgumentException("Only for test");
+    }
+
+    @Override
+    protected Class<DummyHandler> getHandlerType() {
+      return DummyHandler.class;
     }
 
   }

@@ -25,13 +25,12 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.LazyLoader;
 import org.springframework.context.ApplicationContext;
 
-import se.swedenconnect.signservice.core.SignServiceHandler;
 import se.swedenconnect.signservice.core.config.BeanLoader;
 
 /**
  * A Spring bean loader.
  */
-public class SpringBeanLoader<T extends SignServiceHandler> implements BeanLoader<T> {
+public class SpringBeanLoader implements BeanLoader {
 
   /** The logger. */
   private static final Logger log = LoggerFactory.getLogger(SpringBeanLoader.class);
@@ -39,18 +38,13 @@ public class SpringBeanLoader<T extends SignServiceHandler> implements BeanLoade
   /** The Spring application context. */
   private final ApplicationContext applicationContext;
 
-  /** The type of handler loaded by this loader instance. */
-  private final Class<T> handlerType;
-
   /**
-   * Constructor assigning the Spring application context and the the class for handlers loaded by this instance.
+   * Constructor assigning the Spring application context.
    *
    * @param applicationContext the Spring application context
-   * @param handlerType the type of handler loaded
    */
-  public SpringBeanLoader(@Nonnull final ApplicationContext applicationContext, @Nonnull final Class<T> handlerType) {
+  public SpringBeanLoader(@Nonnull final ApplicationContext applicationContext) {
     this.applicationContext = applicationContext;
-    this.handlerType = handlerType;
   }
 
   /**
@@ -58,10 +52,10 @@ public class SpringBeanLoader<T extends SignServiceHandler> implements BeanLoade
    */
   @Override
   @Nonnull
-  public T apply(@Nonnull final String beanName) {
+  public <T> T load(@Nonnull final String beanName, @Nonnull final Class<T> type) {
     try {
-      final T handler = this.applicationContext.getBean(beanName, this.handlerType);
-      log.debug("Bean '{}' of type '{}' was successfully loaded", beanName, this.handlerType.getSimpleName());
+      final T handler = this.applicationContext.getBean(beanName, type);
+      log.debug("Bean '{}' of type '{}' was successfully loaded", beanName, type.getSimpleName());
       return handler;
     }
     catch (final NoSuchBeanDefinitionException e) {
@@ -77,15 +71,15 @@ public class SpringBeanLoader<T extends SignServiceHandler> implements BeanLoade
     // have been setup, we'll get an error.
     //
     final Enhancer enhancer = new Enhancer();
-    enhancer.setSuperclass(this.handlerType);
+    enhancer.setSuperclass(type);
     enhancer.setCallback(new LazyLoader() {
 
       @Override
       public Object loadObject() throws Exception {
-        return applicationContext.getBean(beanName, handlerType);
+        return applicationContext.getBean(beanName, type);
       }
     });
-    return this.handlerType.cast(enhancer.create());
+    return type.cast(enhancer.create());
   }
 
 }

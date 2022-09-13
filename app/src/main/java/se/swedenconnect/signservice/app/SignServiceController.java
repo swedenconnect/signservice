@@ -15,13 +15,10 @@
  */
 package se.swedenconnect.signservice.app;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -29,7 +26,6 @@ import org.springframework.web.servlet.ModelAndView;
 import lombok.Setter;
 import se.swedenconnect.signservice.application.SignServiceEngineManager;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
-import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
 
 /**
@@ -42,15 +38,11 @@ public class SignServiceController {
   @Autowired
   private SignServiceEngineManager manager;
 
-  @Autowired
-  @Qualifier("signservice.Engines")
-  public List<SignServiceEngine> engines;
-
   @RequestMapping("/sign/**")
   public ModelAndView processRequest(final HttpServletRequest request, final HttpServletResponse response)
       throws UnrecoverableSignServiceException {
 
-    final HttpRequestMessage result = manager.processRequest(request, response);
+    final HttpRequestMessage result = this.manager.processRequest(request, response);
 
     if (result == null) {
       return null;
@@ -60,7 +52,7 @@ public class SignServiceController {
         return new ModelAndView("redirect:" + result.getUrl());
       }
       else { // POST
-        ModelAndView mav = new ModelAndView("post");
+        final ModelAndView mav = new ModelAndView("post");
         mav.addObject("action", result.getUrl());
         mav.addObject("parameters", result.getHttpParameters());
         return mav;

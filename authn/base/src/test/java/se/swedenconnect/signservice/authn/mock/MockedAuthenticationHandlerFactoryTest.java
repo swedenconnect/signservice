@@ -74,4 +74,18 @@ public class MockedAuthenticationHandlerFactoryTest {
     });
   }
 
+  @Test
+  public void testHandlerType() {
+    final MockedAuthenticationHandlerFactory2 factory = new MockedAuthenticationHandlerFactory2();
+    Assertions.assertEquals(AuthenticationHandler.class, factory.handler());
+  }
+
+  private static class MockedAuthenticationHandlerFactory2 extends MockedAuthenticationHandlerFactory {
+
+    public Class<AuthenticationHandler> handler() {
+      return this.getHandlerType();
+    }
+
+  }
+
 }

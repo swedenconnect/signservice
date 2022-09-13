@@ -16,6 +16,7 @@
 package se.swedenconnect.signservice.audit.actuator;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -23,6 +24,7 @@ import lombok.Setter;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerFactory;
+import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 
 /**
@@ -37,7 +39,8 @@ public class ActuatorAuditLoggerFactory extends AbstractAuditLoggerFactory {
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  protected AbstractAuditLogger createAuditLogger(@Nonnull final HandlerConfiguration<AuditLogger> configuration)
+  protected AbstractAuditLogger createAuditLogger(
+      @Nonnull final HandlerConfiguration<AuditLogger> configuration, @Nullable final BeanLoader beanLoader)
       throws IllegalArgumentException {
 
     if (configuration == null) {

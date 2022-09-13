@@ -42,15 +42,13 @@ public class HandlerFactoryRegistry {
    *
    * @param <T> the type of SignServiceHandler created by the factory
    * @param className the class name for the factory class
-   * @param type the type of SignServiceHandler created by the factory
    * @return a HandlerFactory instance
    * @throws IllegalArgumentException if the HandlerFactory instance could not be created
    * @throws ClassCastException if the type does not match the factory
    */
   @Nonnull
   @SuppressWarnings("unchecked")
-  public <T extends SignServiceHandler> HandlerFactory<T> getFactory(
-      @Nonnull final String className, @Nonnull final Class<T> type)
+  public <T extends SignServiceHandler> HandlerFactory<T> getFactory(@Nonnull final String className)
       throws IllegalArgumentException, ClassCastException {
 
     HandlerFactory<?> factory = this.registry.stream()
@@ -72,7 +70,7 @@ public class HandlerFactoryRegistry {
         throw new IllegalArgumentException("Failed to create factory class - " + className, e);
       }
     }
-    return (HandlerFactory<T>) factory;
+    return HandlerFactory.class.cast(factory);
   }
 
   /**

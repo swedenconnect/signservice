@@ -70,7 +70,7 @@ public class BeanReferenceHandlerConfigurationTest {
     final BeanReferenceHandlerConfiguration<DummyHandler> conf = new BeanReferenceHandlerConfiguration<>();
 
     final HandlerFactoryRegistry registry = new HandlerFactoryRegistry();
-    final HandlerFactory<DummyHandler> handler = registry.getFactory(conf.getFactoryClass(), DummyHandler.class);
+    final HandlerFactory<DummyHandler> handler = registry.getFactory(conf.getFactoryClass());
 
     Assertions.assertNotNull(handler);
     Assertions.assertEquals(BeanReferenceHandlerConfiguration.BeanReferenceHandlerFactory.class, handler.getClass());

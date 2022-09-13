@@ -148,4 +148,17 @@ public class DefaultSignatureHandlerFactoryTest {
         .hasMessageContaining("Unknown configuration object supplied - ");
   }
 
+  @Test
+  public void testHandlerType() {
+    final DefaultSignatureHandlerFactory2 f = new DefaultSignatureHandlerFactory2();
+    Assertions.assertEquals(SignatureHandler.class, f.handler());
+  }
+
+  private static class DefaultSignatureHandlerFactory2 extends DefaultSignatureHandlerFactory {
+
+    public Class<SignatureHandler> handler() {
+      return this.getHandlerType();
+    }
+  }
+
 }
