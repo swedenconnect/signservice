@@ -54,9 +54,11 @@ public class SpringBeanLoader implements BeanLoader {
   @Nonnull
   public <T> T load(@Nonnull final String beanName, @Nonnull final Class<T> type) {
     try {
-      final T handler = this.applicationContext.getBean(beanName, type);
-      log.debug("Bean '{}' of type '{}' was successfully loaded", beanName, type.getSimpleName());
-      return handler;
+      final T bean = this.applicationContext.getBean(beanName, type);
+      if (bean != null) {
+        log.debug("Bean '{}' of type '{}' was successfully loaded", beanName, type.getSimpleName());
+        return bean;
+      }
     }
     catch (final NoSuchBeanDefinitionException e) {
       log.info("Bean '{}' was not found, possibly not created yet, creating a lazy proxy for the bean ...");
