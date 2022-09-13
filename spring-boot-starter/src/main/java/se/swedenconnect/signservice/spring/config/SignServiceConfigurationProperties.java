@@ -42,8 +42,8 @@ public class SignServiceConfigurationProperties implements InitializingBean {
   private String domain;
 
   /**
-   * The "base URL" of the SignService, i.e., everything up until the context path. If not explicitly set, the value is
-   * set to https://${signservice.domain}.
+   * The "base URL" of the SignService, i.e., the protocol, domain and context path (if set to something other than
+   * '/'). Must not end with a '/'.
    */
   private String baseUrl;
 
@@ -81,10 +81,7 @@ public class SignServiceConfigurationProperties implements InitializingBean {
       this.domain = "localhost";
       log.warn("signservice.domain not set, using {}", this.domain);
     }
-    if (!StringUtils.hasText(this.baseUrl)) {
-      this.baseUrl = String.format("https://%s", this.domain);
-      log.info("signservice.base-url not set, using default: {}", this.baseUrl);
-    }
+    Assert.hasText(this.baseUrl, "signservice.base-url must be set");
     Assert.notNull(this.systemAudit, "signservice.system-audit.* must be set");
     // Assert we have a configuration ...
     this.systemAudit.getHandlerConfiguration();

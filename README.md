@@ -28,11 +28,15 @@ This repository comprises of the following modules:
 
 * [keycert](keycert) - Modules for generating signature keys and certificates.
 
+* [signhandler](signhandler) - Module for creating signatures.
+
+* [audit](audit) - Audit logging support.
+
 * [engine](engine) - Signature Service processing logic engine.
 
 * [spring-boot-starter](spring-boot-starter) - A Spring Boot Starter module that is useful when building a Signature Service using Spring Boot.
 
-* [app](app) - A sample Signature Service application built using Spring Boot.
+* [app](app) - A sample Signature Service application built using Spring Boot. 
 
 
 -----

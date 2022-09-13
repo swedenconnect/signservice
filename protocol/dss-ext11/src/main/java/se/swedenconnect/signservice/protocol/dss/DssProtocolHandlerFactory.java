@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import se.swedenconnect.signservice.core.config.AbstractHandlerFactory;
+import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
 
@@ -32,7 +33,8 @@ public class DssProtocolHandlerFactory extends AbstractHandlerFactory<ProtocolHa
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  protected ProtocolHandler createHandler(@Nullable final HandlerConfiguration<ProtocolHandler> configuration)
+  protected ProtocolHandler createHandler(
+      @Nullable final HandlerConfiguration<ProtocolHandler> configuration, @Nullable final BeanLoader beanLoader)
       throws IllegalArgumentException {
 
     if (configuration != null) {
@@ -55,6 +57,13 @@ public class DssProtocolHandlerFactory extends AbstractHandlerFactory<ProtocolHa
     handler.setResponseConfiguration(responseConfig);
 
     return handler;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Nonnull
+  protected Class<ProtocolHandler> getHandlerType() {
+    return ProtocolHandler.class;
   }
 
 }

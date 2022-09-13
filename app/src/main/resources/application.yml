@@ -37,7 +37,7 @@ signservice:
     actuator:
       name: "SignService System Audit Logger"
       principal: "SignService"
-  default-sign-service-id: https://sandbox.swedenconnect.se/signservice
+  default-sign-service-id: https://localhost.swedenconnect.se/signservice
   default-credential:
     name: SignService
     resource: classpath:signservice.jks
@@ -46,11 +46,6 @@ signservice:
     password: secret
     key-password: secret
   default-handler-config:
-    protocol:
-      dss:
-        name: "DssProtocolHandler"
-        include-assertion: true
-        include-request-message: true
     sign:
       default-handler:
         tbs-processors:
@@ -59,30 +54,24 @@ signservice:
           include-issuer-serial: true
         - type: pdf
     cert:
-      cmc:
-        rsa-provider:
-          key-size: 4096
-#          stack-size: 10
+      built-in-ca:
+        base-url: ${signservice.base-url}
+        ca-credential-props:
+          resource: classpath:ca/test-ca.jks
+          type: JKS
+          password: secret
+          alias: test-ca
+          key-password: secret
+        ca-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256
+        ca-certificate-type: PKC
         ec-provider:
           curve-name: P-256
-        cmc-client-credential-props:
-          resource: classpath:sandbox/cmc-client.jks
-          alias: cmc
-          password: secret
-          key-password: secret
-          type: JKS
-        cmc-request-url: https://sandbox.swedenconnect.se/sigca/cmc/ca01
-        cmc-responder-certificate: classpath:sandbox/cmc-responder.crt
-        ca-certificate-type: PKC
-        remote-ca-info:
-          ca-certificate-chain:
-          - classpath:sandbox/sandbox-ca.crt
-          - classpath:sandbox/sandbox-root-ca.crt
-          ca-algorithm: http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256
-          crl-dp-urls:
-          - https://sandbox.swedenconnect.se/sigca/crl/ca01.crl
-          ocsp-responser-url: https://sandbox.swedenconnect.se/sigca/ocsp/ca01
-        cmc-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256
+        rsa-provider:
+          key-size: 4096
+        cert-validity: P365D
+        crl-validity: P2D
+        crl-dp-path: /sign/signca/signca.crl
+        crl-file-location: ${SIGNSERVICE_HOME}/signca/signca.crl
         default-value-policy-checker:
           default-reply: false
           rules:
@@ -171,25 +160,66 @@ signservice:
               company: "Sweden Connect"
               email-address: operations@swedenconnect.se
   engines:
-  - name: "localhost"
-    sign-service-id: https://localhost.swedenconnect.se/signservice
+  #
+  # Configuration for the "Test my Signature"-client running on localhost. 
+  # See https://github.com/idsec-solutions/signservice-integration.
+  #
+  - name: "test-my-signature-localhost"
     processing-paths:
-    - /sign/localhost/eid2cssp
+    - /sign/testmysignature/signreq
+    client:
+      client-id: http://sandbox.swedenconnect.se/testmyeid
+      trusted-certificates:
+      - classpath:clients/test-my-signature/client.crt
+    protocol:
+      dss:
+        bean-name: signservice.DssProtocolHandler
+    authn:
+      saml:        
+        default-config-ref: authn.saml
+        entity-id: http://sandbox.swedenconnect.se/testmyeid/localsign
+        sp-paths:
+          metadata-publishing-path: /sign/testmysignature/saml/metadata
+          assertion-consumer-path: /sign/testmysignature/saml/sso
+        metadata:
+          ui-info:
+            display-names:
+            - "en-Test your eID (localhost)"
+            - "sv-Testa ditt eID (localhost)"
+            descriptions:
+            - "en-Application for testing your eID (localhost)"
+            - "sv-Applikation för att testa ditt eID (localhost)"
+    sign:
+      default-handler:
+        default-config-ref: sign.default-handler
+    cert:
+      built-in-ca:
+        default-config-ref: cert.built-in-ca
+    audit:
+      file:
+        name: "test-my-signature-audit-logger"
+        file-name: ${SIGNSERVICE_HOME}/testmysignature/audit.log
+  #
+  # Configuration for the "Signature Service Test Application" (https://sig.sandbox.swedenconnect.se/testsp).
+  # Log in using the user "signserviceuser" with the password "signserviceuser".
+  #
+  - name: "signservice-test-localhost"
+    processing-paths:
+    - /sign/testapp/signreq
     client:
       client-id: https://eid2cssp.3xasecurity.com/sign
       trusted-certificates:
-      - classpath:clients/eid2cssp.3xasecurity.com.crt
+      - classpath:clients/signservice-testapp/eid2cssp.3xasecurity.com.crt
     protocol:
       dss:
-        include-request-message: false
-        default-config-ref: protocol.dss
+        bean-name: signservice.DssProtocolHandler
     authn:
       saml:        
         default-config-ref: authn.saml
         entity-id: https://localhost.swedenconnect.se/eid2cssp
         sp-paths:
-          metadata-publishing-path: /sign/localhost/eid2cssp/saml/metadata
-          assertion-consumer-path: /sign/localhost/eid2cssp/saml/sso
+          metadata-publishing-path: /sign/testapp/saml/metadata
+          assertion-consumer-path: /sign/testapp/saml/sso
         preferred-binding: POST
         metadata:
           ui-info:
@@ -203,94 +233,12 @@ signservice:
       default-handler:
         default-config-ref: sign.default-handler
     cert:
-      cmc:
-        default-config-ref: cert.cmc
-    audit:
-      file:
-        name: "Sandbox2 Audit Logger"
-        file-name: ${SIGNSERVICE_HOME}/localhost/audit.log
-  - name: "Sandbox SignService Test Application"
-    processing-paths:
-    - /sign/sandbox/eid2cssp
-    client:
-      client-id: https://eid2cssp.3xasecurity.com/sign
-      trusted-certificates:
-      - classpath:clients/eid2cssp.3xasecurity.com.crt
-    protocol:
-      dss:
-        include-request-message: false
-        default-config-ref: protocol.dss
-    authn:
-      saml:
-        default-config-ref: authn.saml
-        entity-id: https://sandbox.swedenconnect.se/eid2cssp
-        sp-paths:
-          metadata-publishing-path: /sign/sandbox/eid2cssp/saml/metadata
-          assertion-consumer-path: /sign/sandbox/eid2cssp/saml/sso
-        metadata:
-          ui-info:
-            display-names:
-            - "en-Sweden Connect Signature Service Test"
-            - "sv-Sweden Connect test för underskriftstjänster"
-            descriptions:
-            - "en-Sweden Connect test application for signature services"
-            - "sv-Sweden Connect testapplikation för underskriftstjänster"
-    sign:
-      default-handler:
-        default-config-ref: sign.default-handler
-    cert:
-      cmc:
-        default-config-ref: cert.cmc
-    audit:
-      log-system:
-        name: "Sandbox SignService Test Application Audit Logger"
-        logger-name: SANDBOX_TEST_APP
-
-  - name: "Sandbox2"
-    processing-paths:
-    - /sign/sandbox2
-    client:
-      client-id: https://eid2cssp.3xasecurity.com/sign2
-      trusted-certificates:
-      - classpath:clients/eid2cssp.3xasecurity.com.crt
-    protocol:
-      dss:
-        include-request-message: false
-        default-config-ref: protocol.dss
-    authn:
-      mock:
-        active: true
-    sign:
-      external:
-        bean-name: signservice.DefaultSignatureHandler
-    cert:
       built-in-ca:
-        base-url: ${signservice.base-url}
-        ca-credential-props:
-          resource: classpath:ca/test-ca.jks
-          alias: test-ca
-          type: JKS
-          password: secret
-          key-password: secret
-        ca-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256
-        ca-certificate-type: PKC
-        crl-dp-path: /sign/sandbox2/ca/testca.crl
-        crl-file-location: ${SIGNSERVICE_HOME}/sandbox2/testca.crl
-        rsa-provider:
-          key-size: 4096
-        ec-provider:
-          curve-name: P-256
-        default-value-policy-checker:
-          default-reply: false
-          rules:
-          - attribute-type: rdn
-            ref: "2.5.4.6"
-            allowed-values:
-            - SE
+        default-config-ref: cert.built-in-ca
     audit:
       file:
-        name: "Sandbox2 Audit Logger"
-        file-name: ${SIGNSERVICE_HOME}/sandbox2/audit.log
+        name: "signservice-test-localhost-audit"
+        file-name: ${SIGNSERVICE_HOME}/signservice-testapp/audit.log
 
 #
 # Logging

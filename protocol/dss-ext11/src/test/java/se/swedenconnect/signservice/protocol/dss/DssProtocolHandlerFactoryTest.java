@@ -55,6 +55,19 @@ public class DssProtocolHandlerFactoryTest {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       factory.create(conf);
     });
+  }
+
+  @Test
+  public void testHandlerType() {
+    final DssProtocolHandlerFactory2 f = new DssProtocolHandlerFactory2();
+    Assertions.assertEquals(ProtocolHandler.class, f.handler());
+  }
+
+  private static class DssProtocolHandlerFactory2 extends DssProtocolHandlerFactory {
+
+    public Class<ProtocolHandler> handler() {
+      return this.getHandlerType();
+    }
 
   }
 

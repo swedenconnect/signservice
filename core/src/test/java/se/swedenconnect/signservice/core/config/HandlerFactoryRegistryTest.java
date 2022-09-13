@@ -31,12 +31,12 @@ public class HandlerFactoryRegistryTest {
   @Test
   public void testCreate() {
     final HandlerFactoryRegistry reg = new HandlerFactoryRegistry();
-    final HandlerFactory<DummyHandler> factory = reg.getFactory(DummyHandlerFactory.class.getName(), DummyHandler.class);
+    final HandlerFactory<DummyHandler> factory = reg.getFactory(DummyHandlerFactory.class.getName());
     Assertions.assertNotNull(factory);
     Assertions.assertEquals(DummyHandlerFactory.class, factory.getClass());
 
     // Make sure a cache is used ...
-    final HandlerFactory<DummyHandler> factory2 = reg.getFactory(DummyHandlerFactory.class.getName(), DummyHandler.class);
+    final HandlerFactory<DummyHandler> factory2 = reg.getFactory(DummyHandlerFactory.class.getName());
     Assertions.assertEquals(factory, factory2);
   }
 
@@ -44,7 +44,7 @@ public class HandlerFactoryRegistryTest {
   public void testMissingClass() {
     final HandlerFactoryRegistry reg = new HandlerFactoryRegistry();
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      reg.getFactory("se.swedenconnect.NotAClass", DummyHandler.class);
+      reg.getFactory("se.swedenconnect.NotAClass");
     });
   }
 
@@ -52,7 +52,7 @@ public class HandlerFactoryRegistryTest {
   public void testNoNoArgCtor() {
     final HandlerFactoryRegistry reg = new HandlerFactoryRegistry();
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      reg.getFactory(DummyHandlerFactoryNoDefaultCtor.class.getName(), DummyHandler.class);
+      reg.getFactory(DummyHandlerFactoryNoDefaultCtor.class.getName());
     });
   }
 
@@ -63,7 +63,7 @@ public class HandlerFactoryRegistryTest {
     reg.addFactory(factory);
 
     // Make sure a cache is used ...
-    final HandlerFactory<DummyHandler> factory2 = reg.getFactory(DummyHandlerFactory.class.getName(), DummyHandler.class);
+    final HandlerFactory<DummyHandler> factory2 = reg.getFactory(DummyHandlerFactory.class.getName());
     Assertions.assertEquals(factory, factory2);
   }
 
@@ -74,9 +74,15 @@ public class HandlerFactoryRegistryTest {
 
     @Override
     @Nonnull
-    protected DummyHandler createHandler(@Nullable final HandlerConfiguration<DummyHandler> configuration)
+    protected DummyHandler createHandler(
+        @Nullable final HandlerConfiguration<DummyHandler> configuration, @Nonnull final BeanLoader beanLoader)
         throws IllegalArgumentException {
       return new DummyHandler();
+    }
+
+    @Override
+    protected Class<DummyHandler> getHandlerType() {
+      return DummyHandler.class;
     }
   }
 
@@ -87,9 +93,15 @@ public class HandlerFactoryRegistryTest {
 
     @Override
     @Nonnull
-    protected DummyHandler createHandler(@Nullable final HandlerConfiguration<DummyHandler> configuration)
+    protected DummyHandler createHandler(
+        @Nullable final HandlerConfiguration<DummyHandler> configuration, @Nonnull final BeanLoader beanLoader)
         throws IllegalArgumentException {
       return new DummyHandler();
+    }
+
+    @Override
+    protected Class<DummyHandler> getHandlerType() {
+      return DummyHandler.class;
     }
   }
 }

@@ -18,10 +18,12 @@ package se.swedenconnect.signservice.audit.file;
 import java.io.IOException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerFactory;
+import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 
 /**
@@ -32,7 +34,8 @@ public class FileAuditLoggerFactory extends AbstractAuditLoggerFactory {
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  protected AbstractAuditLogger createAuditLogger(@Nonnull final HandlerConfiguration<AuditLogger> configuration)
+  protected AbstractAuditLogger createAuditLogger(
+      @Nonnull final HandlerConfiguration<AuditLogger> configuration, @Nullable final BeanLoader beanLoader)
       throws IllegalArgumentException {
 
     if (configuration == null) {

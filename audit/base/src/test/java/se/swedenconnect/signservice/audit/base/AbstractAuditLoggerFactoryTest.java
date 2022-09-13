@@ -32,6 +32,7 @@ import se.swedenconnect.signservice.audit.base.events.AuditEventFactory;
 import se.swedenconnect.signservice.audit.base.events.DefaultAuditEventFactory;
 import se.swedenconnect.signservice.audit.base.events.SignServiceAuditEvent;
 import se.swedenconnect.signservice.core.config.AbstractHandlerConfiguration;
+import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 
 /**
@@ -129,6 +130,12 @@ public class AbstractAuditLoggerFactoryTest {
         .hasMessageContaining("No no-arg constructor visible for ");
   }
 
+  @Test
+  public void testHandlerType() {
+    final TestAuditLoggerFactory f = new TestAuditLoggerFactory();
+    Assertions.assertEquals(AuditLogger.class, f.handlerType());
+  }
+
   public static class DummyAuditEventFactory implements AuditEventFactory {
 
     public DummyAuditEventFactory(final String s) {
@@ -147,9 +154,14 @@ public class AbstractAuditLoggerFactoryTest {
 
     @Override
     @Nonnull
-    protected AbstractAuditLogger createAuditLogger(@Nullable final HandlerConfiguration<AuditLogger> configuration)
+    protected AbstractAuditLogger createAuditLogger(
+        @Nullable final HandlerConfiguration<AuditLogger> configuration, @Nullable final BeanLoader beanLoader)
         throws IllegalArgumentException {
       return new TestAuditLogger();
+    }
+
+    public Class<AuditLogger> handlerType() {
+      return super.getHandlerType();
     }
 
   }

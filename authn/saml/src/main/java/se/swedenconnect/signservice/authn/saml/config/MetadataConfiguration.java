@@ -162,7 +162,7 @@ public class MetadataConfiguration {
     public static class UIInfoLogo {
 
       /**
-       * The logotype path (minus baseUri).
+       * The logotype path (minus baseUri but including the context path).
        */
       private String path;
 

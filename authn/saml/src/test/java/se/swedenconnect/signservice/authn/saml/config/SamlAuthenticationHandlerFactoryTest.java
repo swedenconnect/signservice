@@ -311,6 +311,12 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
         .hasMessage("Missing metadata configuration");
   }
 
+  @Test
+  public void getHandlerType() {
+    final SamlAuthenticationHandlerFactory2 factory = new SamlAuthenticationHandlerFactory2();
+    Assertions.assertEquals(AuthenticationHandler.class, factory.handler());
+  }
+
   private SamlAuthenticationHandlerConfiguration buildConfiguration() throws Exception {
     SamlAuthenticationHandlerConfiguration config = new SamlAuthenticationHandlerConfiguration();
     config.setSamlType(SamlAuthenticationHandlerConfiguration.SAML_TYPE_SWEDEN_CONNECT);
@@ -356,6 +362,13 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     public void checkReplay(final String id) throws MessageReplayException {
     }
 
+  }
+
+  private static class SamlAuthenticationHandlerFactory2 extends SamlAuthenticationHandlerFactory {
+
+    public Class<AuthenticationHandler> handler() {
+      return this.getHandlerType();
+    }
   }
 
 }

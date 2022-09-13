@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -28,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.signservice.core.config.AbstractHandlerFactory;
+import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.signature.SignatureHandler;
 import se.swedenconnect.signservice.signature.impl.DefaultSignatureHandler;
@@ -45,7 +47,8 @@ public class DefaultSignatureHandlerFactory extends AbstractHandlerFactory<Signa
 
   /** {@inheritDoc} */
   @Override
-  protected SignatureHandler createHandler(@Nullable final HandlerConfiguration<SignatureHandler> configuration)
+  protected SignatureHandler createHandler(
+      @Nullable final HandlerConfiguration<SignatureHandler> configuration, @Nullable final BeanLoader beanLoader)
       throws IllegalArgumentException {
 
     if (configuration == null) {
@@ -103,5 +106,11 @@ public class DefaultSignatureHandlerFactory extends AbstractHandlerFactory<Signa
     }
   }
 
+  /** {@inheritDoc} */
+  @Override
+  @Nonnull
+  protected Class<SignatureHandler> getHandlerType() {
+    return SignatureHandler.class;
+  }
 
 }

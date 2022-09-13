@@ -39,7 +39,7 @@ public interface HandlerFactory<T extends SignServiceHandler> {
    * @throws IllegalArgumentException if the supplied configuration is not correct
    */
   @Nonnull
-  T create(@Nullable final HandlerConfiguration<T> configuration, @Nullable final BeanLoader<T> beanLoader)
+  T create(@Nullable final HandlerConfiguration<T> configuration, @Nullable final BeanLoader beanLoader)
       throws IllegalArgumentException;
 
   /**

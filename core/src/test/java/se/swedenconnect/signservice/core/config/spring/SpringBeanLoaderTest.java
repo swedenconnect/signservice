@@ -41,9 +41,9 @@ public class SpringBeanLoaderTest {
     Mockito.when(context.getBean(Mockito.anyString(), ArgumentMatchers.any(Class.class)))
         .thenReturn(handler);
 
-    final SpringBeanLoader<DummyHandler> loader = new SpringBeanLoader<>(context, DummyHandler.class);
+    final SpringBeanLoader loader = new SpringBeanLoader(context);
 
-    final DummyHandler handler2 = loader.apply("bean.name");
+    final DummyHandler handler2 = loader.load("bean.name", DummyHandler.class);
     Assertions.assertNotNull(handler2);
     Assertions.assertEquals("dummy", handler2.getName());
   }
@@ -58,10 +58,10 @@ public class SpringBeanLoaderTest {
     Mockito.when(context.getBean(Mockito.anyString(), ArgumentMatchers.any(Class.class)))
       .thenThrow(new FatalBeanException("error"));
 
-    final SpringBeanLoader<DummyHandler> loader = new SpringBeanLoader<>(context, DummyHandler.class);
+    final SpringBeanLoader loader = new SpringBeanLoader(context);
 
     Assertions.assertThrows(BeansException.class, () -> {
-      loader.apply("bean.name");
+      loader.load("bean.name", DummyHandler.class);
     });
   }
 
@@ -75,9 +75,9 @@ public class SpringBeanLoaderTest {
     Mockito.when(context.getBean(Mockito.anyString(), ArgumentMatchers.any(Class.class)))
         .thenThrow(new NoSuchBeanDefinitionException("not found"));
 
-    final SpringBeanLoader<DummyHandler> loader = new SpringBeanLoader<>(context, DummyHandler.class);
+    final SpringBeanLoader loader = new SpringBeanLoader(context);
 
-    final DummyHandler handler2 = loader.apply("bean.name");
+    final DummyHandler handler2 = loader.load("bean.name", DummyHandler.class);
     Assertions.assertNotNull(handler2);
 
     Mockito.when(context.getBean(Mockito.anyString(), ArgumentMatchers.any(Class.class)))

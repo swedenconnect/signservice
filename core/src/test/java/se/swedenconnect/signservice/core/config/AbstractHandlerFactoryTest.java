@@ -74,7 +74,16 @@ public class AbstractHandlerFactoryTest {
     final DummyHandlerConfiguration conf = new DummyHandlerConfiguration();
     conf.setBeanName("bean.name");
 
-    final DummyHandler handler2 = factory.create(conf, (ref) -> handler);
+    final BeanLoader loader = new BeanLoader() {
+
+      @Override
+      public <T> T load(String beanName, Class<T> type) {
+        return type.cast(handler);
+      }
+
+    };
+
+    final DummyHandler handler2 = factory.create(conf, loader);
     Assertions.assertEquals(handler, handler2);
   }
 
@@ -87,9 +96,15 @@ public class AbstractHandlerFactoryTest {
 
     @Override
     @Nonnull
-    protected DummyHandler createHandler(@Nullable final HandlerConfiguration<DummyHandler> configuration)
+    protected DummyHandler createHandler(
+        @Nullable final HandlerConfiguration<DummyHandler> configuration, @Nonnull final BeanLoader beanLoader)
         throws IllegalArgumentException {
       return new DummyHandler();
+    }
+
+    @Override
+    protected Class<DummyHandler> getHandlerType() {
+      return DummyHandler.class;
     }
   }
 

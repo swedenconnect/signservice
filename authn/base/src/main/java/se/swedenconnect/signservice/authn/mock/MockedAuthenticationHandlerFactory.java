@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
 
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.core.config.AbstractHandlerFactory;
+import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 
 /**
@@ -31,7 +32,7 @@ public class MockedAuthenticationHandlerFactory extends AbstractHandlerFactory<A
   @Override
   @Nonnull
   protected AuthenticationHandler createHandler(
-      @Nullable final HandlerConfiguration<AuthenticationHandler> configuration)
+      @Nullable final HandlerConfiguration<AuthenticationHandler> configuration, @Nullable final BeanLoader beanLoader)
       throws IllegalArgumentException {
 
     final MockedAuthenticationHandler handler = new MockedAuthenticationHandler();
@@ -47,6 +48,13 @@ public class MockedAuthenticationHandlerFactory extends AbstractHandlerFactory<A
       handler.setName(configuration.getName());
     }
     return handler;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Nonnull
+  protected Class<AuthenticationHandler> getHandlerType() {
+    return AuthenticationHandler.class;
   }
 
 }

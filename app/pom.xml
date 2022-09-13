@@ -199,13 +199,13 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>${spring.boot.version}</version>
+        <version>${spring.boot.version}</version>        
         <executions>
           <execution>
-            <id>repackage</id>
-            <configuration>
-              <classifier>exec</classifier>
-            </configuration>
+            <id>repackage</id>    
+            <goals>
+              <goal>repackage</goal>
+            </goals>
           </execution>
           <execution>
             <goals>
@@ -214,7 +214,7 @@
           </execution>
         </executions>
       </plugin>
-
+      
       <!-- Support for Docker -->
       <plugin>
         <groupId>com.spotify</groupId>

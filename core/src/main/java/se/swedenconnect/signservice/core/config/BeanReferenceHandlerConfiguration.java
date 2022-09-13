@@ -96,8 +96,15 @@ public class BeanReferenceHandlerConfiguration<T extends SignServiceHandler> ext
   public static class BeanReferenceHandlerFactory<T extends SignServiceHandler> extends AbstractHandlerFactory<T> {
 
     @Override
-    protected T createHandler(@Nullable final HandlerConfiguration<T> configuration) throws IllegalArgumentException {
+    protected T createHandler(@Nullable final HandlerConfiguration<T> configuration, @Nullable final BeanLoader beanLoader)
+        throws IllegalArgumentException {
       throw new IllegalArgumentException(this.getClass().getSimpleName() + " only supports loading custom beans");
+    }
+
+    @Override
+    protected Class<T> getHandlerType() {
+      // TODO Auto-generated method stub
+      return null;
     }
 
   }

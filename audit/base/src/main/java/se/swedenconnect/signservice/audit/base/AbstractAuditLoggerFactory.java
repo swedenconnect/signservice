@@ -24,6 +24,7 @@ import javax.annotation.Nullable;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.base.events.AuditEventFactory;
 import se.swedenconnect.signservice.core.config.AbstractHandlerFactory;
+import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 
 /**
@@ -34,28 +35,33 @@ public abstract class AbstractAuditLoggerFactory extends AbstractHandlerFactory<
   /**
    * Based on the supplied configuration the method creates an {@link AuditLogger} instance. Note that the
    * implementation does not have to handle the setting of the handler name and the event factory. This is handled by
-   * {@link AbstractAuditLoggerFactory#createHandler(HandlerConfiguration)}.
+   * {@link AbstractAuditLoggerFactory#createHandler(ObjectConfiguration)}.
    *
-   * @param configuration the configuration (may be null)
+   * @param configuration
+   *          the configuration (may be null)
+   * @param beanLoader
+   *          the bean loader (may be null)
    * @return an audit logger instance
-   * @throws IllegalArgumentException for configuration errors
+   * @throws IllegalArgumentException
+   *           for configuration errors
    */
   @Nonnull
   protected abstract AbstractAuditLogger createAuditLogger(
-      @Nullable final HandlerConfiguration<AuditLogger> configuration) throws IllegalArgumentException;
+      @Nullable final HandlerConfiguration<AuditLogger> configuration, @Nullable final BeanLoader beanLoader)
+      throws IllegalArgumentException;
 
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  protected final AuditLogger createHandler(@Nullable final HandlerConfiguration<AuditLogger> configuration)
-      throws IllegalArgumentException {
+  protected final AuditLogger createHandler(@Nullable final HandlerConfiguration<AuditLogger> configuration,
+      @Nullable final BeanLoader beanLoader) throws IllegalArgumentException {
 
-    final AbstractAuditLogger logger = this.createAuditLogger(configuration);
+    final AbstractAuditLogger logger = this.createAuditLogger(configuration, beanLoader);
 
     if (configuration != null) {
       if (!AbstractAuditLoggerConfiguration.class.isInstance(configuration)) {
         throw new IllegalArgumentException(
-            "Unknown configuration object supplied - " + configuration.getClass().getSimpleName());
+          "Unknown configuration object supplied - " + configuration.getClass().getSimpleName());
       }
       final AbstractAuditLoggerConfiguration conf = AbstractAuditLoggerConfiguration.class.cast(configuration);
       logger.setName(conf.getName());
@@ -67,24 +73,31 @@ public abstract class AbstractAuditLoggerFactory extends AbstractHandlerFactory<
           final Class<? extends AuditEventFactory> eventClass = conf.getEventFactory();
 
           final Constructor<?> ctor = Arrays.stream(eventClass.getDeclaredConstructors())
-              .filter(c -> c.getParameterCount() == 0)
-              .findFirst()
-              .orElseThrow(
-                  () -> new IllegalArgumentException("No no-arg constructor visible for " + eventClass));
+            .filter(c -> c.getParameterCount() == 0)
+            .findFirst()
+            .orElseThrow(
+              () -> new IllegalArgumentException("No no-arg constructor visible for " + eventClass));
 
           final AuditEventFactory factory = (AuditEventFactory) ctor.newInstance();
           logger.setEventFactory(factory);
         }
         catch (final Exception e) {
           throw new IllegalArgumentException(
-              String.format("Failed to create event factory instance for %s - %s", conf.getEventFactory().getName(),
-                  e.getMessage()),
-              e);
+            String.format("Failed to create event factory instance for %s - %s", conf.getEventFactory().getName(),
+              e.getMessage()),
+            e);
         }
       }
     }
 
     return logger;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Nonnull
+  protected Class<AuditLogger> getHandlerType() {
+    return AuditLogger.class;
   }
 
 }

@@ -39,6 +39,7 @@ import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.certificate.keyprovider.OnDemandInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.certificate.keyprovider.StackedInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.core.config.AbstractHandlerFactory;
+import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 
 /**
@@ -51,7 +52,8 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
   @Override
   @Nonnull
   protected KeyAndCertificateHandler createHandler(
-      @Nonnull final HandlerConfiguration<KeyAndCertificateHandler> configuration) throws IllegalArgumentException {
+      @Nonnull final HandlerConfiguration<KeyAndCertificateHandler> configuration,
+      @Nullable final BeanLoader beanLoader) throws IllegalArgumentException {
 
     if (configuration == null) {
       throw new IllegalArgumentException("Missing configuration");
@@ -116,8 +118,8 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
     final CertificateProfileConfiguration profileConfiguration =
         Optional.ofNullable(conf.getProfileConfiguration()).orElse(null);
 
-    final AbstractKeyAndCertificateHandler handler = this.createKeyAndCertificateHandler(configuration, keyProviders,
-        attributeMapper, algorithmRegistry, profileConfiguration);
+    final AbstractKeyAndCertificateHandler handler = this.createKeyAndCertificateHandler(
+        configuration, beanLoader, keyProviders, attributeMapper, algorithmRegistry, profileConfiguration);
 
     // Certificate type
     if (conf.getCaCertificateType() != null) {
@@ -145,6 +147,7 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
    * </p>
    *
    * @param configuration the handler configuration
+   * @param beanLoader the bean loader (may be null)
    * @param keyProviders the key providers
    * @param attributeMapper the attribute mapper
    * @param algorithmRegistry the algorithm registry
@@ -154,8 +157,17 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
    */
   protected abstract AbstractKeyAndCertificateHandler createKeyAndCertificateHandler(
       @Nonnull final HandlerConfiguration<KeyAndCertificateHandler> configuration,
-      @Nonnull final List<KeyProvider> keyProviders, @Nonnull final AttributeMapper attributeMapper,
+      @Nullable final BeanLoader beanLoader,
+      @Nonnull final List<KeyProvider> keyProviders,
+      @Nonnull final AttributeMapper attributeMapper,
       @Nonnull final AlgorithmRegistry algorithmRegistry,
       @Nullable final CertificateProfileConfiguration profileConfiguration) throws IllegalArgumentException;
+
+  /** {@inheritDoc} */
+  @Nonnull
+  @Override
+  protected Class<KeyAndCertificateHandler> getHandlerType() {
+    return KeyAndCertificateHandler.class;
+  }
 
 }

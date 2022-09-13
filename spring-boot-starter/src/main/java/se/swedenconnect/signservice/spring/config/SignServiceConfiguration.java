@@ -28,7 +28,6 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -107,8 +106,8 @@ public class SignServiceConfiguration {
   }
 
   /**
-   * Creates the {@code signservice.BaseUrl} bean representing the IdP "base URL", i.e., everything up until the context
-   * path.
+   * Creates the {@code signservice.BaseUrl} bean representing the IdP "base URL", i.e., the protocol, domain and
+   * context path.
    *
    * @return the base URL
    */
@@ -116,20 +115,6 @@ public class SignServiceConfiguration {
   @Bean("signservice.BaseUrl")
   public String baseUrl() {
     return this.properties.getBaseUrl();
-  }
-
-  /**
-   * Creates the {@code signservice.ContextPath} bean holding the SignService context path
-   * ({@code server.servlet.context-path}).
-   *
-   * @param contextPath
-   *          the context path
-   * @return the context path
-   */
-  @ConditionalOnMissingBean(name = "signservice.ContextPath")
-  @Bean("signservice.ContextPath")
-  public String contextPath(@Value("${server.servlet.context-path:/}") final String contextPath) {
-    return contextPath;
   }
 
   /**
@@ -169,8 +154,7 @@ public class SignServiceConfiguration {
     }
     auditConf.init();
 
-    final HandlerFactory<AuditLogger> auditFactory = this.handlerFactoryRegistry.getFactory(
-      auditConf.getFactoryClass(), AuditLogger.class);
+    final HandlerFactory<AuditLogger> auditFactory = this.handlerFactoryRegistry.getFactory(auditConf.getFactoryClass());
     return auditFactory.create(auditConf);
   }
 
@@ -235,16 +219,7 @@ public class SignServiceConfiguration {
       @Qualifier("signservice.DefaultCredential") final PkiCredential defaultCredential,
       @Qualifier("signservice.SystemAuditLogger") final AuditLogger systemAuditLogger) throws Exception {
 
-    final SpringBeanLoader<ProtocolHandler> protocolBeanLoader =
-        new SpringBeanLoader<>(this.applicationContext, ProtocolHandler.class);
-    final SpringBeanLoader<AuthenticationHandler> authnBeanLoader =
-        new SpringBeanLoader<>(this.applicationContext, AuthenticationHandler.class);
-    final SpringBeanLoader<AuditLogger> auditBeanLoader =
-        new SpringBeanLoader<>(this.applicationContext, AuditLogger.class);
-    final SpringBeanLoader<SignatureHandler> sigHandlerBeanLoader =
-        new SpringBeanLoader<>(this.applicationContext, SignatureHandler.class);
-    final SpringBeanLoader<KeyAndCertificateHandler> keyAndCertBeanLoader =
-        new SpringBeanLoader<>(this.applicationContext, KeyAndCertificateHandler.class);
+    final SpringBeanLoader beanLoader = new SpringBeanLoader(this.applicationContext);
 
     List<SignServiceEngine> engines = new ArrayList<>();
 
@@ -294,37 +269,35 @@ public class SignServiceConfiguration {
       }
       protocolConf.init();
 
-      final HandlerFactory<ProtocolHandler> protocolFactory = this.handlerFactoryRegistry.getFactory(
-        protocolConf.getFactoryClass(), ProtocolHandler.class);
-      conf.setProtocolHandler(protocolFactory.create(protocolConf, protocolBeanLoader));
+      final HandlerFactory<ProtocolHandler> protocolFactory = this.handlerFactoryRegistry.getFactory(protocolConf.getFactoryClass());
+      conf.setProtocolHandler(protocolFactory.create(protocolConf, beanLoader));
 
       // Signature handler
       final HandlerConfiguration<SignatureHandler> sigHandlerConf = ecp.getSign().getHandlerConfiguration();
       if (sigHandlerConf.needsDefaultConfigResolving()) {
         sigHandlerConf.resolveDefaultConfigRef(this.getResolver("sign",
-            Optional.ofNullable(this.properties.getDefaultHandlerConfig())
-                .map(SharedHandlerConfigurationProperties::getSign)
-                .orElse(null)));
+          Optional.ofNullable(this.properties.getDefaultHandlerConfig())
+            .map(SharedHandlerConfigurationProperties::getSign)
+            .orElse(null)));
       }
       sigHandlerConf.init();
 
-      final HandlerFactory<SignatureHandler> sigHandlerFactory = this.handlerFactoryRegistry.getFactory(
-          sigHandlerConf.getFactoryClass(), SignatureHandler.class);
-      conf.setSignatureHandler(sigHandlerFactory.create(sigHandlerConf, sigHandlerBeanLoader));
+      final HandlerFactory<SignatureHandler> sigHandlerFactory = this.handlerFactoryRegistry.getFactory(sigHandlerConf.getFactoryClass());
+      conf.setSignatureHandler(sigHandlerFactory.create(sigHandlerConf, beanLoader));
 
       // Key and certificate handler
       final HandlerConfiguration<KeyAndCertificateHandler> keyAndCertConf = ecp.getCert().getHandlerConfiguration();
       if (keyAndCertConf.needsDefaultConfigResolving()) {
         keyAndCertConf.resolveDefaultConfigRef(this.getResolver("cert",
-            Optional.ofNullable(this.properties.getDefaultHandlerConfig())
-                .map(SharedHandlerConfigurationProperties::getCert)
-                .orElse(null)));
+          Optional.ofNullable(this.properties.getDefaultHandlerConfig())
+            .map(SharedHandlerConfigurationProperties::getCert)
+            .orElse(null)));
       }
       keyAndCertConf.init();
 
-      final HandlerFactory<KeyAndCertificateHandler> keyAndCertHandlerFactory = this.handlerFactoryRegistry.getFactory(
-          keyAndCertConf.getFactoryClass(), KeyAndCertificateHandler.class);
-      conf.setKeyAndCertificateHandler(keyAndCertHandlerFactory.create(keyAndCertConf, keyAndCertBeanLoader));
+      final HandlerFactory<KeyAndCertificateHandler> keyAndCertHandlerFactory =
+          this.handlerFactoryRegistry.getFactory(keyAndCertConf.getFactoryClass());
+      conf.setKeyAndCertificateHandler(keyAndCertHandlerFactory.create(keyAndCertConf, beanLoader));
 
       // Audit logger
       //
@@ -343,9 +316,8 @@ public class SignServiceConfiguration {
       }
       auditConf.init();
 
-      final HandlerFactory<AuditLogger> auditFactory = this.handlerFactoryRegistry.getFactory(
-        auditConf.getFactoryClass(), AuditLogger.class);
-      conf.setAuditLogger(auditFactory.create(auditConf, auditBeanLoader));
+      final HandlerFactory<AuditLogger> auditFactory = this.handlerFactoryRegistry.getFactory(auditConf.getFactoryClass());
+      conf.setAuditLogger(auditFactory.create(auditConf, beanLoader));
 
       // Authentication handler
       //
@@ -362,11 +334,10 @@ public class SignServiceConfiguration {
       }
       authnConf.init();
 
-      final HandlerFactory<AuthenticationHandler> authnFactory = this.handlerFactoryRegistry.getFactory(
-        authnConf.getFactoryClass(), AuthenticationHandler.class);
-      conf.setAuthenticationHandler(authnFactory.create(authnConf, authnBeanLoader));
+      final HandlerFactory<AuthenticationHandler> authnFactory = this.handlerFactoryRegistry.getFactory(authnConf.getFactoryClass());
+      conf.setAuthenticationHandler(authnFactory.create(authnConf, beanLoader));
 
-      // conf.init();
+      conf.init();
 
       final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(conf, sessionHandler, messageReplayChecker, systemAuditLogger);
       engine.init();

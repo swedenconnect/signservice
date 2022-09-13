@@ -15,13 +15,22 @@
  */
 package se.swedenconnect.signservice.core.config;
 
-import java.util.function.Function;
-
-import se.swedenconnect.signservice.core.SignServiceHandler;
+import javax.annotation.Nonnull;
 
 /**
  * A bean loader interface accepts a bean name and returns a handler instance.
  */
 @FunctionalInterface
-public interface BeanLoader<T extends SignServiceHandler> extends Function<String, T> {
+public interface BeanLoader {
+
+  /**
+   * Loads a bean having the given bean name.
+   *
+   * @param <T> the type of the bean
+   * @param beanName the bean name
+   * @param type the type of the bean
+   * @return the loaded bean
+   */
+  <T> T load(@Nonnull final String beanName, @Nonnull final Class<T> type);
+
 }

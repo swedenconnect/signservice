@@ -41,6 +41,7 @@ import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
 import se.swedenconnect.signservice.certificate.cmc.ca.SignServiceCMCClient;
 import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
+import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 
 /**
@@ -54,7 +55,9 @@ public class CMCKeyAndCertificateHandlerFactory extends AbstractKeyAndCertificat
   @Nonnull
   protected AbstractKeyAndCertificateHandler createKeyAndCertificateHandler(
       @Nonnull final HandlerConfiguration<KeyAndCertificateHandler> configuration,
-      @Nonnull final List<KeyProvider> keyProviders, @Nonnull final AttributeMapper attributeMapper,
+      @Nullable final BeanLoader beanLoader,
+      @Nonnull final List<KeyProvider> keyProviders,
+      @Nonnull final AttributeMapper attributeMapper,
       @Nonnull final AlgorithmRegistry algorithmRegistry,
       @Nullable final CertificateProfileConfiguration profileConfiguration) throws IllegalArgumentException {
 

@@ -44,6 +44,7 @@ import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertif
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.ECProviderConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.RsaProviderConfiguration;
 import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
+import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
@@ -253,6 +254,12 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
         .hasMessageContaining("Unknown configuration object supplied - ");
   }
 
+  @Test
+  public void testHandlerType() {
+    final TestFactory factory = new TestFactory();
+    Assertions.assertEquals(KeyAndCertificateHandler.class, factory.handler());
+  }
+
   private TestConfig getFullConfig() {
 
     final DefaultValuePolicyCheckerConfiguration checkerConfig = new DefaultValuePolicyCheckerConfiguration();
@@ -292,11 +299,17 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
     @Nonnull
     protected AbstractKeyAndCertificateHandler createKeyAndCertificateHandler(
         @Nonnull final HandlerConfiguration<KeyAndCertificateHandler> configuration,
-        @Nonnull final List<KeyProvider> keyProviders, @Nonnull final AttributeMapper attributeMapper,
+        @Nullable final BeanLoader beanLoader,
+        @Nonnull final List<KeyProvider> keyProviders,
+        @Nonnull final AttributeMapper attributeMapper,
         @Nonnull final AlgorithmRegistry algorithmRegistry,
         @Nullable final CertificateProfileConfiguration profileConfiguration) throws IllegalArgumentException {
 
       return new TestHandler(keyProviders, attributeMapper, algorithmRegistry);
+    }
+
+    public Class<KeyAndCertificateHandler> handler() {
+      return this.getHandlerType();
     }
   }
 
