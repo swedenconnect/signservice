@@ -329,7 +329,48 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("message-replay-checker must not be null");
+      .hasMessage("message-replay-checker or message-replay-checker-ref is missing");
+  }
+
+  @Test
+  public void testBothMessageReplayCheckers() throws Exception {
+    final SamlAuthenticationHandlerConfiguration conf = this.buildConfiguration();
+    conf.setMessageReplayCheckerRef("bean");
+    final SamlAuthenticationHandlerFactory factory = new SamlAuthenticationHandlerFactory();
+    assertThatThrownBy(() -> {
+      factory.create(conf);
+    }).isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("message-replay-checker and message-replay-checker-ref can not both be set");
+  }
+
+  @Test
+  public void testMessageReplayCheckerRef() throws Exception {
+    final SamlAuthenticationHandlerConfiguration conf = this.buildConfiguration();
+    conf.setMessageReplayCheckerRef("bean");
+    final MessageReplayChecker checker = conf.getMessageReplayChecker();
+    conf.setMessageReplayChecker(null);
+    final BeanLoader beanLoader = new BeanLoader() {
+
+      @Override
+      public <T> T load(String beanName, Class<T> type) {
+        return type.cast(checker);
+      }
+    };
+    final SamlAuthenticationHandlerFactory factory = new SamlAuthenticationHandlerFactory();
+    final AuthenticationHandler handler = factory.create(conf, beanLoader);
+    Assertions.assertTrue(SwedenConnectSamlAuthenticationHandler.class.isInstance(handler));
+  }
+
+  @Test
+  public void testMissingBeanLoader() throws Exception {
+    final SamlAuthenticationHandlerConfiguration conf = this.buildConfiguration();
+    conf.setMessageReplayCheckerRef("bean");
+    conf.setMessageReplayChecker(null);
+    final SamlAuthenticationHandlerFactory factory = new SamlAuthenticationHandlerFactory();
+    assertThatThrownBy(() -> {
+      factory.create(conf);
+    }).isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("message-replay-checker-ref can not be loaded - missing bean loader");
   }
 
   @Test
