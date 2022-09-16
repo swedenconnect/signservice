@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -46,6 +47,7 @@ import se.swedenconnect.signservice.authn.saml.config.MetadataConfiguration.Orga
 import se.swedenconnect.signservice.authn.saml.config.MetadataConfiguration.UIInfoConfig;
 import se.swedenconnect.signservice.authn.saml.config.MetadataConfiguration.UIInfoConfig.UIInfoLogo;
 import se.swedenconnect.signservice.core.config.AbstractHandlerConfiguration;
+import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
 import se.swedenconnect.signservice.storage.MessageReplayException;
@@ -64,7 +66,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
 
   public SamlAuthenticationHandlerFactoryTest() throws Exception {
     final KeyStoreFactoryBean factory = new KeyStoreFactoryBean(
-        new ClassPathResource("keys.jks"), "secret".toCharArray());
+      new ClassPathResource("keys.jks"), "secret".toCharArray());
     factory.afterPropertiesSet();
     this.keyStore = factory.getObject();
   }
@@ -75,7 +77,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(null);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Missing configuration for creating AuthenticationHandler instances");
+      .hasMessage("Missing configuration for creating AuthenticationHandler instances");
   }
 
   @Test
@@ -91,7 +93,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Unknown configuration object supplied - ");
+      .hasMessageContaining("Unknown configuration object supplied - ");
   }
 
   @Test
@@ -148,14 +150,14 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     final MetadataConfiguration md = new MetadataConfiguration();
     md.setAuthnRequestsSigned(true);
     md.setEntityCategories(Arrays.asList("http://id.elegnamnden.se/st/1.0/sigservice",
-        "http://id.elegnamnden.se/ec/1.0/loa3-pnr"));
+      "http://id.elegnamnden.se/ec/1.0/loa3-pnr"));
     md.setServiceNames(Arrays.asList(new LocalizedString("demo", Locale.ENGLISH)));
 
     final UIInfoConfig ui = new UIInfoConfig();
     ui.setDisplayNames(Arrays.asList(
-        new LocalizedString("en-DemoApp"), new LocalizedString("sv-DemoApp")));
+      new LocalizedString("en-DemoApp"), new LocalizedString("sv-DemoApp")));
     ui.setDescriptions(Arrays.asList(
-        new LocalizedString("en-DemoApp"), new LocalizedString("sv-DemoApp")));
+      new LocalizedString("en-DemoApp"), new LocalizedString("sv-DemoApp")));
     final UIInfoLogo logo = new UIInfoLogo();
     logo.setHeight(100);
     logo.setWidth(100);
@@ -185,10 +187,9 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
   @Test
   public void testSeveralMetadataProviders() throws Exception {
     final SamlAuthenticationHandlerConfiguration conf = this.buildConfiguration();
-
-    final MetadataProviderConfiguration mpc = new MetadataProviderConfiguration();
-    mpc.setUrl("https://eid.svelegtest.se/metadata/mdx/role/idp.xml");
-    conf.setMetadataProviders(Arrays.asList(mpc, conf.getMetadataProviders().get(0)));
+    MetadataProviderConfiguration newConf = new MetadataProviderConfiguration();
+    newConf.setUrl("https://eid.svelegtest.se/metadata/mdx/role/idp.xml");
+    conf.getMetadataProvider().setAdditional(List.of(newConf));
 
     final SamlAuthenticationHandlerFactory factory = new SamlAuthenticationHandlerFactory();
     final AuthenticationHandler handler = factory.create(conf);
@@ -202,32 +203,63 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     final MetadataProviderConfiguration mpc = new MetadataProviderConfiguration();
     mpc.setUrl("https://eid.svelegtest.se/metadata/mdx/role/idp.xml");
     mpc.setFile("src/main/resources/idp-metadata.xml");
-    conf.setMetadataProviders(Arrays.asList(mpc));
+    conf.setMetadataProvider(mpc);
 
     final SamlAuthenticationHandlerFactory factory = new SamlAuthenticationHandlerFactory();
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Illegal metadata provider configuration - Both url and file are set");
+      .hasMessage("Illegal metadata provider configuration - Both url and file are set");
 
-    conf.getMetadataProviders().get(0).setFile(null);
-    conf.getMetadataProviders().get(0).setUrl(null);
+    conf.setMetadataProviderRef("bean");
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Illegal metadata provider configuration - url or file must be set");
+      .hasMessage("Illegal configuration - metadata-provider and metadata-provider-ref can not both be assigned");
 
-    conf.setMetadataProviders(null);
+    conf.getMetadataProvider().setFile(null);
+    conf.getMetadataProvider().setUrl(null);
+    conf.setMetadataProviderRef(null);
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Missing metadata provider(s) from configuration object");
+      .hasMessage("Illegal metadata provider configuration - url or file must be set");
 
-    conf.setMetadataProviders(Arrays.asList());
+    conf.setMetadataProvider(null);
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Missing metadata provider(s) from configuration object");
+      .hasMessage("Missing metadata provider(s) from configuration object");
+
+    conf.setMetadataProvider(null);
+    assertThatThrownBy(() -> {
+      factory.create(conf);
+    }).isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("Missing metadata provider(s) from configuration object");
+  }
+
+  @Test
+  public void testMetadataProviderRef() throws Exception {
+    final SamlAuthenticationHandlerConfiguration conf = this.buildConfiguration();
+    final MetadataProviderConfiguration mdConf = conf.getMetadataProvider();
+    final BeanLoader loader = new BeanLoader() {
+
+      @Override
+      public <T> T load(String beanName, Class<T> type) {
+        return type.cast(mdConf.create());
+      }
+    };
+    conf.setMetadataProvider(null);
+    conf.setMetadataProviderRef("bean.name");
+
+    final SamlAuthenticationHandlerFactory factory = new SamlAuthenticationHandlerFactory();
+    final AuthenticationHandler handler = factory.create(conf, loader);
+    Assertions.assertTrue(SwedenConnectSamlAuthenticationHandler.class.isInstance(handler));
+
+    assertThatThrownBy(() -> {
+      factory.create(conf, null);
+    }).isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("Missing bean loader - cannot load bean referenced by metadata-provider-ref");
   }
 
   @Test
@@ -242,7 +274,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("No decryption (or default) credential specified - required since require-encrypted-assertions is true");
+      .hasMessage("No decryption (or default) credential specified - required since require-encrypted-assertions is true");
   }
 
   @Test
@@ -253,7 +285,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Unknown saml-type - ");
+      .hasMessageContaining("Unknown saml-type - ");
   }
 
   @Test
@@ -264,7 +296,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Missing entityId from configuration object");
+      .hasMessage("Missing entityId from configuration object");
   }
 
   @Test
@@ -275,7 +307,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("No sp-paths assigned");
+      .hasMessage("No sp-paths assigned");
   }
 
   @Test
@@ -286,7 +318,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("No sp-paths.base-url setting assigned");
+      .hasMessage("No sp-paths.base-url setting assigned");
   }
 
   @Test
@@ -297,7 +329,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("message-replay-checker must not be null");
+      .hasMessage("message-replay-checker must not be null");
   }
 
   @Test
@@ -308,7 +340,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Missing metadata configuration");
+      .hasMessage("Missing metadata configuration");
   }
 
   @Test
@@ -340,14 +372,14 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
 
     final MetadataProviderConfiguration providerConf = new MetadataProviderConfiguration();
     providerConf.setFile("src/test/resources/idp-metadata.xml");
-    config.setMetadataProviders(Arrays.asList(providerConf));
+    config.setMetadataProvider(providerConf);
 
     final MetadataConfiguration metadataConf = new MetadataConfiguration();
 
     try (final InputStream is = new ClassPathResource("metadata.xml").getInputStream()) {
       final Element elm = XMLObjectProviderRegistrySupport.getParserPool().parse(is).getDocumentElement();
       metadataConf.setTemplate(
-          EntityDescriptor.class.cast(XMLObjectSupport.getUnmarshaller(elm).unmarshall(elm)));
+        EntityDescriptor.class.cast(XMLObjectSupport.getUnmarshaller(elm).unmarshall(elm)));
     }
     config.setMetadata(metadataConf);
 

@@ -13,23 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.core.config;
+package se.swedenconnect.signservice.spring.config;
 
 import javax.annotation.Nonnull;
 
+import org.springframework.beans.factory.InitializingBean;
+
 /**
- * A bean loader interface accepts a bean name and returns a handler instance.
+ * An interface that is implemented by subclasses of configuration classes that may be instantiated as "common beans",
+ * see {@link CommonBeansConfigurationProperties}.
  */
-public interface BeanLoader {
+public interface CommonBeanCandidate extends InitializingBean {
 
   /**
-   * Loads a bean having the given bean name.
+   * The bean name that should be assigned.
    *
-   * @param <T> the type of the bean
-   * @param beanName the bean name
-   * @param type the type of the bean
-   * @return the loaded bean
+   * @return the bean name
    */
-  <T> T load(@Nonnull final String beanName, @Nonnull final Class<T> type);
+  @Nonnull
+  String getBeanName();
+
+  /**
+   * The bean name that should be assigned.
+   *
+   * @param beanName
+   *          the bean name
+   */
+  void setBeanName(@Nonnull final String beanName);
 
 }

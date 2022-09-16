@@ -15,6 +15,8 @@
  */
 package se.swedenconnect.signservice.core.config;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -70,15 +72,44 @@ public class BeanReferenceHandlerConfigurationTest {
     final BeanReferenceHandlerConfiguration<DummyHandler> conf = new BeanReferenceHandlerConfiguration<>();
 
     final HandlerFactoryRegistry registry = new HandlerFactoryRegistry();
-    final HandlerFactory<DummyHandler> handler = registry.getFactory(conf.getFactoryClass());
+    final HandlerFactory<DummyHandler> factory = registry.getFactory(conf.getFactoryClass());
 
-    Assertions.assertNotNull(handler);
-    Assertions.assertEquals(BeanReferenceHandlerConfiguration.BeanReferenceHandlerFactory.class, handler.getClass());
+    Assertions.assertNotNull(factory);
+    Assertions.assertEquals(BeanReferenceHandlerConfiguration.BeanReferenceHandlerFactory.class, factory.getClass());
 
-    Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      handler.create(conf);
-    });
+    final DummyHandler handler = new DummyHandler();
+    final BeanLoader loader = new BeanLoader() {
 
+      @Override
+      public <T> T load(String beanName, Class<T> type) {
+        return type.cast(handler);
+      }
+    };
+
+    assertThatThrownBy(() -> {
+      factory.create(null);
+    }).isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Missing configuration");
+
+    assertThatThrownBy(() -> {
+      factory.create(null, loader);
+    }).isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Missing configuration");
+
+    assertThatThrownBy(() -> {
+      factory.create(conf, loader);
+    }).isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Missing bean-name property");
+
+    conf.setBeanName("beanname");
+
+    assertThatThrownBy(() -> {
+      factory.create(conf, null);
+    }).isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("- No bean loader was supplied");
+
+    final DummyHandler handler2 = factory.create(conf, loader);
+    Assertions.assertEquals(handler, handler2);
   }
 
   public static class DummyHandler extends AbstractSignServiceHandler {

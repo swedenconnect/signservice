@@ -16,7 +16,6 @@
 package se.swedenconnect.signservice.spring.config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -28,10 +27,11 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -47,7 +47,6 @@ import se.swedenconnect.signservice.application.SignServiceEngineManager;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerConfiguration;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
-import se.swedenconnect.signservice.authn.saml.config.SamlAuthenticationHandlerConfiguration;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.core.SignServiceHandler;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
@@ -56,15 +55,14 @@ import se.swedenconnect.signservice.core.config.HandlerFactoryRegistry;
 import se.swedenconnect.signservice.core.config.spring.SpringBeanLoader;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
-import se.swedenconnect.signservice.protocol.dss.DssProtocolHandler;
 import se.swedenconnect.signservice.session.SessionHandler;
 import se.swedenconnect.signservice.session.impl.DefaultSessionHandler;
 import se.swedenconnect.signservice.signature.SignatureHandler;
-import se.swedenconnect.signservice.signature.impl.DefaultSignatureHandler;
-import se.swedenconnect.signservice.signature.tbsdata.impl.PDFTBSDataProcessor;
-import se.swedenconnect.signservice.signature.tbsdata.impl.XMLTBSDataProcessor;
 import se.swedenconnect.signservice.spring.config.engine.EngineConfigurationProperties;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
+import se.swedenconnect.signservice.storage.impl.DefaultMessageReplayChecker;
+import se.swedenconnect.signservice.storage.impl.InMemoryReplayCheckerStorageContainer;
+import se.swedenconnect.signservice.storage.impl.ReplayCheckerStorageContainer;
 
 /**
  * Main configuration for SignService.
@@ -78,7 +76,7 @@ public class SignServiceConfiguration {
   /** The application context. */
   @Setter
   @Autowired
-  private ApplicationContext applicationContext;
+  private ConfigurableApplicationContext applicationContext;
 
   /** The SignService configuration properties. */
   @Setter
@@ -172,26 +170,10 @@ public class SignServiceConfiguration {
 
   @ConditionalOnMissingBean(name = "signservice.MessageReplayChecker")
   @Bean("signservice.MessageReplayChecker")
-  public MessageReplayChecker messageReplayChecker() {
-    // TODO: Introduce a simple InMemory version ...
-    return null;
-  }
-
-  /**
-   * Creates a {@link DssProtocolHandler} with default configuration.
-   *
-   * @return a ProtocolHandler
-   */
-  @ConditionalOnMissingBean(name = "signservice.DssProtocolHandler")
-  @Bean("signservice.DssProtocolHandler")
-  public ProtocolHandler dssProtocolHandler() {
-    return new DssProtocolHandler();
-  }
-
-  @ConditionalOnMissingBean(name = "signservice.DefaultSignatureHandler")
-  @Bean("signservice.DefaultSignatureHandler")
-  public SignatureHandler defaultSignatureHandler() {
-    return new DefaultSignatureHandler(Arrays.asList(new XMLTBSDataProcessor(), new PDFTBSDataProcessor()));
+  public MessageReplayChecker messageReplayChecker(final ReplayCheckerStorageContainer replayStorage) {
+    return new DefaultMessageReplayChecker(replayStorage != null
+      ? replayStorage
+      : new InMemoryReplayCheckerStorageContainer("replay-storage"));
   }
 
   /**
@@ -220,6 +202,63 @@ public class SignServiceConfiguration {
       @Qualifier("signservice.SystemAuditLogger") final AuditLogger systemAuditLogger) throws Exception {
 
     final SpringBeanLoader beanLoader = new SpringBeanLoader(this.applicationContext);
+
+    //
+    // First register common beans (if any)
+    //
+    final CommonBeansConfigurationProperties commons = this.properties.getCommonBeans();
+    if (commons != null) {
+      final ConfigurableListableBeanFactory beanFactory = this.applicationContext.getBeanFactory();
+
+      if (commons.getSaml() != null) {
+        if (commons.getSaml().getMetadataProvider() != null) {
+          log.debug("Registering '{}' bean ...", commons.getSaml().getMetadataProvider().getBeanName());
+          beanFactory.registerSingleton(commons.getSaml().getMetadataProvider().getBeanName(),
+            commons.getSaml().getMetadataProvider().create());
+        }
+      }
+
+      if (commons.getProtocol() != null) {
+        final HandlerConfiguration<ProtocolHandler> protocolConf = commons.getProtocol().getHandlerConfiguration();
+        if (protocolConf.needsDefaultConfigResolving()) {
+          throw new IllegalArgumentException(
+            "Bad configuration for signservice.common-beans.protocol - No merge resolving is possible for bean instantiation");
+        }
+        protocolConf.init();
+
+        final HandlerFactory<ProtocolHandler> protocolFactory = this.handlerFactoryRegistry.getFactory(protocolConf.getFactoryClass());
+        log.debug("Registering '{}' bean ...", commons.getProtocol().getBeanName());
+        beanFactory.registerSingleton(commons.getProtocol().getBeanName(), protocolFactory.create(protocolConf, beanLoader));
+      }
+
+      if (commons.getSign() != null) {
+        final HandlerConfiguration<SignatureHandler> sigHandlerConf = commons.getSign().getHandlerConfiguration();
+        if (sigHandlerConf.needsDefaultConfigResolving()) {
+          throw new IllegalArgumentException(
+            "Bad configuration for signservice.common-beans.sign - No merge resolving is possible for bean instantiation");
+        }
+        sigHandlerConf.init();
+
+        final HandlerFactory<SignatureHandler> sigHandlerFactory = this.handlerFactoryRegistry.getFactory(sigHandlerConf.getFactoryClass());
+        log.debug("Registering '{}' bean ...", commons.getSign().getBeanName());
+        beanFactory.registerSingleton(commons.getSign().getBeanName(), sigHandlerFactory.create(sigHandlerConf, beanLoader));
+      }
+
+      if (commons.getCert() != null) {
+        final HandlerConfiguration<KeyAndCertificateHandler> keyAndCertConf = commons.getCert().getHandlerConfiguration();
+        if (keyAndCertConf.needsDefaultConfigResolving()) {
+          throw new IllegalArgumentException(
+              "Bad configuration for signservice.common-beans.cert - No merge resolving is possible for bean instantiation");
+        }
+        keyAndCertConf.init();
+
+        final HandlerFactory<KeyAndCertificateHandler> keyAndCertHandlerFactory =
+            this.handlerFactoryRegistry.getFactory(keyAndCertConf.getFactoryClass());
+        log.debug("Registering '{}' bean ...", commons.getCert().getBeanName());
+        beanFactory.registerSingleton(commons.getCert().getBeanName(), keyAndCertHandlerFactory.create(keyAndCertConf, beanLoader));
+      }
+
+    }
 
     List<SignServiceEngine> engines = new ArrayList<>();
 
@@ -295,8 +334,8 @@ public class SignServiceConfiguration {
       }
       keyAndCertConf.init();
 
-      final HandlerFactory<KeyAndCertificateHandler> keyAndCertHandlerFactory =
-          this.handlerFactoryRegistry.getFactory(keyAndCertConf.getFactoryClass());
+      final HandlerFactory<KeyAndCertificateHandler> keyAndCertHandlerFactory = this.handlerFactoryRegistry.getFactory(keyAndCertConf
+        .getFactoryClass());
       conf.setKeyAndCertificateHandler(keyAndCertHandlerFactory.create(keyAndCertConf, beanLoader));
 
       // Audit logger
@@ -327,10 +366,6 @@ public class SignServiceConfiguration {
           Optional.ofNullable(this.properties.getDefaultHandlerConfig())
             .map(SharedHandlerConfigurationProperties::getAuthn)
             .orElse(null)));
-      }
-      if (SamlAuthenticationHandlerConfiguration.class.isInstance(authnConf)) {
-        final SamlAuthenticationHandlerConfiguration _authnConf = SamlAuthenticationHandlerConfiguration.class.cast(authnConf);
-        _authnConf.setMessageReplayChecker(messageReplayChecker);
       }
       authnConf.init();
 

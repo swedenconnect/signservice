@@ -58,6 +58,11 @@ public class SignServiceConfigurationProperties implements InitializingBean {
   private PkiCredentialConfigurationProperties defaultCredential;
 
   /**
+   * Common beans configuration.
+   */
+  private CommonBeansConfigurationProperties commonBeans;
+
+  /**
    * Default handler configuration. Used by the handler instances configured as part of the engine configuration.
    */
   private SharedHandlerConfigurationProperties defaultHandlerConfig;
@@ -85,6 +90,10 @@ public class SignServiceConfigurationProperties implements InitializingBean {
     Assert.notNull(this.systemAudit, "signservice.system-audit.* must be set");
     // Assert we have a configuration ...
     this.systemAudit.getHandlerConfiguration();
+
+    if (this.commonBeans != null) {
+      this.commonBeans.afterPropertiesSet();
+    }
 
     if (this.engines != null) {
       for (final EngineConfigurationProperties e : this.engines) {

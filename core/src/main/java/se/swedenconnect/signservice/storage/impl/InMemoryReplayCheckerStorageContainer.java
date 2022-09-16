@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.core.config;
+package se.swedenconnect.signservice.storage.impl;
 
 import javax.annotation.Nonnull;
 
 /**
- * A bean loader interface accepts a bean name and returns a handler instance.
+ * A specialization of an in-memory storage container for use with {@link DefaultMessageReplayChecker}.
  */
-public interface BeanLoader {
+public class InMemoryReplayCheckerStorageContainer extends InMemoryStorageContainer<Long>
+    implements ReplayCheckerStorageContainer {
 
   /**
-   * Loads a bean having the given bean name.
+   * Constructor.
    *
-   * @param <T> the type of the bean
-   * @param beanName the bean name
-   * @param type the type of the bean
-   * @return the loaded bean
+   * @param name the container name
    */
-  <T> T load(@Nonnull final String beanName, @Nonnull final Class<T> type);
+  public InMemoryReplayCheckerStorageContainer(@Nonnull final String name) {
+    super(name);
+  }
 
 }

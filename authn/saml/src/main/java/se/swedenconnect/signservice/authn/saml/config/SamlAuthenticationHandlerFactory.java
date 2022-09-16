@@ -15,7 +15,6 @@
  */
 package se.swedenconnect.signservice.authn.saml.config;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +25,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.core.xml.util.XMLObjectSupport;
@@ -41,9 +39,7 @@ import org.opensaml.saml.saml2.metadata.NameIDFormat;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.security.credential.UsageType;
 
-import lombok.extern.slf4j.Slf4j;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorContainer;
 import se.swedenconnect.opensaml.saml2.metadata.build.AssertionConsumerServiceBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.build.EntityAttributesBuilder;
@@ -51,10 +47,6 @@ import se.swedenconnect.opensaml.saml2.metadata.build.EntityDescriptorBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.build.ExtensionsBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.build.KeyDescriptorBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.build.SPSSODescriptorBuilder;
-import se.swedenconnect.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
-import se.swedenconnect.opensaml.saml2.metadata.provider.CompositeMetadataProvider;
-import se.swedenconnect.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
-import se.swedenconnect.opensaml.saml2.metadata.provider.HTTPMetadataProvider;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 import se.swedenconnect.opensaml.saml2.request.AbstractAuthnRequestGenerator;
 import se.swedenconnect.opensaml.saml2.request.AuthnRequestGenerator;
@@ -81,7 +73,6 @@ import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 /**
  * Base class for factories creating SAML authentication handlers.
  */
-@Slf4j
 public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<AuthenticationHandler> {
 
   /** {@inheritDoc} */
@@ -95,9 +86,10 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     }
     if (!SamlAuthenticationHandlerConfiguration.class.isInstance(configuration)) {
       throw new IllegalArgumentException(
-        "Unknown configuration object supplied - " + configuration.getClass().getSimpleName());
+          "Unknown configuration object supplied - " + configuration.getClass().getSimpleName());
     }
-    final SamlAuthenticationHandlerConfiguration conf = SamlAuthenticationHandlerConfiguration.class.cast(configuration);
+    final SamlAuthenticationHandlerConfiguration conf =
+        SamlAuthenticationHandlerConfiguration.class.cast(configuration);
 
     // Assert that required settings are there in the configuration object.
     //
@@ -117,23 +109,41 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
 
     // Metadata provider
     //
-    final MetadataProvider metadataProvider = this.createMetadataProvider(conf);
+    if (conf.getMetadataProvider() != null && conf.getMetadataProviderRef() != null) {
+      throw new IllegalArgumentException(
+          "Illegal configuration - metadata-provider and metadata-provider-ref can not both be assigned");
+    }
+    MetadataProvider metadataProvider = null;
+    if (conf.getMetadataProvider() != null) {
+      metadataProvider = conf.getMetadataProvider().create();
+    }
+    else if (conf.getMetadataProviderRef() != null) {
+      if (beanLoader == null) {
+        throw new IllegalArgumentException(
+            "Missing bean loader - cannot load bean referenced by metadata-provider-ref");
+      }
+      metadataProvider = beanLoader.load(conf.getMetadataProviderRef(), MetadataProvider.class);
+    }
+    else {
+      throw new IllegalArgumentException("Missing metadata provider(s) from configuration object");
+    }
 
     // Metadata publishing
     //
     final EntityDescriptor entityDescriptor = this.createEntityDescriptor(conf);
     final PkiCredential mdSignCred = Optional.ofNullable(conf.getSignatureCredential())
-      .orElseGet(() -> conf.getDefaultCredential());
+        .orElseGet(() -> conf.getDefaultCredential());
     final EntityDescriptorContainer entityDescriptorContainer = new EntityDescriptorContainer(entityDescriptor,
-      mdSignCred != null ? new OpenSamlCredential(mdSignCred) : null);
+        mdSignCred != null ? new OpenSamlCredential(mdSignCred) : null);
 
     // Response processor
     //
-    final ResponseProcessor responseProcessor = this.createResponseProcessor(conf, metadataProvider);
+    final ResponseProcessor responseProcessor = this.createResponseProcessor(conf, beanLoader, metadataProvider);
 
     // AuthnRequest generator
     //
-    final AuthnRequestGenerator authnRequestGenerator = this.createAuthnRequestGenerator(conf, metadataProvider, entityDescriptor);
+    final AuthnRequestGenerator authnRequestGenerator =
+        this.createAuthnRequestGenerator(conf, metadataProvider, entityDescriptor);
 
     // Request binding
     //
@@ -146,24 +156,18 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     // Create the handler
     //
     return this.createHandler(conf, metadataProvider, entityDescriptorContainer, responseProcessor,
-      authnRequestGenerator, requestBinding);
+        authnRequestGenerator, requestBinding);
   }
 
   /**
    * Creates the SAML authentication handler.
    *
-   * @param config
-   *          the SAML configuration
-   * @param metadataProvider
-   *          the metadata provider
-   * @param entityDescriptorContainer
-   *          the metadata publisher
-   * @param responseProcessor
-   *          the response processor
-   * @param authnRequestGenerator
-   *          the AuthnRequest generator
-   * @param preferredRequestBinding
-   *          the preferred request binding URI
+   * @param config the SAML configuration
+   * @param metadataProvider the metadata provider
+   * @param entityDescriptorContainer the metadata publisher
+   * @param responseProcessor the response processor
+   * @param authnRequestGenerator the AuthnRequest generator
+   * @param preferredRequestBinding the preferred request binding URI
    * @return a SAML authention handler
    */
   protected AuthenticationHandler createHandler(
@@ -177,11 +181,11 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     AbstractSamlAuthenticationHandler handler = null;
     if (SamlAuthenticationHandlerConfiguration.SAML_TYPE_SWEDEN_CONNECT.equals(config.getSamlType())) {
       handler = new SwedenConnectSamlAuthenticationHandler(authnRequestGenerator, responseProcessor, metadataProvider,
-        entityDescriptorContainer, config.getSpPaths());
+          entityDescriptorContainer, config.getSpPaths());
     }
     else if (SamlAuthenticationHandlerConfiguration.SAML_TYPE_DEFAULT.equals(config.getSamlType())) {
       handler = new DefaultSamlAuthenticationHandler(authnRequestGenerator, responseProcessor, metadataProvider,
-        entityDescriptorContainer, config.getSpPaths());
+          entityDescriptorContainer, config.getSpPaths());
     }
     else {
       throw new IllegalArgumentException("Unknown saml-type - " + config.getSamlType());
@@ -193,8 +197,7 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
   /**
    * Based on the configuration an {@link EntityDescriptor} is created.
    *
-   * @param config
-   *          the SAML configuration
+   * @param config the SAML configuration
    * @return an EntityDescriptor for the SP metadata
    */
   protected EntityDescriptor createEntityDescriptor(
@@ -214,15 +217,15 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
 
       // Extensions
       final Extensions extensions = Optional.ofNullable(builder.object().getExtensions())
-        .orElseGet(() -> ExtensionsBuilder.builder().build());
+          .orElseGet(() -> ExtensionsBuilder.builder().build());
 
       // Entity categories
       if (mdConfig.getEntityCategories() != null && !mdConfig.getEntityCategories().isEmpty()) {
         extensions.getUnknownXMLObjects()
-          .add(
-            EntityAttributesBuilder.builder()
-              .entityCategoriesAttribute(mdConfig.getEntityCategories())
-              .build());
+            .add(
+                EntityAttributesBuilder.builder()
+                    .entityCategoriesAttribute(mdConfig.getEntityCategories())
+                    .build());
       }
 
       if (builder.object().getExtensions() == null && !extensions.getUnknownXMLObjects().isEmpty()) {
@@ -237,10 +240,10 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
       // ContactPerson
       if (mdConfig.getContactPersons() != null && !mdConfig.getContactPersons().isEmpty()) {
         builder.contactPersons(mdConfig.getContactPersons()
-          .entrySet()
-          .stream()
-          .map(e -> e.getValue().toElement(e.getKey()))
-          .collect(Collectors.toList()));
+            .entrySet()
+            .stream()
+            .map(e -> e.getValue().toElement(e.getKey()))
+            .collect(Collectors.toList()));
       }
 
       // SPSSODescriptor
@@ -261,7 +264,7 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
 
       // Extensions
       final Extensions descExtensions = Optional.ofNullable(desc.getExtensions())
-        .orElseGet(() -> ExtensionsBuilder.builder().build());
+          .orElseGet(() -> ExtensionsBuilder.builder().build());
 
       // UIInfo
       if (mdConfig.getUiInfo() != null) {
@@ -272,25 +275,25 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
       final List<KeyDescriptor> keyDescriptors = new ArrayList<>();
       if (config.getSignatureCredential() != null) {
         keyDescriptors.add(KeyDescriptorBuilder.builder()
-          .use(UsageType.SIGNING)
-          .keyName(config.getSignatureCredential().getName())
-          .certificate(config.getSignatureCredential().getCertificate())
-          .build());
+            .use(UsageType.SIGNING)
+            .keyName(config.getSignatureCredential().getName())
+            .certificate(config.getSignatureCredential().getCertificate())
+            .build());
       }
       if (config.getDecryptionCredential() != null) {
         keyDescriptors.add(KeyDescriptorBuilder.builder()
-          .use(UsageType.ENCRYPTION)
-          .keyName(config.getDecryptionCredential().getName())
-          .certificate(config.getDecryptionCredential().getCertificate())
-          .build());
+            .use(UsageType.ENCRYPTION)
+            .keyName(config.getDecryptionCredential().getName())
+            .certificate(config.getDecryptionCredential().getCertificate())
+            .build());
         // TODO: Support for EncryptionMethod
       }
       if (config.getDefaultCredential() != null && keyDescriptors.size() < 2) {
         keyDescriptors.add(KeyDescriptorBuilder.builder()
-          .use(UsageType.UNSPECIFIED)
-          .keyName(config.getDefaultCredential().getName())
-          .certificate(config.getDefaultCredential().getCertificate())
-          .build());
+            .use(UsageType.UNSPECIFIED)
+            .keyName(config.getDefaultCredential().getName())
+            .certificate(config.getDefaultCredential().getCertificate())
+            .build());
       }
       if (!keyDescriptors.isEmpty()) {
         desc.getKeyDescriptors().clear();
@@ -319,20 +322,20 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
         throw new IllegalArgumentException("sp-paths.assertion-consumer-path must be set");
       }
       acs.add(AssertionConsumerServiceBuilder.builder()
-        .binding(SAMLConstants.SAML2_POST_BINDING_URI)
-        .location(String.format("%s%s",
-          config.getSpPaths().getBaseUrl(), config.getSpPaths().getAssertionConsumerPath()))
-        .index(index++)
-        .isDefault(true)
-        .build());
-      if (StringUtils.isNotBlank(config.getSpPaths().getAdditionalAssertionConsumerPath())) {
-        acs.add(AssertionConsumerServiceBuilder.builder()
           .binding(SAMLConstants.SAML2_POST_BINDING_URI)
           .location(String.format("%s%s",
-            config.getSpPaths().getBaseUrl(), config.getSpPaths().getAdditionalAssertionConsumerPath()))
+              config.getSpPaths().getBaseUrl(), config.getSpPaths().getAssertionConsumerPath()))
           .index(index++)
-          .isDefault(false)
+          .isDefault(true)
           .build());
+      if (StringUtils.isNotBlank(config.getSpPaths().getAdditionalAssertionConsumerPath())) {
+        acs.add(AssertionConsumerServiceBuilder.builder()
+            .binding(SAMLConstants.SAML2_POST_BINDING_URI)
+            .location(String.format("%s%s",
+                config.getSpPaths().getBaseUrl(), config.getSpPaths().getAdditionalAssertionConsumerPath()))
+            .index(index++)
+            .isDefault(false)
+            .build());
       }
       desc.getAssertionConsumerServices().addAll(acs);
 
@@ -350,19 +353,33 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
   /**
    * Based on the SAML configuration and the metadata provider a {@link ResponseProcessor} is created.
    *
-   * @param config
-   *          the SAML configuration
-   * @param metadataProvider
-   *          the metadata provider
+   * @param config the SAML configuration
+   * @param beanLoader the bean loader
+   * @param metadataProvider the metadata provider
    * @return a ResponseProcessor
    */
   @Nonnull
   protected ResponseProcessor createResponseProcessor(
       @Nonnull final SamlAuthenticationHandlerConfiguration config,
+      @Nullable final BeanLoader beanLoader,
       @Nonnull final MetadataProvider metadataProvider) {
 
-    if (config.getMessageReplayChecker() == null) {
-      throw new IllegalArgumentException("message-replay-checker must not be null");
+    if (config.getMessageReplayChecker() != null && config.getMessageReplayCheckerRef() != null) {
+      throw new IllegalArgumentException("message-replay-checker and message-replay-checker-ref can not both be set");
+    }
+    se.swedenconnect.signservice.storage.MessageReplayChecker messageReplayChecker;
+    if (config.getMessageReplayCheckerRef() != null) {
+      if (beanLoader == null) {
+        throw new IllegalArgumentException("message-replay-checker-ref can not be loaded - missing bean loader");
+      }
+      messageReplayChecker =
+          beanLoader.load(config.getMessageReplayCheckerRef(), se.swedenconnect.signservice.storage.MessageReplayChecker.class);
+    }
+    else if (config.getMessageReplayChecker() != null) {
+      messageReplayChecker = config.getMessageReplayChecker();
+    }
+    else {
+      throw new IllegalArgumentException("message-replay-checker or message-replay-checker-ref is missing");
     }
 
     SAMLObjectDecrypter objectDecrypter = null;
@@ -378,20 +395,16 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     }
 
     return this.createResponseProcessor(config, objectDecrypter,
-      new MessageReplayCheckerWrapper(config.getMessageReplayChecker()), metadataProvider);
+        new MessageReplayCheckerWrapper(messageReplayChecker), metadataProvider);
   }
 
   /**
    * Creates a {@link ResponseProcessor}.
    *
-   * @param config
-   *          the SAML configuration
-   * @param decrypter
-   *          object decrypter
-   * @param messageReplayChecker
-   *          the message replay checker
-   * @param metadataProvider
-   *          the metadata provider
+   * @param config the SAML configuration
+   * @param decrypter object decrypter
+   * @param messageReplayChecker the message replay checker
+   * @param metadataProvider the metadata provider
    * @return a ResponseProcessor
    */
   @Nonnull
@@ -426,69 +439,11 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
   }
 
   /**
-   * Based on the configuration a {@link MetadataProvider} is created.
-   *
-   * @param config
-   *          the configuration
-   * @return a MetadataProvider
-   */
-  @Nonnull
-  protected MetadataProvider createMetadataProvider(
-      @Nonnull final SamlAuthenticationHandlerConfiguration config) {
-    if (config.getMetadataProviders() == null || config.getMetadataProviders().isEmpty()) {
-      throw new IllegalArgumentException("Missing metadata provider(s) from configuration object");
-    }
-    try {
-      final List<MetadataProvider> providers = new ArrayList<>();
-      for (final MetadataProviderConfiguration mc : config.getMetadataProviders()) {
-        if (StringUtils.isNotBlank(mc.getUrl()) && StringUtils.isNotBlank(mc.getFile())) {
-          throw new IllegalArgumentException("Illegal metadata provider configuration - Both url and file are set");
-        }
-        AbstractMetadataProvider provider = null;
-        if (StringUtils.isNotBlank(mc.getUrl())) {
-          provider = new HTTPMetadataProvider(mc.getUrl(), mc.getBackupFile(),
-            HTTPMetadataProvider.createDefaultHttpClient(null /* trust all */, new DefaultHostnameVerifier()));
-          if (mc.getValidationCertificate() == null) {
-            log.warn("No validation certificate given for metadata provider ({}) - metadata can not be trusted",
-              mc.getUrl());
-          }
-        }
-        else if (StringUtils.isNotBlank(mc.getFile())) {
-          provider = new FilesystemMetadataProvider(new File(mc.getFile()));
-        }
-        else {
-          throw new IllegalArgumentException("Illegal metadata provider configuration - url or file must be set");
-        }
-        if (mc.getValidationCertificate() != null) {
-          provider.setSignatureVerificationCertificate(mc.getValidationCertificate());
-        }
-        provider.setPerformSchemaValidation(false);
-        providers.add(provider);
-      }
-      if (providers.size() > 1) {
-        final CompositeMetadataProvider provider = new CompositeMetadataProvider("composite-provider", providers);
-        provider.initialize();
-        return provider;
-      }
-      else {
-        providers.get(0).initialize();
-        return providers.get(0);
-      }
-    }
-    catch (final ResolverException | ComponentInitializationException e) {
-      throw new IllegalArgumentException("Failed to initialize metadata provider - " + e.getMessage(), e);
-    }
-  }
-
-  /**
    * Based on the SAML configuration, metadata provider and SP metadata an {@link AuthnRequestGenerator} is created.
    *
-   * @param config
-   *          the SAML configuration
-   * @param metadataProvider
-   *          the metadata provider
-   * @param entityDescriptor
-   *          the SP metadata
+   * @param config the SAML configuration
+   * @param metadataProvider the metadata provider
+   * @param entityDescriptor the SP metadata
    * @return an AuthnRequestGenerator
    */
   @Nonnull
@@ -498,7 +453,7 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
       @Nonnull final EntityDescriptor entityDescriptor) {
 
     final PkiCredential signCred = Optional.ofNullable(config.getSignatureCredential())
-      .orElseGet(() -> config.getDefaultCredential());
+        .orElseGet(() -> config.getDefaultCredential());
     if (signCred == null && Optional.ofNullable(config.getSignAuthnRequests()).orElse(true)) {
       throw new IllegalArgumentException("No signature (or default) credential specified");
     }
@@ -508,7 +463,8 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     if (SamlAuthenticationHandlerConfiguration.SAML_TYPE_SWEDEN_CONNECT.equalsIgnoreCase(config.getSamlType())) {
       generator = new SwedishEidAuthnRequestGenerator(entityDescriptor, cred, metadataProvider.getMetadataResolver());
       try {
-        final SignMessageEncrypter encrypter = new SignMessageEncrypter(new SAMLObjectEncrypter(metadataProvider.getMetadataResolver()));
+        final SignMessageEncrypter encrypter =
+            new SignMessageEncrypter(new SAMLObjectEncrypter(metadataProvider.getMetadataResolver()));
         ((SwedishEidAuthnRequestGenerator) generator).setSignMessageEncrypter(encrypter);
       }
       catch (final ComponentInitializationException e) {
