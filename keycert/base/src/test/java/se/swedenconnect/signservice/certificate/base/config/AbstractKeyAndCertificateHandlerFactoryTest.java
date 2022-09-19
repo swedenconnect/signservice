@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
@@ -32,6 +33,7 @@ import org.mockito.Mockito;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.CertificateType;
@@ -300,12 +302,13 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
     protected AbstractKeyAndCertificateHandler createKeyAndCertificateHandler(
         @Nonnull final HandlerConfiguration<KeyAndCertificateHandler> configuration,
         @Nullable final BeanLoader beanLoader,
-        @Nonnull final List<KeyProvider> keyProviders,
+        @Nonnull final PkiCredentialContainer keyProvider,
+        @Nonnull final Map<String, String> algorithmKeyTypeMap,
         @Nonnull final AttributeMapper attributeMapper,
         @Nonnull final AlgorithmRegistry algorithmRegistry,
         @Nullable final CertificateProfileConfiguration profileConfiguration) throws IllegalArgumentException {
 
-      return new TestHandler(keyProviders, attributeMapper, algorithmRegistry);
+      return new TestHandler(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry);
     }
 
     public Class<KeyAndCertificateHandler> handler() {
@@ -316,10 +319,11 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
   private static class TestHandler extends AbstractKeyAndCertificateHandler {
 
     public TestHandler(
-        @Nonnull final List<KeyProvider> keyProviders,
+        @Nonnull final PkiCredentialContainer keyProvider,
+        @Nonnull final Map<String, String> algorithmKeyTypeMap,
         @Nonnull final AttributeMapper attributeMapper,
         @Nonnull AlgorithmRegistry algorithmRegistry) {
-      super(keyProviders, attributeMapper, algorithmRegistry);
+      super(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry);
     }
 
     @Override

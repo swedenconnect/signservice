@@ -23,10 +23,10 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.KeyException;
+import java.security.KeyStoreException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,6 +53,8 @@ import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
+import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
 import se.swedenconnect.signservice.authn.AuthnContextIdentifier;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
@@ -88,15 +90,15 @@ public class AbstractKeyAndCertificateHandlerTest {
 
   final SignServiceContext mockedContext;
 
-  public AbstractKeyAndCertificateHandlerTest() {
+  public AbstractKeyAndCertificateHandlerTest() throws KeyStoreException {
     this.handler = new TestKeyAndCertificateHandler(
-        Arrays.asList(
-            new OnDemandInMemoryRSAKeyProvider(2048), new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))),
+        new SoftPkiCredentialContainer("BC", "Test1234"),
         AlgorithmRegistrySingleton.getInstance());
 
     this.mockedContext = Mockito.mock(SignServiceContext.class);
   }
 
+/*
   @Test
   public void testNoProviders() {
     assertThatThrownBy(() -> {
@@ -104,12 +106,11 @@ public class AbstractKeyAndCertificateHandlerTest {
     }).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("At least one key provider must be configured");
   }
+*/
 
   @Test
-  public void testCheckRequirements() throws InvalidRequestException {
-    final KeyAndCertificateHandler keyAndCertificateHandler = new TestKeyAndCertificateHandler(
-        Arrays.asList(
-            new OnDemandInMemoryRSAKeyProvider(2048), new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))));
+  public void testCheckRequirements() throws InvalidRequestException, KeyStoreException {
+    final KeyAndCertificateHandler keyAndCertificateHandler = new TestKeyAndCertificateHandler(new SoftPkiCredentialContainer("BC", "Test1234"));
     log.info("Created key and certificate handler instance");
 
     keyAndCertificateHandler.checkRequirements(
@@ -122,10 +123,9 @@ public class AbstractKeyAndCertificateHandlerTest {
   }
 
   @Test
-  public void testCheckRequirementsUnsupportedKeyType() {
+  public void testCheckRequirementsUnsupportedKeyType() throws KeyStoreException {
 
-    final TestKeyAndCertificateHandler handler = new TestKeyAndCertificateHandler(
-        Arrays.asList(new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))));
+    final TestKeyAndCertificateHandler handler = new TestKeyAndCertificateHandler(new SoftPkiCredentialContainer("BC", "Test1234"));
 
     assertThatThrownBy(() -> {
       handler.checkRequirements(
@@ -136,7 +136,7 @@ public class AbstractKeyAndCertificateHandlerTest {
   }
 
   @Test
-  public void testCheckRequirementsUnsupportedCertificateType() {
+  public void testCheckRequirementsUnsupportedCertificateType() throws KeyStoreException {
 
     assertThatThrownBy(() -> {
       this.handler.checkRequirements(
@@ -145,8 +145,7 @@ public class AbstractKeyAndCertificateHandlerTest {
     }).isInstanceOf(InvalidRequestException.class)
         .hasMessage("Handler does not support certificate type " + CertificateType.QC_SSCD);
 
-    final TestKeyAndCertificateHandler handler = new TestKeyAndCertificateHandler(Arrays
-        .asList(new OnDemandInMemoryRSAKeyProvider(2048), new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))));
+    final TestKeyAndCertificateHandler handler = new TestKeyAndCertificateHandler(new SoftPkiCredentialContainer("BC","Test1234"));
     handler.setCaCertificateType(CertificateType.QC);
 
     assertThatThrownBy(() -> {
@@ -324,7 +323,7 @@ public class AbstractKeyAndCertificateHandlerTest {
   public void testKeyAndCertMissingKeyProvider() throws Exception {
 
     final TestKeyAndCertificateHandler handler = new TestKeyAndCertificateHandler(
-        Arrays.asList(new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))));
+        new SoftPkiCredentialContainer("BC","Test1234"));
 
     final IdentityAssertion assertion = this.getTestAssertion();
 
@@ -460,14 +459,14 @@ public class AbstractKeyAndCertificateHandlerTest {
   class TestKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertificateHandler {
 
     public TestKeyAndCertificateHandler(
-        @Nonnull final List<KeyProvider> keyProviders) {
+        @Nonnull final PkiCredentialContainer keyProviders) {
       super(keyProviders, new DefaultAttributeMapper((p1, p2, p3) -> false));
     }
 
     public TestKeyAndCertificateHandler(
-        @Nonnull final List<KeyProvider> keyProviders,
+        @Nonnull final PkiCredentialContainer keyProvider,
         @Nonnull final AlgorithmRegistry algorithmRegistry) {
-      super(keyProviders, new DefaultAttributeMapper((p1, p2, p3) -> false), algorithmRegistry);
+      super(keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES, new DefaultAttributeMapper((p1, p2, p3) -> false), algorithmRegistry);
     }
 
     @Override
