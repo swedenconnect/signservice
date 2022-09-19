@@ -52,7 +52,6 @@ import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappingData;
-import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
 

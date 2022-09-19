@@ -15,9 +15,8 @@
  */
 package se.swedenconnect.signservice.certificate.base.config;
 
-import java.security.spec.ECGenParameterSpec;
-import java.util.ArrayList;
-import java.util.List;
+import java.security.KeyStoreException;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -28,16 +27,15 @@ import org.apache.commons.lang.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
+import se.swedenconnect.security.credential.container.HsmPkiCredentialContainer;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
+import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultAttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyChecker;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyCheckerImpl;
 import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.OnDemandInMemoryRSAKeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.StackedInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.core.config.AbstractHandlerFactory;
 import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
@@ -71,24 +69,28 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
         Optional.ofNullable(conf.getAlgorithmRegistry()).orElseGet(() -> AlgorithmRegistrySingleton.getInstance());
 
     // Key providers
-    final List<KeyProvider> keyProviders = new ArrayList<>();
-    if (conf.getRsaProvider() != null) {
-      if (conf.getRsaProvider().getKeySize() == null) {
-        throw new IllegalArgumentException("Illegal RSA provider configuration - missing key-size");
-      }
-      if (conf.getRsaProvider().getStackSize() != null) {
-        keyProviders.add(new StackedInMemoryRSAKeyProvider(
-            conf.getRsaProvider().getKeySize(), conf.getRsaProvider().getStackSize()));
-      }
-      else {
-        keyProviders.add(new OnDemandInMemoryRSAKeyProvider(conf.getRsaProvider().getKeySize()));
-      }
+    final PkiCredentialContainer keyProvider ;
+    AbstractKeyAndCertificateHandlerConfiguration.CredentialContainerConfiguration keyProviderConfig = conf.getUserKeyProvider();
+    if (StringUtils.isBlank(keyProviderConfig.getPassword())){
+      throw new IllegalArgumentException("Key container password must not be null");
     }
-    if (conf.getEcProvider() != null) {
-      keyProviders.add(new InMemoryECKeyProvider(new ECGenParameterSpec(conf.getEcProvider().getCurveName())));
-    }
-    if (keyProviders.isEmpty()) {
-      throw new IllegalArgumentException("At least one key provider must be supplied");
+    if (StringUtils.isNotBlank(keyProviderConfig.getHsmConfigurationFile())){
+      // Use HSM credential container
+      try {
+        keyProvider = new HsmPkiCredentialContainer(keyProviderConfig.getHsmConfigurationFile(),
+          keyProviderConfig.getPassword());
+      }
+      catch (KeyStoreException e) {
+        throw new IllegalArgumentException("Invalid HSM credential container configuration for user key generation");
+      }
+    } else {
+      // Use soft credential container
+      try {
+        keyProvider = new SoftPkiCredentialContainer(keyProviderConfig.getSoftProvider(), keyProviderConfig.getPassword());
+      }
+      catch (KeyStoreException e) {
+        throw new IllegalArgumentException("Invalid soft credential container configuration for user key generation");
+      }
     }
 
     // Attribute mappings
@@ -119,7 +121,7 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
         Optional.ofNullable(conf.getProfileConfiguration()).orElse(null);
 
     final AbstractKeyAndCertificateHandler handler = this.createKeyAndCertificateHandler(
-        configuration, beanLoader, keyProviders, attributeMapper, algorithmRegistry, profileConfiguration);
+        configuration, beanLoader, keyProvider, keyProviderConfig.algorithmKeyType , attributeMapper, algorithmRegistry, profileConfiguration);
 
     // Certificate type
     if (conf.getCaCertificateType() != null) {
@@ -158,7 +160,8 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
   protected abstract AbstractKeyAndCertificateHandler createKeyAndCertificateHandler(
       @Nonnull final HandlerConfiguration<KeyAndCertificateHandler> configuration,
       @Nullable final BeanLoader beanLoader,
-      @Nonnull final List<KeyProvider> keyProviders,
+      @Nonnull final PkiCredentialContainer keyProviders,
+      @Nonnull final Map<String, String> algorithmKeyTypeMap,
       @Nonnull final AttributeMapper attributeMapper,
       @Nonnull final AlgorithmRegistry algorithmRegistry,
       @Nullable final CertificateProfileConfiguration profileConfiguration) throws IllegalArgumentException;

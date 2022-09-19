@@ -37,7 +37,7 @@ import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyCheckerImpl;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.DefaultValuePolicyCheckerConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.ECProviderConfiguration;
+import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.CredentialContainerConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.RsaProviderConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.simple.SimpleKeyAndCertificateHandler;
@@ -218,7 +218,7 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
     config.setName("NAME");
     config.setAlgorithmRegistry(AlgorithmRegistrySingleton.getInstance());
     config.setRsaProvider(RsaProviderConfiguration.builder().keySize(2048).build());
-    config.setEcProvider(ECProviderConfiguration.builder().curveName("P-256").build());
+    config.setUserKeyProvider(CredentialContainerConfiguration.builder().curveName("P-256").build());
     config.setProfileConfiguration(new CertificateProfileConfiguration());
     config.setDefaultValuePolicyChecker(checkerConfig);
     config.setServiceName("SERVICE_NAME");

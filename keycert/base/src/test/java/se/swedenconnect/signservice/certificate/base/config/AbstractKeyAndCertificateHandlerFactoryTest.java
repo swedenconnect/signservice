@@ -17,8 +17,10 @@ package se.swedenconnect.signservice.certificate.base.config;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -26,7 +28,9 @@ import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -43,9 +47,7 @@ import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappin
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyCheckerImpl;
 import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.DefaultValuePolicyCheckerConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.ECProviderConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.RsaProviderConfiguration;
-import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
+import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.CredentialContainerConfiguration;
 import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
@@ -56,6 +58,13 @@ import se.swedenconnect.signservice.session.SignServiceContext;
  * Test cases for AbstractKeyAndCertificateHandlerFactory.
  */
 public class AbstractKeyAndCertificateHandlerFactoryTest {
+
+  @BeforeAll
+  static void init() throws Exception {
+    if (Security.getProvider("BC") == null) {
+      Security.insertProviderAt(new BouncyCastleProvider(), 2);
+    }
+  }
 
   @Test
   public void testCreate() {
@@ -70,27 +79,6 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
   @Test
   public void testUseStackedRsaKeyProvider() {
     final TestConfig config = this.getFullConfig();
-    config.getRsaProvider().setStackSize(1);
-    final TestFactory factory = new TestFactory();
-
-    final KeyAndCertificateHandler handler = factory.create(config);
-    Assertions.assertTrue(TestHandler.class.isInstance(handler));
-  }
-
-  @Test
-  public void testOnlyRsaKeyProvider() {
-    final TestConfig config = this.getFullConfig();
-    config.setEcProvider(null);
-    final TestFactory factory = new TestFactory();
-
-    final KeyAndCertificateHandler handler = factory.create(config);
-    Assertions.assertTrue(TestHandler.class.isInstance(handler));
-  }
-
-  @Test
-  public void testOnlyEcKeyProvider() {
-    final TestConfig config = this.getFullConfig();
-    config.setRsaProvider(null);
     final TestFactory factory = new TestFactory();
 
     final KeyAndCertificateHandler handler = factory.create(config);
@@ -100,14 +88,13 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
   @Test
   public void testMissingKeyProviders() {
     final TestConfig config = this.getFullConfig();
-    config.setRsaProvider(null);
-    config.setEcProvider(null);
+    config.getUserKeyProvider().setAlgorithmKeyType(new HashMap<>());
     final TestFactory factory = new TestFactory();
 
     assertThatThrownBy(() -> {
       factory.create(config);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("At least one key provider must be supplied");
+        .hasMessage("At least one key type for one algorithm must be present");
   }
 
   @Test
@@ -276,8 +263,9 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
     final TestConfig config = new TestConfig();
     config.setName("NAME");
     config.setAlgorithmRegistry(AlgorithmRegistrySingleton.getInstance());
-    config.setRsaProvider(RsaProviderConfiguration.builder().keySize(2048).build());
-    config.setEcProvider(ECProviderConfiguration.builder().curveName("P-256").build());
+    config.setUserKeyProvider(CredentialContainerConfiguration.builder()
+      .password("Test1234").softProvider("BC")
+      .algorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES).build());
     config.setProfileConfiguration(new CertificateProfileConfiguration());
     config.setDefaultValuePolicyChecker(checkerConfig);
     config.setServiceName("SERVICE_NAME");

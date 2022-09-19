@@ -65,9 +65,6 @@ import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappin
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultAttributeMapper;
 import se.swedenconnect.signservice.certificate.base.utils.TestUtils;
 import se.swedenconnect.signservice.certificate.base.utils.X509DnNameType;
-import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.OnDemandInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;

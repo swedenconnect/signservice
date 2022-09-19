@@ -17,6 +17,7 @@ package se.swedenconnect.signservice.certificate.base.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
@@ -50,18 +51,12 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
   private AlgorithmRegistry algorithmRegistry;
 
   /**
-   * Configuration for an RSA key provider.
+   * Configuration the user key generator.
    */
   @Getter
   @Setter
-  private RsaProviderConfiguration rsaProvider;
+  private CredentialContainerConfiguration userKeyProvider;
 
-  /**
-   * Configuration for an EC key provider.
-   */
-  @Getter
-  @Setter
-  private ECProviderConfiguration ecProvider;
 
   /**
    * The attribute mapper.
@@ -133,38 +128,37 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
   }
 
   /**
-   * Configuration for an RSA key provider.
-   */
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class RsaProviderConfiguration {
-
-    /**
-     * The keysize in bits.
-     */
-    private Integer keySize;
-
-    /**
-     * The number of keys stored in this key stack. If not set, RSA keys will be generated on demand.
-     */
-    private Integer stackSize;
-  }
-
-  /**
    * Configuration for an EC key provider.
    */
   @Data
   @Builder
   @NoArgsConstructor
   @AllArgsConstructor
-  public static class ECProviderConfiguration {
+  public static class CredentialContainerConfiguration {
 
     /**
-     * The name of the EC curve for the EC provider.
+     * The name of the EC curve for the EC provider. A null or absent value indicate generation and use of software based keys.
      */
-    private String curveName;
+    private String hsmConfigurationFile;
+
+    /**
+     * The password used to access the HSM slot if HSM is used or the password used to protect the key store if software
+     * based keys are being used
+     */
+    private String password;
+
+    /**
+     * The name of the crypto provider used to generate software based keys. This value is ignored if the
+     * hsmConfigurationFile property is set.
+     */
+    private String softProvider;
+
+    /**
+     * A map specifying the key type for each supported algorithm type (primary EC and RSA algorithm types)
+     */
+    Map<String, String> algorithmKeyType;
+
+
   }
 
 }
