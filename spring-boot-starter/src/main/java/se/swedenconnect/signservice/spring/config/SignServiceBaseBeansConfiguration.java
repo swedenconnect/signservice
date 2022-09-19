@@ -48,7 +48,7 @@ public class SignServiceBaseBeansConfiguration {
   private ApplicationEventPublisher applicationEventPublisher;
 
   /**
-   * Creates the {@link FactoryRegistry} bean that is needed for handler configuration and creation.
+   * Creates the FactoryRegistry bean that is needed for handler configuration and creation.
    *
    * @return a HandlerFactoryRegistry bean
    */
