@@ -30,7 +30,7 @@ import se.swedenconnect.signservice.spring.config.HandlerConfigurationProperties
 /**
  * Properties for authentication configuration.
  */
-public class AuthenticationConfigurationProperties implements HandlerConfigurationProperties<AuthenticationHandler> {
+public class AuthenticationHandlerConfigurationProperties implements HandlerConfigurationProperties<AuthenticationHandler> {
 
   /**
    * Configuration for using a mocked authentication handler.

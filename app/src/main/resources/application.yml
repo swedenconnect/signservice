@@ -45,15 +45,27 @@ signservice:
     type: JKS
     password: secret
     key-password: secret
-  default-handler-config:
+
+  #
+  # Configuration for common beans used by several engine configurations
+  #  
+  common-beans:
+    protocol:
+      bean-name: signservice.DssProtocolHandler
+      dss:
+        include-assertion: true
+        include-request-message: false
     sign:
+      bean-name: signservice.DefaultSignatureHandler
       default-handler:
+        name: DefaultSignatureHandler
         tbs-processors:
         - type: xml
           strict-processing: false
           include-issuer-serial: true
         - type: pdf
     cert:
+      bean-name: signservice.BuiltInCa
       built-in-ca:
         base-url: ${signservice.base-url}
         ca-credential-props:
@@ -79,15 +91,20 @@ signservice:
             ref: "2.5.4.6"
             allowed-values:
             - SE
+    saml:
+      metadata-provider:
+        bean-name: signservice.SamlMetadataProvider
+        url: https://eid.svelegtest.se/metadata/mdx/role/idp.xml
+        backup-file: ${SIGNSERVICE_HOME}/sandbox-metadata.xml
+        validation-certificate: classpath:sandbox/sandbox-metadata.crt
+                        
+  default-handler-config:
     authn:
       saml:
         saml-type: sweden-connect
         sp-paths:
           base-url: ${signservice.base-url}
-        metadata-providers:
-        - url: https://eid.svelegtest.se/metadata/mdx/role/idp.xml
-          backup-file: ${SIGNSERVICE_HOME}/sandbox-metadata.xml
-          validation-certificate: classpath:sandbox/sandbox-metadata.crt
+        metadata-provider-ref: signservice.SamlMetadataProvider
         signature-credential-props:
           name: SignService SAML Signing
           resource: classpath:sandbox/saml-sp.jks
@@ -108,6 +125,7 @@ signservice:
           strict-validation: false
           require-signed-assertions: true
           allowed-clock-skew: PT60S
+        message-replay-checker-ref: signservice.MessageReplayChecker 
         metadata:
           entity-categories:
           - http://id.elegnamnden.se/st/1.0/sigservice
@@ -160,6 +178,7 @@ signservice:
               company: "Sweden Connect"
               email-address: operations@swedenconnect.se
   engines:
+  
   #
   # Configuration for the "Test my Signature"-client running on localhost. 
   # See https://github.com/idsec-solutions/signservice-integration.
@@ -172,7 +191,7 @@ signservice:
       trusted-certificates:
       - classpath:clients/test-my-signature/client.crt
     protocol:
-      dss:
+      external:
         bean-name: signservice.DssProtocolHandler
     authn:
       saml:        
@@ -190,15 +209,16 @@ signservice:
             - "en-Application for testing your eID (localhost)"
             - "sv-Applikation för att testa ditt eID (localhost)"
     sign:
-      default-handler:
-        default-config-ref: sign.default-handler
+      external:
+        bean-name: signservice.DefaultSignatureHandler
     cert:
-      built-in-ca:
-        default-config-ref: cert.built-in-ca
+      external:
+        bean-name: signservice.BuiltInCa
     audit:
       file:
         name: "test-my-signature-audit-logger"
         file-name: ${SIGNSERVICE_HOME}/testmysignature/audit.log
+        
   #
   # Configuration for the "Signature Service Test Application" (https://sig.sandbox.swedenconnect.se/testsp).
   # Log in using the user "signserviceuser" with the password "signserviceuser".
@@ -211,7 +231,7 @@ signservice:
       trusted-certificates:
       - classpath:clients/signservice-testapp/eid2cssp.3xasecurity.com.crt
     protocol:
-      dss:
+      external:
         bean-name: signservice.DssProtocolHandler
     authn:
       saml:        
@@ -230,11 +250,11 @@ signservice:
             - "en-Sweden Connect test application for signature services running on localhost"
             - "sv-Sweden Connect testapplikation för underskriftstjänster (localhost)"
     sign:
-      default-handler:
-        default-config-ref: sign.default-handler
+      external:
+        bean-name: signservice.DefaultSignatureHandler
     cert:
-      built-in-ca:
-        default-config-ref: cert.built-in-ca
+      external:
+        bean-name: signservice.BuiltInCa
     audit:
       file:
         name: "signservice-test-localhost-audit"

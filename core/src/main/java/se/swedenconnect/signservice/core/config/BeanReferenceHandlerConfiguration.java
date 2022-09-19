@@ -16,7 +16,9 @@
 package se.swedenconnect.signservice.core.config;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import se.swedenconnect.signservice.core.SignServiceHandler;
 
@@ -93,18 +95,32 @@ public class BeanReferenceHandlerConfiguration<T extends SignServiceHandler> ext
   /**
    * The factory class used by the {@link BeanReferenceHandlerConfiguration} configuration class.
    */
-  public static class BeanReferenceHandlerFactory<T extends SignServiceHandler> extends AbstractHandlerFactory<T> {
+  public static class BeanReferenceHandlerFactory<T extends SignServiceHandler> implements HandlerFactory<T> {
 
+    /** The logger. */
+    private static final Logger log = LoggerFactory.getLogger(BeanReferenceHandlerFactory.class);
+
+    /**
+     * Loads the externally configured bean.
+     */
+    @SuppressWarnings("unchecked")
     @Override
-    protected T createHandler(@Nullable final HandlerConfiguration<T> configuration, @Nullable final BeanLoader beanLoader)
+    public T create(@Nonnull final HandlerConfiguration<T> configuration, @Nonnull final BeanLoader beanLoader)
         throws IllegalArgumentException {
-      throw new IllegalArgumentException(this.getClass().getSimpleName() + " only supports loading custom beans");
-    }
+      if (configuration == null) {
+        throw new IllegalArgumentException("Missing configuration");
+      }
+      if (configuration.getBeanName() == null) {
+        throw new IllegalArgumentException("Missing bean-name property");
+      }
+      if (beanLoader == null) {
+        throw new IllegalArgumentException(
+            String.format("Can not load bean '{}' - No bean loader was supplied", configuration.getBeanName()));
+      }
+      log.debug("Factory {} supplied with configuration that contains bean-name '{}', loading bean ...",
+          this.getClass().getSimpleName(), configuration.getBeanName());
 
-    @Override
-    protected Class<T> getHandlerType() {
-      // TODO Auto-generated method stub
-      return null;
+      return (T) beanLoader.load(configuration.getBeanName(), Object.class);
     }
 
   }

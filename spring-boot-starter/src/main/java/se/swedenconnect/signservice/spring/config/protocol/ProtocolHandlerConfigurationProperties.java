@@ -29,7 +29,7 @@ import se.swedenconnect.signservice.spring.config.HandlerConfigurationProperties
 /**
  * Properties for protocol configuration.
  */
-public class ProtocolConfigurationProperties implements HandlerConfigurationProperties<ProtocolHandler> {
+public class ProtocolHandlerConfigurationProperties implements HandlerConfigurationProperties<ProtocolHandler> {
 
   /**
    * Configuration for the DSS protocol.

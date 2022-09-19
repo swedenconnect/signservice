@@ -24,6 +24,7 @@ import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 
 import lombok.Getter;
 import lombok.Setter;
+import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 import se.swedenconnect.opensaml.saml2.response.validation.ResponseValidationSettings;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
@@ -85,11 +86,18 @@ public class SamlAuthenticationHandlerConfiguration
   private SpUrlConfiguration spPaths;
 
   /**
-   * A list of metadata providers.
+   * Metadata provider(s). Mutually exclusive with {@code metadataProviderRef}.
    */
   @Setter
   @Getter
-  private List<MetadataProviderConfiguration> metadataProviders;
+  private MetadataProviderConfiguration metadataProvider;
+
+  /**
+   * A bean reference to a metadata provider {@link MetadataProvider}. Mutually exclusive with {@code metadataProvider}.
+   */
+  @Setter
+  @Getter
+  private String metadataProviderRef;
 
   /**
    * The SAML SP metadata.
@@ -99,11 +107,18 @@ public class SamlAuthenticationHandlerConfiguration
   private MetadataConfiguration metadata;
 
   /**
-   * The message replay checker.
+   * The message replay checker. Mutually exclusive with {@code messageReplayCheckerRef}.
    */
   @Setter
   @Getter
   private MessageReplayChecker messageReplayChecker;
+
+  /**
+   * A bean reference to a {@link MessageReplayChecker}. Mutually exclusive with {@code messageReplayChecker}.
+   */
+  @Setter
+  @Getter
+  private String messageReplayCheckerRef;
 
   /**
    * Whether AuthnRequest messages should be signed by the SP. The default is {@code true}.

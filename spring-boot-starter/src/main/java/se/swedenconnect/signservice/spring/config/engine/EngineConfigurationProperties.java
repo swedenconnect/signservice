@@ -26,9 +26,9 @@ import lombok.Setter;
 import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationProperties;
 import se.swedenconnect.signservice.client.impl.DefaultClientConfiguration;
 import se.swedenconnect.signservice.spring.config.audit.AuditLoggerConfigurationProperties;
-import se.swedenconnect.signservice.spring.config.authn.AuthenticationConfigurationProperties;
+import se.swedenconnect.signservice.spring.config.authn.AuthenticationHandlerConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.keycert.KeyAndCertificateHandlerConfigurationProperties;
-import se.swedenconnect.signservice.spring.config.protocol.ProtocolConfigurationProperties;
+import se.swedenconnect.signservice.spring.config.protocol.ProtocolHandlerConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.sign.SignatureHandlerConfigurationProperties;
 
 /**
@@ -65,12 +65,12 @@ public class EngineConfigurationProperties implements InitializingBean {
   /**
    * Protocol configuration.
    */
-  private ProtocolConfigurationProperties protocol;
+  private ProtocolHandlerConfigurationProperties protocol;
 
   /**
    * Authentication handler configuration.
    */
-  private AuthenticationConfigurationProperties authn;
+  private AuthenticationHandlerConfigurationProperties authn;
 
   /**
    * Signature handler configuration.

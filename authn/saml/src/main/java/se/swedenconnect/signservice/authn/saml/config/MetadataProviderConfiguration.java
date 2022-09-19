@@ -15,31 +15,43 @@
  */
 package se.swedenconnect.signservice.authn.saml.config;
 
+import java.io.File;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import se.swedenconnect.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
+import se.swedenconnect.opensaml.saml2.metadata.provider.CompositeMetadataProvider;
+import se.swedenconnect.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
+import se.swedenconnect.opensaml.saml2.metadata.provider.HTTPMetadataProvider;
+import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 
 /**
  * Configuration class for metadata providers.
  */
+@Slf4j
+@Data
 public class MetadataProviderConfiguration {
 
   /**
    * The certificate used to validate the metadata.
    */
-  @Getter
-  @Setter
   @Nullable
   private X509Certificate validationCertificate;
 
   /**
    * The URL from where metadata is downloaded. Mutually exclusive with {@code file}.
    */
-  @Getter
-  @Setter
   @Nullable
   private String url;
 
@@ -47,17 +59,66 @@ public class MetadataProviderConfiguration {
    * Optional property. If {@code url} is assigned, this setting tells where a backup of the downloaded data should be
    * saved.
    */
-  @Getter
-  @Setter
   @Nullable
   private String backupFile;
 
   /**
    * A path to locally stored metadata. Mutually exclusive with {@code url}.
    */
-  @Getter
-  @Setter
   @Nullable
   private String file;
+
+  /**
+   * Additional providers.
+   */
+  @Nullable
+  private List<MetadataProviderConfiguration> additional;
+
+  /**
+   * Based on the configuration a {@link MetadataProvider} is created.
+   *
+   * @return a MetadataProvider
+   */
+  @Nonnull
+  public MetadataProvider create() throws IllegalArgumentException {
+    try {
+      if (StringUtils.isNotBlank(this.url) && StringUtils.isNotBlank(this.file)) {
+        throw new IllegalArgumentException("Illegal metadata provider configuration - Both url and file are set");
+      }
+      AbstractMetadataProvider provider = null;
+      if (StringUtils.isNotBlank(this.url)) {
+        provider = new HTTPMetadataProvider(this.url, this.backupFile,
+          HTTPMetadataProvider.createDefaultHttpClient(null /* trust all */, new DefaultHostnameVerifier()));
+        if (this.validationCertificate == null) {
+          log.warn("No validation certificate given for metadata provider ({}) - metadata can not be trusted", this.url);
+        }
+      }
+      else if (StringUtils.isNotBlank(this.file)) {
+        provider = new FilesystemMetadataProvider(new File(this.file));
+      }
+      else {
+        throw new IllegalArgumentException("Illegal metadata provider configuration - url or file must be set");
+      }
+      provider.setPerformSchemaValidation(false);
+      provider.initialize();
+
+      if (this.additional != null && !this.additional.isEmpty()) {
+        final List<MetadataProvider> metadataProviders = new ArrayList<>();
+        metadataProviders.add(provider);
+        for (final MetadataProviderConfiguration mpc : this.additional) {
+          metadataProviders.add(mpc.create());
+        }
+        final CompositeMetadataProvider compositeProvider = new CompositeMetadataProvider("composite-provider", metadataProviders);
+        compositeProvider.initialize();
+        return compositeProvider;
+      }
+      else {
+        return provider;
+      }
+    }
+    catch (final ResolverException | ComponentInitializationException e) {
+      throw new IllegalArgumentException("Failed to initialize metadata provider - " + e.getMessage(), e);
+    }
+  }
 
 }

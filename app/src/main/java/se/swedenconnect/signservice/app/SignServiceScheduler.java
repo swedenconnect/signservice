@@ -13,22 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.app.config;
+package se.swedenconnect.signservice.app;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
+import lombok.Setter;
 import se.swedenconnect.signservice.storage.impl.InMemoryReplayCheckerStorageContainer;
 
 /**
- * Configuration for SignService.
+ * Responsible of handling scheduled tasks.
  */
-@Configuration
-public class SignServiceConfiguration {
+@Service
+public class SignServiceScheduler {
 
-  @Bean
-  public InMemoryReplayCheckerStorageContainer inMemoryReplayCheckerStorageContainer() {
-    return new InMemoryReplayCheckerStorageContainer("replay-storage");
+  /** The replay storage that we use. */
+  @Autowired
+  @Setter
+  private InMemoryReplayCheckerStorageContainer replayStorage;
+
+  /**
+   * Cleans the replay storage.
+   */
+  @Scheduled(fixedDelay = 600000L)
+  public void clearReplayStorage() {
+    this.replayStorage.cleanup();
   }
 
 }
