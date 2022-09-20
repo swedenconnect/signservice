@@ -46,13 +46,13 @@ public class DefaultSelfSignedCaCertificateGenerator implements SelfSignedCaCert
   @Override
   @Nonnull
   public X509Certificate generate(
-      @Nonnull final PkiCredential keyPair, @Nonnull final CertificateIssuerModel certificateIssuerModel,
+      @Nonnull final PkiCredential KeyPairCredentials, @Nonnull final CertificateIssuerModel certificateIssuerModel,
       @Nonnull final CertNameModel<?> name) throws CertificateException {
 
     try {
       final CertificateIssuer issuer = new SelfIssuedCertificateIssuer(certificateIssuerModel);
       final CertificateModel certificateModel = SelfIssuedCertificateModelBuilder.getInstance(
-          new KeyPair(keyPair.getPublicKey(), keyPair.getPrivateKey()), certificateIssuerModel)
+          new KeyPair(KeyPairCredentials.getPublicKey(), KeyPairCredentials.getPrivateKey()), certificateIssuerModel)
           .subject(name)
           .basicConstraints(new BasicConstraintsModel(true, true))
           .keyUsage(new KeyUsageModel(KeyUsage.keyCertSign + KeyUsage.cRLSign, true))

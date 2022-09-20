@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.security.KeyStoreException;
 import java.time.Duration;
 import java.util.List;
 
@@ -62,9 +63,14 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
         return "dummy";
       }
 
-      @Override
-      public RsaProviderConfiguration getRsaProvider() {
-        return RsaProviderConfiguration.builder().keySize(4096).build();
+      /**
+       * Configuration the user key generator.
+       */
+      @Override public CredentialContainerConfiguration getUserKeyProvider() {
+        return CredentialContainerConfiguration.builder()
+          .softProvider("BC")
+          .password("Test1234")
+          .build();
       }
 
     };
@@ -216,8 +222,7 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
         new SpringSimpleKeyAndCertificateHandlerConfiguration();
     config.setName("NAME");
     config.setAlgorithmRegistry(AlgorithmRegistrySingleton.getInstance());
-    config.setRsaProvider(RsaProviderConfiguration.builder().keySize(2048).build());
-    config.setUserKeyProvider(CredentialContainerConfiguration.builder().curveName("P-256").build());
+    config.setUserKeyProvider(CredentialContainerConfiguration.builder().softProvider("BC").password("Test1234").build());
     config.setProfileConfiguration(new CertificateProfileConfiguration());
     config.setDefaultValuePolicyChecker(checkerConfig);
     config.setServiceName("SERVICE_NAME");

@@ -43,7 +43,9 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
+import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
+import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 
 /**
  * Basic CA service test
@@ -68,9 +70,9 @@ class BasicCAServiceTest {
 
   @Test
   void caServiceTest() throws Exception {
-    final InMemoryECKeyProvider ecProvider = new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"));
+    final PkiCredentialContainer ecProvider = new SoftPkiCredentialContainer("BC", "Test1234");
 
-    final PkiCredential caCredential = ecProvider.getKeyPair();
+    final PkiCredential caCredential = ecProvider.getCredential(ecProvider.generateCredential(KeyGenType.EC_P256));
     final SelfSignedCaCertificateGenerator caCertificateFactory = new DefaultSelfSignedCaCertificateGenerator();
     final X509Certificate caCertificate = caCertificateFactory.generate(
         caCredential,

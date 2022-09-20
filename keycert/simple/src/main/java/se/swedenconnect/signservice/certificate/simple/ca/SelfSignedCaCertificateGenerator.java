@@ -32,7 +32,7 @@ public interface SelfSignedCaCertificateGenerator {
   /**
    * Generates the self-issued CA certificates.
    *
-   * @param keyPair the public and private ca issuing key
+   * @param KeyPairCredentials the public and private ca issuing key
    * @param certificateIssuerModel parameters determining type and validity of issued certificate
    * @param name the subject and issuer name of the CA
    * @return CA certificate
@@ -40,6 +40,6 @@ public interface SelfSignedCaCertificateGenerator {
    */
   @Nonnull
   X509Certificate generate(
-      @Nonnull final PkiCredential keyPair, @Nonnull final CertificateIssuerModel certificateIssuerModel,
+      @Nonnull final PkiCredential KeyPairCredentials, @Nonnull final CertificateIssuerModel certificateIssuerModel,
       @Nonnull final CertNameModel<?> name) throws CertificateException;
 }

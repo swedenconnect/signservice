@@ -25,13 +25,11 @@ import java.io.Serializable;
 import java.security.KeyException;
 import java.security.KeyStoreException;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,6 +37,8 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
 import org.apache.xml.security.algorithms.MessageDigestAlgorithm;
 import org.apache.xml.security.signature.XMLSignature;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -55,6 +55,7 @@ import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
+import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 import se.swedenconnect.signservice.authn.AuthnContextIdentifier;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
@@ -86,6 +87,13 @@ public class AbstractKeyAndCertificateHandlerTest {
   final KeyAndCertificateHandler handler;
 
   final SignServiceContext mockedContext;
+
+  @BeforeAll
+  static void init()  throws Exception {
+    if (Security.getProvider("BC") == null) {
+      Security.insertProviderAt(new BouncyCastleProvider(), 2);
+    }
+  }
 
   public AbstractKeyAndCertificateHandlerTest() throws KeyStoreException {
     this.handler = new TestKeyAndCertificateHandler(
@@ -122,14 +130,16 @@ public class AbstractKeyAndCertificateHandlerTest {
   @Test
   public void testCheckRequirementsUnsupportedKeyType() throws KeyStoreException {
 
-    final TestKeyAndCertificateHandler handler = new TestKeyAndCertificateHandler(new SoftPkiCredentialContainer("BC", "Test1234"));
+    final TestKeyAndCertificateHandler handler = new TestKeyAndCertificateHandler(
+      new SoftPkiCredentialContainer("BC", "Test1234"), Collections.singletonMap("EC", KeyGenType.EC_P256)
+    );
 
     assertThatThrownBy(() -> {
       handler.checkRequirements(
           this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256, CertificateType.PKC, null),
           this.mockedContext);
     }).isInstanceOf(InvalidRequestException.class)
-        .hasMessageContaining("Unsupported key type");
+        .hasMessageContaining("Unsupported algorithm type: RSA");
   }
 
   @Test
@@ -319,8 +329,10 @@ public class AbstractKeyAndCertificateHandlerTest {
   @Test
   public void testKeyAndCertMissingKeyProvider() throws Exception {
 
+    PkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer("BC", "Test1234");
+    credentialContainer.setSupportedKeyTypes(List.of(KeyGenType.EC_P256));
     final TestKeyAndCertificateHandler handler = new TestKeyAndCertificateHandler(
-        new SoftPkiCredentialContainer("BC","Test1234"));
+        credentialContainer);
 
     final IdentityAssertion assertion = this.getTestAssertion();
 
@@ -329,7 +341,7 @@ public class AbstractKeyAndCertificateHandlerTest {
           this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256, null, null), assertion,
           new DefaultSignServiceContext("ctx"));
     }).isInstanceOf(KeyException.class)
-        .hasMessageContaining("Unsupported key type: ");
+        .hasMessageContaining("Algorithm not supported");
 
   }
 
@@ -458,6 +470,10 @@ public class AbstractKeyAndCertificateHandlerTest {
     public TestKeyAndCertificateHandler(
         @Nonnull final PkiCredentialContainer keyProviders) {
       super(keyProviders, new DefaultAttributeMapper((p1, p2, p3) -> false));
+    }
+    public TestKeyAndCertificateHandler(
+        @Nonnull final PkiCredentialContainer keyProviders, Map<String, String> algorithmKeyTypes) {
+      super(keyProviders, algorithmKeyTypes, new DefaultAttributeMapper((p1, p2, p3) -> false), AlgorithmRegistrySingleton.getInstance());
     }
 
     public TestKeyAndCertificateHandler(
