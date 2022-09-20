@@ -19,12 +19,16 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
+import se.swedenconnect.security.credential.container.PkiCredentialContainerException;
+import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
+import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 import se.swedenconnect.security.credential.utils.X509Utils;
-import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.OnDemandInMemoryRSAKeyProvider;
 
+import java.security.KeyException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
 import java.util.*;
@@ -55,32 +59,37 @@ public class TestServices {
 
     try {
 
-      KeyProvider kpRsa2048 = new OnDemandInMemoryRSAKeyProvider(2048);
-      KeyProvider kpRsa3072 = new OnDemandInMemoryRSAKeyProvider(3072);
-      KeyProvider ecP256 = new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"));
-      KeyProvider ecP521 = new InMemoryECKeyProvider(new ECGenParameterSpec("P-521"));
+      PkiCredentialContainer keyProvider = new SoftPkiCredentialContainer("BC", "Test1234");
+      keyProvider.setSupportedKeyTypes(List.of(
+        KeyGenType.RSA_2048,
+        KeyGenType.RSA_3072,
+        KeyGenType.EC_P256,
+        KeyGenType.EC_P521
+      ));
 
 
       // Generate user key pais
       log.info("Generating rsa 2048 user key");
-      rsa2048kp01 = getKeyPair(kpRsa2048.getKeyPair());
+      rsa2048kp01 = getKeyPair(keyProvider, KeyGenType.RSA_2048);
       log.info("Generating rsa 2048 user key");
-      rsa2048kp02 = getKeyPair(kpRsa2048.getKeyPair());
+      rsa2048kp02 = getKeyPair(keyProvider, KeyGenType.RSA_2048);
       log.info("Generating rsa 3072 user key");
-      rsa3072kp = getKeyPair(kpRsa3072.getKeyPair());;
+      rsa3072kp = getKeyPair(keyProvider, KeyGenType.RSA_3072);;
       log.info("Generating ec P256 user key");
-      ec256kp01 = getKeyPair(ecP256.getKeyPair());
+      ec256kp01 = getKeyPair(keyProvider, KeyGenType.EC_P256);
       log.info("Generating ec P256 user key");
-      ec256kp02 = getKeyPair(ecP256.getKeyPair());
+      ec256kp02 = getKeyPair(keyProvider, KeyGenType.EC_P256);
       log.info("Generating ec P521 user key");
-      ec521kp = getKeyPair(ecP521.getKeyPair());
+      ec521kp = getKeyPair(keyProvider, KeyGenType.EC_P521);
 
     }
     catch (Exception ignored) {
     }
   }
 
-  private static KeyPair getKeyPair(PkiCredential pkiCredential) {
+  private static KeyPair getKeyPair(PkiCredentialContainer keyProvider, String keyType)
+    throws CertificateException, NoSuchAlgorithmException, KeyException, PkiCredentialContainerException {
+    PkiCredential pkiCredential = keyProvider.getCredential(keyProvider.generateCredential(keyType));
     return new KeyPair(pkiCredential.getPublicKey(), pkiCredential.getPrivateKey());
   }
 

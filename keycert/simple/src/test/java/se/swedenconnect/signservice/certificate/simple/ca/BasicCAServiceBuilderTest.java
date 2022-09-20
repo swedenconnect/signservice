@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.File;
 import java.security.Security;
 import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
 import java.time.Duration;
 import java.util.List;
 
@@ -80,14 +79,6 @@ class BasicCAServiceBuilderTest {
             new AttributeTypeAndValueModel(CertAttributes.CN, "Test CA"),
             new AttributeTypeAndValueModel(CertAttributes.SERIALNUMBER, "1234567890"))));
     log.info("CA Certificate:\n{}", new PrintCertificate(caCertificate).toString(true, true, true));
-
-    assertThrows(IllegalArgumentException.class, () -> BasicCAServiceBuilder.getInstance(caCredential,
-        "http://localhost/testCa.crl",
-        XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
-        new File(caDir, TEST_CRL).toString())
-        .build());
-    log.info("Test acceptance of empty CA certificate list");
-
     caCredential.setCertificate(caCertificate);
 
     BasicCAServiceBuilder.getInstance(caCredential,

@@ -48,6 +48,8 @@ import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
+import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
 import se.swedenconnect.security.credential.utils.X509Utils;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.authn.impl.SimpleAuthnContextIdentifier;
@@ -56,6 +58,7 @@ import se.swedenconnect.signservice.certificate.CertificateType;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultAttributeMapper;
+import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
 import se.swedenconnect.signservice.certificate.cmc.ca.SignServiceCMCClient;
@@ -66,9 +69,6 @@ import se.swedenconnect.signservice.certificate.cmc.testutils.ca.BadCAService;
 import se.swedenconnect.signservice.certificate.cmc.testutils.ca.TestCA;
 import se.swedenconnect.signservice.certificate.cmc.testutils.ca.TestCAHolder;
 import se.swedenconnect.signservice.certificate.cmc.testutils.ca.TestServices;
-import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.OnDemandInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
@@ -88,19 +88,17 @@ import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 @Slf4j
 class CMCKeyAndCertificateHandlerTest {
 
-  static KeyProvider rsaProvider;
-  static KeyProvider ecProvider;
+  static PkiCredentialContainer keyProvider;
   static AlgorithmRegistry algorithmRegistry;
   static AttributeMapper attributeMapper;
 
   @BeforeAll
-  static void init() {
+  static void init() throws Exception{
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
 
-    rsaProvider = new OnDemandInMemoryRSAKeyProvider(2048);
-    ecProvider = new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"));
+    keyProvider = new SoftPkiCredentialContainer("BC", "Test1234");
 
     algorithmRegistry = AlgorithmRegistrySingleton.getInstance();
     attributeMapper = new DefaultAttributeMapper(
@@ -144,7 +142,8 @@ class CMCKeyAndCertificateHandlerTest {
     rsaCaCmcClient
         .setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(caHolder.getCscaService())));
     CMCKeyAndCertificateHandler keyAndCertificateHandler = new CMCKeyAndCertificateHandler(
-        Arrays.asList(rsaProvider, ecProvider), attributeMapper, algorithmRegistry, rsaCaCmcClient);
+        keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES,
+      attributeMapper, algorithmRegistry, rsaCaCmcClient);
     rsaCaCmcClient
         .setProfileConfiguration(CertificateProfileConfiguration.builder()
             .policies(List.of("1.2.3.4.5.6.7.8.9"))
@@ -155,7 +154,7 @@ class CMCKeyAndCertificateHandlerTest {
     badRsaCaCmcClient
         .setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getBadCMCApi(caHolder.getCscaService())));
     CMCKeyAndCertificateHandler badKeyAndCertificateHandler = new CMCKeyAndCertificateHandler(
-        Arrays.asList(rsaProvider, ecProvider), attributeMapper, algorithmRegistry, badRsaCaCmcClient);
+      keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES, attributeMapper, algorithmRegistry, badRsaCaCmcClient);
     log.info("Created bad CMC key and certificate handler");
 
     TestCAHolder rsaPssCaHolder = TestServices.getTestCAs().get(TestCA.RSA_PSS_CA);
@@ -163,7 +162,7 @@ class CMCKeyAndCertificateHandlerTest {
     rsaPssCaCmcClient
         .setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(rsaPssCaHolder.getCscaService())));
     CMCKeyAndCertificateHandler rsaPssCaKeyAndCertificateHandler = new CMCKeyAndCertificateHandler(
-        Arrays.asList(rsaProvider, ecProvider), attributeMapper, rsaPssCaCmcClient);
+      keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES, attributeMapper, rsaPssCaCmcClient);
     log.info("Created RSA PSS CA CMC key and certificate handler");
 
     TestCAHolder ecCaHolder = TestServices.getTestCAs().get(TestCA.ECDSA_CA);
@@ -171,14 +170,14 @@ class CMCKeyAndCertificateHandlerTest {
     ecCaCmcClient
         .setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(ecCaHolder.getCscaService())));
     CMCKeyAndCertificateHandler ecCaKeyAndCertificateHandler = new CMCKeyAndCertificateHandler(
-        Arrays.asList(rsaProvider, ecProvider), attributeMapper, algorithmRegistry, ecCaCmcClient);
+      keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES, attributeMapper, algorithmRegistry, ecCaCmcClient);
     log.info("Created ECDSA CA CMC key and certificate handler");
 
     CMCClient badCaCmcClient = getCMCClient(ecCaHolder.getCscaService());
     badCaCmcClient.setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(
         new BadCAService(TestServices.getTestCAs().get(TestCA.INSTANCE1).getCscaService()))));
     CMCKeyAndCertificateHandler badCaKeyAndCertificateHandler = new CMCKeyAndCertificateHandler(
-        Arrays.asList(rsaProvider, ecProvider), attributeMapper, algorithmRegistry, badCaCmcClient);
+      keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES, attributeMapper, algorithmRegistry, badCaCmcClient);
     log.info("Created ECDSA CA CMC key and certificate handler");
 
     keyAndCertificateHandler.checkRequirements(getCheckRequirementsRequest(CertificateType.PKC, "client-01"), null);

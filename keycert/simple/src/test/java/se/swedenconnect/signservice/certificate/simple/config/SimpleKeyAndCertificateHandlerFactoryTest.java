@@ -21,13 +21,16 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.KeyStoreException;
+import java.security.Security;
 import java.time.Duration;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.xml.security.signature.XMLSignature;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -36,6 +39,7 @@ import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationPr
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyCheckerImpl;
+import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.DefaultValuePolicyCheckerConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.CredentialContainerConfiguration;
@@ -50,6 +54,13 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
 
   private static final String CRL_DIR = "target/test/ca-repo";
 
+  @BeforeAll
+  public static void init() {
+    if (Security.getProvider("BC") == null) {
+      Security.insertProviderAt(new BouncyCastleProvider(), 2);
+    }
+  }
+
   @AfterAll
   public static void clean() throws Exception {
     FileUtils.deleteDirectory(new File(CRL_DIR));
@@ -63,13 +74,11 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
         return "dummy";
       }
 
-      /**
-       * Configuration the user key generator.
-       */
       @Override public CredentialContainerConfiguration getUserKeyProvider() {
         return CredentialContainerConfiguration.builder()
           .softProvider("BC")
           .password("Test1234")
+          .algorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES)
           .build();
       }
 
@@ -222,7 +231,11 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
         new SpringSimpleKeyAndCertificateHandlerConfiguration();
     config.setName("NAME");
     config.setAlgorithmRegistry(AlgorithmRegistrySingleton.getInstance());
-    config.setUserKeyProvider(CredentialContainerConfiguration.builder().softProvider("BC").password("Test1234").build());
+    config.setUserKeyProvider(CredentialContainerConfiguration.builder()
+      .softProvider("BC")
+      .password("Test1234")
+      .algorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES)
+      .build());
     config.setProfileConfiguration(new CertificateProfileConfiguration());
     config.setDefaultValuePolicyChecker(checkerConfig);
     config.setServiceName("SERVICE_NAME");
