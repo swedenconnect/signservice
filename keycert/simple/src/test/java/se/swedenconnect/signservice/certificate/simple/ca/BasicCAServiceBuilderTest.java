@@ -40,7 +40,9 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
+import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
+import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 
 /**
  * CA service builder test
@@ -66,8 +68,8 @@ class BasicCAServiceBuilderTest {
 
   @Test
   void getInstance() throws Exception {
-    final InMemoryECKeyProvider ecProvider = new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"));
-    final PkiCredential caCredential = ecProvider.getKeyPair();
+    final PkiCredentialContainer caKeyProvider = new SoftPkiCredentialContainer("BC","Test1234");
+    final PkiCredential caCredential = caKeyProvider.getCredential(caKeyProvider.generateCredential(KeyGenType.EC_P256));
     final SelfSignedCaCertificateGenerator caCertificateFactory = new DefaultSelfSignedCaCertificateGenerator();
     final X509Certificate caCertificate = caCertificateFactory.generate(
         caCredential,
@@ -106,7 +108,7 @@ class BasicCAServiceBuilderTest {
         .build();
     log.info("CA service created with provided CA repository");
 
-    final PkiCredential subjectKeys = ecProvider.getKeyPair();
+    final PkiCredential subjectKeys = caKeyProvider.getCredential(caKeyProvider.generateCredential(KeyGenType.EC_P256));
     final DefaultCertificateModelBuilder certificateModelBuilder = caService.getBaseCertificateModelBuilder(
         new ExplicitCertNameModel(List.of()),
         subjectKeys.getPublicKey(),

@@ -20,6 +20,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -32,6 +33,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
@@ -55,7 +57,8 @@ public class CMCKeyAndCertificateHandlerFactory extends AbstractKeyAndCertificat
   protected AbstractKeyAndCertificateHandler createKeyAndCertificateHandler(
       @Nonnull final HandlerConfiguration<KeyAndCertificateHandler> configuration,
       @Nullable final BeanLoader beanLoader,
-      @Nonnull final List<KeyProvider> keyProviders,
+      @Nonnull final PkiCredentialContainer keyProvider,
+      @Nonnull final Map<String, String> algorithmKeyTypeMap,
       @Nonnull final AttributeMapper attributeMapper,
       @Nonnull final AlgorithmRegistry algorithmRegistry,
       @Nullable final CertificateProfileConfiguration profileConfiguration) throws IllegalArgumentException {
@@ -100,7 +103,7 @@ public class CMCKeyAndCertificateHandlerFactory extends AbstractKeyAndCertificat
         cmcClient.setProfileConfiguration(profileConfiguration);
       }
 
-      return new CMCKeyAndCertificateHandler(keyProviders, attributeMapper, algorithmRegistry, cmcClient);
+      return new CMCKeyAndCertificateHandler(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry, cmcClient);
     }
     catch (final CertificateEncodingException | MalformedURLException | NoSuchAlgorithmException | OperatorCreationException e) {
       log.warn("Failed to create CMC client - {}", e.getMessage(), e);
