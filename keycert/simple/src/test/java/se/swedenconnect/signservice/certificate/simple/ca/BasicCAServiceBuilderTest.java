@@ -42,6 +42,8 @@ import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
 import se.swedenconnect.security.credential.container.keytype.KeyGenType;
+import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
+import se.swedenconnect.signservice.certificate.base.config.SigningKeyUsageDirective;
 
 /**
  * CA service builder test
@@ -98,6 +100,13 @@ class BasicCAServiceBuilderTest {
         new NoStorageCARepository(new File(caDir, TEST_CRL).getAbsolutePath()))
         .build();
     log.info("CA service created with provided CA repository");
+    CertificateProfileConfiguration certProfileConfig = CertificateProfileConfiguration.builder()
+      .policies(List.of("1.2.3.4.5.6.7"))
+      .extendedKeyUsageCritical(true)
+      .extendedKeyUsages(List.of("2.3.4.5.6.7.8", "2.4.5.6.7.8.9"))
+      .usageDirective(SigningKeyUsageDirective.builder().excludeNonRepudiation(true).encrypt(true).build())
+      .build();
+    caService.setProfileConfiguration(certProfileConfig);
 
     final PkiCredential subjectKeys = caKeyProvider.getCredential(caKeyProvider.generateCredential(KeyGenType.EC_P256));
     final DefaultCertificateModelBuilder certificateModelBuilder = caService.getBaseCertificateModelBuilder(

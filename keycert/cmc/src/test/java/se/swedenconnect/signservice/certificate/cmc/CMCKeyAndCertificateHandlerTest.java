@@ -60,6 +60,7 @@ import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultAttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
+import se.swedenconnect.signservice.certificate.base.config.SigningKeyUsageDirective;
 import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
 import se.swedenconnect.signservice.certificate.cmc.ca.SignServiceCMCClient;
 import se.swedenconnect.signservice.certificate.cmc.testutils.CMCApiFactory;
@@ -147,6 +148,9 @@ class CMCKeyAndCertificateHandlerTest {
     rsaCaCmcClient
         .setProfileConfiguration(CertificateProfileConfiguration.builder()
             .policies(List.of("1.2.3.4.5.6.7.8.9"))
+            .extendedKeyUsageCritical(true)
+            .extendedKeyUsages(List.of("1.2.3.4.5.6.7", "2.3.4.5.6.7.8"))
+            .usageDirective(SigningKeyUsageDirective.builder().encrypt(true).excludeNonRepudiation(true).build())
             .build());
     log.info("Created CMC key and certificate handler");
 
