@@ -20,13 +20,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.security.Security;
 import java.time.Duration;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.xml.security.signature.XMLSignature;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -35,11 +38,11 @@ import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationPr
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyCheckerImpl;
+import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.DefaultValuePolicyCheckerConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.ECProviderConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.RsaProviderConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
+import se.swedenconnect.signservice.certificate.base.config.CredentialContainerConfiguration;
 import se.swedenconnect.signservice.certificate.simple.SimpleKeyAndCertificateHandler;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 
@@ -49,6 +52,13 @@ import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 public class SimpleKeyAndCertificateHandlerFactoryTest {
 
   private static final String CRL_DIR = "target/test/ca-repo";
+
+  @BeforeAll
+  public static void init() {
+    if (Security.getProvider("BC") == null) {
+      Security.insertProviderAt(new BouncyCastleProvider(), 2);
+    }
+  }
 
   @AfterAll
   public static void clean() throws Exception {
@@ -62,12 +72,6 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
       protected String getDefaultFactoryClass() {
         return "dummy";
       }
-
-      @Override
-      public RsaProviderConfiguration getRsaProvider() {
-        return RsaProviderConfiguration.builder().keySize(4096).build();
-      }
-
     };
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
     assertThatThrownBy(() -> {
@@ -217,8 +221,10 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
         new SpringSimpleKeyAndCertificateHandlerConfiguration();
     config.setName("NAME");
     config.setAlgorithmRegistry(AlgorithmRegistrySingleton.getInstance());
-    config.setRsaProvider(RsaProviderConfiguration.builder().keySize(2048).build());
-    config.setEcProvider(ECProviderConfiguration.builder().curveName("P-256").build());
+    config.setAlgorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES);
+    config.setKeyProvider(CredentialContainerConfiguration.builder()
+      .securityProvider("BC")
+      .build());
     config.setProfileConfiguration(new CertificateProfileConfiguration());
     config.setDefaultValuePolicyChecker(checkerConfig);
     config.setServiceName("SERVICE_NAME");

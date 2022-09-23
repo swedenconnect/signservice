@@ -18,11 +18,14 @@ package se.swedenconnect.signservice.certificate.cmc.config;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
 import org.apache.xml.security.signature.XMLSignature;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
@@ -35,11 +38,11 @@ import se.swedenconnect.security.credential.utils.X509Utils;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyCheckerImpl;
+import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.DefaultValuePolicyCheckerConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.ECProviderConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.RsaProviderConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
+import se.swedenconnect.signservice.certificate.base.config.CredentialContainerConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
@@ -49,6 +52,13 @@ import se.swedenconnect.signservice.core.config.HandlerConfiguration;
  */
 public class CMCKeyAndCertificateHandlerFactoryTest {
 
+  @BeforeAll
+  static void init() {
+    if (Security.getProvider("BC") == null) {
+      Security.insertProviderAt(new BouncyCastleProvider(), 2);
+    }
+  }
+
   @Test
   public void testBadConfigType() throws Exception {
     HandlerConfiguration<KeyAndCertificateHandler> config = new AbstractKeyAndCertificateHandlerConfiguration() {
@@ -56,12 +66,6 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
       protected String getDefaultFactoryClass() {
         return "dummy";
       }
-
-      @Override
-      public RsaProviderConfiguration getRsaProvider() {
-        return RsaProviderConfiguration.builder().keySize(4096).build();
-      }
-
     };
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
     assertThatThrownBy(() -> {
@@ -200,8 +204,10 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
     final SpringCMCKeyAndCertificateHandlerConfiguration config = new SpringCMCKeyAndCertificateHandlerConfiguration();
     config.setName("NAME");
     config.setAlgorithmRegistry(AlgorithmRegistrySingleton.getInstance());
-    config.setRsaProvider(RsaProviderConfiguration.builder().keySize(2048).build());
-    config.setEcProvider(ECProviderConfiguration.builder().curveName("P-256").build());
+    config.setAlgorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES);
+    config.setKeyProvider(CredentialContainerConfiguration.builder()
+        .securityProvider("BC")
+        .build());
     config.setProfileConfiguration(new CertificateProfileConfiguration());
     config.setDefaultValuePolicyChecker(checkerConfig);
     config.setServiceName("SERVICE_NAME");

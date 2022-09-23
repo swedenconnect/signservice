@@ -23,7 +23,6 @@ import java.io.File;
 import java.math.BigInteger;
 import java.security.Security;
 import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
 import java.time.Duration;
 import java.util.List;
 
@@ -42,7 +41,9 @@ import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.ca.engine.ca.repository.SortBy;
-import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
+import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
+import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 
 /**
  * No storage repository test
@@ -68,9 +69,10 @@ class NoStorageCARepositoryTest {
     ));
 
     SelfSignedCaCertificateGenerator caf = new DefaultSelfSignedCaCertificateGenerator();
+    PkiCredentialContainer keyGenerator = new SoftPkiCredentialContainer("BC", "Test1234");
 
     caCertificate = caf.generate(
-        (new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))).getKeyPair(),
+      keyGenerator.getCredential(keyGenerator.generateCredential(KeyGenType.EC_P256)),
       new CertificateIssuerModel(
           XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, Duration.ofDays(365)), caNameModel);
   }

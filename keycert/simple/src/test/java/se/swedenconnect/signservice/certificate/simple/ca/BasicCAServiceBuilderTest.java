@@ -15,12 +15,9 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.io.File;
 import java.security.Security;
 import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
 import java.time.Duration;
 import java.util.List;
 
@@ -40,7 +37,11 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
+import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
+import se.swedenconnect.security.credential.container.keytype.KeyGenType;
+import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
+import se.swedenconnect.signservice.certificate.base.config.SigningKeyUsageDirective;
 
 /**
  * CA service builder test
@@ -66,8 +67,8 @@ class BasicCAServiceBuilderTest {
 
   @Test
   void getInstance() throws Exception {
-    final InMemoryECKeyProvider ecProvider = new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"));
-    final PkiCredential caCredential = ecProvider.getKeyPair();
+    final PkiCredentialContainer caKeyProvider = new SoftPkiCredentialContainer("BC","Test1234");
+    final PkiCredential caCredential = caKeyProvider.getCredential(caKeyProvider.generateCredential(KeyGenType.EC_P256));
     final SelfSignedCaCertificateGenerator caCertificateFactory = new DefaultSelfSignedCaCertificateGenerator();
     final X509Certificate caCertificate = caCertificateFactory.generate(
         caCredential,
@@ -78,14 +79,6 @@ class BasicCAServiceBuilderTest {
             new AttributeTypeAndValueModel(CertAttributes.CN, "Test CA"),
             new AttributeTypeAndValueModel(CertAttributes.SERIALNUMBER, "1234567890"))));
     log.info("CA Certificate:\n{}", new PrintCertificate(caCertificate).toString(true, true, true));
-
-    assertThrows(IllegalArgumentException.class, () -> BasicCAServiceBuilder.getInstance(caCredential,
-        "http://localhost/testCa.crl",
-        XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
-        new File(caDir, TEST_CRL).toString())
-        .build());
-    log.info("Test acceptance of empty CA certificate list");
-
     caCredential.setCertificate(caCertificate);
 
     BasicCAServiceBuilder.getInstance(caCredential,
@@ -105,8 +98,15 @@ class BasicCAServiceBuilderTest {
         new NoStorageCARepository(new File(caDir, TEST_CRL).getAbsolutePath()))
         .build();
     log.info("CA service created with provided CA repository");
+    CertificateProfileConfiguration certProfileConfig = CertificateProfileConfiguration.builder()
+      .policies(List.of("1.2.3.4.5.6.7"))
+      .extendedKeyUsageCritical(true)
+      .extendedKeyUsages(List.of("2.3.4.5.6.7.8", "2.4.5.6.7.8.9"))
+      .usageDirective(SigningKeyUsageDirective.builder().excludeNonRepudiation(true).encrypt(true).build())
+      .build();
+    caService.setProfileConfiguration(certProfileConfig);
 
-    final PkiCredential subjectKeys = ecProvider.getKeyPair();
+    final PkiCredential subjectKeys = caKeyProvider.getCredential(caKeyProvider.generateCredential(KeyGenType.EC_P256));
     final DefaultCertificateModelBuilder certificateModelBuilder = caService.getBaseCertificateModelBuilder(
         new ExplicitCertNameModel(List.of()),
         subjectKeys.getPublicKey(),

@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CRLException;
 import java.security.cert.CertificateException;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -31,12 +31,12 @@ import org.apache.xml.security.signature.XMLSignature;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerFactory;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
-import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.certificate.simple.SimpleKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.simple.ca.BasicCAService;
 import se.swedenconnect.signservice.certificate.simple.ca.BasicCAServiceBuilder;
@@ -55,7 +55,8 @@ public class SimpleKeyAndCertificateHandlerFactory extends AbstractKeyAndCertifi
   protected AbstractKeyAndCertificateHandler createKeyAndCertificateHandler(
       @Nonnull final HandlerConfiguration<KeyAndCertificateHandler> configuration,
       @Nullable final BeanLoader beanLoader,
-      @Nonnull final List<KeyProvider> keyProviders,
+      @Nonnull final PkiCredentialContainer keyProvider,
+      @Nullable final Map<String, String> algorithmKeyTypes,
       @Nonnull final AttributeMapper attributeMapper,
       @Nonnull final AlgorithmRegistry algorithmRegistry,
       @Nullable final CertificateProfileConfiguration profileConfiguration) throws IllegalArgumentException {
@@ -126,7 +127,7 @@ public class SimpleKeyAndCertificateHandlerFactory extends AbstractKeyAndCertifi
     }
 
     return new SimpleKeyAndCertificateHandler(
-        keyProviders, attributeMapper, algorithmRegistry, caService, crlDpPath);
+        keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry, caService, crlDpPath);
   }
 
 }

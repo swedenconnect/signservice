@@ -23,6 +23,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -42,10 +43,9 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
-import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.session.SignServiceContext;
@@ -69,35 +69,21 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
   /**
    * Constructor.
    *
-   * @param keyProviders a list of key providers that this handler uses
-   * @param attributeMapper attribute mapper
-   * @param caService ca service
-   * @param crlPublishPath the path (relative) to the application root where CRL:s are exposed
-   */
-  public SimpleKeyAndCertificateHandler(
-      @Nonnull final List<KeyProvider> keyProviders,
-      @Nonnull final AttributeMapper attributeMapper,
-      @Nonnull final CAService caService,
-      @Nonnull final String crlPublishPath) {
-    this(keyProviders, attributeMapper, AlgorithmRegistrySingleton.getInstance(), caService, crlPublishPath);
-  }
-
-  /**
-   * Constructor.
-   *
-   * @param keyProviders a list of key providers that this handler uses
+   * @param keyProvider a {@link PkiCredentialContainer} acting as the source of generated signing keys
+   * @param algorithmKeyTypes a map of the selected key type for each supported algorithm
    * @param attributeMapper attribute mapper
    * @param algorithmRegistry algorithm registry
    * @param caService ca service
    * @param crlPublishPath the path (relative) to the application root where CRL:s are exposed
    */
   public SimpleKeyAndCertificateHandler(
-      @Nonnull final List<KeyProvider> keyProviders,
+      @Nonnull final PkiCredentialContainer keyProvider,
+      @Nullable final Map<String, String> algorithmKeyTypes,
       @Nonnull final AttributeMapper attributeMapper,
-      @Nonnull final AlgorithmRegistry algorithmRegistry,
+      @Nullable final AlgorithmRegistry algorithmRegistry,
       @Nonnull final CAService caService,
       @Nonnull final String crlPublishPath) {
-    super(keyProviders, attributeMapper, algorithmRegistry);
+    super(keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry);
     this.caService = Objects.requireNonNull(caService, "caService must not be null");
     this.crlPublishPath = Objects.requireNonNull(crlPublishPath, "crlPublishPath must not be null");
     this.caChain = new ArrayList<>();

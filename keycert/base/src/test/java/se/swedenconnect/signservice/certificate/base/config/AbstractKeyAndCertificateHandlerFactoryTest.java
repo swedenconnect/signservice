@@ -16,22 +16,29 @@
 package se.swedenconnect.signservice.certificate.base.config;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.CertificateType;
@@ -41,9 +48,6 @@ import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappin
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyCheckerImpl;
 import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.DefaultValuePolicyCheckerConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.ECProviderConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.RsaProviderConfiguration;
-import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
@@ -54,6 +58,13 @@ import se.swedenconnect.signservice.session.SignServiceContext;
  * Test cases for AbstractKeyAndCertificateHandlerFactory.
  */
 public class AbstractKeyAndCertificateHandlerFactoryTest {
+
+  @BeforeAll
+  static void init() throws Exception {
+    if (Security.getProvider("BC") == null) {
+      Security.insertProviderAt(new BouncyCastleProvider(), 2);
+    }
+  }
 
   @Test
   public void testCreate() {
@@ -68,7 +79,6 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
   @Test
   public void testUseStackedRsaKeyProvider() {
     final TestConfig config = this.getFullConfig();
-    config.getRsaProvider().setStackSize(1);
     final TestFactory factory = new TestFactory();
 
     final KeyAndCertificateHandler handler = factory.create(config);
@@ -76,36 +86,15 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
   }
 
   @Test
-  public void testOnlyRsaKeyProvider() {
+  public void testEmptyAlgorithmTypeMap() {
     final TestConfig config = this.getFullConfig();
-    config.setEcProvider(null);
+    config.setAlgorithmKeyType(Collections.emptyMap());
     final TestFactory factory = new TestFactory();
 
-    final KeyAndCertificateHandler handler = factory.create(config);
-    Assertions.assertTrue(TestHandler.class.isInstance(handler));
-  }
-
-  @Test
-  public void testOnlyEcKeyProvider() {
-    final TestConfig config = this.getFullConfig();
-    config.setRsaProvider(null);
-    final TestFactory factory = new TestFactory();
-
-    final KeyAndCertificateHandler handler = factory.create(config);
-    Assertions.assertTrue(TestHandler.class.isInstance(handler));
-  }
-
-  @Test
-  public void testMissingKeyProviders() {
-    final TestConfig config = this.getFullConfig();
-    config.setRsaProvider(null);
-    config.setEcProvider(null);
-    final TestFactory factory = new TestFactory();
-
-    assertThatThrownBy(() -> {
+    // Should work since we treat empty map as null
+    assertDoesNotThrow(() -> {
       factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("At least one key provider must be supplied");
+    });
   }
 
   @Test
@@ -160,6 +149,61 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
     config.setServiceName(null);
     final TestFactory factory = new TestFactory();
 
+    final KeyAndCertificateHandler handler = factory.create(config);
+    Assertions.assertTrue(TestHandler.class.isInstance(handler));
+  }
+
+  @Test
+  public void testLoadKeyProviderRef() {
+    final TestConfig config = this.getFullConfig();
+    config.setKeyProvider(null);
+    config.setKeyProviderRef("bean.name");
+
+    final TestFactory factory = new TestFactory();
+
+    final PkiCredentialContainer container = Mockito.mock(PkiCredentialContainer.class);
+    final BeanLoader loader = new BeanLoader() {
+      @Override
+      public <T> T load(final String beanName, final Class<T> type) {
+        return type.cast(container);
+      }
+    };
+
+    final KeyAndCertificateHandler handler = factory.create(config, loader);
+    Assertions.assertTrue(TestHandler.class.isInstance(handler));
+  }
+
+  @Test
+  public void testLoadKeyProviderRefMissingBeanLoader() {
+    final TestConfig config = this.getFullConfig();
+    config.setKeyProvider(null);
+    config.setKeyProviderRef("bean.name");
+
+    final TestFactory factory = new TestFactory();
+    assertThatThrownBy(() -> {
+      factory.create(config, null);
+    }).isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("key-provider-ref is assigned, but no bean loader is available");
+  }
+
+  @Test
+  public void testKeyProviderAndRef() {
+    final TestConfig config = this.getFullConfig();
+    config.setKeyProviderRef("bean.name");
+
+    final TestFactory factory = new TestFactory();
+    assertThatThrownBy(() -> {
+      factory.create(config, null);
+    }).isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Both key-provider and key-provider-ref are present, only one can appear");
+  }
+
+  @Test
+  public void testDefaultKeyProvider() {
+    final TestConfig config = this.getFullConfig();
+    config.setKeyProvider(null);
+
+    final TestFactory factory = new TestFactory();
     final KeyAndCertificateHandler handler = factory.create(config);
     Assertions.assertTrue(TestHandler.class.isInstance(handler));
   }
@@ -274,8 +318,10 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
     final TestConfig config = new TestConfig();
     config.setName("NAME");
     config.setAlgorithmRegistry(AlgorithmRegistrySingleton.getInstance());
-    config.setRsaProvider(RsaProviderConfiguration.builder().keySize(2048).build());
-    config.setEcProvider(ECProviderConfiguration.builder().curveName("P-256").build());
+    config.setAlgorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES);
+    config.setKeyProvider(CredentialContainerConfiguration.builder()
+        .securityProvider("BC")
+        .build());
     config.setProfileConfiguration(new CertificateProfileConfiguration());
     config.setDefaultValuePolicyChecker(checkerConfig);
     config.setServiceName("SERVICE_NAME");
@@ -300,12 +346,13 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
     protected AbstractKeyAndCertificateHandler createKeyAndCertificateHandler(
         @Nonnull final HandlerConfiguration<KeyAndCertificateHandler> configuration,
         @Nullable final BeanLoader beanLoader,
-        @Nonnull final List<KeyProvider> keyProviders,
+        @Nonnull final PkiCredentialContainer keyProvider,
+        @Nullable final Map<String, String> algorithmKeyTypes,
         @Nonnull final AttributeMapper attributeMapper,
         @Nonnull final AlgorithmRegistry algorithmRegistry,
         @Nullable final CertificateProfileConfiguration profileConfiguration) throws IllegalArgumentException {
 
-      return new TestHandler(keyProviders, attributeMapper, algorithmRegistry);
+      return new TestHandler(keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry);
     }
 
     public Class<KeyAndCertificateHandler> handler() {
@@ -316,10 +363,11 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
   private static class TestHandler extends AbstractKeyAndCertificateHandler {
 
     public TestHandler(
-        @Nonnull final List<KeyProvider> keyProviders,
+        @Nonnull final PkiCredentialContainer keyProvider,
+        @Nullable final Map<String, String> algorithmKeyTypes,
         @Nonnull final AttributeMapper attributeMapper,
-        @Nonnull AlgorithmRegistry algorithmRegistry) {
-      super(keyProviders, attributeMapper, algorithmRegistry);
+        @Nullable AlgorithmRegistry algorithmRegistry) {
+      super(keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry);
     }
 
     @Override

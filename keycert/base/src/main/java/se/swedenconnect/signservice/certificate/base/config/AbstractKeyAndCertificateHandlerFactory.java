@@ -15,9 +15,7 @@
  */
 package se.swedenconnect.signservice.certificate.base.config;
 
-import java.security.spec.ECGenParameterSpec;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -28,16 +26,13 @@ import org.apache.commons.lang.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultAttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyChecker;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyCheckerImpl;
 import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.OnDemandInMemoryRSAKeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.StackedInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.core.config.AbstractHandlerFactory;
 import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
@@ -70,25 +65,25 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
     final AlgorithmRegistry algorithmRegistry =
         Optional.ofNullable(conf.getAlgorithmRegistry()).orElseGet(() -> AlgorithmRegistrySingleton.getInstance());
 
-    // Key providers
-    final List<KeyProvider> keyProviders = new ArrayList<>();
-    if (conf.getRsaProvider() != null) {
-      if (conf.getRsaProvider().getKeySize() == null) {
-        throw new IllegalArgumentException("Illegal RSA provider configuration - missing key-size");
+    // Credential provider
+    //
+    final PkiCredentialContainer keyProvider;
+    if (StringUtils.isNotBlank(conf.getKeyProviderRef())) {
+      if (conf.getKeyProvider() != null) {
+        throw new IllegalArgumentException("Both key-provider and key-provider-ref are present, only one can appear");
       }
-      if (conf.getRsaProvider().getStackSize() != null) {
-        keyProviders.add(new StackedInMemoryRSAKeyProvider(
-            conf.getRsaProvider().getKeySize(), conf.getRsaProvider().getStackSize()));
+      if (beanLoader == null) {
+        throw new IllegalArgumentException("key-provider-ref is assigned, but no bean loader is available");
       }
-      else {
-        keyProviders.add(new OnDemandInMemoryRSAKeyProvider(conf.getRsaProvider().getKeySize()));
-      }
+      keyProvider = beanLoader.load(conf.getKeyProviderRef(), PkiCredentialContainer.class);
     }
-    if (conf.getEcProvider() != null) {
-      keyProviders.add(new InMemoryECKeyProvider(new ECGenParameterSpec(conf.getEcProvider().getCurveName())));
-    }
-    if (keyProviders.isEmpty()) {
-      throw new IllegalArgumentException("At least one key provider must be supplied");
+    else {
+      CredentialContainerConfiguration keyProviderConfig = conf.getKeyProvider();
+      if (keyProviderConfig == null) {
+        // Use the defaults ...
+        keyProviderConfig = new CredentialContainerConfiguration();
+      }
+      keyProvider = keyProviderConfig.create();
     }
 
     // Attribute mappings
@@ -119,7 +114,8 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
         Optional.ofNullable(conf.getProfileConfiguration()).orElse(null);
 
     final AbstractKeyAndCertificateHandler handler = this.createKeyAndCertificateHandler(
-        configuration, beanLoader, keyProviders, attributeMapper, algorithmRegistry, profileConfiguration);
+        configuration, beanLoader, keyProvider, conf.getAlgorithmKeyType(),
+        attributeMapper, algorithmRegistry, profileConfiguration);
 
     // Certificate type
     if (conf.getCaCertificateType() != null) {
@@ -148,7 +144,8 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
    *
    * @param configuration the handler configuration
    * @param beanLoader the bean loader (may be null)
-   * @param keyProviders the key providers
+   * @param credentialContainer the key generation container
+   * @param algorithmKeyTypes the mapping between key types and key generation strings
    * @param attributeMapper the attribute mapper
    * @param algorithmRegistry the algorithm registry
    * @param profileConfiguration the certificate profile configuration (may be null)
@@ -158,7 +155,8 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
   protected abstract AbstractKeyAndCertificateHandler createKeyAndCertificateHandler(
       @Nonnull final HandlerConfiguration<KeyAndCertificateHandler> configuration,
       @Nullable final BeanLoader beanLoader,
-      @Nonnull final List<KeyProvider> keyProviders,
+      @Nonnull final PkiCredentialContainer credentialContainer,
+      @Nullable final Map<String, String> algorithmKeyTypes,
       @Nonnull final AttributeMapper attributeMapper,
       @Nonnull final AlgorithmRegistry algorithmRegistry,
       @Nullable final CertificateProfileConfiguration profileConfiguration) throws IllegalArgumentException;

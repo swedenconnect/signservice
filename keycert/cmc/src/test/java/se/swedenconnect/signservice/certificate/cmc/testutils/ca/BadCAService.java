@@ -13,11 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.cmc.testutils.ca;
+
+import java.math.BigInteger;
+import java.security.PublicKey;
+import java.util.Date;
+import java.util.List;
 
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
+
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
@@ -26,11 +31,6 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
-
-import java.math.BigInteger;
-import java.security.PublicKey;
-import java.util.Date;
-import java.util.List;
 
 /**
  * A bad CA service that issue null certificates

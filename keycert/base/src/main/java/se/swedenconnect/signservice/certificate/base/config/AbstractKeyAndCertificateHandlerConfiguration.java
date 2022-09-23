@@ -17,17 +17,17 @@ package se.swedenconnect.signservice.certificate.base.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
+import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 import se.swedenconnect.signservice.certificate.CertificateType;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
@@ -50,18 +50,36 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
   private AlgorithmRegistry algorithmRegistry;
 
   /**
-   * Configuration for an RSA key provider.
+   * A map specifying the key type for each supported algorithm type (primary EC and RSA algorithm types).
+   * See {@link KeyGenType} for possible values. If not assigned, default key types for EC and RSA will be
+   * assigned by the handler.
    */
   @Getter
   @Setter
-  private RsaProviderConfiguration rsaProvider;
+  private Map<String, String> algorithmKeyType;
 
   /**
-   * Configuration for an EC key provider.
+   * Configuration the user credentials container (for key generation).
+   * <p>
+   * Mutually exclusive with {@link keyProviderRef}.
+   * </p>
    */
   @Getter
   @Setter
-  private ECProviderConfiguration ecProvider;
+  private CredentialContainerConfiguration keyProvider;
+
+  /**
+   * A reference to a {@link PkiCredentialContainer} bean that is to be used for user key generation. The reason that it
+   * is wise to define this a stand-alone bean is that it makes it easier to schedule tasks that periodically invoked
+   * the {@link PkiCredentialContainer#cleanup()} method. This ensures that no expired credentials remain in the
+   * container too long.
+   * <p>
+   * Mutually exclusive with {@link keyProvider}.
+   * </p>
+   */
+  @Getter
+  @Setter
+  private String keyProviderRef;
 
   /**
    * The attribute mapper.
@@ -130,41 +148,6 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
      * false). The default is false.
      */
     private Boolean defaultReply;
-  }
-
-  /**
-   * Configuration for an RSA key provider.
-   */
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class RsaProviderConfiguration {
-
-    /**
-     * The keysize in bits.
-     */
-    private Integer keySize;
-
-    /**
-     * The number of keys stored in this key stack. If not set, RSA keys will be generated on demand.
-     */
-    private Integer stackSize;
-  }
-
-  /**
-   * Configuration for an EC key provider.
-   */
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class ECProviderConfiguration {
-
-    /**
-     * The name of the EC curve for the EC provider.
-     */
-    private String curveName;
   }
 
 }

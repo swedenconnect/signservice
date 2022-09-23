@@ -120,6 +120,18 @@
         <version>1.9.4</version>
       </dependency>
       
+      <dependency>
+        <groupId>org.cryptacular</groupId>
+        <artifactId>cryptacular</artifactId>
+        <version>1.2.5</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>se.swedenconnect.security</groupId>
+        <artifactId>credentials-support</artifactId>
+        <version>1.2.4</version>
+      </dependency>
+
       <!-- 
         We want to force opensaml-addons to be 1.2.4 to avoid the dependency
         to Velocity that appear in 1.2.3. 

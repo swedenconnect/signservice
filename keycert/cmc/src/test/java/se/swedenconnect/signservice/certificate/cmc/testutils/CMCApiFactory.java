@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.cmc.testutils;
+
+import java.security.KeyPair;
+import java.security.cert.CertificateEncodingException;
 
 import lombok.Getter;
 import se.swedenconnect.ca.cmc.api.CMCCaApi;
@@ -23,9 +25,6 @@ import se.swedenconnect.ca.cmc.api.CMCResponseFactory;
 import se.swedenconnect.ca.cmc.api.impl.DefaultCMCCaApi;
 import se.swedenconnect.ca.cmc.auth.impl.DefaultCMCValidator;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
-
-import java.security.KeyPair;
-import java.security.cert.CertificateEncodingException;
 
 /**
  * Factory for providing CMC API instances

@@ -44,14 +44,13 @@ import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.ObjectFactory;
 import se.swedenconnect.schemas.saml_2_0.assertion.Attribute;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
-import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.authn.AuthnContextIdentifier;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappingData;
-import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
@@ -61,28 +60,19 @@ import se.swedenconnect.signservice.session.SignServiceContext;
 public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractKeyAndCertificateHandler {
 
   /**
-   * Constructor. The algorithm registry will be set to {@link AlgorithmRegistrySingleton#getInstance()}.
-   *
-   * @param keyProviders a list of key providers that this handler uses
-   * @param attributeMapper the attribute mapper
-   */
-  public AbstractCaEngineKeyAndCertificateHandler(
-      @Nonnull final List<KeyProvider> keyProviders, @Nonnull final AttributeMapper attributeMapper) {
-    super(keyProviders, attributeMapper);
-  }
-
-  /**
    * Constructor.
    *
-   * @param keyProviders a list of key providers that this handler uses
+   * @param keyProvider a {@link PkiCredentialContainer} acting as the source of generated signing keys
+   * @param algorithmKeyTypes a map of the selected key type for each supported algorithm
    * @param attributeMapper the attribute mapper
    * @param algorithmRegistry algorithm registry
    */
   public AbstractCaEngineKeyAndCertificateHandler(
-      @Nonnull final List<KeyProvider> keyProviders,
+      @Nonnull final PkiCredentialContainer keyProvider,
+      @Nullable final Map<String, String> algorithmKeyTypes,
       @Nonnull final AttributeMapper attributeMapper,
-      @Nonnull final AlgorithmRegistry algorithmRegistry) {
-    super(keyProviders, attributeMapper, algorithmRegistry);
+      @Nullable final AlgorithmRegistry algorithmRegistry) {
+    super(keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry);
   }
 
   /** {@inheritDoc} */

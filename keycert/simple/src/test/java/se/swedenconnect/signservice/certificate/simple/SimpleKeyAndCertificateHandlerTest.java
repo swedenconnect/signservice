@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -57,16 +56,16 @@ import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
-import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
+import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
+import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.authn.impl.SimpleAuthnContextIdentifier;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.CertificateType;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultAttributeMapper;
-import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.OnDemandInMemoryRSAKeyProvider;
 import se.swedenconnect.signservice.certificate.simple.ca.BasicCAServiceBuilder;
 import se.swedenconnect.signservice.certificate.simple.ca.DefaultSelfSignedCaCertificateGenerator;
 import se.swedenconnect.signservice.certificate.simple.ca.SelfSignedCaCertificateGenerator;
@@ -109,8 +108,8 @@ class SimpleKeyAndCertificateHandlerTest {
     final File caDir = new File(TEST_PATH);
 
 
-    final InMemoryECKeyProvider ecProvider = new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"));
-    final PkiCredential caCredential = ecProvider.getKeyPair();
+    final PkiCredentialContainer ecProvider = new SoftPkiCredentialContainer("BC", "Test1234");
+    final PkiCredential caCredential = ecProvider.getCredential(ecProvider.generateCredential(KeyGenType.EC_P256));
 
     final SelfSignedCaCertificateGenerator caCertGenerator = new DefaultSelfSignedCaCertificateGenerator();
     caCertificate = caCertGenerator.generate(
@@ -132,9 +131,7 @@ class SimpleKeyAndCertificateHandlerTest {
             && value.equalsIgnoreCase("SE"));
 
     defaultHandler = new SimpleKeyAndCertificateHandler(
-        Arrays.asList(new OnDemandInMemoryRSAKeyProvider(2048),
-            new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))),
-        defaultAttributeMapper, caService, crlPath);
+        new SoftPkiCredentialContainer("BC", "Test1234"), null, defaultAttributeMapper, null, caService, crlPath);
   }
 
   @AfterAll
@@ -234,9 +231,8 @@ class SimpleKeyAndCertificateHandlerTest {
     Mockito.when(mockedCa.getCertificateModelBuilder(Mockito.any(), Mockito.any())).thenReturn(modelBuilder);
 
     final SimpleKeyAndCertificateHandler handler = new SimpleKeyAndCertificateHandler(
-        Arrays.asList(new OnDemandInMemoryRSAKeyProvider(2048),
-            new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"))),
-        defaultAttributeMapper, AlgorithmRegistrySingleton.getInstance(), mockedCa, crlPath);
+        new SoftPkiCredentialContainer("BC", "Test1234"), null, defaultAttributeMapper,
+        null, mockedCa, crlPath);
 
     assertThatThrownBy(() -> {
       handler.generateSigningCredential(

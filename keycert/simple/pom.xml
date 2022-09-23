@@ -75,6 +75,12 @@
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-keycert-base</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>se.swedenconnect.security</groupId>
+          <artifactId>credentials-support</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     
     <dependency>

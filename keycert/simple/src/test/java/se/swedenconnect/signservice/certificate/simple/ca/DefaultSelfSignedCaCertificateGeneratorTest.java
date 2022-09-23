@@ -17,10 +17,10 @@ package se.swedenconnect.signservice.certificate.simple.ca;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.security.KeyStoreException;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
 import java.time.Duration;
 import java.util.List;
 
@@ -36,9 +36,9 @@ import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
-import se.swedenconnect.signservice.certificate.keyprovider.InMemoryECKeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.KeyProvider;
-import se.swedenconnect.signservice.certificate.keyprovider.OnDemandInMemoryRSAKeyProvider;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
+import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
+import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 
 /**
  * Test cases for DefaultSelfSignedCaCertificateGenerator.
@@ -47,19 +47,17 @@ import se.swedenconnect.signservice.certificate.keyprovider.OnDemandInMemoryRSAK
 class DefaultSelfSignedCaCertificateGeneratorTest {
 
   private static SelfSignedCaCertificateGenerator generator;
-  private static KeyProvider rsaProvider;
-  private static KeyProvider ecProvider;
+  private static PkiCredentialContainer userKeyProvider;
   private static CertNameModel<?> caNameModel;
 
   @BeforeAll
-  public static void init() {
+  public static void init() throws KeyStoreException {
     generator = new DefaultSelfSignedCaCertificateGenerator();
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
 
-    rsaProvider = new OnDemandInMemoryRSAKeyProvider(2048);
-    ecProvider = new InMemoryECKeyProvider(new ECGenParameterSpec("P-256"));
+    userKeyProvider = new SoftPkiCredentialContainer("BC", "Test1234");
 
     caNameModel = new ExplicitCertNameModel(List.of(
         new AttributeTypeAndValueModel(CertAttributes.C, "SE"),
@@ -70,7 +68,8 @@ class DefaultSelfSignedCaCertificateGeneratorTest {
 
   @Test
   public void testEcdsa() throws Exception {
-    final X509Certificate caCertificate = generator.generate(ecProvider.getKeyPair(),
+    final X509Certificate caCertificate = generator.generate(userKeyProvider.getCredential(userKeyProvider.generateCredential(
+        KeyGenType.EC_P256)),
         new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, Duration.ofDays(365)), caNameModel);
     log.info("Successfully created CA Certificate:\n{}",
         (new PrintCertificate(caCertificate)).toString(true, true, true));
@@ -78,7 +77,8 @@ class DefaultSelfSignedCaCertificateGeneratorTest {
 
   @Test
   public void testRsa() throws Exception {
-    final X509Certificate caCertificate = generator.generate(rsaProvider.getKeyPair(),
+    final X509Certificate caCertificate = generator.generate(userKeyProvider.getCredential(userKeyProvider.generateCredential(
+        KeyGenType.RSA_3072)),
         new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1, Duration.ofDays(365)), caNameModel);
     log.info("Successfully created CA Certificate:\n{}",
         (new PrintCertificate(caCertificate)).toString(true, true, true));
@@ -87,7 +87,8 @@ class DefaultSelfSignedCaCertificateGeneratorTest {
   @Test
   public void testRsaKeyWithEcAlgo() throws Exception {
     assertThatThrownBy(() -> {
-      generator.generate(rsaProvider.getKeyPair(),
+      generator.generate(userKeyProvider.getCredential(userKeyProvider.generateCredential(
+          KeyGenType.RSA_3072)),
           new CertificateIssuerModel(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, Duration.ofDays(365)), caNameModel);
     }).isInstanceOf(CertificateException.class);
   }

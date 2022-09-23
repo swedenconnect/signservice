@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.Algorithm;
@@ -66,7 +67,7 @@ public class DefaultSignatureHandler extends AbstractSignServiceHandler implemen
    * @param tbsDataProcessors a list of TBS data processors
    */
   public DefaultSignatureHandler(@Nonnull final List<TBSDataProcessor> tbsDataProcessors) {
-    this(tbsDataProcessors, AlgorithmRegistrySingleton.getInstance());
+    this(tbsDataProcessors, null, null);
   }
 
   /**
@@ -76,14 +77,19 @@ public class DefaultSignatureHandler extends AbstractSignServiceHandler implemen
    * @param tbsDataProcessors a list of TBS data processors
    * @param algorithmRegistry algorithm registry
    */
-  public DefaultSignatureHandler(@Nonnull final List<TBSDataProcessor> tbsDataProcessors,
-      @Nonnull final AlgorithmRegistry algorithmRegistry) {
-    this(tbsDataProcessors, Objects.requireNonNull(algorithmRegistry, "algorithmRegistry must not be null"),
-        new DefaultSignServiceSignerProvider(algorithmRegistry));
+  public DefaultSignatureHandler(
+      @Nonnull final List<TBSDataProcessor> tbsDataProcessors,
+      @Nullable final AlgorithmRegistry algorithmRegistry) {
+    this(tbsDataProcessors, algorithmRegistry, null);
   }
 
   /**
    * Constructor.
+   * <p>
+   * If {@code algorithmRegistry} is {@code null}, a default algorithm registry
+   * ({@link AlgorithmRegistrySingleton#getInstance()}) is used. If {@code signServiceSignerProvider} is {@code null} a
+   * default signer provider ({@link DefaultSignServiceSignerProvider}) is used.
+   * </p>
    *
    * @param tbsDataProcessors a list of TBS data processors
    * @param algorithmRegistry algorithm registry
@@ -91,12 +97,13 @@ public class DefaultSignatureHandler extends AbstractSignServiceHandler implemen
    */
   public DefaultSignatureHandler(
       @Nonnull final List<TBSDataProcessor> tbsDataProcessors,
-      @Nonnull final AlgorithmRegistry algorithmRegistry,
-      @Nonnull final SignServiceSignerProvider signServiceSignerProvider) {
+      @Nullable final AlgorithmRegistry algorithmRegistry,
+      @Nullable final SignServiceSignerProvider signServiceSignerProvider) {
     this.tbsDataProcessors = Objects.requireNonNull(tbsDataProcessors, "tbsDataProcessors must not be null");
-    this.signServiceSignerProvider =
-        Objects.requireNonNull(signServiceSignerProvider, "signServiceSignerProvider must not be null");
-    this.algorithmRegistry = Objects.requireNonNull(algorithmRegistry, "algorithmRegistry must not be null");
+    this.algorithmRegistry = Optional.ofNullable(algorithmRegistry)
+        .orElseGet(() -> AlgorithmRegistrySingleton.getInstance());
+    this.signServiceSignerProvider = Optional.ofNullable(signServiceSignerProvider)
+        .orElseGet(() -> new DefaultSignServiceSignerProvider(this.algorithmRegistry));
 
     if (this.tbsDataProcessors.isEmpty()) {
       throw new IllegalArgumentException("tbsDataProcessors must not be empty");
@@ -149,6 +156,7 @@ public class DefaultSignatureHandler extends AbstractSignServiceHandler implemen
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public CompletedSignatureTask sign(@Nonnull final RequestedSignatureTask signatureTask,
       @Nonnull final PkiCredential signingCredential,
       @Nonnull final SignRequestMessage signRequest,

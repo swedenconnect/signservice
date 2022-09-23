@@ -64,6 +64,9 @@ signservice:
           strict-processing: false
           include-issuer-serial: true
         - type: pdf
+    key-provider:
+      bean-name: signservice.DefaultKeyProvider
+      security-provider: BC
     cert:
       bean-name: signservice.BuiltInCa
       built-in-ca:
@@ -76,10 +79,7 @@ signservice:
           key-password: secret
         ca-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256
         ca-certificate-type: PKC
-        ec-provider:
-          curve-name: P-256
-        rsa-provider:
-          key-size: 4096
+        key-provider-ref: signservice.DefaultKeyProvider
         cert-validity: P365D
         crl-validity: P2D
         crl-dp-path: /sign/signca/signca.crl

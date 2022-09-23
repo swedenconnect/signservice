@@ -316,6 +316,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       final HttpServletRequest httpRequest, final AuthenticationResult authnResult, final EngineContext context)
       throws UnrecoverableSignServiceException {
 
+    PkiCredential signingCredential = null;
     try {
       context.updateState(SignOperationState.SIGNING);
 
@@ -329,9 +330,8 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       //
       final SignRequestMessage signRequestMessage = context.getSignRequest();
 
-      final PkiCredential signingCredential =
-          this.engineConfiguration.getKeyAndCertificateHandler().generateSigningCredential(
-              signRequestMessage, authnResult.getAssertion(), context.getContext());
+      signingCredential = this.engineConfiguration.getKeyAndCertificateHandler().generateSigningCredential(
+          signRequestMessage, authnResult.getAssertion(), context.getContext());
 
       // Sign the requested tasks ...
       //
@@ -415,6 +415,17 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
     }
     catch (final SignServiceErrorException e) {
       return this.sendErrorResponse(httpRequest, context, e.getError());
+    }
+    finally {
+      if (signingCredential != null) {
+        try {
+          signingCredential.destroy();
+        }
+        catch (final Exception e) {
+          log.warn("{}: Error during destruction of user signing credential - {} [id: '{}']",
+              this.getName(), e.getMessage(), context.getId(), e);
+        }
+      }
     }
   }
 
