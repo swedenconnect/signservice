@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.security.KeyStoreException;
 import java.security.Security;
 import java.time.Duration;
 import java.util.List;
@@ -42,8 +41,8 @@ import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePol
 import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.DefaultValuePolicyCheckerConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.CredentialContainerConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
+import se.swedenconnect.signservice.certificate.base.config.CredentialContainerConfiguration;
 import se.swedenconnect.signservice.certificate.simple.SimpleKeyAndCertificateHandler;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 
@@ -73,15 +72,6 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
       protected String getDefaultFactoryClass() {
         return "dummy";
       }
-
-      @Override public CredentialContainerConfiguration getUserKeyProvider() {
-        return CredentialContainerConfiguration.builder()
-          .softProvider("BC")
-          .password("Test1234")
-          .algorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES)
-          .build();
-      }
-
     };
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
     assertThatThrownBy(() -> {
@@ -231,10 +221,9 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
         new SpringSimpleKeyAndCertificateHandlerConfiguration();
     config.setName("NAME");
     config.setAlgorithmRegistry(AlgorithmRegistrySingleton.getInstance());
-    config.setUserKeyProvider(CredentialContainerConfiguration.builder()
-      .softProvider("BC")
-      .password("Test1234")
-      .algorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES)
+    config.setAlgorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES);
+    config.setKeyProvider(CredentialContainerConfiguration.builder()
+      .securityProvider("BC")
       .build());
     config.setProfileConfiguration(new CertificateProfileConfiguration());
     config.setDefaultValuePolicyChecker(checkerConfig);

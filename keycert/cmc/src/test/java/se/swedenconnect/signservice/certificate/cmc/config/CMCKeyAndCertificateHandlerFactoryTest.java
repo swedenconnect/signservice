@@ -41,8 +41,8 @@ import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePol
 import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.DefaultValuePolicyCheckerConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.CredentialContainerConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
+import se.swedenconnect.signservice.certificate.base.config.CredentialContainerConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
@@ -53,7 +53,7 @@ import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 public class CMCKeyAndCertificateHandlerFactoryTest {
 
   @BeforeAll
-  static void init(){
+  static void init() {
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
@@ -66,15 +66,6 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
       protected String getDefaultFactoryClass() {
         return "dummy";
       }
-
-      @Override public CredentialContainerConfiguration getUserKeyProvider() {
-        return CredentialContainerConfiguration.builder()
-          .softProvider("BC")
-          .password("Test1234")
-          .algorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES)
-          .build();
-      }
-
     };
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
     assertThatThrownBy(() -> {
@@ -213,11 +204,10 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
     final SpringCMCKeyAndCertificateHandlerConfiguration config = new SpringCMCKeyAndCertificateHandlerConfiguration();
     config.setName("NAME");
     config.setAlgorithmRegistry(AlgorithmRegistrySingleton.getInstance());
-    config.setUserKeyProvider(CredentialContainerConfiguration.builder()
-      .softProvider("BC")
-      .password("Test1234")
-      .algorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES)
-      .build());
+    config.setAlgorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES);
+    config.setKeyProvider(CredentialContainerConfiguration.builder()
+        .securityProvider("BC")
+        .build());
     config.setProfileConfiguration(new CertificateProfileConfiguration());
     config.setDefaultValuePolicyChecker(checkerConfig);
     config.setServiceName("SERVICE_NAME");

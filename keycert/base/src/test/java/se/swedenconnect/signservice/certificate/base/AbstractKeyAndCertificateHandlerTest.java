@@ -29,7 +29,11 @@ import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -50,7 +54,6 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
-import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
@@ -89,7 +92,7 @@ public class AbstractKeyAndCertificateHandlerTest {
   final SignServiceContext mockedContext;
 
   @BeforeAll
-  static void init()  throws Exception {
+  static void init() throws Exception {
     if (Security.getProvider("BC") == null) {
       Security.insertProviderAt(new BouncyCastleProvider(), 2);
     }
@@ -97,25 +100,15 @@ public class AbstractKeyAndCertificateHandlerTest {
 
   public AbstractKeyAndCertificateHandlerTest() throws KeyStoreException {
     this.handler = new TestKeyAndCertificateHandler(
-        new SoftPkiCredentialContainer("BC", "Test1234"),
-        AlgorithmRegistrySingleton.getInstance());
+        new SoftPkiCredentialContainer("BC", "Test1234"));
 
     this.mockedContext = Mockito.mock(SignServiceContext.class);
   }
 
-/*
-  @Test
-  public void testNoProviders() {
-    assertThatThrownBy(() -> {
-      new TestKeyAndCertificateHandler(Collections.emptyList());
-    }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("At least one key provider must be configured");
-  }
-*/
-
   @Test
   public void testCheckRequirements() throws InvalidRequestException, KeyStoreException {
-    final KeyAndCertificateHandler keyAndCertificateHandler = new TestKeyAndCertificateHandler(new SoftPkiCredentialContainer("BC", "Test1234"));
+    final KeyAndCertificateHandler keyAndCertificateHandler =
+        new TestKeyAndCertificateHandler(new SoftPkiCredentialContainer("BC", "Test1234"));
     log.info("Created key and certificate handler instance");
 
     keyAndCertificateHandler.checkRequirements(
@@ -131,8 +124,7 @@ public class AbstractKeyAndCertificateHandlerTest {
   public void testCheckRequirementsUnsupportedKeyType() throws KeyStoreException {
 
     final TestKeyAndCertificateHandler handler = new TestKeyAndCertificateHandler(
-      new SoftPkiCredentialContainer("BC", "Test1234"), Collections.singletonMap("EC", KeyGenType.EC_P256)
-    );
+        new SoftPkiCredentialContainer("BC", "Test1234"), Collections.singletonMap("EC", KeyGenType.EC_P256));
 
     assertThatThrownBy(() -> {
       handler.checkRequirements(
@@ -152,7 +144,8 @@ public class AbstractKeyAndCertificateHandlerTest {
     }).isInstanceOf(InvalidRequestException.class)
         .hasMessage("Handler does not support certificate type " + CertificateType.QC_SSCD);
 
-    final TestKeyAndCertificateHandler handler = new TestKeyAndCertificateHandler(new SoftPkiCredentialContainer("BC","Test1234"));
+    final TestKeyAndCertificateHandler handler =
+        new TestKeyAndCertificateHandler(new SoftPkiCredentialContainer("BC", "Test1234"));
     handler.setCaCertificateType(CertificateType.QC);
 
     assertThatThrownBy(() -> {
@@ -291,7 +284,8 @@ public class AbstractKeyAndCertificateHandlerTest {
 
     assertThatThrownBy(() -> {
       this.handler.generateSigningCredential(
-          this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, CertificateType.PKC, null), assertion, new DefaultSignServiceContext("ctx"));
+          this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, CertificateType.PKC, null), assertion,
+          new DefaultSignServiceContext("ctx"));
     }).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Assertion identifier must be set");
 
@@ -300,7 +294,8 @@ public class AbstractKeyAndCertificateHandlerTest {
 
     assertThatThrownBy(() -> {
       this.handler.generateSigningCredential(
-          this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, CertificateType.PKC, null), assertion, new DefaultSignServiceContext("ctx"));
+          this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, CertificateType.PKC, null), assertion,
+          new DefaultSignServiceContext("ctx"));
     }).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Assertion authentication LoA identifier must be present");
 
@@ -312,7 +307,8 @@ public class AbstractKeyAndCertificateHandlerTest {
 
     assertThatThrownBy(() -> {
       this.handler.generateSigningCredential(
-          this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, CertificateType.PKC, null), assertion, new DefaultSignServiceContext("ctx"));
+          this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, CertificateType.PKC, null), assertion,
+          new DefaultSignServiceContext("ctx"));
     }).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Assertion issuer must not be present");
 
@@ -321,7 +317,8 @@ public class AbstractKeyAndCertificateHandlerTest {
 
     assertThatThrownBy(() -> {
       this.handler.generateSigningCredential(
-          this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, CertificateType.PKC, null), assertion, new DefaultSignServiceContext("ctx"));
+          this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, CertificateType.PKC, null), assertion,
+          new DefaultSignServiceContext("ctx"));
     }).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Missing authentication instant from assertion");
   }
@@ -467,19 +464,20 @@ public class AbstractKeyAndCertificateHandlerTest {
    */
   class TestKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertificateHandler {
 
-    public TestKeyAndCertificateHandler(
-        @Nonnull final PkiCredentialContainer keyProviders) {
-      super(keyProviders, new DefaultAttributeMapper((p1, p2, p3) -> false));
-    }
-    public TestKeyAndCertificateHandler(
-        @Nonnull final PkiCredentialContainer keyProviders, Map<String, String> algorithmKeyTypes) {
-      super(keyProviders, algorithmKeyTypes, new DefaultAttributeMapper((p1, p2, p3) -> false), AlgorithmRegistrySingleton.getInstance());
+    public TestKeyAndCertificateHandler(@Nonnull final PkiCredentialContainer keyProvider) {
+      super(keyProvider, null, new DefaultAttributeMapper((p1, p2, p3) -> false), null);
     }
 
     public TestKeyAndCertificateHandler(
-        @Nonnull final PkiCredentialContainer keyProvider,
-        @Nonnull final AlgorithmRegistry algorithmRegistry) {
-      super(keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES, new DefaultAttributeMapper((p1, p2, p3) -> false), algorithmRegistry);
+        @Nonnull final PkiCredentialContainer keyProvider, final Map<String, String> algorithmKeyTypes) {
+      super(keyProvider, algorithmKeyTypes, new DefaultAttributeMapper((p1, p2, p3) -> false), null);
+    }
+
+    public TestKeyAndCertificateHandler(
+        final PkiCredentialContainer keyProvider,
+        final Map<String, String> algorithmKeyTypes,
+        final AlgorithmRegistry algorithmRegistry) {
+      super(keyProvider, algorithmKeyTypes, new DefaultAttributeMapper((p1, p2, p3) -> false), algorithmRegistry);
     }
 
     @Override
@@ -492,7 +490,8 @@ public class AbstractKeyAndCertificateHandlerTest {
       context.put("signingKeyPair", new PkiCredentialWrapper(signingKeyPair));
       context.put("algorithm", signRequest.getSignatureRequirements().getSignatureAlgorithm());
 
-      return super.issueSigningCertificateChain(signingKeyPair, signRequest, assertion, certAttributes, certificateProfile,
+      return super.issueSigningCertificateChain(signingKeyPair, signRequest, assertion, certAttributes,
+          certificateProfile,
           context);
     }
 

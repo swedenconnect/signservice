@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.cmc;
 
 import java.security.PublicKey;
@@ -41,7 +40,6 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
-import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
@@ -64,34 +62,18 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
    * Constructor.
    *
    * @param keyProvider a {@link PkiCredentialContainer} acting as the source of generated signing keys
-   * @param algorithmKeyTypeMap a map of the selected key type for each supported algorithm
-   * @param attributeMapper the attribute mapper
-   * @param cmcClient CMC client used to issue certificates using CMC
-   */
-  public CMCKeyAndCertificateHandler(
-      @Nonnull final PkiCredentialContainer keyProvider,
-      @Nonnull final Map<String, String> algorithmKeyTypeMap,
-      @Nonnull final AttributeMapper attributeMapper,
-      @Nonnull final CMCClient cmcClient) {
-    this(keyProvider, algorithmKeyTypeMap, attributeMapper, AlgorithmRegistrySingleton.getInstance(), cmcClient);
-  }
-
-  /**
-   * Constructor.
-   *
-   * @param keyProvider a {@link PkiCredentialContainer} acting as the source of generated signing keys
-   * @param algorithmKeyTypeMap a map of the selected key type for each supported algorithm
+   * @param algorithmKeyTypes a map of the selected key type for each supported algorithm
    * @param attributeMapper the attribute mapper
    * @param algorithmRegistry algorithm registry
    * @param cmcClient CMC client used to issue certificates using CMC
    */
   public CMCKeyAndCertificateHandler(
       @Nonnull final PkiCredentialContainer keyProvider,
-      @Nonnull final Map<String, String> algorithmKeyTypeMap,
+      @Nullable final Map<String, String> algorithmKeyTypes,
       @Nonnull final AttributeMapper attributeMapper,
-      @Nonnull final AlgorithmRegistry algorithmRegistry,
+      @Nullable final AlgorithmRegistry algorithmRegistry,
       @Nonnull final CMCClient cmcClient) {
-    super(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry);
+    super(keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry);
     this.cmcClient = Objects.requireNonNull(cmcClient, "cmcClient must not be null");
     this.caChain = new ArrayList<>();
     try {

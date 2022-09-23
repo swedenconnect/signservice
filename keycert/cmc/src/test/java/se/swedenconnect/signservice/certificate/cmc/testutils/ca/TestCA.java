@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Agency for Digital Government (DIGG)
+ * Copyright 2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package se.swedenconnect.signservice.certificate.cmc.testutils.ca;
 
+import java.security.KeyPair;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
-
-import java.security.KeyPair;
 /**
  * Enumeration of configuration data for test CA providers
  */

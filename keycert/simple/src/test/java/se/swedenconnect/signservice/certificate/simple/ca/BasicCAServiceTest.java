@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.security.Security;
 import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
 import java.time.Duration;
 import java.util.List;
 

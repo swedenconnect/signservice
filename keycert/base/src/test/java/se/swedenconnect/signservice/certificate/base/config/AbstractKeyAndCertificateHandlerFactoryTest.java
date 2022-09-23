@@ -16,11 +16,12 @@
 package se.swedenconnect.signservice.certificate.base.config;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -47,7 +48,6 @@ import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappin
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyCheckerImpl;
 import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.DefaultValuePolicyCheckerConfiguration;
-import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.CredentialContainerConfiguration;
 import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
@@ -86,15 +86,15 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
   }
 
   @Test
-  public void testMissingKeyProviders() {
+  public void testEmptyAlgorithmTypeMap() {
     final TestConfig config = this.getFullConfig();
-    config.getUserKeyProvider().setAlgorithmKeyType(new HashMap<>());
+    config.setAlgorithmKeyType(Collections.emptyMap());
     final TestFactory factory = new TestFactory();
 
-    assertThatThrownBy(() -> {
+    // Should work since we treat empty map as null
+    assertDoesNotThrow(() -> {
       factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("At least one key type for one algorithm must be present");
+    });
   }
 
   @Test
@@ -149,6 +149,61 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
     config.setServiceName(null);
     final TestFactory factory = new TestFactory();
 
+    final KeyAndCertificateHandler handler = factory.create(config);
+    Assertions.assertTrue(TestHandler.class.isInstance(handler));
+  }
+
+  @Test
+  public void testLoadKeyProviderRef() {
+    final TestConfig config = this.getFullConfig();
+    config.setKeyProvider(null);
+    config.setKeyProviderRef("bean.name");
+
+    final TestFactory factory = new TestFactory();
+
+    final PkiCredentialContainer container = Mockito.mock(PkiCredentialContainer.class);
+    final BeanLoader loader = new BeanLoader() {
+      @Override
+      public <T> T load(final String beanName, final Class<T> type) {
+        return type.cast(container);
+      }
+    };
+
+    final KeyAndCertificateHandler handler = factory.create(config, loader);
+    Assertions.assertTrue(TestHandler.class.isInstance(handler));
+  }
+
+  @Test
+  public void testLoadKeyProviderRefMissingBeanLoader() {
+    final TestConfig config = this.getFullConfig();
+    config.setKeyProvider(null);
+    config.setKeyProviderRef("bean.name");
+
+    final TestFactory factory = new TestFactory();
+    assertThatThrownBy(() -> {
+      factory.create(config, null);
+    }).isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("key-provider-ref is assigned, but no bean loader is available");
+  }
+
+  @Test
+  public void testKeyProviderAndRef() {
+    final TestConfig config = this.getFullConfig();
+    config.setKeyProviderRef("bean.name");
+
+    final TestFactory factory = new TestFactory();
+    assertThatThrownBy(() -> {
+      factory.create(config, null);
+    }).isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Both key-provider and key-provider-ref are present, only one can appear");
+  }
+
+  @Test
+  public void testDefaultKeyProvider() {
+    final TestConfig config = this.getFullConfig();
+    config.setKeyProvider(null);
+
+    final TestFactory factory = new TestFactory();
     final KeyAndCertificateHandler handler = factory.create(config);
     Assertions.assertTrue(TestHandler.class.isInstance(handler));
   }
@@ -263,9 +318,10 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
     final TestConfig config = new TestConfig();
     config.setName("NAME");
     config.setAlgorithmRegistry(AlgorithmRegistrySingleton.getInstance());
-    config.setUserKeyProvider(CredentialContainerConfiguration.builder()
-      .password("Test1234").softProvider("BC")
-      .algorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES).build());
+    config.setAlgorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES);
+    config.setKeyProvider(CredentialContainerConfiguration.builder()
+        .securityProvider("BC")
+        .build());
     config.setProfileConfiguration(new CertificateProfileConfiguration());
     config.setDefaultValuePolicyChecker(checkerConfig);
     config.setServiceName("SERVICE_NAME");
@@ -291,12 +347,12 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
         @Nonnull final HandlerConfiguration<KeyAndCertificateHandler> configuration,
         @Nullable final BeanLoader beanLoader,
         @Nonnull final PkiCredentialContainer keyProvider,
-        @Nonnull final Map<String, String> algorithmKeyTypeMap,
+        @Nullable final Map<String, String> algorithmKeyTypes,
         @Nonnull final AttributeMapper attributeMapper,
         @Nonnull final AlgorithmRegistry algorithmRegistry,
         @Nullable final CertificateProfileConfiguration profileConfiguration) throws IllegalArgumentException {
 
-      return new TestHandler(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry);
+      return new TestHandler(keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry);
     }
 
     public Class<KeyAndCertificateHandler> handler() {
@@ -308,10 +364,10 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
 
     public TestHandler(
         @Nonnull final PkiCredentialContainer keyProvider,
-        @Nonnull final Map<String, String> algorithmKeyTypeMap,
+        @Nullable final Map<String, String> algorithmKeyTypes,
         @Nonnull final AttributeMapper attributeMapper,
-        @Nonnull AlgorithmRegistry algorithmRegistry) {
-      super(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry);
+        @Nullable AlgorithmRegistry algorithmRegistry) {
+      super(keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry);
     }
 
     @Override

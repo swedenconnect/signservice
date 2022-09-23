@@ -56,7 +56,7 @@ public class SimpleKeyAndCertificateHandlerFactory extends AbstractKeyAndCertifi
       @Nonnull final HandlerConfiguration<KeyAndCertificateHandler> configuration,
       @Nullable final BeanLoader beanLoader,
       @Nonnull final PkiCredentialContainer keyProvider,
-      @Nonnull final Map<String, String> algorithmKeyTypeMap,
+      @Nullable final Map<String, String> algorithmKeyTypes,
       @Nonnull final AttributeMapper attributeMapper,
       @Nonnull final AlgorithmRegistry algorithmRegistry,
       @Nullable final CertificateProfileConfiguration profileConfiguration) throws IllegalArgumentException {
@@ -127,7 +127,7 @@ public class SimpleKeyAndCertificateHandlerFactory extends AbstractKeyAndCertifi
     }
 
     return new SimpleKeyAndCertificateHandler(
-        keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry, caService, crlDpPath);
+        keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry, caService, crlDpPath);
   }
 
 }

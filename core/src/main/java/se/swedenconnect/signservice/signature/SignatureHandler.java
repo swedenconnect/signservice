@@ -52,6 +52,7 @@ public interface SignatureHandler extends SignServiceHandler {
    * @return a completed signature task
    * @throws SignatureException for signing errors
    */
+  @Nonnull
   CompletedSignatureTask sign(@Nonnull final RequestedSignatureTask signatureTask,
       @Nonnull final PkiCredential signingCredential, @Nonnull final SignRequestMessage signRequest,
       @Nonnull final SignServiceContext context) throws SignatureException;

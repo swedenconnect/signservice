@@ -44,7 +44,6 @@ import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.ObjectFactory;
 import se.swedenconnect.schemas.saml_2_0.assertion.Attribute;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
-import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.authn.AuthnContextIdentifier;
@@ -61,30 +60,19 @@ import se.swedenconnect.signservice.session.SignServiceContext;
 public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractKeyAndCertificateHandler {
 
   /**
-   * Constructor. The algorithm registry will be set to {@link AlgorithmRegistrySingleton#getInstance()}.
-   *
-   * @param keyProvider a {@link PkiCredentialContainer} acting as the source of generated signing keys
-   * @param attributeMapper the attribute mapper
-   */
-  public AbstractCaEngineKeyAndCertificateHandler(
-      @Nonnull final PkiCredentialContainer keyProvider, @Nonnull final AttributeMapper attributeMapper) {
-    super(keyProvider, attributeMapper);
-  }
-
-  /**
    * Constructor.
    *
    * @param keyProvider a {@link PkiCredentialContainer} acting as the source of generated signing keys
-   * @param algorithmKeyTypeMap a map of the selected key type for each supported algorithm
+   * @param algorithmKeyTypes a map of the selected key type for each supported algorithm
    * @param attributeMapper the attribute mapper
    * @param algorithmRegistry algorithm registry
    */
   public AbstractCaEngineKeyAndCertificateHandler(
       @Nonnull final PkiCredentialContainer keyProvider,
-      @Nonnull final Map<String, String> algorithmKeyTypeMap,
+      @Nullable final Map<String, String> algorithmKeyTypes,
       @Nonnull final AttributeMapper attributeMapper,
-      @Nonnull final AlgorithmRegistry algorithmRegistry) {
-    super(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry);
+      @Nullable final AlgorithmRegistry algorithmRegistry) {
+    super(keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry);
   }
 
   /** {@inheritDoc} */

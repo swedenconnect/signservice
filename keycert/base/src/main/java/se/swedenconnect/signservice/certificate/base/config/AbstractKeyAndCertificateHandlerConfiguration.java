@@ -21,14 +21,13 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
+import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 import se.swedenconnect.signservice.certificate.CertificateType;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
@@ -51,12 +50,36 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
   private AlgorithmRegistry algorithmRegistry;
 
   /**
-   * Configuration the user key generator.
+   * A map specifying the key type for each supported algorithm type (primary EC and RSA algorithm types).
+   * See {@link KeyGenType} for possible values. If not assigned, default key types for EC and RSA will be
+   * assigned by the handler.
    */
   @Getter
   @Setter
-  private CredentialContainerConfiguration userKeyProvider;
+  private Map<String, String> algorithmKeyType;
 
+  /**
+   * Configuration the user credentials container (for key generation).
+   * <p>
+   * Mutually exclusive with {@link keyProviderRef}.
+   * </p>
+   */
+  @Getter
+  @Setter
+  private CredentialContainerConfiguration keyProvider;
+
+  /**
+   * A reference to a {@link PkiCredentialContainer} bean that is to be used for user key generation. The reason that it
+   * is wise to define this a stand-alone bean is that it makes it easier to schedule tasks that periodically invoked
+   * the {@link PkiCredentialContainer#cleanup()} method. This ensures that no expired credentials remain in the
+   * container too long.
+   * <p>
+   * Mutually exclusive with {@link keyProvider}.
+   * </p>
+   */
+  @Getter
+  @Setter
+  private String keyProviderRef;
 
   /**
    * The attribute mapper.
@@ -125,40 +148,6 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
      * false). The default is false.
      */
     private Boolean defaultReply;
-  }
-
-  /**
-   * Configuration for an EC key provider.
-   */
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class CredentialContainerConfiguration {
-
-    /**
-     * The name of the EC curve for the EC provider. A null or absent value indicate generation and use of software based keys.
-     */
-    private String hsmConfigurationFile;
-
-    /**
-     * The password used to access the HSM slot if HSM is used or the password used to protect the key store if software
-     * based keys are being used
-     */
-    private String password;
-
-    /**
-     * The name of the crypto provider used to generate software based keys. This value is ignored if the
-     * hsmConfigurationFile property is set.
-     */
-    private String softProvider;
-
-    /**
-     * A map specifying the key type for each supported algorithm type (primary EC and RSA algorithm types)
-     */
-    Map<String, String> algorithmKeyType;
-
-
   }
 
 }

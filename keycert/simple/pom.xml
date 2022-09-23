@@ -86,12 +86,6 @@
     <dependency>
       <groupId>se.swedenconnect.ca</groupId>
       <artifactId>ca-engine</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>se.swedenconnect.security</groupId>
-          <artifactId>credentials-support</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     
     <dependency>

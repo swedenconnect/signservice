@@ -43,7 +43,6 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
-import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
@@ -71,25 +70,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
    * Constructor.
    *
    * @param keyProvider a {@link PkiCredentialContainer} acting as the source of generated signing keys
-   * @param algorithmKeyTypeMap a map of the selected key type for each supported algorithm
-   * @param attributeMapper attribute mapper
-   * @param caService ca service
-   * @param crlPublishPath the path (relative) to the application root where CRL:s are exposed
-   */
-  public SimpleKeyAndCertificateHandler(
-      @Nonnull final PkiCredentialContainer keyProvider,
-      @Nonnull final Map<String, String> algorithmKeyTypeMap,
-      @Nonnull final AttributeMapper attributeMapper,
-      @Nonnull final CAService caService,
-      @Nonnull final String crlPublishPath) {
-    this(keyProvider, algorithmKeyTypeMap, attributeMapper, AlgorithmRegistrySingleton.getInstance(), caService, crlPublishPath);
-  }
-
-  /**
-   * Constructor.
-   *
-   * @param keyProvider a {@link PkiCredentialContainer} acting as the source of generated signing keys
-   * @param algorithmKeyTypeMap a map of the selected key type for each supported algorithm
+   * @param algorithmKeyTypes a map of the selected key type for each supported algorithm
    * @param attributeMapper attribute mapper
    * @param algorithmRegistry algorithm registry
    * @param caService ca service
@@ -97,12 +78,12 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
    */
   public SimpleKeyAndCertificateHandler(
       @Nonnull final PkiCredentialContainer keyProvider,
-      @Nonnull final Map<String, String> algorithmKeyTypeMap,
+      @Nullable final Map<String, String> algorithmKeyTypes,
       @Nonnull final AttributeMapper attributeMapper,
-      @Nonnull final AlgorithmRegistry algorithmRegistry,
+      @Nullable final AlgorithmRegistry algorithmRegistry,
       @Nonnull final CAService caService,
       @Nonnull final String crlPublishPath) {
-    super(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry);
+    super(keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry);
     this.caService = Objects.requireNonNull(caService, "caService must not be null");
     this.crlPublishPath = Objects.requireNonNull(crlPublishPath, "crlPublishPath must not be null");
     this.caChain = new ArrayList<>();

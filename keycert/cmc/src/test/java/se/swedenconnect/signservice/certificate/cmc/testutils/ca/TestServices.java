@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Agency for Digital Government (DIGG)
+ * Copyright 2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,16 @@
  */
 package se.swedenconnect.signservice.certificate.cmc.testutils.ca;
 
+import java.security.KeyException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -24,14 +34,6 @@ import se.swedenconnect.security.credential.container.PkiCredentialContainerExce
 import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
 import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 import se.swedenconnect.security.credential.utils.X509Utils;
-
-import java.security.KeyException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
-import java.util.*;
 
 /**
  * This is the top level class for accessing test data and services for unit testing

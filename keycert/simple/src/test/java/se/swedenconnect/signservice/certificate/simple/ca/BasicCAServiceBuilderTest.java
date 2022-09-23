@@ -15,8 +15,6 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.io.File;
 import java.security.Security;
 import java.security.cert.X509Certificate;

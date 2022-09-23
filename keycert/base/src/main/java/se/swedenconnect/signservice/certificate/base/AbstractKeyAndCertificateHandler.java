@@ -19,7 +19,10 @@ import java.security.KeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -56,12 +59,16 @@ import se.swedenconnect.signservice.session.SignServiceContext;
 public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServiceHandler
     implements KeyAndCertificateHandler {
 
-  public static final Map<String, String> DEFAULT_ALGORITHM_KEY_TYPES;
+  /** The default mappings from key type to algorithm key generator type. */
+  public static final Map<String, String> DEFAULT_ALGORITHM_KEY_TYPES = Map.of(
+      "EC", KeyGenType.EC_P256,
+      "RSA", KeyGenType.RSA_3072);
 
   /** Providers for generating signing key pairs. */
   private final PkiCredentialContainer keyProvider;
 
-  private final Map<String, String> algorithmKeyTypeMap;
+  /** A map of key type to algorithm. */
+  private final Map<String, String> algorithmKeyTypes;
 
   /** Algorithm registry providing information about supported algorithms. */
   private final AlgorithmRegistry algorithmRegistry;
@@ -72,12 +79,6 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
   /** The type of certificates that the underlying CA issues. */
   private CertificateType caCertificateType = CertificateType.PKC;
 
-  static {
-    DEFAULT_ALGORITHM_KEY_TYPES = new HashMap<>();
-    DEFAULT_ALGORITHM_KEY_TYPES.put("EC", KeyGenType.EC_P256);
-    DEFAULT_ALGORITHM_KEY_TYPES.put("RSA", KeyGenType.RSA_3072);
-  }
-
   /**
    * Service name placed in AuthnContextExtensions. If this value is null, then the service name is set according to
    * local policy which by default should be to use the requesting client ID.
@@ -85,39 +86,29 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
   private String serviceName;
 
   /**
-   * Constructor. The algorithm registry will be set to {@link AlgorithmRegistrySingleton#getInstance()} and the
-   * algorithm key types will be NIST P256 for Elliptic curve algorithms and RSA 3072 bit keys for RSA.
-   *
-   * @param keyProvider a {@link PkiCredentialContainer} acting as the source of generated signing keys
-   * @param attributeMapper the attribute mapper
-   */
-  public AbstractKeyAndCertificateHandler(
-      @Nonnull final PkiCredentialContainer keyProvider,
-      @Nonnull final AttributeMapper attributeMapper) {
-    this(keyProvider, DEFAULT_ALGORITHM_KEY_TYPES, attributeMapper, AlgorithmRegistrySingleton.getInstance());
-  }
-
-  /**
    * Constructor.
    *
+   * The {@code algorithmKeyTypes} is optional. If not assigned, the algorithm key types will be NIST P256 for Elliptic
+   * curve algorithms and RSA 3072 bit keys for RSA. If the {@code algorithmRegistry} is not assigned, the registry will
+   * be set to {@link AlgorithmRegistrySingleton#getInstance()}.
+   *
    * @param keyProvider a {@link PkiCredentialContainer} acting as the source of generated signing keys
-   * @param algorithmKeyTypeMap a map of the selected key type for each supported algorithm
+   * @param algorithmKeyTypes a map of the selected key type for each supported algorithm
    * @param attributeMapper the attribute mapper
    * @param algorithmRegistry algorithm registry
    */
   public AbstractKeyAndCertificateHandler(
       @Nonnull final PkiCredentialContainer keyProvider,
-      @Nonnull final Map<String, String> algorithmKeyTypeMap,
+      @Nullable final Map<String, String> algorithmKeyTypes,
       @Nonnull final AttributeMapper attributeMapper,
-      @Nonnull final AlgorithmRegistry algorithmRegistry) {
+      @Nullable final AlgorithmRegistry algorithmRegistry) {
     this.keyProvider = Objects.requireNonNull(keyProvider, "keyProviders must not be null");
-    this.algorithmKeyTypeMap = Objects.requireNonNull(algorithmKeyTypeMap, "algorithm key type map must not be null");
+    this.algorithmKeyTypes = Optional.ofNullable(algorithmKeyTypes)
+        .filter(a -> !a.isEmpty())
+        .orElseGet(() -> DEFAULT_ALGORITHM_KEY_TYPES);
     this.attributeMapper = Objects.requireNonNull(attributeMapper, "attributeMapper must not be null");
-    this.algorithmRegistry = Objects.requireNonNull(algorithmRegistry, "algorithmRegistry must not be null");
-
-    if (this.algorithmKeyTypeMap.isEmpty()) {
-      throw new IllegalArgumentException("At least one key type for one algorithm must be present");
-    }
+    this.algorithmRegistry = Optional.ofNullable(algorithmRegistry)
+        .orElseGet(() -> AlgorithmRegistrySingleton.getInstance());
   }
 
   /** {@inheritDoc} */
@@ -136,14 +127,14 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
     if (algorithm == null) {
       throw new InvalidRequestException("Unsupported signature algorithm: " + signatureAlgorithm);
     }
-    if (!(algorithm instanceof SignatureAlgorithm)) {
+    if (!SignatureAlgorithm.class.isInstance(algorithm)) {
       throw new InvalidRequestException("Requested signature algorithm is not a valid signature algorithm");
     }
     log.debug("Signature algorithm checks passed for {}", algorithm.getUri());
 
     final String algorithmType = ((SignatureAlgorithm) algorithm).getKeyType();
 
-    if (!algorithmKeyTypeMap.containsKey(algorithmType)) {
+    if (!this.algorithmKeyTypes.containsKey(algorithmType)) {
       throw new InvalidRequestException("Unsupported algorithm type: " + algorithmType);
     }
     log.debug("Key type checks passed for {}", algorithmType);
@@ -195,7 +186,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
   @Override
   public PkiCredential generateSigningCredential(@Nonnull final SignRequestMessage signRequest,
       @Nonnull final IdentityAssertion assertion, @Nonnull final SignServiceContext context)
-    throws CertificateException, KeyException {
+      throws CertificateException, KeyException {
 
     // Map attributes from the assertion to certificate attributes ...
     //
@@ -215,22 +206,22 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
             .map(SignatureRequirements::getSignatureAlgorithm)
             .orElseThrow(() -> new IllegalArgumentException("Signature algorithm must not be null")));
 
-    // Obtain the raw key pair (public and private key)
+    // Obtain the credential (public and private key)
     //
     final PkiCredential signingKeyCredentials;
     try {
-      String keyType = algorithmKeyTypeMap.get(algorithm.getKeyType());
-      String alias = this.keyProvider.generateCredential(keyType);
+      final String keyType = this.algorithmKeyTypes.get(algorithm.getKeyType());
+      final String alias = this.keyProvider.generateCredential(keyType);
 
       signingKeyCredentials = this.keyProvider.getCredential(alias);
+      log.debug("Issued key pair for key type {}", algorithm.getKeyType());
     }
-    catch (NoSuchAlgorithmException e) {
+    catch (final NoSuchAlgorithmException e) {
       throw new KeyException("Algorithm not supported", e);
     }
-    catch (PkiCredentialContainerException e) {
-      throw new KeyException("PkiCredentialContainer error", e);
+    catch (final PkiCredentialContainerException e) {
+      throw new KeyException("Failed to generate key pair - " + e.getMessage(), e);
     }
-    log.debug("Issued key pair for key type {}", algorithm.getKeyType());
 
     // Get the signer certificate for the public key
     //

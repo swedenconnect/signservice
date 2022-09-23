@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -166,7 +165,7 @@ class CMCKeyAndCertificateHandlerTest {
     rsaPssCaCmcClient
         .setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(rsaPssCaHolder.getCscaService())));
     CMCKeyAndCertificateHandler rsaPssCaKeyAndCertificateHandler = new CMCKeyAndCertificateHandler(
-      keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES, attributeMapper, rsaPssCaCmcClient);
+      keyProvider, null, attributeMapper, null, rsaPssCaCmcClient);
     log.info("Created RSA PSS CA CMC key and certificate handler");
 
     TestCAHolder ecCaHolder = TestServices.getTestCAs().get(TestCA.ECDSA_CA);

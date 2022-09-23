@@ -244,6 +244,12 @@ public class SignServiceConfiguration {
         beanFactory.registerSingleton(commons.getSign().getBeanName(), sigHandlerFactory.create(sigHandlerConf, beanLoader));
       }
 
+      if (commons.getKeyProvider() != null) {
+        log.debug("Registering '{}' bean ...", commons.getKeyProvider().getBeanName());
+        beanFactory.registerSingleton(commons.getKeyProvider().getBeanName(),
+            commons.getKeyProvider().create());
+      }
+
       if (commons.getCert() != null) {
         final HandlerConfiguration<KeyAndCertificateHandler> keyAndCertConf = commons.getCert().getHandlerConfiguration();
         if (keyAndCertConf.needsDefaultConfigResolving()) {

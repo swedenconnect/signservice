@@ -21,7 +21,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
+import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.spring.config.authn.SamlMetadataProviderBeanConfiguration;
+import se.swedenconnect.signservice.spring.config.keycert.CredentialContainerBeanConfiguration;
 import se.swedenconnect.signservice.spring.config.keycert.KeyAndCertificateHandlerBeanConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.protocol.ProtocolHandlerBeanConfigurationProperties;
 import se.swedenconnect.signservice.spring.config.sign.SignatureHandlerBeanConfigurationProperties;
@@ -47,6 +49,14 @@ public class CommonBeansConfigurationProperties implements InitializingBean {
   @Getter
   @Setter
   private SignatureHandlerBeanConfigurationProperties sign;
+
+  /**
+   * A key provider ({@link PkiCredentialContainer}) that may be referenced in the configuration for a key and
+   * certificate handler.
+   */
+  @Getter
+  @Setter
+  private CredentialContainerBeanConfiguration keyProvider;
 
   /**
    * Key and certificate handler configuration for a common bean.
