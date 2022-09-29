@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.api.engine.session;
+package se.swedenconnect.signservice.engine.session;
 
 /**
  * Defines the different "states" a sign operation may be in.

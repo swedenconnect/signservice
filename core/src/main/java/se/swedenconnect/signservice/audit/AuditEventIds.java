@@ -32,6 +32,14 @@ public class AuditEventIds {
   /** A SignService engine instance (servicing a client) was started. */
   public final static String EVENT_ENGINE_STARTED = "audit.engine.started";
 
+  /**
+   * A "session reset" may occur when a SignRequest is received when the expected message is
+   * an authentication response message. This is not treated as an error. Instead we assume
+   * that the previous session was abandoned by the user. However, we audit log this, since
+   * it may be useful in interactions with users (support).
+   */
+  public final static String EVENT_ENGINE_SESSION_RESET = "audit.engine.user.session-reset";
+
   /** A user was successfully authenticated. */
   public final static String EVENT_ENGINE_USER_AUTHENTICATED = "audit.engine.user.authn";
 

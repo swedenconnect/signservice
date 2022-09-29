@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.api.engine;
+package se.swedenconnect.signservice.engine;
 
-import se.swedenconnect.signservice.engine.SignServiceError;
+import java.util.Optional;
 
 /**
  * Exception class for reporting a {@link SignServiceError}.
@@ -34,6 +34,7 @@ public class SignServiceErrorException extends Exception {
    * @param error the error
    */
   public SignServiceErrorException(final SignServiceError error) {
+    super(Optional.ofNullable(error).map(SignServiceError::getMessage).orElse(null));
     this.error = error;
   }
 
@@ -44,7 +45,7 @@ public class SignServiceErrorException extends Exception {
    * @param cause the cause
    */
   public SignServiceErrorException(final SignServiceError error, final Throwable cause) {
-    super(cause);
+    super(Optional.ofNullable(error).map(SignServiceError::getMessage).orElse(null), cause);
     this.error = error;
   }
 
