@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.api.engine;
+package se.swedenconnect.signservice.engine;
 
 import java.io.IOException;
 import java.security.KeyException;
@@ -35,10 +35,6 @@ import org.apache.commons.lang.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.api.engine.config.EngineConfiguration;
-import se.swedenconnect.signservice.api.engine.impl.DefaultSignRequestMessageVerifier;
-import se.swedenconnect.signservice.api.engine.session.EngineContext;
-import se.swedenconnect.signservice.api.engine.session.SignOperationState;
 import se.swedenconnect.signservice.audit.AuditEventIds;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
@@ -50,11 +46,9 @@ import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
-import se.swedenconnect.signservice.engine.SignServiceEngine;
-import se.swedenconnect.signservice.engine.SignServiceError;
-import se.swedenconnect.signservice.engine.SignServiceErrorCode;
-import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
-import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
+import se.swedenconnect.signservice.engine.config.EngineConfiguration;
+import se.swedenconnect.signservice.engine.session.EngineContext;
+import se.swedenconnect.signservice.engine.session.SignOperationState;
 import se.swedenconnect.signservice.protocol.ProtocolException;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
 import se.swedenconnect.signservice.protocol.ProtocolProcessingRequirements.SignatureRequirement;
@@ -193,8 +187,18 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
               + "A new SignRequest has been received in the same session [id: '{}']",
               this.getName(), context.getId());
 
+          final String previousSignRequestId = Optional.ofNullable(context.getSignRequest())
+              .map(SignRequestMessage::getRequestId)
+              .orElseGet(() -> "-");
+
           context = this.resetContext(httpRequest);
           log.info("{}: New context has been created [id: '{}']", this.getName(), context.getId());
+
+          this.engineConfiguration.getAuditLogger().auditLog(AuditEventIds.EVENT_ENGINE_SESSION_RESET, (b) -> b
+              .parameter("engine-name", this.getName())
+              .parameter("client-id", this.engineConfiguration.getClientConfiguration().getClientId())
+              .parameter("abandoned-request-id", previousSignRequestId)
+              .build());
 
           return this.processSignRequest(httpRequest, context);
         }
@@ -214,7 +218,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       log.info("{}: State error - Engine is is '{}' state. Can not process request '{}' [id: '{}']",
           this.getName(), context.getState(), httpRequest.getRequestURI(), context.getId());
 
-      throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.STATE_ERROR, "State error");
+      throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.STATE_ERROR, "State error - did not expect message");
     }
     catch (final UnrecoverableSignServiceException | RuntimeException e) {
       this.removeContext(httpRequest);

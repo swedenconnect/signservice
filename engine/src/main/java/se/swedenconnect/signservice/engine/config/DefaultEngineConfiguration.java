@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.api.engine.config.impl;
+package se.swedenconnect.signservice.engine.config;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +25,6 @@ import org.apache.commons.lang.StringUtils;
 
 import lombok.Setter;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.api.engine.config.EngineConfiguration;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;

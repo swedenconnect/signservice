@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.api.engine;
+package se.swedenconnect.signservice.engine;
 
-import se.swedenconnect.signservice.api.engine.config.EngineConfiguration;
-import se.swedenconnect.signservice.api.engine.session.EngineContext;
-import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
+import se.swedenconnect.signservice.engine.config.EngineConfiguration;
+import se.swedenconnect.signservice.engine.session.EngineContext;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 
 /**
