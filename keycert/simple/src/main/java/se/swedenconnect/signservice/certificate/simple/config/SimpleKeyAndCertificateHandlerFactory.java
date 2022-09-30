@@ -89,8 +89,7 @@ public class SimpleKeyAndCertificateHandlerFactory extends AbstractKeyAndCertifi
         .filter(c -> StringUtils.isNotBlank(c))
         .orElseThrow(() -> new IllegalArgumentException("CRL distributions point path must be set"));
 
-    final String crlDp = String.format("%s%s",
-        Optional.ofNullable(conf.getBaseUrl())
+    final String crlDp = String.format("%s%s", Optional.ofNullable(conf.getBaseUrl())
         .filter(c -> StringUtils.isNotBlank(c))
         .orElseThrow(() -> new IllegalArgumentException("Base URL must be set")), crlDpPath);
 

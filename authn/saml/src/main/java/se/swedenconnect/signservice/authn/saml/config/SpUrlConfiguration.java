@@ -28,7 +28,7 @@ import lombok.Getter;
 public class SpUrlConfiguration {
 
   /**
-   * The application base URL. Must not end with a slash.
+   * The application base URL. Must not end with a slash. The base URL consists of the protocol, host and context path.
    */
   @Getter
   private String baseUrl;

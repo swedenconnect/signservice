@@ -34,7 +34,7 @@ import se.swedenconnect.signservice.certificate.simple.SimpleKeyAndCertificateHa
 public class SimpleKeyAndCertificateHandlerConfiguration extends AbstractKeyAndCertificateHandlerConfiguration {
 
   /**
-   * The application base URL. Must not end with a slash.
+   * The application base URL. Must not end with a slash. The base URL consists of the protocol, host and context path.
    */
   @Getter
   private String baseUrl;

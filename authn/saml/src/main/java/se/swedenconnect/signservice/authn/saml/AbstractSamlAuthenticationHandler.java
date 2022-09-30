@@ -375,7 +375,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
       return false;
     }
 
-    final String requestPath = httpRequest.getRequestURI();
+    final String requestPath = httpRequest.getServletPath();
     if (!(requestPath.equalsIgnoreCase(this.urlConfiguration.getAssertionConsumerPath())
         || (this.urlConfiguration.getAdditionalAssertionConsumerPath() != null
             && requestPath.equalsIgnoreCase(this.urlConfiguration.getAdditionalAssertionConsumerPath())))) {
@@ -445,7 +445,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
     if (!"GET".equals(httpRequest.getMethod())) {
       return false;
     }
-    return httpRequest.getRequestURI().equalsIgnoreCase(this.urlConfiguration.getMetadataPublishingPath());
+    return httpRequest.getServletPath().equalsIgnoreCase(this.urlConfiguration.getMetadataPublishingPath());
   }
 
   /**
@@ -554,7 +554,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
 
       @Override
       public String getReceiveURL() {
-        return baseUrl + httpRequest.getRequestURI();
+        return baseUrl + httpRequest.getServletPath();
       }
 
       @Override

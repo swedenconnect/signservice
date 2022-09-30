@@ -172,7 +172,7 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
         (SwedenConnectSamlAuthenticationHandler) this.createHandler();
 
     final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRequestURI()).thenReturn(ASSERTION_CONSUMER_PATH);
+    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
@@ -263,7 +263,7 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
         (SwedenConnectSamlAuthenticationHandler) this.createHandler();
 
     final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRequestURI()).thenReturn(ASSERTION_CONSUMER_PATH);
+    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
@@ -330,7 +330,7 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
         (SwedenConnectSamlAuthenticationHandler) this.createHandler();
 
     final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRequestURI()).thenReturn(ASSERTION_CONSUMER_PATH);
+    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
