@@ -746,7 +746,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
    * @return true if the request is sent to a SignRequest endpoint and false otherwise
    */
   protected boolean isSignRequestEndpoint(final HttpServletRequest httpRequest) {
-    final String request = httpRequest.getRequestURI();
+    final String request = httpRequest.getServletPath();
     return this.engineConfiguration.getProcessingPaths().stream()
         .anyMatch(p -> p.equalsIgnoreCase(request));
   }

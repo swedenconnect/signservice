@@ -180,7 +180,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
     if (!"GET".equals(httpRequest.getMethod())) {
       return false;
     }
-    return this.crlPublishPath.equalsIgnoreCase(httpRequest.getRequestURI());
+    return this.crlPublishPath.equalsIgnoreCase(httpRequest.getServletPath());
   }
 
 }

@@ -128,13 +128,13 @@ public class DefaultSignServiceEngineTest {
     doNothing().when(provider1).getResource(any(), any());
     when(provider1.supports(any())).thenAnswer(a -> {
       final HttpServletRequest req = a.getArgument(0, HttpServletRequest.class);
-      return RESOURCE_PATH.equals(req.getRequestURI());
+      return RESOURCE_PATH.equals(req.getServletPath());
     });
     final HttpResourceProvider provider2 = mock(HttpResourceProvider.class);
     doThrow(IOException.class).when(provider2).getResource(any(), any());
     when(provider2.supports(any())).thenAnswer(a -> {
       final HttpServletRequest req = a.getArgument(0, HttpServletRequest.class);
-      return ERROR_RESOURCE_PATH.equals(req.getRequestURI());
+      return ERROR_RESOURCE_PATH.equals(req.getServletPath());
     });
     when(this.engineConfiguration.getHttpResourceProviders()).thenReturn(List.of(provider1, provider2));
 
@@ -150,7 +150,7 @@ public class DefaultSignServiceEngineTest {
 
     when(this.authnHandler.canProcess(any(), any())).thenAnswer(a -> {
       final HttpServletRequest req = a.getArgument(0, HttpServletRequest.class);
-      return SAML_POST_PATH.equals(req.getRequestURI()) || METADATA_PATH.equals(req.getRequestURI());
+      return SAML_POST_PATH.equals(req.getServletPath()) || METADATA_PATH.equals(req.getServletPath());
     });
 
     final HttpRequestMessage authnRequest = mock(HttpRequestMessage.class);
@@ -262,7 +262,7 @@ public class DefaultSignServiceEngineTest {
     this.systemAuditLogger = new TestAuditLogger();
 
     this.httpRequest = mock(HttpServletRequest.class);
-    when(this.httpRequest.getRequestURI()).thenReturn(SIGNREQUEST_PATH);
+    when(this.httpRequest.getServletPath()).thenReturn(SIGNREQUEST_PATH);
     when(this.httpRequest.getRemoteAddr()).thenReturn("187.11.12.45");
 
     this.httpResponse = mock(HttpServletResponse.class);
@@ -355,7 +355,7 @@ public class DefaultSignServiceEngineTest {
 
     // OK, now the user has been to the IdP and is posted back ...
 
-    when(this.httpRequest.getRequestURI()).thenReturn(SAML_POST_PATH);
+    when(this.httpRequest.getServletPath()).thenReturn(SAML_POST_PATH);
 
     result = engine.processRequest(this.httpRequest, this.httpResponse);
     Assertions.assertNotNull(result);
@@ -386,7 +386,7 @@ public class DefaultSignServiceEngineTest {
 
     // OK, now the user has been to the IdP and is posted back ...
 
-    when(this.httpRequest.getRequestURI()).thenReturn(SAML_POST_PATH);
+    when(this.httpRequest.getServletPath()).thenReturn(SAML_POST_PATH);
 
     result = engine.processRequest(this.httpRequest, this.httpResponse);
     Assertions.assertNotNull(result);
@@ -483,7 +483,7 @@ public class DefaultSignServiceEngineTest {
 
     engine.processRequest(this.httpRequest, this.httpResponse);
 
-    when(this.httpRequest.getRequestURI()).thenReturn(SAML_POST_PATH);
+    when(this.httpRequest.getServletPath()).thenReturn(SAML_POST_PATH);
     when(this.authnHandler.resumeAuthentication(any(), any())).thenThrow(
         new UserAuthenticationException(AuthenticationErrorCode.USER_CANCEL, "msg"));
 
@@ -549,7 +549,7 @@ public class DefaultSignServiceEngineTest {
         this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    when(this.httpRequest.getRequestURI()).thenReturn(METADATA_PATH);
+    when(this.httpRequest.getServletPath()).thenReturn(METADATA_PATH);
 
     Assertions.assertTrue(engine.canProcess(this.httpRequest));
   }
@@ -560,7 +560,7 @@ public class DefaultSignServiceEngineTest {
         this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    when(this.httpRequest.getRequestURI()).thenReturn("/other");
+    when(this.httpRequest.getServletPath()).thenReturn("/other");
 
     Assertions.assertFalse(engine.canProcess(this.httpRequest));
   }
@@ -571,7 +571,7 @@ public class DefaultSignServiceEngineTest {
         this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    when(this.httpRequest.getRequestURI()).thenReturn("/other");
+    when(this.httpRequest.getServletPath()).thenReturn("/other");
 
     final HttpResourceProvider p = mock(HttpResourceProvider.class);
     when(p.supports(any())).thenReturn(true);
@@ -586,7 +586,7 @@ public class DefaultSignServiceEngineTest {
         this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    when(this.httpRequest.getRequestURI()).thenReturn(RESOURCE_PATH);
+    when(this.httpRequest.getServletPath()).thenReturn(RESOURCE_PATH);
     Assertions.assertNull(engine.processRequest(this.httpRequest, this.httpResponse));
   }
 
@@ -596,7 +596,7 @@ public class DefaultSignServiceEngineTest {
         this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    when(this.httpRequest.getRequestURI()).thenReturn(ERROR_RESOURCE_PATH);
+    when(this.httpRequest.getServletPath()).thenReturn(ERROR_RESOURCE_PATH);
 
     assertThatThrownBy(() -> {
       engine.processRequest(this.httpRequest, this.httpResponse);
@@ -612,7 +612,7 @@ public class DefaultSignServiceEngineTest {
         this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    when(this.httpRequest.getRequestURI()).thenReturn(SAML_POST_PATH);
+    when(this.httpRequest.getServletPath()).thenReturn(SAML_POST_PATH);
 
     assertThatThrownBy(() -> {
       engine.processRequest(this.httpRequest, this.httpResponse);

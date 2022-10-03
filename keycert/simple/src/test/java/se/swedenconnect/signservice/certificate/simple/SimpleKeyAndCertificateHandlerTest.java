@@ -258,7 +258,7 @@ class SimpleKeyAndCertificateHandlerTest {
   public void testSupports() throws Exception {
     final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
     Mockito.when(request.getRemoteAddr()).thenReturn("227.123.34.21");
-    Mockito.when(request.getRequestURI()).thenReturn(crlPath);
+    Mockito.when(request.getServletPath()).thenReturn(crlPath);
 
     Mockito.when(request.getMethod()).thenReturn("POST");
     Assertions.assertFalse(defaultHandler.supports(request));
@@ -266,7 +266,7 @@ class SimpleKeyAndCertificateHandlerTest {
     Mockito.when(request.getMethod()).thenReturn("GET");
     Assertions.assertTrue(defaultHandler.supports(request));
 
-    Mockito.when(request.getRequestURI()).thenReturn("/other/path.crl");
+    Mockito.when(request.getServletPath()).thenReturn("/other/path.crl");
     Assertions.assertFalse(defaultHandler.supports(request));
   }
 
@@ -274,7 +274,7 @@ class SimpleKeyAndCertificateHandlerTest {
   public void testGetResource() throws Exception {
     final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
     Mockito.when(request.getRemoteAddr()).thenReturn("227.123.34.21");
-    Mockito.when(request.getRequestURI()).thenReturn(crlPath);
+    Mockito.when(request.getServletPath()).thenReturn(crlPath);
     Mockito.when(request.getMethod()).thenReturn("GET");
 
     final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
@@ -293,7 +293,7 @@ class SimpleKeyAndCertificateHandlerTest {
   public void testGetResourceError() throws Exception {
     final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
     Mockito.when(request.getRemoteAddr()).thenReturn("227.123.34.21");
-    Mockito.when(request.getRequestURI()).thenReturn(crlPath);
+    Mockito.when(request.getServletPath()).thenReturn(crlPath);
     Mockito.when(request.getMethod()).thenReturn("POST");
 
     final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
