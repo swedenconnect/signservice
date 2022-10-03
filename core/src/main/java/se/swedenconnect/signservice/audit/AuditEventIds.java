@@ -43,7 +43,14 @@ public class AuditEventIds {
   /** A user was successfully authenticated. */
   public final static String EVENT_ENGINE_USER_AUTHENTICATED = "audit.engine.user.authn";
 
-  // TODO: More
+  /** The user authentication failed. */
+  public final static String EVENT_ENGINE_USER_AUTHN_FAILED = "audit.engine.user.authn-failure";
+
+  /** The signature operation failed and an error message is sent back to the user. */
+  public final static String EVENT_ENGINE_SIGNATURE_OPERATION_FAILURE = "audit.engine.user.operation-failure";
+
+  /** The signature operation was successful. */
+  public final static String EVENT_ENGINE_SIGNATURE_OPERATION_SUCCESS = "audit.engine.user.operation-success";
 
   // Hidden constructor
   private AuditEventIds() {

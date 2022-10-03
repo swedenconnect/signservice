@@ -168,8 +168,9 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
 
     // Based on the context state and the URL on which we received the request do dispatching ...
     //
+    EngineContext context = null;
     try {
-      EngineContext context = this.getContext(httpRequest);
+      context = this.getContext(httpRequest);
 
       if (this.isSignRequestEndpoint(httpRequest)) {
         if (context.getState() == SignOperationState.NEW) {
@@ -218,9 +219,27 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       log.info("{}: State error - Engine is is '{}' state. Can not process request '{}' [id: '{}']",
           this.getName(), context.getState(), httpRequest.getRequestURI(), context.getId());
 
-      throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.STATE_ERROR, "State error - did not expect message");
+      throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.STATE_ERROR,
+          "State error - did not expect message");
     }
     catch (final UnrecoverableSignServiceException | RuntimeException e) {
+
+      // Audit log
+      //
+      final EngineContext ctx = context != null ? context : null;
+      this.engineConfiguration.getAuditLogger().auditLog(AuditEventIds.EVENT_ENGINE_SIGNATURE_OPERATION_FAILURE,
+          (b) -> b
+              .parameter("engine-name", this.getName())
+              .parameter("client-id", this.engineConfiguration.getClientConfiguration().getClientId())
+              .parameter("request-id",
+                  Optional.ofNullable(ctx).map(EngineContext::getSignRequest).map(SignRequestMessage::getRequestId)
+                      .orElseGet(() -> "-"))
+              .parameter("error-code", UnrecoverableSignServiceException.class.isInstance(e)
+                  ? UnrecoverableSignServiceException.class.cast(e).getErrorCode()
+                  : "runtime-exception")
+              .parameter("error-message", e.getMessage())
+              .build());
+
       this.removeContext(httpRequest);
       throw e;
     }
@@ -386,7 +405,16 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       // Get the result ...
       final HttpRequestMessage result = protocolHandler.encodeResponse(signResponseMessage, context.getContext());
 
-      // TODO: Audit log
+      // Audit log
+      //
+      this.engineConfiguration.getAuditLogger().auditLog(AuditEventIds.EVENT_ENGINE_SIGNATURE_OPERATION_SUCCESS,
+          (b) -> b
+              .parameter("engine-name", this.getName())
+              .parameter("client-id", this.engineConfiguration.getClientConfiguration().getClientId())
+              .parameter("request-id",
+                  Optional.ofNullable(context).map(EngineContext::getSignRequest).map(SignRequestMessage::getRequestId)
+                      .orElseGet(() -> "-"))
+              .build());
 
       // Clean up the context
       this.removeContext(httpRequest);
@@ -496,6 +524,14 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       log.info("{}: Authentication error: {} - {} [id: '{}', request-id: '{}']", this.getName(),
           e.getErrorCode(), e.getMessage(), context.getId(), signRequest.getRequestId());
 
+      this.engineConfiguration.getAuditLogger().auditLog(AuditEventIds.EVENT_ENGINE_USER_AUTHN_FAILED, (b) -> b
+          .parameter("engine-name", this.getName())
+          .parameter("client-id", this.engineConfiguration.getClientConfiguration().getClientId())
+          .parameter("request-id", signRequest.getRequestId())
+          .parameter("error-code", e.getErrorCode().name())
+          .parameter("error-message", e.getMessage())
+          .build());
+
       throw this.mapAuthenticationError(e);
     }
   }
@@ -541,6 +577,15 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
     catch (final UserAuthenticationException e) {
       log.info("{}: Authentication error: {} - {} [id: '{}', request-id: '{}']", this.getName(),
           e.getErrorCode(), e.getMessage(), context.getId(), context.getSignRequest().getRequestId());
+
+      this.engineConfiguration.getAuditLogger().auditLog(AuditEventIds.EVENT_ENGINE_USER_AUTHN_FAILED, (b) -> b
+          .parameter("engine-name", this.getName())
+          .parameter("client-id", this.engineConfiguration.getClientConfiguration().getClientId())
+          .parameter("request-id",
+              Optional.ofNullable(context.getSignRequest()).map(SignRequestMessage::getRequestId).orElseGet(() -> "-"))
+          .parameter("error-code", e.getErrorCode().name())
+          .parameter("error-message", e.getMessage())
+          .build());
 
       throw this.mapAuthenticationError(e);
     }
@@ -695,6 +740,20 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       // Let the protocol handler encode the return message.
       //
       final HttpRequestMessage result = handler.encodeResponse(responseMessage, context.getContext());
+
+      // Audit log
+      //
+      this.engineConfiguration.getAuditLogger().auditLog(AuditEventIds.EVENT_ENGINE_SIGNATURE_OPERATION_FAILURE,
+          (b) -> b
+              .parameter("engine-name", this.getName())
+              .parameter("client-id", this.engineConfiguration.getClientConfiguration().getClientId())
+              .parameter("request-id",
+                  Optional.ofNullable(context.getSignRequest()).map(SignRequestMessage::getRequestId)
+                      .orElseGet(() -> "-"))
+              .parameter("error-code", error.getErrorCode().name())
+              .parameter("error-message", error.getMessage())
+              .parameter("detailed-error-message", Optional.ofNullable(error.getDetailedMessage()).orElseGet(() -> "-"))
+              .build());
 
       // Clear the sign service context ...
       //
