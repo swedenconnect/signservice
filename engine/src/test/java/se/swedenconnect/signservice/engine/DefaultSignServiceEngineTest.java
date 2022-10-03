@@ -47,6 +47,7 @@ import lombok.Getter;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditEventIds;
+import se.swedenconnect.signservice.audit.AuditEventParameter;
 import se.swedenconnect.signservice.audit.AuditLoggerException;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
 import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
@@ -363,9 +364,10 @@ public class DefaultSignServiceEngineTest {
 
     // Assert audit logging
     final TestAuditLogger auditLogger = (TestAuditLogger) this.engineConfiguration.getAuditLogger();
-    Assertions.assertTrue(auditLogger.getEvents().size() == 1);
-    // TODO: change to several entries
+    Assertions.assertTrue(auditLogger.getEvents().size() == 2);
     Assertions.assertEquals(AuditEventIds.EVENT_ENGINE_USER_AUTHENTICATED, auditLogger.getEvents().get(0).getId());
+    Assertions.assertEquals(AuditEventIds.EVENT_ENGINE_SIGNATURE_OPERATION_SUCCESS,
+        auditLogger.getEvents().get(1).getId());
   }
 
   @Test
@@ -393,9 +395,10 @@ public class DefaultSignServiceEngineTest {
     Assertions.assertEquals("SUCCESS", result.getHttpParameters().get("result-code"));
 
     // Assert audit logging
-    Assertions.assertTrue(auditLogger.getEvents().size() == 2);
-    // TODO: change to several entries
+    Assertions.assertTrue(auditLogger.getEvents().size() == 3);
     Assertions.assertEquals(AuditEventIds.EVENT_ENGINE_USER_AUTHENTICATED, auditLogger.getEvents().get(1).getId());
+    Assertions.assertEquals(AuditEventIds.EVENT_ENGINE_SIGNATURE_OPERATION_SUCCESS,
+        auditLogger.getEvents().get(2).getId());
   }
 
   @Test
@@ -412,6 +415,15 @@ public class DefaultSignServiceEngineTest {
         .hasMessage("Message is already being processed")
         .extracting((e) -> UnrecoverableSignServiceException.class.cast(e).getErrorCode())
         .isEqualTo(UnrecoverableErrorCodes.REPLAY_ATTACK);
+
+    // Assert audit logging
+    final TestAuditLogger auditLogger = (TestAuditLogger) this.engineConfiguration.getAuditLogger();
+    Assertions.assertTrue(auditLogger.getEvents().size() == 1);
+    Assertions.assertEquals(AuditEventIds.EVENT_ENGINE_SIGNATURE_OPERATION_FAILURE,
+        auditLogger.getEvents().get(0).getId());
+    Assertions.assertEquals(UnrecoverableErrorCodes.REPLAY_ATTACK,
+        auditLogger.getEvents().get(0).getParameters().stream().filter(p -> "error-code".equals(p.getName()))
+            .map(AuditEventParameter::getValue).findFirst().orElse(null));
   }
 
   @Test
@@ -441,6 +453,15 @@ public class DefaultSignServiceEngineTest {
     final HttpRequestMessage result = engine.processRequest(this.httpRequest, this.httpResponse);
     Assertions.assertEquals(SignServiceErrorCode.REQUEST_INCORRECT.name(),
         result.getHttpParameters().get("result-code"));
+
+    // Assert audit logging
+    final TestAuditLogger auditLogger = (TestAuditLogger) this.engineConfiguration.getAuditLogger();
+    Assertions.assertTrue(auditLogger.getEvents().size() == 1);
+    Assertions.assertEquals(AuditEventIds.EVENT_ENGINE_SIGNATURE_OPERATION_FAILURE,
+        auditLogger.getEvents().get(0).getId());
+    Assertions.assertEquals(SignServiceErrorCode.REQUEST_INCORRECT.name(),
+        auditLogger.getEvents().get(0).getParameters().stream().filter(p -> "error-code".equals(p.getName()))
+            .map(AuditEventParameter::getValue).findFirst().orElse(null));
   }
 
   @Test
