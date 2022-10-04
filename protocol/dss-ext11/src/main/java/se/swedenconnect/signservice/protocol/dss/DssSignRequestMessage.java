@@ -77,6 +77,7 @@ import se.swedenconnect.signservice.protocol.msg.impl.DefaultAuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultCertificateAttributeMapping;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultMessageConditions;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificateAttribute;
+import se.swedenconnect.signservice.protocol.msg.impl.DefaultSignatureActivationRequestData;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultSignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultSigningCertificateRequirements;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
@@ -410,7 +411,7 @@ class DssSignRequestMessage implements SignRequestMessage {
     return Optional.ofNullable(this.signRequest.getSignRequestExtension())
         .map(SignRequestExtension::getVersion)
         .map(ProtocolVersion::valueOf)
-        .orElse(ProtocolVersion.valueOf("1.1"));
+        .orElseGet(() -> ProtocolVersion.valueOf("1.1"));
   }
 
   /** {@inheritDoc} */
@@ -521,6 +522,15 @@ class DssSignRequestMessage implements SignRequestMessage {
       }
       authnRequirements.setRequestedSignerAttributes(attributes);
     }
+
+    final CertificateType certType = Optional.ofNullable(this.signRequest.getSignRequestExtension())
+        .map(SignRequestExtension::getCertRequestProperties)
+        .map(CertRequestProperties::getCertType)
+        .map(CertificateType::fromType)
+        .orElseGet(() -> CertificateType.PKC);
+    authnRequirements.setSignatureActivationRequestData(
+        new DefaultSignatureActivationRequestData(
+            this.signRequest.getRequestID(), certType == CertificateType.QC_SSCD));
 
     return authnRequirements;
   }

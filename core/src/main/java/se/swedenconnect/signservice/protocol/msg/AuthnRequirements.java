@@ -18,6 +18,9 @@ package se.swedenconnect.signservice.protocol.msg;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import se.swedenconnect.signservice.authn.AuthnContextIdentifier;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 
@@ -43,6 +46,7 @@ public interface AuthnRequirements extends Serializable {
    *
    * @return the ID of the authentication service to use
    */
+  @Nonnull
   String getAuthnServiceID();
 
   /**
@@ -51,6 +55,7 @@ public interface AuthnRequirements extends Serializable {
    *
    * @return opaque string representing an authentication profile
    */
+  @Nullable
   String getAuthnProfile();
 
   /**
@@ -67,6 +72,7 @@ public interface AuthnRequirements extends Serializable {
    *
    * @return the authentication context identifiers
    */
+  @Nonnull
   List<AuthnContextIdentifier> getAuthnContextIdentifiers();
 
   /**
@@ -79,6 +85,17 @@ public interface AuthnRequirements extends Serializable {
    *
    * @return a list of requested identity attribute values
    */
+  @Nonnull
   List<IdentityAttribute<?>> getRequestedSignerAttributes();
+
+  /**
+   * If the signature request is for a qualified certificate associated with a private key held in a Qualified Signature
+   * Creation Device according to eIDAS the signature service must request by the identity provider a proof for this.
+   * This method returns this request data.
+   *
+   * @return SAD request data or null if no SAD should be requested
+   */
+  @Nullable
+  SignatureActivationRequestData getSignatureActivationRequestData();
 
 }

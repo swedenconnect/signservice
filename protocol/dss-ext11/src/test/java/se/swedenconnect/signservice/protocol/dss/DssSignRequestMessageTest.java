@@ -52,6 +52,9 @@ public class DssSignRequestMessageTest {
     Assertions.assertEquals("da655e67-1104-4ae0-994f-740811ece38d", request.getRelayState());
     Assertions.assertEquals("http://id.elegnamnden.se/loa/1.0/loa3",
         request.getAuthnRequirements().getAuthnContextIdentifiers().get(0).getIdentifier());
+    Assertions.assertEquals(request.getRequestId(),
+        request.getAuthnRequirements().getSignatureActivationRequestData().getSignRequestId());
+    Assertions.assertFalse(request.getAuthnRequirements().getSignatureActivationRequestData().isRequired());
     Assertions.assertTrue(request.isSigned());
 
     Assertions.assertNotNull(request.getJaxbObject());

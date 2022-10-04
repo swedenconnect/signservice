@@ -181,6 +181,17 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
     // Get hold of the IdP metadata ...
     final EntityDescriptor idpMetadata = this.getIdpMetadata(authnRequirements, context);
 
+    // Check if we need to send a SAD request ...
+    if (authnRequirements.getSignatureActivationRequestData() != null) {
+      if (authnRequirements.getSignatureActivationRequestData().isRequired()
+          && !this.isSignatureActivationProtocolSupported(idpMetadata)) {
+        final String msg = "Authentication requirements states that a SAD request should be sent "
+            + "but the IdP does not support the Signature Activation Data extension";
+        log.info("{}: {}", context.getId(), msg);
+        throw new UserAuthenticationException(AuthenticationErrorCode.FAILED_AUTHN, msg);
+      }
+    }
+
     // Create an authentication request context ...
     final AuthnRequestGeneratorContext authnContext =
         this.createAuthnRequestContext(authnRequirements, signMessage, context, idpMetadata);
@@ -286,7 +297,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
           Optional.ofNullable(context.get(AUTHN_REQS_KEY, AuthnRequirements.class))
               .orElseThrow(() -> new UserAuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHN_ERROR,
                   "State error - missing information about authn requirements"));
-      this.assertAttributes(authnRequirements.getRequestedSignerAttributes(), attributes, context);
+      this.assertAttributes(authnRequirements, attributes, context);
 
       // Assert that the correct authentication context class was delivered in the assertion.
       //
@@ -295,6 +306,10 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
       // Assert SignMessage handling ...
       final SignMessage signMessage = context.get(SIGNMESSAGE_KEY, SignMessage.class);
       this.assertSignMessage(signMessage, attributes, processingResult, authnRequest, context);
+
+      // Make additional checks concerning the assertion received ...
+      //
+      this.extendedAssertionVerification(authnRequirements, authnRequest, processingResult, context);
 
       // Build result ...
       //
@@ -350,10 +365,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
     }
     finally {
       // Reset context ...
-      context.remove(AUTHNREQUEST_KEY);
-      context.remove(RELAY_STATE_KEY);
-      context.remove(AUTHN_REQS_KEY);
-      context.remove(SIGNMESSAGE_KEY);
+      this.resetContext(context);
     }
   }
 
@@ -456,6 +468,35 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
    */
   protected boolean isSignMessageSupported() {
     return false;
+  }
+
+  /**
+   * A predicate telling whether the Signature Activation Protocol is supported by the given IdP. The default
+   * implementation always returns {@code false}.
+   * <p>
+   * See <a href=
+   * "https://docs.swedenconnect.se/technical-framework/latest/13_-_Signature_Activation_Protocol.html#sadrequest">Signature
+   * Activation Protocol for Federated Signing</a>.
+   * </p>
+   *
+   * @param idpMetadata the IdP metadata
+   * @return whether the Signature Activation Protocol is supported
+   */
+  protected boolean isSignatureActivationProtocolSupported(@Nonnull final EntityDescriptor idpMetadata) {
+    return false;
+  }
+
+  /**
+   * Is invoked to reset the context, i.e., to remove elements that were added by this handler. If overridden, the super
+   * implementation should always be called.
+   *
+   * @param context the SignService context.
+   */
+  protected void resetContext(@Nonnull final SignServiceContext context) {
+    context.remove(AUTHNREQUEST_KEY);
+    context.remove(RELAY_STATE_KEY);
+    context.remove(AUTHN_REQS_KEY);
+    context.remove(SIGNMESSAGE_KEY);
   }
 
   /**
@@ -655,14 +696,16 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
    * Asserts that all requested signer attributes (from the SignRequest) is provided among the attributes from the
    * identity assertion received from the IdP.
    *
-   * @param requestedSignerAttributes the requested attributes
+   * @param authnRequirements the authentication requirements (including the requested attributes)
    * @param issuedAttributes the attributes from the assertion
    * @param context the SignService context
    * @throws UserAuthenticationException if requested attributes are not present in the issued attributes
    */
-  protected void assertAttributes(@Nonnull final List<IdentityAttribute<?>> requestedSignerAttributes,
+  protected void assertAttributes(@Nonnull final AuthnRequirements authnRequirements,
       @Nonnull final List<IdentityAttribute<?>> issuedAttributes, @Nonnull final SignServiceContext context)
       throws UserAuthenticationException {
+
+    final List<IdentityAttribute<?>> requestedSignerAttributes = authnRequirements.getRequestedSignerAttributes();
 
     for (final IdentityAttribute<?> requestedAttribute : requestedSignerAttributes) {
       final IdentityAttribute<?> issuedAttribute = issuedAttributes.stream()
@@ -751,6 +794,21 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
       @Nonnull final AuthnRequest authnRequest, @Nonnull final SignServiceContext context)
       throws UserAuthenticationException {
     // NO-OP
+  }
+
+  /**
+   * A method that enables sub-classes to extend the verification of the received assertion. The default implementation
+   * does nothing.
+   *
+   * @param authnRequirements the authentication requirements
+   * @param authnRequest the authentication request
+   * @param result the result from the response processing (includes the assertion)
+   * @param context the SignService context
+   * @throws UserAuthenticationException for verification errors
+   */
+  protected void extendedAssertionVerification(@Nonnull final AuthnRequirements authnRequirements,
+      @Nonnull final AuthnRequest authnRequest, @Nonnull ResponseProcessingResult result,
+      @Nonnull final SignServiceContext context) throws UserAuthenticationException {
   }
 
   /**

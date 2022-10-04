@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,6 +31,7 @@ import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.Extensions;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.SSODescriptor;
 
@@ -48,7 +50,12 @@ import se.swedenconnect.opensaml.sweid.saml2.authn.psc.PrincipalSelection;
 import se.swedenconnect.opensaml.sweid.saml2.authn.psc.RequestedPrincipalSelection;
 import se.swedenconnect.opensaml.sweid.saml2.authn.psc.build.MatchValueBuilder;
 import se.swedenconnect.opensaml.sweid.saml2.authn.psc.build.PrincipalSelectionBuilder;
+import se.swedenconnect.opensaml.sweid.saml2.metadata.entitycategory.EntityCategoryConstants;
 import se.swedenconnect.opensaml.sweid.saml2.request.SwedishEidAuthnRequestGeneratorContext;
+import se.swedenconnect.opensaml.sweid.saml2.signservice.SADParser;
+import se.swedenconnect.opensaml.sweid.saml2.signservice.SADParser.SADValidator;
+import se.swedenconnect.opensaml.sweid.saml2.signservice.SADValidationException;
+import se.swedenconnect.opensaml.sweid.saml2.signservice.sap.SADRequest;
 import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
 import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.authn.saml.config.SpUrlConfiguration;
@@ -64,6 +71,12 @@ import se.swedenconnect.signservice.session.SignServiceContext;
  */
 @Slf4j
 public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenticationHandler {
+
+  /** Key for storing the SAD Id. */
+  public static final String SAD_ID_KEY = SwedenConnectSamlAuthenticationHandler.class.getPackageName() + ".SadID";
+
+  /** For validating SAD attributes. */
+  private SADValidator sadValidator;
 
   /**
    * Constructor.
@@ -81,6 +94,7 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
       @Nonnull final EntityDescriptorContainer entityDescriptorContainer,
       @Nonnull final SpUrlConfiguration urlConfiguration) {
     super(authnRequestGenerator, responseProcessor, metadataProvider, entityDescriptorContainer, urlConfiguration);
+    this.sadValidator = SADParser.getValidator(metadataProvider);
   }
 
   /**
@@ -103,6 +117,22 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
     // Handle the principal selection extension. Base it on what the IdP declares in its metadata.
     //
     final PrincipalSelection principalSelection = this.getPrincipalSelection(authnRequirements, context, idpMetadata);
+
+    // Should we send a SAD request?
+    //
+    final SADRequest sadRequest = authnRequirements.getSignatureActivationRequestData() != null
+        && this.isSignatureActivationProtocolSupported(idpMetadata)
+            ? (SADRequest) XMLObjectSupport.buildXMLObject(SADRequest.DEFAULT_ELEMENT_NAME)
+            : null;
+    if (sadRequest != null) {
+      sadRequest.setRequesterID(this.authnRequestGenerator.getSpEntityID());
+      sadRequest.setSignRequestID(authnRequirements.getSignatureActivationRequestData().getSignRequestId());
+      sadRequest.setDocCount(1);
+      sadRequest.setID(UUID.randomUUID().toString());
+
+      // Save in context
+      context.put(SAD_ID_KEY, sadRequest.getID());
+    }
 
     return new SwedishEidAuthnRequestGeneratorContext() {
 
@@ -128,6 +158,23 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
       @Nullable
       public SignMessageBuilderFunction getSignMessageBuilderFunction() {
         return (m, e) -> openSamlSignMessage != null ? openSamlSignMessage : null;
+      }
+
+      @Override
+      @Nonnull
+      public AuthnRequestCustomizer getAuthnRequestCustomizer() {
+        if (sadRequest != null) {
+          return (authnRequest) -> {
+            if (authnRequest.getExtensions() == null) {
+              final Extensions exts = (Extensions) XMLObjectSupport.buildXMLObject(Extensions.DEFAULT_ELEMENT_NAME);
+              authnRequest.setExtensions(exts);
+            }
+            authnRequest.getExtensions().getUnknownXMLObjects().add(sadRequest);
+          };
+        }
+        else {
+          return SwedishEidAuthnRequestGeneratorContext.super.getAuthnRequestCustomizer();
+        }
       }
 
     };
@@ -226,6 +273,54 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
   }
 
   /**
+   * Checks if the IdP declares the entity category "http://id.elegnamnden.se/sprop/1.0/scal2".
+   */
+  @Override
+  protected boolean isSignatureActivationProtocolSupported(@Nonnull final EntityDescriptor idpMetadata) {
+
+    return EntityDescriptorUtils.getEntityCategories(idpMetadata).stream()
+        .filter(e -> EntityCategoryConstants.SERVICE_PROPERTY_CATEGORY_SCAL2.getUri().equals(e))
+        .findFirst()
+        .isPresent();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected void resetContext(@Nonnull final SignServiceContext context) {
+    super.resetContext(context);
+
+    context.remove(SAD_ID_KEY);
+  }
+
+  /**
+   * Checks for a SAD request.
+   */
+  @Override
+  protected void extendedAssertionVerification(@Nonnull final AuthnRequirements authnRequirements,
+      @Nonnull final AuthnRequest authnRequest, @Nonnull ResponseProcessingResult result,
+      @Nonnull final SignServiceContext context) throws UserAuthenticationException {
+
+    // Did we include a SADRequest extension in the AuthnRequest?
+    //
+    final String sadId = context.get(SAD_ID_KEY, String.class);
+    if (sadId == null) {
+      return;
+    }
+
+    // OK, we sent a SADRequest. We now expect the 'sad' attribute to be included in the assertion.
+    //
+    try {
+      this.sadValidator.validate(authnRequest, result.getAssertion());
+    }
+    catch (final SADValidationException e) {
+      final String msg = String.format("Verification of signature activation data (SAD) failed - %s - %s",
+          e.getErrorCode().name(), e.getMessage());
+      log.info("{}: {}", context.getId(), msg);
+      throw new UserAuthenticationException(AuthenticationErrorCode.MISMATCHING_IDENTITY_ATTRIBUTES, msg);
+    }
+  }
+
+  /**
    * Asserts that we received a signMessageDigest attribute if SignMessage was sent.
    */
   @Override
@@ -271,6 +366,16 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
         .map(StringSamlIdentityAttribute.class::cast)
         .findFirst()
         .isPresent();
+  }
+
+  /**
+   * Assigns the {@link SADValidator} to be used when validating SAD attributes. If not explicitly assigned
+   * a validator is created using {@link SADParser#getValidator(MetadataProvider)}.
+   *
+   * @param sadValidator the SAD validator
+   */
+  public void setSadValidator(@Nonnull final SADValidator sadValidator) {
+    this.sadValidator = sadValidator;
   }
 
 }
