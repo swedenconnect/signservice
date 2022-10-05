@@ -1,20 +1,18 @@
 ![Logo](../docs/images/sweden-connect.png)
 
 
-# SignService Audit Modules
+# signservice/audit
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-audit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-audit-parent)
 
 -----
 
-The `audit` directory contains code for implementing the [AuditLogger](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/audit/AuditLogger.java)
+The `audit` directory contains code for implementing the [AuditLogger](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/audit/AuditLogger.java) interface.
 
 
-- [base](base) - Common code for all implementations. It also includes a file based audit implementation.
+- [base](base) - Common code for all implementations. It also includes two implementations; a file based audit implementation and an implementation making use of an underlying log system (for example Logback or Log4j).
 
-- [actuator](actuator) - A Spring Actuator implementation 
-
-> TODO: More
+- [actuator](actuator) - A Spring Actuator implementation.
 
 -----
 

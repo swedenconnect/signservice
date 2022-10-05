@@ -1,13 +1,15 @@
 ![Logo](../docs/images/sweden-connect.png)
 
 
-# signservice-engine
+# signservice/engine
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-engine/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-engine)
 
 -----
 
-Contains the main processing logic for processing a signature request.
+## About
+
+Contains the main processing logic for processing a signature request and to complete a signature operation.
 
 > TODO: More
 

@@ -1,7 +1,7 @@
 ![Logo](images/sweden-connect.png)
 
 
-# Signature Service Design Documentation
+# Signature Service Architectural Overview
 
 ## Overall Structure
 

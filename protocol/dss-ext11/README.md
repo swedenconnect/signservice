@@ -7,16 +7,20 @@
 
 -----
 
-## SignService Protocol Handler for DSS 1.1 extensions
+## About
+
+SignService Protocol Handler for DSS 1.1 extensions.
+
+> TODO
 
 ### Configuration
 
-The [DssProtocolHandler](https://github.com/swedenconnect/signservice/blob/main/protocol/dss-ext11/src/main/java/se/swedenconnect/signservice/protocol/dss/DssProtocolHandler.java) is configured using [DssConfiguration](https://github.com/swedenconnect/signservice/blob/main/protocol/dss-ext11/src/main/java/se/swedenconnect/signservice/protocol/dss/DssConfiguration.java). This class defines the following configuration settings:
+The [DssProtocolHandler](https://github.com/swedenconnect/signservice/blob/main/protocol/dss-ext11/src/main/java/se/swedenconnect/signservice/protocol/dss/DssProtocolHandler.java) is configured using [DssProtocolHandlerConfiguration](https://github.com/swedenconnect/signservice/blob/main/protocol/dss-ext11/src/main/java/se/swedenconnect/signservice/protocol/dss/DssProtocolHandlerConfiguration.java). This class defines the following configuration settings:
 
 | Property | Description | Default |
 | :--- | :--- | :--- |
-| `includeAssertion` | Tells whether SAML assertions should be included in the response messages. | `true` |
-| `includeRequestMessage` | Tells whether to include the request message in the response messages created. For 1.1 version and below this will always be included, but in greater versions the field is optional (actually the specs dissuade from using it). | `false` |
+| `include-assertion` | Tells whether SAML assertions should be included in the response messages. | `true` |
+| `include-request-message` | Tells whether to include the request message in the response messages created. For 1.1 version and below this will always be included, but in greater versions the field is optional (actually the specs dissuade from using it). | `false` |
 
 
 

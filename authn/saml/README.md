@@ -1,7 +1,7 @@
 ![Logo](../../docs/images/sweden-connect.png)
 
 
-# SignService SAML Authentication Handler
+# signservice/authn/saml
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-authn-saml/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-authn-saml)
 
@@ -13,8 +13,7 @@
 
 ### Configuration
 
-| Property | Description | Default |
-| :--- | :--- | :--- |
+> TODO
 
 
 -----

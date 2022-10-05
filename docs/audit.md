@@ -1,8 +1,8 @@
 ![Logo](images/sweden-connect.png)
 
-# What is a Signature Service?
+# Signature Service Audit Logging
 
-> TODO: An introduction to what a signature service is. A few illustrative figures may also be helpful.
+> TODO
 
 -----
 

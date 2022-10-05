@@ -1,15 +1,17 @@
 ![Logo](../docs/images/sweden-connect.png)
 
 
-# signservice-core
+# signservice/core
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-core)
 
 -----
 
+## About
+
 A module containing core API:s and classes for the signature service.
 
-> TODO: More
+> TODO
 
 -----
 

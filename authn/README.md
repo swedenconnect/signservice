@@ -1,13 +1,17 @@
 ![Logo](../docs/images/sweden-connect.png)
 
 
-# SignService Authentication Modules
+# signservice/authn
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-authn-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-authn-parent)
 
 -----
 
-> TODO: More
+The `authn` directory contains implementations for an [AuthenticationHandler](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/authn/AuthenticationHandler.java). This handler is used to authenticate the user as part of the signature process.
+
+- [base](base) - Common definitions for authentication handlers and a mocked implementation for authentication (for testing).
+
+- [saml](saml) - Implementations using SAML as the authentication mechanism.
 
 -----
 
