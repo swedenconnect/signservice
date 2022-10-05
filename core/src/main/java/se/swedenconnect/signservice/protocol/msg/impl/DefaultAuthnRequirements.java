@@ -20,10 +20,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import se.swedenconnect.signservice.authn.AuthnContextIdentifier;
 import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
+import se.swedenconnect.signservice.protocol.msg.SignatureActivationRequestData;
 
 /**
  * Default implementation of {@link AuthnRequirements}.
@@ -45,6 +49,9 @@ public class DefaultAuthnRequirements implements AuthnRequirements {
   /** The requested signer attributes. */
   private List<IdentityAttribute<?>> requestedSignerAttributes;
 
+  /** The SAD request data. */
+  private SignatureActivationRequestData signatureActivationRequestData;
+
   /**
    * Default constructor.
    */
@@ -53,6 +60,7 @@ public class DefaultAuthnRequirements implements AuthnRequirements {
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public String getAuthnServiceID() {
     return this.authnServiceID;
   }
@@ -62,12 +70,13 @@ public class DefaultAuthnRequirements implements AuthnRequirements {
    *
    * @param authnServiceID the authentication service ID
    */
-  public void setAuthnServiceID(final String authnServiceID) {
+  public void setAuthnServiceID(@Nonnull final String authnServiceID) {
     this.authnServiceID = authnServiceID;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nullable
   public String getAuthnProfile() {
     return this.authnProfile;
   }
@@ -77,14 +86,15 @@ public class DefaultAuthnRequirements implements AuthnRequirements {
    *
    * @param authnProfile the authentication profile
    */
-  public void setAuthnProfile(final String authnProfile) {
+  public void setAuthnProfile(@Nonnull final String authnProfile) {
     this.authnProfile = authnProfile;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public List<AuthnContextIdentifier> getAuthnContextIdentifiers() {
-    return Optional.ofNullable(this.authnContextIdentifiers).orElse(Collections.emptyList());
+    return Optional.ofNullable(this.authnContextIdentifiers).orElseGet(() -> Collections.emptyList());
   }
 
   /**
@@ -92,7 +102,7 @@ public class DefaultAuthnRequirements implements AuthnRequirements {
    *
    * @param authnContextIdentifiers the authentication context identifiers
    */
-  public void setAuthnContextIdentifiers(final List<AuthnContextIdentifier> authnContextIdentifiers) {
+  public void setAuthnContextIdentifiers(@Nonnull final List<AuthnContextIdentifier> authnContextIdentifiers) {
     this.authnContextIdentifiers = authnContextIdentifiers != null
         ? Collections.unmodifiableList(authnContextIdentifiers)
         : null;
@@ -100,8 +110,9 @@ public class DefaultAuthnRequirements implements AuthnRequirements {
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public List<IdentityAttribute<?>> getRequestedSignerAttributes() {
-    return Optional.ofNullable(this.requestedSignerAttributes).orElse(Collections.emptyList());
+    return Optional.ofNullable(this.requestedSignerAttributes).orElseGet(() -> Collections.emptyList());
   }
 
   /**
@@ -109,7 +120,7 @@ public class DefaultAuthnRequirements implements AuthnRequirements {
    *
    * @param requestedSignerAttributes the requested signer attributes
    */
-  public void setRequestedSignerAttributes(final List<IdentityAttribute<?>> requestedSignerAttributes) {
+  public void setRequestedSignerAttributes(@Nonnull final List<IdentityAttribute<?>> requestedSignerAttributes) {
     this.requestedSignerAttributes = requestedSignerAttributes != null
         ? Collections.unmodifiableList(requestedSignerAttributes)
         : null;
@@ -117,10 +128,26 @@ public class DefaultAuthnRequirements implements AuthnRequirements {
 
   /** {@inheritDoc} */
   @Override
+  @Nullable
+  public SignatureActivationRequestData getSignatureActivationRequestData() {
+    return this.signatureActivationRequestData;
+  }
+
+  /**
+   * Assigns SAD request data. See {@link SignatureActivationRequestData}.
+   *
+   * @param sadRequestData the SAD request data
+   */
+  public void setSignatureActivationRequestData(@Nonnull final SignatureActivationRequestData sadRequestData) {
+    this.signatureActivationRequestData = sadRequestData;
+  }
+
+  /** {@inheritDoc} */
+  @Override
   @GeneratedMethod
   public int hashCode() {
     return Objects.hash(this.authnContextIdentifiers, this.authnProfile, this.authnServiceID,
-        this.requestedSignerAttributes);
+        this.requestedSignerAttributes, this.signatureActivationRequestData);
   }
 
   /** {@inheritDoc} */
@@ -137,15 +164,17 @@ public class DefaultAuthnRequirements implements AuthnRequirements {
     return Objects.equals(this.authnContextIdentifiers, other.authnContextIdentifiers)
         && Objects.equals(this.authnProfile, other.authnProfile)
         && Objects.equals(this.authnServiceID, other.authnServiceID)
-        && Objects.equals(this.requestedSignerAttributes, other.requestedSignerAttributes);
+        && Objects.equals(this.requestedSignerAttributes, other.requestedSignerAttributes)
+        && Objects.equals(this.signatureActivationRequestData, other.signatureActivationRequestData);
   }
 
   /** {@inheritDoc} */
   @Override
   public String toString() {
-    return String.format(
-        "authn-service-id='%s', authn-profile='%s', authn-context-identifiers=%s, requested-signer-attributes=%s",
-        this.authnServiceID, this.authnProfile, this.authnContextIdentifiers, this.requestedSignerAttributes);
+    return String.format("authn-service-id='%s', authn-profile='%s', "
+        + "authn-context-identifiers=%s, requested-signer-attributes=%s, sad-request-data=[%s]",
+        this.authnServiceID, this.authnProfile, this.authnContextIdentifiers, this.requestedSignerAttributes,
+        this.signatureActivationRequestData);
   }
 
 }

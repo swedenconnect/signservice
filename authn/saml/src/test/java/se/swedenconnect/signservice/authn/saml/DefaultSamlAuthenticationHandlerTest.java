@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.signservice.authn.saml;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -51,6 +52,7 @@ import se.swedenconnect.opensaml.saml2.attribute.AttributeBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorContainer;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 import se.swedenconnect.opensaml.saml2.request.AuthnRequestGenerator;
+import se.swedenconnect.opensaml.saml2.request.AuthnRequestGeneratorContext;
 import se.swedenconnect.opensaml.saml2.request.RequestHttpObject;
 import se.swedenconnect.opensaml.saml2.response.ResponseProcessingException;
 import se.swedenconnect.opensaml.saml2.response.ResponseProcessingResult;
@@ -68,6 +70,7 @@ import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityA
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultAuthnRequirements;
+import se.swedenconnect.signservice.protocol.msg.impl.DefaultSignatureActivationRequestData;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
@@ -76,6 +79,7 @@ import se.swedenconnect.signservice.session.SignServiceContext;
 public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
 
   protected static final String CONTEXT_ID = "ID";
+  protected static final String SIGNREQUEST_ID = "SR-ID";
 
   protected static final String IDP = "https://idp.example.com";
   protected static final String IDP_DESTINATION = "https://idp.example.com/sso";
@@ -154,7 +158,13 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
       }
     });
     Mockito.when(this.authnRequestGenerator.generateAuthnRequest(eq(IDP), anyString(), any()))
-        .thenReturn(requestObject);
+      .thenAnswer((a) -> {
+        final AuthnRequestGeneratorContext ctx = a.getArgument(2, AuthnRequestGeneratorContext.class);
+        ctx.getAuthnRequestCustomizer();
+        ctx.getAssertionConsumerServiceResolver();
+        ctx.getRequestedAuthnContextBuilderFunction();
+        return requestObject;
+      });
 
     final AuthenticationResultChoice result = handler.authenticate(authnReqs, null, context);
 
@@ -168,6 +178,19 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.RELAY_STATE_KEY), eq("ID"));
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHN_REQS_KEY), eq(authnReqs));
     Mockito.verify(this.context, Mockito.never()).put(eq(AbstractSamlAuthenticationHandler.SIGNMESSAGE_KEY), any());
+  }
+
+  @Test
+  public void testAuthenticateSadError() throws Exception {
+    final AuthnRequirements authnReqs = this.getAuthnRequirements();
+    ((DefaultAuthnRequirements) authnReqs).setSignatureActivationRequestData(
+        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 2, true));
+
+    assertThatThrownBy(() -> {
+      handler.authenticate(authnReqs, null, this.context);
+    }).isInstanceOf(UserAuthenticationException.class)
+        .hasMessage("Authentication requirements states that a SAD request should be sent "
+            + "but the IdP does not support the Signature Activation Data extension");
   }
 
   @Test
@@ -736,6 +759,8 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
             AttributeConstants.ATTRIBUTE_FRIENDLY_NAME_GIVEN_NAME, Arrays.asList(GN1, GN2)),
         new StringSamlIdentityAttribute(AttributeConstants.ATTRIBUTE_NAME_SN,
             AttributeConstants.ATTRIBUTE_FRIENDLY_NAME_SN, SN)));
+    reqs.setSignatureActivationRequestData(
+        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 1, false));
     return reqs;
   }
 
