@@ -37,6 +37,12 @@ public interface SignatureActivationRequestData extends Serializable {
   String getSignRequestId();
 
   /**
+   * Gets the number of documents that are to be signed. This information is part of the Signature Activation Data.
+   * @return the document count
+   */
+  int getDocumentCount();
+
+  /**
    * A predicate that tells whether it is mandatory to pass a "Signature Activation Data" request to the identity
    * provider.
    *

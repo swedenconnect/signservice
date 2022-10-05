@@ -38,7 +38,7 @@ public class DefaultAuthnRequirementsTest {
     ar.setAuthnServiceID("http://idp.example.com");
     ar.setRequestedSignerAttributes(Arrays.asList(
         new StringSamlIdentityAttribute("urn:oid:1.2.752.29.4.13", null, "199001011809")));
-    ar.setSignatureActivationRequestData(new DefaultSignatureActivationRequestData("ID", false));
+    ar.setSignatureActivationRequestData(new DefaultSignatureActivationRequestData("ID", 2, false));
 
     Assertions.assertEquals("default", ar.getAuthnProfile());
     Assertions.assertEquals(Arrays.asList(
@@ -49,6 +49,7 @@ public class DefaultAuthnRequirementsTest {
         new StringSamlIdentityAttribute("urn:oid:1.2.752.29.4.13", null, "199001011809")),
         ar.getRequestedSignerAttributes());
     Assertions.assertEquals("ID", ar.getSignatureActivationRequestData().getSignRequestId());
+    Assertions.assertEquals(2, ar.getSignatureActivationRequestData().getDocumentCount());
     Assertions.assertFalse(ar.getSignatureActivationRequestData().isRequired());
     Assertions.assertNotNull(ar.toString());
   }

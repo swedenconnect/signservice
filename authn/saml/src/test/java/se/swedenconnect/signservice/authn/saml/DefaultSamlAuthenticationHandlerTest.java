@@ -184,7 +184,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
   public void testAuthenticateSadError() throws Exception {
     final AuthnRequirements authnReqs = this.getAuthnRequirements();
     ((DefaultAuthnRequirements) authnReqs).setSignatureActivationRequestData(
-        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, true));
+        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 2, true));
 
     assertThatThrownBy(() -> {
       handler.authenticate(authnReqs, null, this.context);
@@ -760,7 +760,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
         new StringSamlIdentityAttribute(AttributeConstants.ATTRIBUTE_NAME_SN,
             AttributeConstants.ATTRIBUTE_FRIENDLY_NAME_SN, SN)));
     reqs.setSignatureActivationRequestData(
-        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, false));
+        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 1, false));
     return reqs;
   }
 

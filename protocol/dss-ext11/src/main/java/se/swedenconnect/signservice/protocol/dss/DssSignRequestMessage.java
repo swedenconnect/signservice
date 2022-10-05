@@ -528,9 +528,14 @@ class DssSignRequestMessage implements SignRequestMessage {
         .map(CertRequestProperties::getCertType)
         .map(CertificateType::fromType)
         .orElseGet(() -> CertificateType.PKC);
+    final int docCount = Optional.ofNullable(this.signRequest.getSignTasks())
+        .filter(t -> t.getSignTaskDatas() != null)
+        .map(t -> t.getSignTaskDatas().size())
+        .orElse(0);
+
     authnRequirements.setSignatureActivationRequestData(
         new DefaultSignatureActivationRequestData(
-            this.signRequest.getRequestID(), certType == CertificateType.QC_SSCD));
+            this.signRequest.getRequestID(), docCount, certType == CertificateType.QC_SSCD));
 
     return authnRequirements;
   }

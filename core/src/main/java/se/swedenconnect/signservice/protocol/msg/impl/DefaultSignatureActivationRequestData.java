@@ -34,6 +34,9 @@ public class DefaultSignatureActivationRequestData implements SignatureActivatio
   /** The sign request ID. */
   private final String signRequestId;
 
+  /** The number of documents that are to be signed. */
+  private final int documentCount;
+
   /** Whether sending the SAD request is mandatory/required. */
   private final boolean required;
 
@@ -41,9 +44,13 @@ public class DefaultSignatureActivationRequestData implements SignatureActivatio
    * Constructor.
    *
    * @param signRequestId the sign request ID
+   * @param documentCount the number of documents that are to be signed
+   * @param required whether sending a SAD request is mandatory
    */
-  public DefaultSignatureActivationRequestData(@Nonnull final String signRequestId, final boolean required) {
+  public DefaultSignatureActivationRequestData(
+      @Nonnull final String signRequestId, final int documentCount, final boolean required) {
     this.signRequestId = Objects.requireNonNull(signRequestId, "signRequestId must not be null");
+    this.documentCount = documentCount;
     this.required = required;
   }
 
@@ -56,6 +63,12 @@ public class DefaultSignatureActivationRequestData implements SignatureActivatio
 
   /** {@inheritDoc} */
   @Override
+  public int getDocumentCount() {
+    return this.documentCount;
+  }
+
+  /** {@inheritDoc} */
+  @Override
   public boolean isRequired() {
     return this.required;
   }
@@ -64,7 +77,7 @@ public class DefaultSignatureActivationRequestData implements SignatureActivatio
   @Override
   @GeneratedMethod
   public int hashCode() {
-    return Objects.hash(this.signRequestId, this.required);
+    return Objects.hash(this.signRequestId, this.documentCount, this.required);
   }
 
   /** {@inheritDoc} */
@@ -79,6 +92,7 @@ public class DefaultSignatureActivationRequestData implements SignatureActivatio
     }
     final DefaultSignatureActivationRequestData other = (DefaultSignatureActivationRequestData) obj;
     return Objects.equals(this.signRequestId, other.signRequestId)
+        && this.documentCount == other.documentCount
         && this.required == other.required;
   }
 
@@ -86,7 +100,8 @@ public class DefaultSignatureActivationRequestData implements SignatureActivatio
   @Override
   @Nonnull
   public String toString() {
-    return String.format("sign-request-id='%s', required=%s", this.signRequestId, this.required);
+    return String.format("sign-request-id='%s', document-count=%d, required=%s",
+        this.signRequestId, this.documentCount, this.required);
   }
 
 }

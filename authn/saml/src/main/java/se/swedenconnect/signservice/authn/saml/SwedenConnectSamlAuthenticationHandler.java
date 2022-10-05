@@ -127,7 +127,7 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
     if (sadRequest != null) {
       sadRequest.setRequesterID(this.authnRequestGenerator.getSpEntityID());
       sadRequest.setSignRequestID(authnRequirements.getSignatureActivationRequestData().getSignRequestId());
-      sadRequest.setDocCount(1);
+      sadRequest.setDocCount(authnRequirements.getSignatureActivationRequestData().getDocumentCount());
       sadRequest.setID(UUID.randomUUID().toString());
 
       // Save in context
@@ -279,9 +279,7 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
   protected boolean isSignatureActivationProtocolSupported(@Nonnull final EntityDescriptor idpMetadata) {
 
     return EntityDescriptorUtils.getEntityCategories(idpMetadata).stream()
-        .filter(e -> EntityCategoryConstants.SERVICE_PROPERTY_CATEGORY_SCAL2.getUri().equals(e))
-        .findFirst()
-        .isPresent();
+        .anyMatch(e -> EntityCategoryConstants.SERVICE_PROPERTY_CATEGORY_SCAL2.getUri().equals(e));
   }
 
   /** {@inheritDoc} */

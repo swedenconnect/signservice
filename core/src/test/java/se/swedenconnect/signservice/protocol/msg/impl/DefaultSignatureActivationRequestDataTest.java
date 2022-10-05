@@ -25,10 +25,11 @@ public class DefaultSignatureActivationRequestDataTest {
 
   @Test
   public void testUsage() {
-    final DefaultSignatureActivationRequestData sad = new DefaultSignatureActivationRequestData("ID", true);
+    final DefaultSignatureActivationRequestData sad = new DefaultSignatureActivationRequestData("ID", 3, true);
     Assertions.assertEquals("ID", sad.getSignRequestId());
+    Assertions.assertEquals(3, sad.getDocumentCount());
     Assertions.assertTrue(sad.isRequired());
-    Assertions.assertEquals("sign-request-id='ID', required=true", sad.toString());
+    Assertions.assertEquals("sign-request-id='ID', document-count=3, required=true", sad.toString());
   }
 
 }

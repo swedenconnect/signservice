@@ -208,7 +208,7 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
         (SwedenConnectSamlAuthenticationHandler) this.createHandler();
     final AuthnRequirements authnReqs = this.getAuthnRequirements();
     ((DefaultAuthnRequirements) authnReqs).setSignatureActivationRequestData(
-        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, true));
+        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 1, true));
 
     this.mockEntityCategories(List.of(
         EntityCategoryConstants.SERVICE_PROPERTY_CATEGORY_SCAL2.getUri(),
@@ -607,7 +607,7 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
 
     final AuthnRequirements authnReqs = this.getAuthnRequirements();
     ((DefaultAuthnRequirements) authnReqs).setSignatureActivationRequestData(
-        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, true));
+        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 1, true));
 
     Mockito.when(this.context.get(eq(AbstractSamlAuthenticationHandler.AUTHN_REQS_KEY), any()))
         .thenReturn(authnReqs);
@@ -713,7 +713,7 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
 
     final AuthnRequirements authnReqs = this.getAuthnRequirements();
     ((DefaultAuthnRequirements) authnReqs).setSignatureActivationRequestData(
-        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, true));
+        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 1, true));
 
     Mockito.when(this.context.get(eq(AbstractSamlAuthenticationHandler.AUTHN_REQS_KEY), any()))
         .thenReturn(authnReqs);
