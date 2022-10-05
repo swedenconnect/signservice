@@ -1,9 +1,9 @@
 ![Logo](../docs/images/sweden-connect.png)
 
 
-# SignService KeyAndCertificate Modules
+# signservice/keycert
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-engine/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-engine)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-keycert-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.signservice/signservice-keycert-parent)
 
 -----
 
@@ -11,11 +11,9 @@ The `keycert` directory contains code for implementing the [KeyAndCertificateHan
 
 - [base](base) - Common code for all implementations.
 
-- [simple](simple) - A simple implementation that generates keys in software and uses a built-in CA for issuing certificates.
+- [simple](simple) - An implementation that uses a built-in CA for issuing certificates.
 
-- full - An implementation that supports generation of keys on a HSM and communication with an external CA.
-
-> TODO: More
+- [cmc](cmc) - An implementation that communicates with an external CA using the CMC API.
 
 -----
 

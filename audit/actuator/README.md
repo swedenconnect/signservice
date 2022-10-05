@@ -7,7 +7,22 @@
 
 -----
 
-> TODO
+## About
+
+The `signservice-audit-actuator` provides an [AuditLogger](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/audit/AuditLogger.java) 
+implementation that can audit log using Spring Boot's actuator feature.
+
+## ActuatorAuditLogger
+
+The [ActuatorAuditLogger](https://github.com/swedenconnect/signservice/blob/main/audit/actuator/src/main/java/se/swedenconnect/signservice/audit/actuator/ActuatorAuditLogger.java) is intended to be
+used for SignService applications built using Spring Boot. It will publish audit logs that later will
+be accessible from the `auditevents` actuator endpoint.
+
+> Note: Using this audit logger it is not possible to separate audit logs from different clients.
+
+
+
+> TODO: How to setup
 
 -----
 
