@@ -1,0 +1,290 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>se.swedenconnect.signservice</groupId>
+  <artifactId>signservice-application-bom</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0.0-SNAPSHOT</version>
+
+  <name>Sweden Connect :: SignService :: Application BOM</name>
+  <description>BOM for SignService Applications</description>
+  <url>https://github.com/swedenconnect/signservice</url>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:https://github.com/swedenconnect/signservice.git</connection>
+    <developerConnection>scm:git:https://github.com/swedenconnect/signservice.git</developerConnection>
+    <url>https://github.com/idsec/signservice/tree/master</url>
+  </scm>
+
+  <organization>
+    <name>Sweden Connect</name>
+    <url>https://www.swedenconnect.se</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <name>Martin Lindström</name>
+      <email>martin@idsec.se</email>
+      <organization>IDsec Solutions AB</organization>
+      <organizationUrl>https://www.idsec.se</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Stefan Santesson</name>
+      <email>stefan@idsec.se</email>
+      <organization>IDsec Solutions AB</organization>
+      <organizationUrl>https://www.idsec.se</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Magnus Hoflin</name>
+      <email>magnus.hoflin@digg.se</email>
+      <organization>DIGG</organization>
+      <organizationUrl>https://www.digg.se</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Henric Norlander</name>
+      <email>extern.henric.norlander@digg.se</email>
+      <organization>DIGG</organization>
+      <organizationUrl>https://www.digg.se</organizationUrl>
+    </developer>
+
+  </developers>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>11</java.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>https://repo1.maven.org/maven2/</url>
+    </repository>
+  </repositories>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
+  <dependencyManagement>
+
+    <dependencies>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-framework-bom</artifactId>
+        <type>pom</type>
+        <version>5.3.22</version>
+        <scope>import</scope>
+      </dependency>
+      
+      <dependency>
+        <groupId>se.idsec.signservice.commons</groupId>
+        <artifactId>signservice-bom</artifactId>
+        <version>1.2.2</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      
+      <!-- Jackson -->
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.13.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <!-- <version>${jackson.version}</version> -->
+        <version>[2.14.0-rc1,)</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>2.13.4</version>
+      </dependency>      
+
+      <dependency>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>1.9.4</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.cryptacular</groupId>
+        <artifactId>cryptacular</artifactId>
+        <version>1.2.4</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>se.swedenconnect.security</groupId>
+        <artifactId>credentials-support</artifactId>
+        <version>1.2.4</version>
+      </dependency>
+
+      <!-- 
+        We want to force opensaml-addons to be 1.2.4 to avoid the dependency
+        to Velocity that appear in 1.2.3. 
+      -->
+      <dependency>
+        <groupId>se.swedenconnect.opensaml</groupId>
+        <artifactId>opensaml-addons</artifactId>
+        <version>1.2.4</version>       
+      </dependency>
+      
+      <dependency>
+        <groupId>se.swedenconnect.opensaml</groupId>
+        <artifactId>opensaml-security-ext</artifactId>
+        <version>3.1.1</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>4.0.1</version>
+        <scope>provided</scope>
+      </dependency>
+      
+      <dependency>
+        <groupId>se.swedenconnect.signservice</groupId>
+        <artifactId>signservice-core</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>se.swedenconnect.signservice</groupId>
+        <artifactId>signservice-engine</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>se.swedenconnect.signservice</groupId>
+        <artifactId>signservice-protocol-dssext11</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>se.swedenconnect.signservice</groupId>
+        <artifactId>signservice-authn-base</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>se.swedenconnect.signservice</groupId>
+        <artifactId>signservice-authn-saml</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>    
+      
+      <dependency>
+        <groupId>se.swedenconnect.signservice</groupId>
+        <artifactId>signservice-audit-base</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>
+  
+      <dependency>
+        <groupId>se.swedenconnect.signservice</groupId>
+        <artifactId>signservice-audit-actuator</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>se.swedenconnect.signservice</groupId>
+        <artifactId>signservice-signhandler</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>
+  
+      <dependency>
+        <groupId>se.swedenconnect.signservice</groupId>
+        <artifactId>signservice-keycert-base</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>  
+  
+      <dependency>
+        <groupId>se.swedenconnect.signservice</groupId>
+        <artifactId>signservice-keycert-simple</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>
+  
+      <dependency>
+        <groupId>se.swedenconnect.signservice</groupId>
+        <artifactId>signservice-keycert-cmc</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>se.swedenconnect.signservice</groupId>
+        <artifactId>signservice-spring-boot-starter</artifactId>
+        <version>1.0.0-SNAPSHOT</version>        
+      </dependency>
+      
+    </dependencies>
+
+  </dependencyManagement>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+
+      <build>
+        <plugins>
+
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.8</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>false</autoReleaseAfterClose>
+              <!--
+                Allows manual inspection of the staging repo before deploying it to the central repo.
+                Use 'mvn nexus-staging:release -Prelease' to release and 'mvn nexus-staging:drop' to abort.
+                -->
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+        </plugins>
+      </build>
+
+    </profile>
+  </profiles>
+
+</project>
