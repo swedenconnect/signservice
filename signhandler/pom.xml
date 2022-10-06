@@ -93,7 +93,7 @@
       <artifactId>activation</artifactId>
     </dependency>    
 
-    <!-- JAXB -->
+    <!-- JAXB --> 
     <dependency>
       <groupId>se.swedenconnect.schemas</groupId>
       <artifactId>oasis-dss-jaxb</artifactId>

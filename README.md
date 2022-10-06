@@ -38,6 +38,7 @@ This repository comprises of the following modules:
 
 * [app](app) - A sample Signature Service application built using Spring Boot. 
 
+* [bom](bom) - A Maven Bill-of-Materials POM that is useful when building SignService applications.
 
 -----
 
