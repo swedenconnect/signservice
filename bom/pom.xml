@@ -98,6 +98,15 @@
         <scope>import</scope>
       </dependency>
       
+      <!-- 
+        If using Spring Boot, we'll get an inclusion of 1.30 that has reported vulnerabilities.
+      -->
+      <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>1.33</version>
+      </dependency>      
+      
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-bom</artifactId>

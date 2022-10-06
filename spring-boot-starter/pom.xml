@@ -67,8 +67,6 @@
   </developers>
 
   <properties>
-    <!-- Versions on dependencies -->
-    <spring.boot.version>2.7.1</spring.boot.version>
   </properties>
 
   <dependencyManagement>
