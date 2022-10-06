@@ -65,6 +65,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>11</java.version>
+    
+    <spring.boot.version>2.7.1</spring.boot.version>
   </properties>
 
   <repositories>
@@ -109,6 +111,15 @@
         <type>pom</type>
         <version>5.3.22</version>
         <scope>import</scope>
+      </dependency>
+      
+      <!-- 
+        If using Spring Boot, we'll get an inclusion of 1.30 that has reported vulnerabilities.
+      -->
+      <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>1.33</version>
       </dependency>
       
       <!-- Jackson -->

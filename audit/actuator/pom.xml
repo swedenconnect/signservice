@@ -67,8 +67,6 @@
   </developers>
 
   <properties>
-    <!-- Versions on dependencies -->
-    <spring.boot.version>2.6.6</spring.boot.version>
   </properties>
 
   <dependencyManagement>
@@ -81,7 +79,7 @@
         <version>${spring.boot.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
+      </dependency>      
 
     </dependencies>
 
