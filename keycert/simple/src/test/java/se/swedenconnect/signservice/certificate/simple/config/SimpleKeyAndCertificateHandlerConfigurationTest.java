@@ -57,12 +57,7 @@ public class SimpleKeyAndCertificateHandlerConfigurationTest {
     assertThatThrownBy(() -> {
       config.setCrlDpPath("path/xyz");
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("The crlDpPath must begin with a '/'");
-
-    assertThatThrownBy(() -> {
-      config.setCrlDpPath(null);
-    }).isInstanceOf(NullPointerException.class)
-        .hasMessage("crlDpPath must not be null");
+        .hasMessage("The crlDpPath must be null or begin with a '/'");
 
   }
 

@@ -17,9 +17,11 @@ package se.swedenconnect.signservice.certificate.simple.config;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.xml.security.signature.XMLSignature;
 
 import lombok.Getter;
@@ -75,6 +77,18 @@ public class SimpleKeyAndCertificateHandlerConfiguration extends AbstractKeyAndC
   private String crlDpPath;
 
   /**
+   * A URL where the CRL is published. This option may be used if the CRL is published under a publicly available
+   * URL to allow validation of the signature certificate.
+   *
+   * <p>
+   *   When this parameter is set crlDpPath is ignored.
+   * </p>
+   */
+  @Getter
+  @Setter
+  private String crlDpUrl;
+
+  /**
    * Even though revocation is not supported we need to support an empty CRL. This property tells where to store this
    * CRL locally.
    */
@@ -100,9 +114,11 @@ public class SimpleKeyAndCertificateHandlerConfiguration extends AbstractKeyAndC
    * @param crlDpPath the CRL distribution path
    */
   public void setCrlDpPath(@Nonnull final String crlDpPath) {
-    this.crlDpPath = Objects.requireNonNull(crlDpPath, "crlDpPath must not be null");
-    if (!this.crlDpPath.startsWith("/")) {
-      throw new IllegalArgumentException("The crlDpPath must begin with a '/'");
+    this.crlDpPath = Optional.ofNullable(crlDpPath)
+      .filter(StringUtils::isNotBlank)
+      .orElse(null);
+    if (this.crlDpPath != null && !this.crlDpPath.startsWith("/")) {
+      throw new IllegalArgumentException("The crlDpPath must be null or begin with a '/'");
     }
   }
 

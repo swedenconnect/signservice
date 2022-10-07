@@ -82,10 +82,10 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
       @Nonnull final AttributeMapper attributeMapper,
       @Nullable final AlgorithmRegistry algorithmRegistry,
       @Nonnull final CAService caService,
-      @Nonnull final String crlPublishPath) {
+      @Nullable final String crlPublishPath) {
     super(keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry);
     this.caService = Objects.requireNonNull(caService, "caService must not be null");
-    this.crlPublishPath = Objects.requireNonNull(crlPublishPath, "crlPublishPath must not be null");
+    this.crlPublishPath = crlPublishPath;
     this.caChain = new ArrayList<>();
     try {
       for (final X509CertificateHolder c : this.caService.getCACertificateChain()) {
@@ -180,7 +180,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
     if (!"GET".equals(httpRequest.getMethod())) {
       return false;
     }
-    return this.crlPublishPath.equalsIgnoreCase(httpRequest.getServletPath());
+    return this.crlPublishPath != null && this.crlPublishPath.equalsIgnoreCase(httpRequest.getServletPath());
   }
 
 }
