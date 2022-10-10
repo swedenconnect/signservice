@@ -36,10 +36,12 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel.CertificateModelBuilder;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.data.QcStatementsBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.data.SAMLAuthContextBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.SubjDirectoryAttributesModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
+import se.swedenconnect.cert.extensions.QCStatements;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.ObjectFactory;
 import se.swedenconnect.schemas.saml_2_0.assertion.Attribute;
@@ -49,9 +51,12 @@ import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.authn.AuthnContextIdentifier;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
+import se.swedenconnect.signservice.certificate.CertificateType;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappingData;
+import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
+import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
@@ -92,7 +97,7 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
       throw new IllegalArgumentException("Assertion authentication LoA identifier must be present");
     }
     if (assertion.getIssuer() == null) {
-      throw new IllegalArgumentException("Assertion issuer must not be present");
+      throw new IllegalArgumentException("Assertion issuer must be present");
     }
     if (assertion.getAuthnInstant() == null) {
       throw new IllegalArgumentException("Missing authentication instant from assertion");
@@ -105,6 +110,20 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
       // Get the certificate model builder.
       final AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>> certificateModelBuilder =
           this.createCertificateModelBuilder(signingKeyPair.getPublicKey(), certificateNameModel);
+
+      // Add QC declarations
+      SigningCertificateRequirements certificateRequirements = signRequest.getSigningCertificateRequirements();
+      checkCertificateType(certificateRequirements);
+      CertificateType certificateType = certificateRequirements.getCertificateType();
+      switch (certificateType){
+      case QC:
+      case QC_SSCD:
+        certificateModelBuilder.qcStatements(QcStatementsBuilder.instance()
+            .qualifiedCertificate(true)
+            .qcTypes(List.of(QCStatements.QC_TYPE_ELECTRONIC_SIGNATURE))
+            .qscd(certificateType.equals(CertificateType.QC_SSCD))
+          .build());
+      }
 
       // Add the AuthContextExtension.
       certificateModelBuilder.authenticationContext(SAMLAuthContextBuilder.instance()
@@ -133,6 +152,9 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
     }
     catch (final CertificateIssuanceException e) {
       throw new CertificateException("Failed to issue certificate - " + e.getMessage(), e);
+    }
+    catch (InvalidRequestException e) {
+      throw new CertificateException("Unsupported certificate type");
     }
   }
 

@@ -101,7 +101,7 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
    */
   @Getter
   @Setter
-  private CertificateType caCertificateType;
+  private List<CertificateType> supportedCertificateTypes;
 
   /**
    * Certificate issuance profile configuration.
