@@ -81,7 +81,7 @@ public class SimpleKeyAndCertificateHandlerConfiguration extends AbstractKeyAndC
    * URL to allow validation of the signature certificate.
    *
    * <p>
-   *   When this parameter is set crlDpPath is ignored.
+   * When this parameter is set {@code crlDpPath} is ignored.
    * </p>
    */
   @Getter
