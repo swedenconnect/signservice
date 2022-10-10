@@ -130,6 +130,19 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
   }
 
   @Test
+  public void testCRLDistributionPointUrl() throws Exception {
+    final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
+    final Field crlDp = config.getClass().getSuperclass().getDeclaredField("crlDpPath");
+    crlDp.setAccessible(true);
+    crlDp.set(config, null);
+    final Field crlDpUlr = config.getClass().getSuperclass().getDeclaredField("crlDpUrl");
+    crlDpUlr.setAccessible(true);
+    crlDpUlr.set(config, "https://example.com/crl");
+    final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
+    factory.create(config);
+  }
+
+  @Test
   public void testMissingCrlDp() throws Exception {
     final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
     final Field crlDp = config.getClass().getSuperclass().getDeclaredField("crlDpPath");
@@ -140,7 +153,7 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
     assertThatThrownBy(() -> {
       factory.create(config);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("CRL distributions point path must be set");
+        .hasMessage("CRL distributions point path must be set when CRL distribution point URL is not set");
   }
 
   @Test
@@ -154,7 +167,7 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
     assertThatThrownBy(() -> {
       factory.create(config);
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Base URL must be set");
+        .hasMessage("Base URL must be set to form CRL Distribution point based on path");
   }
 
   @Test

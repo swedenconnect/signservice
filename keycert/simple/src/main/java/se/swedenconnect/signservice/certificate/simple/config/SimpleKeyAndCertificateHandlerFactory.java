@@ -86,15 +86,23 @@ public class SimpleKeyAndCertificateHandlerFactory extends AbstractKeyAndCertifi
     }
 
     final String crlDpPath = Optional.ofNullable(conf.getCrlDpPath())
-        .filter(c -> StringUtils.isNotBlank(c))
-        .orElseThrow(() -> new IllegalArgumentException("CRL distributions point path must be set"));
+      .filter(StringUtils::isNotBlank)
+      .orElse(null);
 
-    final String crlDp = String.format("%s%s", Optional.ofNullable(conf.getBaseUrl())
-        .filter(c -> StringUtils.isNotBlank(c))
-        .orElseThrow(() -> new IllegalArgumentException("Base URL must be set")), crlDpPath);
+    final String crlDp = Optional.ofNullable(conf.getCrlDpUrl())
+      .filter(StringUtils::isNotBlank)
+      .orElseGet(() -> {
+        Optional.ofNullable(crlDpPath)
+          .orElseThrow(() -> new IllegalArgumentException("CRL distributions point path must be set when CRL "
+            + "distribution point URL is not set"));
+        return String.format("%s%s", Optional.ofNullable(conf.getBaseUrl())
+          .filter(StringUtils::isNotBlank)
+          .orElseThrow(() -> new IllegalArgumentException("Base URL must be set to form CRL Distribution point "
+            + "based on path")), crlDpPath);
+      });
 
     final String crlFileLocation = Optional.ofNullable(conf.getCrlFileLocation())
-        .filter(c -> StringUtils.isNotBlank(c))
+        .filter(StringUtils::isNotBlank)
         .orElseThrow(() -> new IllegalArgumentException("CRL file location must be set"));
 
     // Set up a CA service
