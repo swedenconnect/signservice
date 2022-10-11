@@ -76,8 +76,8 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
   /** Attribute mapper mapping attribute data from assertion to certificates. */
   private final AttributeMapper attributeMapper;
 
-  /** The type of certificates that the underlying CA issues. */
-  private CertificateType caCertificateType = CertificateType.PKC;
+  /** The types of certificates that the underlying CA supports. */
+  private List<CertificateType> caSupportedCertificateTypes = List.of(CertificateType.PKC);
 
   /**
    * Service name placed in AuthnContextExtensions. If this value is null, then the service name is set according to
@@ -144,12 +144,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
         .orElseThrow(() -> new InvalidRequestException("Missing certificate requirements"));
 
     // Check certificate type.
-    if (certificateRequirements.getCertificateType() != null) {
-      if (!certificateRequirements.getCertificateType().equals(this.getCaCertificateType())) {
-        throw new InvalidRequestException("Handler does not support certificate type " +
-            certificateRequirements.getCertificateType());
-      }
-    }
+    this.checkCertificateType(certificateRequirements);
 
     // Attribute mappings ...
     // TODO: Later we may want to apply a default mapping if none is passed ...
@@ -168,6 +163,22 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
     // Do any other specific compliance tests by the extending class
     this.specificRequirementTests(signRequest, context);
     log.debug("Key and certificate issuing requirements on SignRequest passed");
+  }
+
+  /**
+   * Checks that the requested certificate type is consistent with supported certificate types.
+   *
+   * @param certificateRequirements certificate requirements from the certificate request
+   * @throws InvalidRequestException illegal certificate type requirements
+   */
+  protected void checkCertificateType(@Nonnull final SigningCertificateRequirements certificateRequirements)
+      throws InvalidRequestException {
+    if (certificateRequirements.getCertificateType() != null) {
+      if (!this.getCaSupportedCertificateTypes().contains(certificateRequirements.getCertificateType())) {
+        throw new InvalidRequestException("Handler does not support certificate type " +
+            certificateRequirements.getCertificateType());
+      }
+    }
   }
 
   /**
@@ -240,9 +251,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
   }
 
   /**
-   * Issues the signing certificate for the signing credentials. Note that the context parameter holds information about
-   * algorithm, cert type and profile where default values as been taken into account. The signRequest only holds the
-   * values from the actual request.
+   * Issues the signing certificate for the signing credentials.
    *
    * @param signingKeyPair signing key pair
    * @param signRequest sign request
@@ -294,18 +303,18 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
    * @return the certificate type
    */
   @Nonnull
-  protected CertificateType getCaCertificateType() {
-    return this.caCertificateType;
+  protected List<CertificateType> getCaSupportedCertificateTypes() {
+    return this.caSupportedCertificateTypes;
   }
 
   /**
    * Assigns the type of certificates that the underlying CA issues.
    *
-   * @param certificateType the certificate type
+   * @param supportedCertificateTypes the certificate type
    */
-  public void setCaCertificateType(@Nonnull final CertificateType certificateType) {
-    if (certificateType != null) {
-      this.caCertificateType = certificateType;
+  public void setCaSupportedCertificateTypes(@Nonnull final List<CertificateType> caSupportedCertificateTypes) {
+    if (caSupportedCertificateTypes != null) {
+      this.caSupportedCertificateTypes = caSupportedCertificateTypes;
     }
   }
 

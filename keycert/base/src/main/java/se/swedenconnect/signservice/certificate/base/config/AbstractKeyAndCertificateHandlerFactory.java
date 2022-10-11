@@ -118,8 +118,8 @@ public abstract class AbstractKeyAndCertificateHandlerFactory extends AbstractHa
         attributeMapper, algorithmRegistry, profileConfiguration);
 
     // Certificate type
-    if (conf.getCaCertificateType() != null) {
-      handler.setCaCertificateType(conf.getCaCertificateType());
+    if (conf.getCaSupportedCertificateTypes() != null) {
+      handler.setCaSupportedCertificateTypes(conf.getCaSupportedCertificateTypes());
     }
 
     // Handler name

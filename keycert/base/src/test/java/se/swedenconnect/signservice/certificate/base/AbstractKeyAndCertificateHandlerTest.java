@@ -88,6 +88,7 @@ import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 public class AbstractKeyAndCertificateHandlerTest {
 
   final KeyAndCertificateHandler handler;
+  final KeyAndCertificateHandler allTypesHandler;
 
   final SignServiceContext mockedContext;
 
@@ -101,6 +102,10 @@ public class AbstractKeyAndCertificateHandlerTest {
   public AbstractKeyAndCertificateHandlerTest() throws KeyStoreException {
     this.handler = new TestKeyAndCertificateHandler(
         new SoftPkiCredentialContainer("BC", "Test1234"));
+    this.allTypesHandler = new TestKeyAndCertificateHandler(
+        new SoftPkiCredentialContainer("BC", "Test1234"));
+    ((TestKeyAndCertificateHandler) this.allTypesHandler).setCaSupportedCertificateTypes(List.of(
+        CertificateType.PKC, CertificateType.QC, CertificateType.QC_SSCD));
 
     this.mockedContext = Mockito.mock(SignServiceContext.class);
   }
@@ -146,7 +151,7 @@ public class AbstractKeyAndCertificateHandlerTest {
 
     final TestKeyAndCertificateHandler handler =
         new TestKeyAndCertificateHandler(new SoftPkiCredentialContainer("BC", "Test1234"));
-    handler.setCaCertificateType(CertificateType.QC);
+    handler.setCaSupportedCertificateTypes(List.of(CertificateType.QC));
 
     assertThatThrownBy(() -> {
       handler.checkRequirements(
@@ -231,15 +236,21 @@ public class AbstractKeyAndCertificateHandlerTest {
   public void testKeyAndCertGenRsa() throws Exception {
     final IdentityAssertion assertion = this.getTestAssertion();
 
-    final PkiCredential credential = this.handler.generateSigningCredential(
-        this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256, null, null), assertion,
+    final PkiCredential credential = this.allTypesHandler.generateSigningCredential(
+        this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256, CertificateType.QC, null), assertion,
         new DefaultSignServiceContext("ctx"));
     assertDoesNotThrow(() -> credential.getCertificate().verify(credential.getPublicKey()));
 
-    final PkiCredential credential2 = this.handler.generateSigningCredential(
-        this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA384, null, null), assertion,
+    final PkiCredential credential2 = this.allTypesHandler.generateSigningCredential(
+        this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA384, CertificateType.QC_SSCD, null), assertion,
         new DefaultSignServiceContext("ctx"));
     assertDoesNotThrow(() -> credential2.getCertificate().verify(credential2.getPublicKey()));
+
+    final PkiCredential credential3 = this.handler.generateSigningCredential(
+      this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256, null, null), assertion,
+      new DefaultSignServiceContext("ctx"));
+    assertDoesNotThrow(() -> credential3.getCertificate().verify(credential3.getPublicKey()));
+
   }
 
   @Test
@@ -310,7 +321,7 @@ public class AbstractKeyAndCertificateHandlerTest {
           this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, CertificateType.PKC, null), assertion,
           new DefaultSignServiceContext("ctx"));
     }).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Assertion issuer must not be present");
+        .hasMessage("Assertion issuer must be present");
 
     when(assertion.getIssuer()).thenReturn("https://www.idp.com");
     when(assertion.getAuthnInstant()).thenReturn(null);
