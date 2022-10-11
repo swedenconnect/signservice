@@ -102,6 +102,15 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
     if (assertion.getAuthnInstant() == null) {
       throw new IllegalArgumentException("Missing authentication instant from assertion");
     }
+    // This has already been checked, but since we also want to protect from programming mistakes
+    // that could lead to a certificate being issued falsely we duplicate it ...
+    //
+    try {
+      this.checkCertificateType(signRequest.getSigningCertificateRequirements());
+    }
+    catch (final InvalidRequestException e) {
+      throw new IllegalArgumentException(e);
+    }
 
     try {
       // Get certificate subject name model.
@@ -111,18 +120,15 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
       final AbstractCertificateModelBuilder<? extends AbstractCertificateModelBuilder<?>> certificateModelBuilder =
           this.createCertificateModelBuilder(signingKeyPair.getPublicKey(), certificateNameModel);
 
-      // Add QC declarations
-      SigningCertificateRequirements certificateRequirements = signRequest.getSigningCertificateRequirements();
-      checkCertificateType(certificateRequirements);
-      CertificateType certificateType = certificateRequirements.getCertificateType();
-      switch (certificateType){
-      case QC:
-      case QC_SSCD:
+      // Add QC declarations.
+      final SigningCertificateRequirements certificateRequirements = signRequest.getSigningCertificateRequirements();
+      final CertificateType certificateType = certificateRequirements.getCertificateType();
+      if (CertificateType.QC == certificateType || CertificateType.QC_SSCD == certificateType) {
         certificateModelBuilder.qcStatements(QcStatementsBuilder.instance()
             .qualifiedCertificate(true)
             .qcTypes(List.of(QCStatements.QC_TYPE_ELECTRONIC_SIGNATURE))
-            .qscd(certificateType.equals(CertificateType.QC_SSCD))
-          .build());
+            .qscd(certificateType == CertificateType.QC_SSCD)
+            .build());
       }
 
       // Add the AuthContextExtension.
@@ -152,9 +158,6 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
     }
     catch (final CertificateIssuanceException e) {
       throw new CertificateException("Failed to issue certificate - " + e.getMessage(), e);
-    }
-    catch (InvalidRequestException e) {
-      throw new CertificateException("Unsupported certificate type");
     }
   }
 

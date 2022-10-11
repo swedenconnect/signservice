@@ -77,8 +77,7 @@ signservice:
           password: secret
           alias: test-ca
           key-password: secret
-        ca-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256
-        ca-certificate-type: PKC
+        ca-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256                
         key-provider-ref: signservice.DefaultKeyProvider
         cert-validity: P365D
         crl-validity: P2D

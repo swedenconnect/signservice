@@ -104,9 +104,8 @@ public class AbstractKeyAndCertificateHandlerTest {
         new SoftPkiCredentialContainer("BC", "Test1234"));
     this.allTypesHandler = new TestKeyAndCertificateHandler(
         new SoftPkiCredentialContainer("BC", "Test1234"));
-    ((TestKeyAndCertificateHandler)this.allTypesHandler).setSupportedCertificateTypes(List.of(
-      CertificateType.PKC, CertificateType.QC, CertificateType.QC_SSCD
-    ));
+    ((TestKeyAndCertificateHandler) this.allTypesHandler).setCaSupportedCertificateTypes(List.of(
+        CertificateType.PKC, CertificateType.QC, CertificateType.QC_SSCD));
 
     this.mockedContext = Mockito.mock(SignServiceContext.class);
   }
@@ -152,7 +151,7 @@ public class AbstractKeyAndCertificateHandlerTest {
 
     final TestKeyAndCertificateHandler handler =
         new TestKeyAndCertificateHandler(new SoftPkiCredentialContainer("BC", "Test1234"));
-    handler.setSupportedCertificateTypes(List.of(CertificateType.QC));
+    handler.setCaSupportedCertificateTypes(List.of(CertificateType.QC));
 
     assertThatThrownBy(() -> {
       handler.checkRequirements(
