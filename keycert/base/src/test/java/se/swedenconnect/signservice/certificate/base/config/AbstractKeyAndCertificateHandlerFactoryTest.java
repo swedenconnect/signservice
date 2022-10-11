@@ -125,7 +125,7 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
   @Test
   public void testNoCertificateType() {
     final TestConfig config = this.getFullConfig();
-    config.setCaCertificateType(null);
+    config.setCaSupportedCertificateTypes(null);
     final TestFactory factory = new TestFactory();
 
     final KeyAndCertificateHandler handler = factory.create(config);
@@ -325,7 +325,7 @@ public class AbstractKeyAndCertificateHandlerFactoryTest {
     config.setProfileConfiguration(new CertificateProfileConfiguration());
     config.setDefaultValuePolicyChecker(checkerConfig);
     config.setServiceName("SERVICE_NAME");
-    config.setCaCertificateType(CertificateType.PKC);
+    config.setCaSupportedCertificateTypes(List.of(CertificateType.PKC));
 
     return config;
   }
