@@ -245,6 +245,12 @@ public class AbstractKeyAndCertificateHandlerTest {
         this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA384, CertificateType.QC_SSCD, null), assertion,
         new DefaultSignServiceContext("ctx"));
     assertDoesNotThrow(() -> credential2.getCertificate().verify(credential2.getPublicKey()));
+
+    final PkiCredential credential3 = this.handler.generateSigningCredential(
+      this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256, null, null), assertion,
+      new DefaultSignServiceContext("ctx"));
+    assertDoesNotThrow(() -> credential3.getCertificate().verify(credential3.getPublicKey()));
+
   }
 
   @Test

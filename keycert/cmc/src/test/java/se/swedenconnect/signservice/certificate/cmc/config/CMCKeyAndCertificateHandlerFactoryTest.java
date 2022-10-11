@@ -92,7 +92,7 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
     config.setProfileConfiguration(null);
     config.setDefaultValuePolicyChecker(null);
     config.setServiceName(null);
-    config.setSupportedCertificateTypes(null);
+    config.setCaSupportedCertificateTypes(null);
     config.setCmcSigningAlgorithm(null);
 
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
