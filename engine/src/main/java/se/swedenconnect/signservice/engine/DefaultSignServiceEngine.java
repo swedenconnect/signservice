@@ -261,6 +261,10 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       //
       final SignRequestMessage signRequestMessage = this.decodeMessage(httpRequest, context);
 
+      // Let's save the request message in the context for future use ...
+      //
+      context.putSignRequest(signRequestMessage);
+
       // Make sure that this is not a replay attack ...
       //
       try {
@@ -291,10 +295,6 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
         throw new SignServiceErrorException(
             new SignServiceError(SignServiceErrorCode.REQUEST_INCORRECT, "Can not process request", e.getMessage()), e);
       }
-
-      // OK, the SignRequest is accepted. Let's save it in the context for future use ...
-      //
-      context.putSignRequest(signRequestMessage);
 
       // Init authentication ...
       //
