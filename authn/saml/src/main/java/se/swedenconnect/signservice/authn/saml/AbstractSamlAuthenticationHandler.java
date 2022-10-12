@@ -43,7 +43,6 @@ import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import org.opensaml.saml.saml2.core.StatusCode;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
@@ -57,6 +56,7 @@ import se.idsec.signservice.xml.DOMUtils;
 import se.idsec.signservice.xml.InternalXMLException;
 import se.swedenconnect.opensaml.saml2.core.build.RequestedAuthnContextBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorContainer;
+import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorUtils;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 import se.swedenconnect.opensaml.saml2.request.AuthnRequestGenerator;
 import se.swedenconnect.opensaml.saml2.request.AuthnRequestGeneratorContext;
@@ -521,6 +521,22 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
       @Nonnull final SignServiceContext context, @Nonnull final EntityDescriptor idpMetadata)
       throws UserAuthenticationException {
 
+    // Processing regarding requested AuthnContext. If the IdP does not support what is requested,
+    // we report an error ...
+    //
+    if (authnRequirements.getAuthnContextIdentifiers() != null
+        && !authnRequirements.getAuthnContextIdentifiers().isEmpty()) {
+      final List<String> supportedUris = EntityDescriptorUtils.getAssuranceCertificationUris(idpMetadata);
+      final boolean match = authnRequirements.getAuthnContextIdentifiers().stream()
+        .map(AuthnContextIdentifier::getIdentifier)
+        .anyMatch(a -> supportedUris.contains(a));
+      if (!match) {
+        final String msg = "None of the requested authn context URIs are supported by the IdP";
+        log.info("{}: {}", context.getId(), msg);
+        throw new UserAuthenticationException(AuthenticationErrorCode.UNSUPPORTED_AUTHNCONTEXT, msg);
+      }
+    }
+
     return new AuthnRequestGeneratorContext() {
 
       @Override
@@ -753,9 +769,10 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
 
     // Get the authentication context:s that we sent in the request
     //
-    final List<String> requestedContexts = Optional.ofNullable(authnRequest.getRequestedAuthnContext())
-        .map(RequestedAuthnContext::getAuthnContextClassRefs)
-        .get()
+    if (authnRequest.getRequestedAuthnContext() == null) {
+      return;
+    }
+    final List<String> requestedContexts = authnRequest.getRequestedAuthnContext().getAuthnContextClassRefs()
         .stream()
         .map(AuthnContextClassRef::getURI)
         .collect(Collectors.toList());
