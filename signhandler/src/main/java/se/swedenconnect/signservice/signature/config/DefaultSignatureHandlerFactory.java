@@ -78,13 +78,13 @@ public class DefaultSignatureHandlerFactory extends AbstractHandlerFactory<Signa
           }
 
           AbstractTBSDataProcessor processor = null;
-          if ("xml".equalsIgnoreCase(c.getType())) {
+          if (TBSDataProcessorConfiguration.XML_TYPE.equalsIgnoreCase(c.getType())) {
             processor = new XMLTBSDataProcessor(c.getSupportedProcessingRules());
             if (StringUtils.isNotBlank(c.getDefaultCanonicalizationAlgorithm())) {
               ((XMLTBSDataProcessor) processor).setDefaultCanonicalizationAlgorithm(c.getDefaultCanonicalizationAlgorithm());
             }
           }
-          else if ("pdf".equalsIgnoreCase(c.getType())) {
+          else if (TBSDataProcessorConfiguration.PDF_TYPE.equalsIgnoreCase(c.getType())) {
             processor = new PDFTBSDataProcessor(c.getSupportedProcessingRules());
           }
           else {
