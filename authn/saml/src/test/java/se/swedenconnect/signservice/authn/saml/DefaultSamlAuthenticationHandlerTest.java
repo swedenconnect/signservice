@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -37,12 +38,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.opensaml.core.xml.util.XMLObjectSupport;
+import org.opensaml.saml.ext.saml2mdattr.EntityAttributes;
 import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Status;
 import org.opensaml.saml.saml2.core.StatusCode;
 import org.opensaml.saml.saml2.core.StatusMessage;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.Extensions;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.w3c.dom.Element;
 
@@ -126,6 +130,18 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
 
     Mockito.when(this.idpMetadata.getEntityID()).thenReturn(IDP);
 
+    final Extensions extensions = (Extensions) XMLObjectSupport.buildXMLObject(Extensions.DEFAULT_ELEMENT_NAME);
+    final Attribute attribute =
+        AttributeBuilder
+            .builder(
+                se.swedenconnect.opensaml.saml2.attribute.AttributeConstants.ASSURANCE_CERTIFICATION_ATTRIBUTE_NAME)
+            .value(LevelOfAssuranceUris.AUTHN_CONTEXT_URI_LOA3)
+            .build();
+    final EntityAttributes ea = (EntityAttributes) XMLObjectSupport.buildXMLObject(EntityAttributes.DEFAULT_ELEMENT_NAME);
+    ea.getAttributes().add(attribute);
+    extensions.getUnknownXMLObjects().add(ea);
+    Mockito.when(this.idpMetadata.getExtensions()).thenReturn(extensions);
+
     Mockito.when(this.spUrlConfiguration.getBaseUrl()).thenReturn("https://www.example.com/sp");
     Mockito.when(this.spUrlConfiguration.getAssertionConsumerPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(this.spUrlConfiguration.getAdditionalAssertionConsumerPath()).thenReturn(null);
@@ -158,13 +174,13 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
       }
     });
     Mockito.when(this.authnRequestGenerator.generateAuthnRequest(eq(IDP), anyString(), any()))
-      .thenAnswer((a) -> {
-        final AuthnRequestGeneratorContext ctx = a.getArgument(2, AuthnRequestGeneratorContext.class);
-        ctx.getAuthnRequestCustomizer();
-        ctx.getAssertionConsumerServiceResolver();
-        ctx.getRequestedAuthnContextBuilderFunction();
-        return requestObject;
-      });
+        .thenAnswer((a) -> {
+          final AuthnRequestGeneratorContext ctx = a.getArgument(2, AuthnRequestGeneratorContext.class);
+          ctx.getAuthnRequestCustomizer();
+          ctx.getAssertionConsumerServiceResolver();
+          ctx.getRequestedAuthnContextBuilderFunction();
+          return requestObject;
+        });
 
     final AuthenticationResultChoice result = handler.authenticate(authnReqs, null, context);
 
@@ -178,6 +194,41 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.RELAY_STATE_KEY), eq("ID"));
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHN_REQS_KEY), eq(authnReqs));
     Mockito.verify(this.context, Mockito.never()).put(eq(AbstractSamlAuthenticationHandler.SIGNMESSAGE_KEY), any());
+  }
+
+  @Test
+  public void testAuthenticateNotSupportedAuthnCtx() throws Exception {
+    final AuthnRequirements authnReqs = this.getAuthnRequirements();
+    ((DefaultAuthnRequirements) authnReqs).setAuthnContextIdentifiers(List.of(
+        new SimpleAuthnContextIdentifier(LevelOfAssuranceUris.AUTHN_CONTEXT_URI_LOA2)));
+
+    @SuppressWarnings("unchecked")
+    final RequestHttpObject<AuthnRequest> requestObject = Mockito.mock(RequestHttpObject.class);
+    Mockito.when(requestObject.getRequest()).thenReturn(this.getAuthnRequest());
+    Mockito.when(requestObject.getMethod()).thenReturn("POST");
+    Mockito.when(requestObject.getSendUrl()).thenReturn(IDP_DESTINATION);
+    Mockito.when(requestObject.getRequestParameters()).thenReturn(new HashMap<>() {
+      private static final long serialVersionUID = 1L;
+
+      {
+        put("SAMLRequest", "ENCODED_REQUEST");
+        put("RelayState", CONTEXT_ID);
+      }
+    });
+    Mockito.when(this.authnRequestGenerator.generateAuthnRequest(eq(IDP), anyString(), any()))
+        .thenAnswer((a) -> {
+          final AuthnRequestGeneratorContext ctx = a.getArgument(2, AuthnRequestGeneratorContext.class);
+          ctx.getAuthnRequestCustomizer();
+          ctx.getAssertionConsumerServiceResolver();
+          ctx.getRequestedAuthnContextBuilderFunction();
+          return requestObject;
+        });
+
+    assertThatThrownBy(() -> {
+      handler.authenticate(authnReqs, null, context);
+    }).isInstanceOf(UserAuthenticationException.class)
+      .hasMessage("None of the requested authn context URIs are supported by the IdP");
+
   }
 
   @Test
