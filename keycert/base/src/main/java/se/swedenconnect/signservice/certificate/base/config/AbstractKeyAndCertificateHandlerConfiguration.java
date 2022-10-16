@@ -111,7 +111,7 @@ public abstract class AbstractKeyAndCertificateHandlerConfiguration
   private CertificateProfileConfiguration profileConfiguration;
 
   /**
-   * Service name placed in AuthnContextExtensions.
+   * Service name placed in AuthnContextExtensions. If not set, the client ID will be used by default.
    */
   @Getter
   @Setter

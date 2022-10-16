@@ -123,7 +123,7 @@ class CMCKeyAndCertificateHandlerTest {
     RemoteCaInformation caInformation = RemoteCaInformation.builder()
         .caAlgorithm(caService.getCaAlgorithm())
         .caCertificateChain(caService.getCACertificateChain().stream().map(mapCert).collect(Collectors.toList()))
-        .ocspResponserUrl(caService.getOCSPResponderURL())
+        .ocspResponderUrl(caService.getOCSPResponderURL())
         .crlDpUrls(caService.getCrlDpURLs())
         .build();
 
