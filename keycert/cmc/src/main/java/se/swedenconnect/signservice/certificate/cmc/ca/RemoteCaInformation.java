@@ -53,7 +53,7 @@ public class RemoteCaInformation {
   /**
    * The URL to the OCSP responder of this CA (if present).
    */
-  private String ocspResponserUrl;
+  private String ocspResponderUrl;
 
   public StaticCAInformation toStaticCAInformation() {
     final StaticCAInformation info = new StaticCAInformation();
@@ -70,7 +70,7 @@ public class RemoteCaInformation {
     }
     info.setCaAlgorithm(this.caAlgorithm);
     info.setCrlDpURLs(this.crlDpUrls);
-    info.setOcspResponserUrl(this.ocspResponserUrl);
+    info.setOcspResponserUrl(this.ocspResponderUrl);
     return info;
   }
 
