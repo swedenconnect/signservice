@@ -41,9 +41,9 @@ responsibility for the signing process, is managed by the Service Provider as a 
 ## Signing flow
 
 A significant advantage with this model where the signer has no persistent relationship with the
-signature service, is that the signature service can be made invisible to the signer and integrated into the
-service provider. This creates a natural service context where the service provider is responsible for the complete 
-user experience of the signing process and the identity provider is responsible for the authentication and commitment
+Signature Service, is that the Signature Service can be made invisible to the signer and integrated into the
+service provider. This creates a natural service context where the Service Provider is responsible for the complete 
+user experience of the signing process and the Identity Provider is responsible for the authentication and commitment
 process. This provides a natural and logical signature process as illustrated by the following example:
 
 **Signing tax declaration user experience:**
@@ -52,11 +52,11 @@ process. This provides a natural and logical signature process as illustrated by
 2) The user is prompted to use his/her eID where the user examines a "sign message" related to this tax declaration and accepts to sign.
 3) The user is returned to the tax declaration service and gets a receipt and confirmation that the tax declaration is signed and submitted.
 
-From the signer's perspective the signature service simply a part of the service provider.
+From the signer's perspective the Signature Service is simply a part of the Service Provider.
 
 What actually happens is somewhat more complex, as illustrated by the image above:
 
-1) When the user agrees to sign, the Service Provider creates transfers the user to the Signature service with a Sign Request that holds the information necessary for the Signing Service to complete the signing process.
+1) When the user agrees to sign, the Service Provider creates transfers the user to the Signature Service with a Sign Request that holds the information necessary for the Signing Service to complete the signing process.
 2) The Signature Service examines the request and transfers the user to the appropriate Identity Provider for authentication and acceptance to sign.
 3) The Identity Provider presents signature acceptance data authenticates the signer.
 4) The Identity Provider transfers the user back to the Signature Service with proof of identity and acceptance to sign.
@@ -84,10 +84,10 @@ or the Sign Response messages as the document itself is not necessary for the ac
 a number of important advantages, such as allowing signing of sensitive information while remaining a high level of
 integrity and confidentiality. But this also requires the actual signed document to be stored when creating the sign request
 and retrieved from storage when parsing the Sign Response to complete the signing process. Different integration
-solutions exists that provides different solutions to providing integration service both as an API for direct integration
+solutions exists that provides integration service both as an API for direct integration
 and as a REST API provided by a separate service.
 
-One such integration service that can handle this integration service both as a Java API and through a REST API
+One such integration service that can provide integration both as Java API and through REST API
 is available as open source is available [here](https://github.com/idsec-solutions/signservice-integration).
 
 ## Leves of security and variations of authentication methods
@@ -106,9 +106,9 @@ Such aspects are:
  - The level of protection of the signer's signing key
  - The algorithms and key sizes used to generate signatures
 
-The overview above is written in a way that describes features that assumes a high security setup, such as
-display of sign message and where the identity provider enforce that the signer commits to signing. It is
-important to note that such process is supported by not required. It is perfectly possible to use a setup
+The overview above is written to illustrate features which are relevant only in a high level security setup, such as
+functions to display a sign message and strict enforcement of the signer's commitment to sign. It is
+important to note that many of these processes are supported by not required. For example, it is perfectly possible to use a setup
 where the Identity Provider role is reduced to just authenticate the signer without showing any sign message.
 
 The Signature Service implemented here is intentionally modular in a way that allows multiple handlers for
