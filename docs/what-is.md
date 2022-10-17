@@ -69,15 +69,21 @@ specifications published by Sweden Connect eID framework specifications:
 3) [Certificate Profile for Certificates Issued by Central Signing Services](https://docs.swedenconnect.se/technical-framework/latest/08_-_Certificate_Profile_for_Central_Signing_Services.html)
 4) [Signature Activation Protocol for Federated Signing](https://docs.swedenconnect.se/technical-framework/latest/13_-_Signature_Activation_Protocol.html)
 
+To avoid the complexity of implementing these specifications, Service Providers normally use a separate integration service
+as a backend service to create Sign Request and to parse Sign Response documents in order to complete the signing process.
 
-![Signature Service Integration](images/signservice-integration.svg)
+![Signature Service Integration](images/signservice-integration.png)
 
+One important feature of this setup is that the actual document to be signed is not part of the Sign Request
+or the Sign Response messages as the document itself is not necessary for the actual signature process. This has
+a number of important advantages, such as allowing signing of sensitive information while remaining a high level of
+integrity and confidentiality. But this also requires the actual signed document to be stored when creating the sign request
+and retrieved from storage when parsing the Sign Response to complete the signing process. Different integration
+solutions exists that provides different solutions to providing integration service both as an API for direct integration
+and as a REST API provided by a separate service.
 
-A key feature of the signature flow is that the actual document that is signed is never passed to the Signature Service.
-The 
-
-
-
+One such integration service that can handle this integration service both as a Java API and through a REST API
+is available as open source is available [here](https://github.com/idsec-solutions/signservice-integration).
 
 -----
 
