@@ -10,28 +10,33 @@ A signature service is the central service component in a remote signing setup (
 in this figure. This setup is characterized by a signature process that involves a number of independent services and actors with
 distinct roles:
 
-| Role                    | Description                                                                                                                          |
-|:------------------------|:-------------------------------------------------------------------------------------------------------------------------------------|
-| Signer                  | A natural person that is signing a document.                                                                                         |
-| Service Provider        | The service visited by the signer where the signer reviews agrees to sign.                                                           |
-| Signature Service       | Central service component that manages the signature process and creates the signature.                                              |
-| Identity Provider       | The signer's eID service where the signer uses his/her eID to authenticate and commit to sign.                                       |
-| Certification Authority | Creates the signer certificate that is attached to the signature based on the authentication of the signer in the signature process. |
+| Role                    | Description                                                                                                                            |
+|:------------------------|:---------------------------------------------------------------------------------------------------------------------------------------|
+| Signer                  | A natural person that is signing a document.                                                                                           |
+| Service Provider        | The service visited by the signer where the signer reviews data to be signed and agrees to sign.                                       |
+| Signature Service       | Central service component that manages the signature process and creates the signature.                                                |
+| Identity Provider       | The signer's eID service where the signer uses his/her eID to authenticate and agrees to sign.                                         |
+| Certification Authority | Creates the signer's certificate that is attached to the signature based on the authentication of the signer in the signature process. |
 
 
 ## Specific characteristics of the Federated Signing model
 
 Traditional remote signature services store a static persistent signing key for each natural person signer. Each such key is
 associated with a static and persistent certificate attached to all signatures created by a particular signer. This 
-setup requires that the user has a persistent relationship with that signing service and means to ensure
+setup requires that the signing service has a persistent relationship with each signer and has means to ensure
 that each signing key is never ever used by more than one signer.
 
-The federated signing model avoids this significant management overhead by always generating a new key and a new
+The federated signing model (implemented by Sweden Connect Signing Service) avoids this significant management overhead by always generating a new key and a new
 signing certificate for each instance of signing and by immediately and permanently destroying all knowledge
-about the signing key after completed signing. In this setup there is no need to have any user-accounts for storing
+about the signing key after completed signing. In this setup there is no need to have persistent user-accounts for storing
 private signing keys and to prevent multiple signer's from using the same key. This is replaced by a process
 where the signer is authenticated at each instance of signing, typically using an open federated authentication infrastructure 
 (hence the popular name "Federated Signing").
+
+This type of Signing Service is therefore optimised for a setup where the agreement with the signer to use the Signing Service for signing, and where the
+responsibility for the signing process, is managed by the Service Provider as a condition for using the service.
+
+
 
 ## Signing flow
 
@@ -84,6 +89,35 @@ and as a REST API provided by a separate service.
 
 One such integration service that can handle this integration service both as a Java API and through a REST API
 is available as open source is available [here](https://github.com/idsec-solutions/signservice-integration).
+
+## Leves of security and variations of authentication methods
+
+The present Signature Service is adapted to serve a wide range of security levels from Qualified Electronic
+Signatures according to the EU eIDAS regulation, to lower levels of security based on simpler forms of authentication.
+
+Several components of the specifications and features of the implementation are configurable to meet the requirements
+and the context within which the Signature Service is used.
+
+Such aspects are:
+
+ - Whether the Identity Provider must show a sign message or not and get explicit approval for signing
+ - What level of assurance (LoA) the Identity Provider must use when authenticating the signer
+ - What certificate policy that is used to issue the signature certificate.
+ - The level of protection of the signer's signing key
+ - The algorithms and key sizes used to generate signatures
+
+The overview above is written in a way that describes features that assumes a high security setup, such as
+display of sign message and where the identity provider enforce that the signer commits to signing. It is
+important to note that such process is supported by not required. It is perfectly possible to use a setup
+where the Identity Provider role is reduced to just authenticate the signer without showing any sign message.
+
+The Signature Service implemented here is intentionally modular in a way that allows multiple handlers for
+various forms of integrations with authentication frameworks or external Certification Authority services.
+
+This is further explained in the [architecture section](https://github.com/swedenconnect/signservice/blob/main/docs/architechture.md).
+
+
+
 
 -----
 
