@@ -2,7 +2,7 @@
 
 # What is a Signature Service?
 
-![SignServiceOverview](images/signservice-overview.svg)
+![SignServiceOverview](images/signservice-overview.png)
 
 ## Overview
 
