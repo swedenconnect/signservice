@@ -10,13 +10,13 @@ A signature service is the central service component in a remote signing setup (
 in this figure. This setup is characterized by a signature process that involves a number of independent services and actors with
 distinct roles:
 
-| Role                    | Description                                                                                                                            |
-|:------------------------|:---------------------------------------------------------------------------------------------------------------------------------------|
-| Signer                  | A natural person that is signing a document.                                                                                           |
-| Service Provider        | The service visited by the signer where the signer reviews data to be signed and agrees to sign.                                       |
-| Signature Service       | Central service component that manages the signature process and creates the signature.                                                |
-| Identity Provider       | The signer's eID service where the signer uses his/her eID to authenticate and agrees to sign.                                         |
-| Certification Authority | Creates the signer's certificate that is attached to the signature based on the authentication of the signer in the signature process. |
+| Role                    | Description                                                                                                                                           |
+|:------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Signer                  | A person that is signing a document.                                                                                                                  |
+| Service Provider        | The service visited by the signer where the signer reviews data to be signed and agrees to sign. This is also referred to as a "Signature Requester". |
+| Signature Service       | Central component that manages the signature process and creates the signature.                                                                       |
+| Identity Provider       | The eID service where the signer uses his/her eID to authenticate and agrees to sign.                                                                 |
+| Certification Authority | Creates the signer's certificate that is attached to the signature based on the authentication of the signer in the signature process.                |
 
 
 ## Specific characteristics of the Federated Signing model
@@ -26,10 +26,10 @@ associated with a static and persistent certificate attached to all signatures c
 setup requires that the signing service has a persistent relationship with each signer and has means to ensure
 that each signing key is never ever used by more than one signer.
 
-The federated signing model (implemented by Sweden Connect Signing Service) avoids this significant management overhead by always generating a new key and a new
+The federated signing model (implemented by Sweden Connect Signing Service) avoids this management overhead by always generating a new key and a new
 signing certificate for each instance of signing and by immediately and permanently destroying all knowledge
 about the signing key after completed signing. In this setup there is no need to have persistent user-accounts for storing
-private signing keys and to prevent multiple signer's from using the same key. This is replaced by a process
+private signing keys and to prevent multiple signers from using the same key. This is replaced by a process
 where the signer is authenticated at each instance of signing, typically using an open federated authentication infrastructure 
 (hence the popular name "Federated Signing").
 
