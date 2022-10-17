@@ -46,6 +46,7 @@ import org.w3c.dom.Element;
 import se.idsec.signservice.xml.DOMUtils;
 import se.swedenconnect.opensaml.saml2.attribute.AttributeBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorContainer;
+import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorUtils;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 import se.swedenconnect.opensaml.saml2.request.AuthnRequestGenerator;
 import se.swedenconnect.opensaml.saml2.request.AuthnRequestGeneratorContext;
@@ -190,15 +191,26 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
   }
 
   private void mockEntityCategories(final List<String> entityCategories) {
+
+    Extensions exts = this.idpMetadata.getExtensions();
+    EntityAttributes ea = null;
+    if (exts != null) {
+      ea = EntityDescriptorUtils.getMetadataExtension(exts, EntityAttributes.class);
+    }
+    else {
+      exts = (Extensions) XMLObjectSupport.buildXMLObject(Extensions.DEFAULT_ELEMENT_NAME);
+    }
+    if (ea == null) {
+      ea = (EntityAttributes) XMLObjectSupport.buildXMLObject(EntityAttributes.DEFAULT_ELEMENT_NAME);
+      exts.getUnknownXMLObjects().add(ea);
+    }
+
     final Attribute entityCategoriesAttribute = AttributeBuilder.builder(
         se.swedenconnect.opensaml.saml2.attribute.AttributeConstants.ENTITY_CATEGORY_ATTRIBUTE_NAME)
         .value(entityCategories)
         .build();
-    final EntityAttributes entityAttributes =
-        (EntityAttributes) XMLObjectSupport.buildXMLObject(EntityAttributes.DEFAULT_ELEMENT_NAME);
-    entityAttributes.getAttributes().add(entityCategoriesAttribute);
-    final Extensions exts = (Extensions) XMLObjectSupport.buildXMLObject(Extensions.DEFAULT_ELEMENT_NAME);
-    exts.getUnknownXMLObjects().add(entityAttributes);
+    ea.getAttributes().add(entityCategoriesAttribute);
+
     Mockito.when(this.idpMetadata.getExtensions()).thenReturn(exts);
   }
 
