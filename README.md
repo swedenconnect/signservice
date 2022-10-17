@@ -12,7 +12,7 @@ Framework specifications - https://docs.swedenconnect.se/technical-framework.
 
 ## Documentation
 
-Go to [https://docs.swedenconnect.se/signservice](docs/index.md) for documentation of how to understand and use this repository.
+Go to https://docs.swedenconnect.se/signservice for documentation of how to understand and use this repository.
 
 ## Modules
 
