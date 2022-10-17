@@ -112,10 +112,10 @@ public class DefaultClientConfiguration implements ClientConfiguration {
   /**
    * Should be invoked after all properties have been assigned.
    *
-   * @throws Exception if the object has not been initialized correctly
+   * @throws IllegalArgumentException if the object has not been initialized correctly
    */
   @PostConstruct
-  public void init() throws Exception {
+  public void init() throws IllegalArgumentException {
     if (this.clientId == null) {
       throw new IllegalArgumentException("clientId must be set");
     }

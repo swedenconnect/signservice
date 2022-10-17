@@ -49,6 +49,7 @@ import se.swedenconnect.signservice.authn.saml.config.MetadataConfiguration.UIIn
 import se.swedenconnect.signservice.core.config.AbstractHandlerConfiguration;
 import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
+import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
 import se.swedenconnect.signservice.storage.MessageReplayException;
 
@@ -398,12 +399,12 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     final KeyStoreCredential signCred = new KeyStoreCredential(this.keyStore, "sign", "secret".toCharArray());
     signCred.setName("SIGNING");
     signCred.afterPropertiesSet();
-    config.setSignatureCredential(signCred);
+    config.setSignatureCredential(new PkiCredentialConfiguration(signCred));
 
     final KeyStoreCredential decryptCred = new KeyStoreCredential(this.keyStore, "encrypt", "secret".toCharArray());
     decryptCred.setName("DECRYPTION");
     decryptCred.afterPropertiesSet();
-    config.setDecryptionCredential(decryptCred);
+    config.setDecryptionCredential(new PkiCredentialConfiguration(decryptCred));
 
     final SpUrlConfiguration paths = new SpUrlConfiguration();
     paths.setBaseUrl(BASE_URL);

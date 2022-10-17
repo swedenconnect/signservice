@@ -23,10 +23,10 @@ import org.apache.xml.security.signature.XMLSignature;
 
 import lombok.Getter;
 import lombok.Setter;
-import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
+import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
 
 /**
  * Configuration class for {@link CMCKeyAndCertificateHandler}.
@@ -43,9 +43,9 @@ public class CMCKeyAndCertificateHandlerConfiguration extends AbstractKeyAndCert
   /**
    * The CMC client credential.
    */
-  @Getter
   @Setter
-  private PkiCredential cmcClientCredential;
+  @Getter
+  private PkiCredentialConfiguration cmcClientCredential;
 
   /**
    * The CMC signing algorithm. Defaults to {@value XMLSignature#ALGO_ID_SIGNATURE_RSA_SHA256} or
