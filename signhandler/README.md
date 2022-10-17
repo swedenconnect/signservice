@@ -23,9 +23,8 @@ instance.
 
 | Property            | Description                                                                                                                         |
 |:--------------------|:------------------------------------------------------------------------------------------------------------------------------------|
-| `name`              | The name of this signature handler (typically 'DefaultSignatureHandler').                                                           | 
 | `algorithmRegistry` | The algorithm registry. If not assigned, the registry given from a call to `AlgorithmRegistrySingleton#getInstance()` will be used. |
-| `signerProvider`    | The signer provider. If not assigned, DefaultSignServiceSignerProvider will be used.                                                |
+| `signerProvider`    | The signer provider. If not assigned, `DefaultSignServiceSignerProvider` will be used.                                                |
 | `tbsProcessors`     | A list of configured To-Be-Signed (TBS) data processors for different signature types.                                              |
 
 The [TBSDataProcessorConfiguration](https://github.com/swedenconnect/signservice/blob/main/signhandler/src/main/java/se/swedenconnect/signservice/signature/config/TBSDataProcessorConfiguration.java)

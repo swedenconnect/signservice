@@ -18,9 +18,8 @@ the CA issues these certificates as ordered as long as they comply with defined 
 
 ### Configuration
 
-The CMC based key and certificate handler incorporates the base configuration parameters described here:
-
-> [base configuration](https://github.com/swedenconnect/signservice/tree/main/keycert/base)
+The CMC based key and certificate handler incorporates the [base configuration](https://github.com/swedenconnect/signservice/tree/main/keycert/base)
+parameters from the `base` module
 
 The [CMCKeyAndCertificateHandlerConfiguration](https://github.com/swedenconnect/signservice/blob/main/keycert/cmc/src/main/java/se/swedenconnect/signservice/certificate/cmc/config/CMCKeyAndCertificateHandlerConfiguration.java)
 configuration data class describes additional configuration parameters for the CMC based key and certificate handler:

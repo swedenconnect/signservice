@@ -20,9 +20,8 @@ The local embedded CA has the following limitations:
 
 ### Configuration
 
-The simple key and certificate handler incorporates the base configuration parameters described here
-:
-> [base configuration](https://github.com/swedenconnect/signservice/tree/main/keycert/base)
+The simple key and certificate handler incorporates the [base configuration](https://github.com/swedenconnect/signservice/tree/main/keycert/base)
+parameters from the `base` module
 
 The [SimpleKeyAndCertificateHandlerConfiguration](https://github.com/swedenconnect/signservice/blob/main/keycert/simple/src/main/java/se/swedenconnect/signservice/certificate/simple/config/SimpleKeyAndCertificateHandlerConfiguration.java)
 describes additional configuration parameters for the simple key and certificate handler:
@@ -37,8 +36,6 @@ describes additional configuration parameters for the simple key and certificate
 | `crlDpPath`          | The path to where CRL:s are exposed relative to `baseUrl`.                                                                                                                           |
 | `crlDpUrl`           | A URL where the CRL is published. This option may be used if the CRL is published under a publicly available URL to allow validation of the signature certificate.                   |
 | `crlFileLocation`    | Even though revocation is not supported we need to support an empty CRL. This property tells where to store thisCRL locally.                                                         |
-
-> TODO
 
 -----
 
