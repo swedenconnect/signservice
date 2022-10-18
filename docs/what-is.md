@@ -48,31 +48,31 @@ process. This provides a natural and logical signature process as illustrated by
 
 **Signing tax declaration user experience:**
 
-1) The user visits the Tax authority website to complete a tax declaration. When all information is entered and reviewed, the user choose to sign and submit the declaration.
-2) The user is prompted to use his/her eID where the user examines a "sign message" related to this tax declaration and accepts to sign.
-3) The user is returned to the tax declaration service and gets a receipt and confirmation that the tax declaration is signed and submitted.
+ 1. The user visits the Tax authority website to complete a tax declaration. When all information is entered and reviewed, the user choose to sign and submit the declaration.
+ 2. The user is prompted to use his/her eID where the user examines a "sign message" related to this tax declaration and accepts to sign.
+ 3. The user is returned to the tax declaration service and gets a receipt and confirmation that the tax declaration is signed and submitted.
 
 From the signer's perspective the Signature Service is simply a part of the Service Provider.
 
 What actually happens is somewhat more complex, as illustrated by the image above:
 
-1) When the user agrees to sign, the Service Provider creates transfers the user to the Signature Service with a Sign Request that holds the information necessary for the Signing Service to complete the signing process.
-2) The Signature Service examines the request and transfers the user to the appropriate Identity Provider for authentication and acceptance to sign.
-3) The Identity Provider presents signature acceptance data authenticates the signer.
-4) The Identity Provider transfers the user back to the Signature Service with proof of identity and acceptance to sign.
-5) The Signature Service generates a signing key and collaborates with the Certification Authority to create a signing certificate
-6) The Signature Service completes the signature process and transfers the signer back to the Service Provider with signature data in a Sign Response.
-7) The Service Provider assembles the signed document based on the data received from the Signature Service.
+ 1. When the user agrees to sign, the Service Provider creates transfers the user to the Signature Service with a Sign Request that holds the information necessary for the Signing Service to complete the signing process.
+ 2. The Signature Service examines the request and transfers the user to the appropriate Identity Provider for authentication and acceptance to sign.
+ 3. The Identity Provider presents signature acceptance data authenticates the signer.
+ 4. The Identity Provider transfers the user back to the Signature Service with proof of identity and acceptance to sign.
+ 5. The Signature Service generates a signing key and collaborates with the Certification Authority to create a signing certificate
+ 6. The Signature Service completes the signature process and transfers the signer back to the Service Provider with signature data in a Sign Response.
+ 7. The Service Provider assembles the signed document based on the data received from the Signature Service.
 
 ## Signature Service Integration
 
 The protocol that specifies the Sign Request and Sign Response messages in this model is defined in a number of 
 specifications published by Sweden Connect eID framework specifications:
 
-1) [DSS Extension for Federated Central Signing Services](https://docs.swedenconnect.se/technical-framework/latest/09_-_DSS_Extension_for_Federated_Signing_Services.html)
-2) [Implementation Profile for using OASIS DSS in Central Signing Services](https://docs.swedenconnect.se/technical-framework/latest/07_-_Implementation_Profile_for_using_DSS_in_Central_Signing_Services.html)
-3) [Certificate Profile for Certificates Issued by Central Signing Services](https://docs.swedenconnect.se/technical-framework/latest/08_-_Certificate_Profile_for_Central_Signing_Services.html)
-4) [Signature Activation Protocol for Federated Signing](https://docs.swedenconnect.se/technical-framework/latest/13_-_Signature_Activation_Protocol.html)
+ 1. [DSS Extension for Federated Central Signing Services](https://docs.swedenconnect.se/technical-framework/latest/09_-_DSS_Extension_for_Federated_Signing_Services.html)
+ 2. [Implementation Profile for using OASIS DSS in Central Signing Services](https://docs.swedenconnect.se/technical-framework/latest/07_-_Implementation_Profile_for_using_DSS_in_Central_Signing_Services.html)
+ 3. [Certificate Profile for Certificates Issued by Central Signing Services](https://docs.swedenconnect.se/technical-framework/latest/08_-_Certificate_Profile_for_Central_Signing_Services.html)
+ 4. [Signature Activation Protocol for Federated Signing](https://docs.swedenconnect.se/technical-framework/latest/13_-_Signature_Activation_Protocol.html)
 
 To avoid the complexity of implementing these specifications, Service Providers normally use a separate integration service
 as a backend service to create Sign Request and to parse Sign Response documents in order to complete the signing process.
