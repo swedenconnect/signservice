@@ -237,8 +237,10 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
     ((DefaultAuthnRequirements) authnReqs).setSignatureActivationRequestData(
         new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 2, true));
 
+    final SignMessage sm = Mockito.mock(SignMessage.class);
+
     assertThatThrownBy(() -> {
-      handler.authenticate(authnReqs, null, this.context);
+      handler.authenticate(authnReqs, sm, this.context);
     }).isInstanceOf(UserAuthenticationException.class)
         .hasMessage("Authentication requirements states that a SAD request should be sent "
             + "but the IdP does not support the Signature Activation Data extension");

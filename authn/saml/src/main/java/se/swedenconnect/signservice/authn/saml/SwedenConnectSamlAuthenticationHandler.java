@@ -121,6 +121,7 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
     // Should we send a SAD request?
     //
     final SADRequest sadRequest = authnRequirements.getSignatureActivationRequestData() != null
+        && signMessage != null
         && this.isSignatureActivationProtocolSupported(idpMetadata)
             ? (SADRequest) XMLObjectSupport.buildXMLObject(SADRequest.DEFAULT_ELEMENT_NAME)
             : null;

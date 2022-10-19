@@ -226,6 +226,13 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
         EntityCategoryConstants.SERVICE_PROPERTY_CATEGORY_SCAL2.getUri(),
         EntityCategoryConstants.SERVICE_ENTITY_CATEGORY_LOA3_PNR.getUri()));
 
+    final SignMessage signMessage = Mockito.mock(SignMessage.class);
+    Mockito.when(signMessage.getMustShow()).thenReturn(true);
+    Mockito.when(signMessage.getEncoding()).thenReturn(this.getEncodedSignMessage());
+
+    Mockito.when(this.context.get(eq(AbstractSamlAuthenticationHandler.SIGNMESSAGE_KEY), any()))
+      .thenReturn(signMessage);
+
     @SuppressWarnings("unchecked")
     final RequestHttpObject<AuthnRequest> requestObject = Mockito.mock(RequestHttpObject.class);
     Mockito.when(requestObject.getRequest()).thenReturn(this.getAuthnRequest());
@@ -249,7 +256,7 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
           customizer.accept(ar);
           return requestObject;
         });
-    final AuthenticationResultChoice result = handler.authenticate(authnReqs, null, this.context);
+    final AuthenticationResultChoice result = handler.authenticate(authnReqs, signMessage, this.context);
 
     Assertions.assertNull(result.getAuthenticationResult());
     Assertions.assertEquals("POST", result.getHttpRequestMessage().getMethod());
@@ -262,6 +269,48 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
         ArgumentMatchers.notNull());
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.RELAY_STATE_KEY), eq("ID"));
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHN_REQS_KEY), eq(authnReqs));
+  }
+
+  @Test
+  public void testAuthenticateWithSadRequestMissingSignMessage() throws Exception {
+    final SwedenConnectSamlAuthenticationHandler handler =
+        (SwedenConnectSamlAuthenticationHandler) this.createHandler();
+    final AuthnRequirements authnReqs = this.getAuthnRequirements();
+    ((DefaultAuthnRequirements) authnReqs).setSignatureActivationRequestData(
+        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 1, true));
+
+    this.mockEntityCategories(List.of(
+        EntityCategoryConstants.SERVICE_PROPERTY_CATEGORY_SCAL2.getUri(),
+        EntityCategoryConstants.SERVICE_ENTITY_CATEGORY_LOA3_PNR.getUri()));
+
+    @SuppressWarnings("unchecked")
+    final RequestHttpObject<AuthnRequest> requestObject = Mockito.mock(RequestHttpObject.class);
+    Mockito.when(requestObject.getRequest()).thenReturn(this.getAuthnRequest());
+    Mockito.when(requestObject.getMethod()).thenReturn("POST");
+    Mockito.when(requestObject.getSendUrl()).thenReturn(IDP_DESTINATION);
+    Mockito.when(requestObject.getRequestParameters()).thenReturn(new HashMap<>() {
+      private static final long serialVersionUID = 1L;
+
+      {
+        this.put("SAMLRequest", "ENCODED_REQUEST");
+        this.put("RelayState", CONTEXT_ID);
+      }
+    });
+    Mockito.when(this.authnRequestGenerator.generateAuthnRequest(eq(IDP), anyString(), any()))
+        .thenAnswer((a) -> {
+          final AuthnRequestGeneratorContext ctx = a.getArgument(2, AuthnRequestGeneratorContext.class);
+          ctx.getAssertionConsumerServiceResolver();
+          ctx.getRequestedAuthnContextBuilderFunction();
+          final AuthnRequestCustomizer customizer = ctx.getAuthnRequestCustomizer();
+          final AuthnRequest ar = (AuthnRequest) XMLObjectSupport.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
+          customizer.accept(ar);
+          return requestObject;
+        });
+
+    assertThatThrownBy(() -> {
+      handler.authenticate(authnReqs, null, this.context);
+    }).isInstanceOf(UserAuthenticationException.class)
+      .hasMessage("SAD request must be included in AuthnRequest, but no SignMessage was provided");
   }
 
   @Test
