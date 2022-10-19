@@ -183,13 +183,18 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
 
     // Check if we need to send a SAD request ...
     if (authnRequirements.getSignatureActivationRequestData() != null) {
-      if (authnRequirements.getSignatureActivationRequestData().isRequired()
-          && signMessage != null
-          && !this.isSignatureActivationProtocolSupported(idpMetadata)) {
-        final String msg = "Authentication requirements states that a SAD request should be sent "
-            + "but the IdP does not support the Signature Activation Data extension";
-        log.info("{}: {}", context.getId(), msg);
-        throw new UserAuthenticationException(AuthenticationErrorCode.FAILED_AUTHN, msg);
+      if (authnRequirements.getSignatureActivationRequestData().isRequired()) {
+        if (!this.isSignatureActivationProtocolSupported(idpMetadata)) {
+          final String msg = "Authentication requirements states that a SAD request should be sent "
+              + "but the IdP does not support the Signature Activation Data extension";
+          log.info("{}: {}", context.getId(), msg);
+          throw new UserAuthenticationException(AuthenticationErrorCode.FAILED_AUTHN, msg);
+        }
+        if (signMessage == null) {
+          final String msg = "SAD request must be included in AuthnRequest, but no SignMessage was provided";
+          log.info("{}: {}", context.getId(), msg);
+          throw new UserAuthenticationException(AuthenticationErrorCode.FAILED_AUTHN, msg);
+        }
       }
     }
 
