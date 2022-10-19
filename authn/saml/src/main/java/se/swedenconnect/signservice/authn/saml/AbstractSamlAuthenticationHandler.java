@@ -184,6 +184,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
     // Check if we need to send a SAD request ...
     if (authnRequirements.getSignatureActivationRequestData() != null) {
       if (authnRequirements.getSignatureActivationRequestData().isRequired()
+          && signMessage != null
           && !this.isSignatureActivationProtocolSupported(idpMetadata)) {
         final String msg = "Authentication requirements states that a SAD request should be sent "
             + "but the IdP does not support the Signature Activation Data extension";

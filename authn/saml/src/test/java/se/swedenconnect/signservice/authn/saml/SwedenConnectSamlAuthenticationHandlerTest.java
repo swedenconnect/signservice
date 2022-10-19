@@ -226,6 +226,13 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
         EntityCategoryConstants.SERVICE_PROPERTY_CATEGORY_SCAL2.getUri(),
         EntityCategoryConstants.SERVICE_ENTITY_CATEGORY_LOA3_PNR.getUri()));
 
+    final SignMessage signMessage = Mockito.mock(SignMessage.class);
+    Mockito.when(signMessage.getMustShow()).thenReturn(true);
+    Mockito.when(signMessage.getEncoding()).thenReturn(this.getEncodedSignMessage());
+
+    Mockito.when(this.context.get(eq(AbstractSamlAuthenticationHandler.SIGNMESSAGE_KEY), any()))
+      .thenReturn(signMessage);
+
     @SuppressWarnings("unchecked")
     final RequestHttpObject<AuthnRequest> requestObject = Mockito.mock(RequestHttpObject.class);
     Mockito.when(requestObject.getRequest()).thenReturn(this.getAuthnRequest());
@@ -249,7 +256,7 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
           customizer.accept(ar);
           return requestObject;
         });
-    final AuthenticationResultChoice result = handler.authenticate(authnReqs, null, this.context);
+    final AuthenticationResultChoice result = handler.authenticate(authnReqs, signMessage, this.context);
 
     Assertions.assertNull(result.getAuthenticationResult());
     Assertions.assertEquals("POST", result.getHttpRequestMessage().getMethod());
