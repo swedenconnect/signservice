@@ -11,7 +11,20 @@
 
 > TODO
 
+<a name="default-saml-authentication-handler"></a>
+### DefaultSamlAuthenticationHandler
+
+<a name="sweden-connect-saml-authentication-handler"></a>
+### SwedenConnectSamlAuthenticationHandler
+
+### Making your own SAML handler
+
+Extending AbstractSamlAuthenticationHandler 
+
 ### Configuration
+
+<a name="metadata-provider-configuration"></a>
+#### MetadataProviderConfiguration
 
 > TODO
 

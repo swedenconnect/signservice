@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.application;
+package se.swedenconnect.signservice.engine;
 
 import java.util.List;
 
@@ -24,9 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
-import se.swedenconnect.signservice.engine.SignServiceEngine;
-import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
-import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
 
 /**
  * The SignService engine manager is responsible of routing every call to a matching engine and is seen as the main

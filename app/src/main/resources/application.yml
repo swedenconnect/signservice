@@ -38,7 +38,7 @@ signservice:
       name: "SignService System Audit Logger"
       principal: "SignService"
   default-sign-service-id: https://localhost.swedenconnect.se/signservice
-  default-credential:
+  default-credential:    
     props:      
       name: SignService
       resource: classpath:signservice.jks

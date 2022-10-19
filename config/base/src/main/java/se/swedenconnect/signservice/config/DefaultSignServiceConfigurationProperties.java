@@ -21,11 +21,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.opensaml.saml2.response.replay.MessageReplayChecker;
 import se.swedenconnect.signservice.config.audit.AuditLoggerConfigurationProperties;
 import se.swedenconnect.signservice.config.common.CommonBeansConfigurationProperties;
@@ -33,11 +31,11 @@ import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
 import se.swedenconnect.signservice.session.SessionHandler;
 import se.swedenconnect.signservice.session.impl.DefaultSessionHandler;
 import se.swedenconnect.signservice.storage.impl.DefaultMessageReplayChecker;
+import se.swedenconnect.signservice.storage.impl.ReplayCheckerStorageContainer;
 
 /**
  * Default implementation of {@link SignServiceConfigurationProperties}.
  */
-@Slf4j
 public class DefaultSignServiceConfigurationProperties implements SignServiceConfigurationProperties {
 
   /**
@@ -84,21 +82,23 @@ public class DefaultSignServiceConfigurationProperties implements SignServiceCon
   private AuditLoggerConfigurationProperties systemAudit;
 
   /**
-   * The bean name for the {@link SessionHandler} that should be used by the application.
+   * The bean name of the {@link SessionHandler} that should be used by the SignService application. If not assigned, a
+   * {@link DefaultSessionHandler} instance will be used.
    */
   @Setter
   private String sessionHandlerBeanName;
 
   /**
-   * The bean name of the {@link SessionHandler} that should be used by the SignService application. If not assigned, a
-   * {@link DefaultSessionHandler} instance will be used.
+   * Refers to a {@link MessageReplayChecker} bean that will be used by the application to detect message replay
+   * attacks. If not set, a {@link DefaultMessageReplayChecker} will be used.
    */
   @Setter
   private String messageReplayCheckerBeanName;
 
   /**
-   * Refers to a {@link MessageReplayChecker} bean that will be used by the application to detect message replay
-   * attacks. If not set, a {@link DefaultMessageReplayChecker} will be used.
+   * Relevant only if {@code message-replay-checker-bean-name} is not set. In these cases a
+   * {@link DefaultMessageReplayChecker} will be created using a {@link ReplayCheckerStorageContainer} instance. This
+   * setting refers to {@link ReplayCheckerStorageContainer} bean.
    */
   @Setter
   private String replayCheckerStorageContainerBeanName;
@@ -190,13 +190,15 @@ public class DefaultSignServiceConfigurationProperties implements SignServiceCon
   @Override
   @PostConstruct
   public void afterPropertiesSet() throws IllegalArgumentException {
-    if (!StringUtils.hasText(this.domain)) {
-      this.domain = "localhost";
-      log.warn("signservice.domain not set, using {}", this.domain);
+    if (StringUtils.isBlank(this.domain)) {
+      throw new IllegalArgumentException("signservice.domain must be set");
     }
-    Assert.hasText(this.baseUrl, "signservice.base-url must be set");
-    Assert.notNull(this.systemAudit, "signservice.system-audit.* must be set");
-    // Assert we have a configuration ...
+    if (StringUtils.isBlank(this.baseUrl)) {
+      throw new IllegalArgumentException("signservice.base-url must be set");
+    }
+    if (this.systemAudit == null) {
+      throw new IllegalArgumentException("signservice.system-audit.* must be set");
+    }
     this.systemAudit.getHandlerConfiguration();
 
     if (this.commonBeans != null) {

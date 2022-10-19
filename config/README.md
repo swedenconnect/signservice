@@ -7,12 +7,12 @@
 
 -----
 
-The `config` directory contains ...
+The `config` directory contains support interfaces and classes for configuring a SignService application.
 
 
-- [base](base) - ... .
+- [base](base) - Application configuration properties and a factory for setting up the necessary beans needed in a SignService application.
 
-- [spring](spring) - ...
+- [spring](spring) - Spring specific configuration.
 
 -----
 

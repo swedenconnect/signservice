@@ -18,8 +18,8 @@ package se.swedenconnect.signservice.config;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import se.swedenconnect.signservice.application.SignServiceEngineManager;
 import se.swedenconnect.signservice.core.config.BeanLoader;
+import se.swedenconnect.signservice.engine.SignServiceEngineManager;
 
 /**
  * The {@code SignServiceFactory} is responsible of setting up the required instances (beans) needed for a SignService
