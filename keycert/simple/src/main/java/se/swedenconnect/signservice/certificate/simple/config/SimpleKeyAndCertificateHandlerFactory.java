@@ -69,6 +69,7 @@ public class SimpleKeyAndCertificateHandlerFactory extends AbstractKeyAndCertifi
         SimpleKeyAndCertificateHandlerConfiguration.class.cast(configuration);
 
     final PkiCredential caCredential = Optional.ofNullable(conf.getCaCredential())
+        .map(c -> c.resolvePkiCredential(beanLoader))
         .orElseThrow(() -> new IllegalArgumentException("Missing CA credential"));
 
     String caSigningAlgorithm = conf.getCaSigningAlgorithm();

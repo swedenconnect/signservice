@@ -26,9 +26,9 @@ import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 import se.swedenconnect.opensaml.saml2.response.validation.ResponseValidationSettings;
-import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.core.config.AbstractHandlerConfiguration;
+import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
 
 /**
@@ -62,21 +62,21 @@ public class SamlAuthenticationHandlerConfiguration
    */
   @Setter
   @Getter
-  private PkiCredential defaultCredential;
+  private PkiCredentialConfiguration defaultCredential;
 
   /**
    * The SAML SP signature credential.
    */
   @Setter
   @Getter
-  private PkiCredential signatureCredential;
+  private PkiCredentialConfiguration signatureCredential;
 
   /**
    * The SAML SP decryption credential.
    */
   @Setter
   @Getter
-  private PkiCredential decryptionCredential;
+  private PkiCredentialConfiguration decryptionCredential;
 
   /**
    * Configuration for the SAML SP paths.

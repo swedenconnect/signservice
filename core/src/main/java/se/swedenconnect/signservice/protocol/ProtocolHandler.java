@@ -46,9 +46,9 @@ public interface ProtocolHandler extends SignServiceHandler {
       throws ProtocolException;
 
   /**
-   * A factory method that creates a {@link SignRequestMessage} given the context and the corresponding request message.
+   * A factory method that creates a {@link SignResponseMessage} given the context and the corresponding request message.
    * <p>
-   * Which parts of the {@link SignRequestMessage} that is populated is implementation dependent, but the
+   * Which parts of the {@link SignResponseMessage} that is populated is implementation dependent, but the
    * {@link ProtocolProcessingRequirements} of the created object will always be present, i.e.,
    * {@link SignRequestMessage#getProcessingRequirements()} will be non-null.
    * </p>

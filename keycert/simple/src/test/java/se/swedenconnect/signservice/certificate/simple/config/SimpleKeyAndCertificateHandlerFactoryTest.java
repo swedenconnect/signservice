@@ -45,6 +45,7 @@ import se.swedenconnect.signservice.certificate.base.config.CertificateProfileCo
 import se.swedenconnect.signservice.certificate.base.config.CredentialContainerConfiguration;
 import se.swedenconnect.signservice.certificate.simple.SimpleKeyAndCertificateHandler;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
+import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
 
 /**
  * Test cases for SimpleKeyAndCertificateHandlerFactory.
@@ -100,7 +101,7 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
     Assertions.assertTrue(SimpleKeyAndCertificateHandler.class.isInstance(handler));
 
     // The same for EC
-    ((SpringSimpleKeyAndCertificateHandlerConfiguration) config).getCaCredentialProps().setAlias("ec-ca");
+    config.getCaCredential().getProps().setAlias("ec-ca");
 
     final KeyAndCertificateHandler handler2 = factory.create(config);
     Assertions.assertTrue(SimpleKeyAndCertificateHandler.class.isInstance(handler2));
@@ -132,10 +133,10 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
   @Test
   public void testCRLDistributionPointUrl() throws Exception {
     final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
-    final Field crlDp = config.getClass().getSuperclass().getDeclaredField("crlDpPath");
+    final Field crlDp = config.getClass().getDeclaredField("crlDpPath");
     crlDp.setAccessible(true);
     crlDp.set(config, null);
-    final Field crlDpUlr = config.getClass().getSuperclass().getDeclaredField("crlDpUrl");
+    final Field crlDpUlr = config.getClass().getDeclaredField("crlDpUrl");
     crlDpUlr.setAccessible(true);
     crlDpUlr.set(config, "https://example.com/crl");
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
@@ -145,7 +146,7 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
   @Test
   public void testMissingCrlDp() throws Exception {
     final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
-    final Field crlDp = config.getClass().getSuperclass().getDeclaredField("crlDpPath");
+    final Field crlDp = config.getClass().getDeclaredField("crlDpPath");
     crlDp.setAccessible(true);
     crlDp.set(config, null);
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
@@ -159,7 +160,7 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
   @Test
   public void testMissingBaseUrl() throws Exception {
     final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
-    final Field crlDp = config.getClass().getSuperclass().getDeclaredField("baseUrl");
+    final Field crlDp = config.getClass().getDeclaredField("baseUrl");
     crlDp.setAccessible(true);
     crlDp.set(config, null);
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
@@ -210,7 +211,7 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
   @Test
   public void testMissingCaCredential() throws Exception {
     final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
-    ((SpringSimpleKeyAndCertificateHandlerConfiguration) config).setCaCredentialProps(null);
+    config.setCaCredential(null);
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
 
     assertThatThrownBy(() -> {
@@ -230,20 +231,19 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
         .build()));
     checkerConfig.setDefaultReply(false);
 
-    final SpringSimpleKeyAndCertificateHandlerConfiguration config =
-        new SpringSimpleKeyAndCertificateHandlerConfiguration();
+    final SimpleKeyAndCertificateHandlerConfiguration config = new SimpleKeyAndCertificateHandlerConfiguration();
     config.setName("NAME");
     config.setAlgorithmRegistry(AlgorithmRegistrySingleton.getInstance());
     config.setAlgorithmKeyType(AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES);
     config.setKeyProvider(CredentialContainerConfiguration.builder()
-      .securityProvider("BC")
-      .build());
+        .securityProvider("BC")
+        .build());
     config.setProfileConfiguration(new CertificateProfileConfiguration());
     config.setDefaultValuePolicyChecker(checkerConfig);
     config.setServiceName("SERVICE_NAME");
 
     config.setBaseUrl("https://www.example.com/sign");
-    config.setCaCredentialProps(this.getCaCredentialProperties());
+    config.setCaCredential(new PkiCredentialConfiguration(this.getCaCredentialProperties()));
     config.setCaSigningAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256);
     config.setCertValidity(Duration.ofDays(365));
     config.setCrlValidity(Duration.ofDays(2));

@@ -95,55 +95,19 @@
     
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-engine</artifactId>
+      <artifactId>signservice-config</artifactId>
       <version>${project.version}</version>
     </dependency>
     
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-protocol-dssext11</artifactId>
+      <artifactId>signservice-config-spring</artifactId>
       <version>${project.version}</version>
     </dependency>
     
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-authn-base</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-authn-saml</artifactId>
-      <version>${project.version}</version>
-    </dependency>    
-    
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-audit-base</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-audit-actuator</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-signhandler</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-keycert-simple</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-keycert-cmc</artifactId>
       <version>${project.version}</version>
     </dependency>
     

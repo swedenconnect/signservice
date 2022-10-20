@@ -96,6 +96,7 @@
     <module>signhandler</module>
     <module>keycert</module>
     <module>engine</module>
+    <module>config</module>
     <module>spring-boot-starter</module>
     <module>bom</module>
     <module>app</module>

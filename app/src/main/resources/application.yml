@@ -38,13 +38,14 @@ signservice:
       name: "SignService System Audit Logger"
       principal: "SignService"
   default-sign-service-id: https://localhost.swedenconnect.se/signservice
-  default-credential:
-    name: SignService
-    resource: classpath:signservice.jks
-    alias: signservice
-    type: JKS
-    password: secret
-    key-password: secret
+  default-credential:    
+    props:      
+      name: SignService
+      resource: classpath:signservice.jks
+      alias: signservice
+      type: JKS
+      password: secret
+      key-password: secret
 
   #
   # Configuration for common beans used by several engine configurations
@@ -71,12 +72,13 @@ signservice:
       bean-name: signservice.BuiltInCa
       built-in-ca:
         base-url: ${signservice.base-url}
-        ca-credential-props:
-          resource: classpath:ca/test-ca.jks
-          type: JKS
-          password: secret
-          alias: test-ca
-          key-password: secret
+        ca-credential:
+          props:            
+            resource: classpath:ca/test-ca.jks
+            type: JKS
+            password: secret
+            alias: test-ca
+            key-password: secret
         ca-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256                
         key-provider-ref: signservice.DefaultKeyProvider
         cert-validity: P365D
@@ -104,20 +106,22 @@ signservice:
         sp-paths:
           base-url: ${signservice.base-url}
         metadata-provider-ref: signservice.SamlMetadataProvider
-        signature-credential-props:
-          name: SignService SAML Signing
-          resource: classpath:sandbox/saml-sp.jks
-          alias: sign
-          type: JKS
-          password: secret
-          key-password: secret
-        decryption-credential-props:
-          name: SignService SAML Decryption
-          resource: classpath:sandbox/saml-sp.jks
-          alias: encrypt
-          type: JKS
-          password: secret
-          key-password: secret
+        signature-credential:
+          props:
+            name: SignService SAML Signing
+            resource: classpath:sandbox/saml-sp.jks
+            alias: sign
+            type: JKS
+            password: secret
+            key-password: secret
+        decryption-credential:
+          props:            
+            name: SignService SAML Decryption
+            resource: classpath:sandbox/saml-sp.jks
+            alias: encrypt
+            type: JKS
+            password: secret
+            key-password: secret
         sign-authn-requests: true
         require-encrypted-assertions: true
         response-validation:

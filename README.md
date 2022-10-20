@@ -34,6 +34,8 @@ This repository comprises of the following modules:
 
 * [engine](engine) - Signature Service processing logic engine.
 
+* [config](config) - Application configuration support.
+
 * [spring-boot-starter](spring-boot-starter) - A Spring Boot Starter module that is useful when building a Signature Service using Spring Boot.
 
 * [app](app) - A sample Signature Service application built using Spring Boot. 
