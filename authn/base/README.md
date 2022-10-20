@@ -9,7 +9,15 @@
 
 ## About
 
-> TODO
+The `signservice-authn-base` module is intended to hold base classes and interfaces to be used for authentication.
+Currently no such code is added to the module (it may change in the future when more authentication handlers
+are added).
+
+However, the `signservice-authn-base` module contains the [MockedAuthenticationHandler](https://github.com/swedenconnect/signservice/blob/main/authn/base/src/main/java/se/swedenconnect/signservice/authn/mock/MockedAuthenticationHandler.java). It may be used during testing or development and mocks an authentication (i.e., just tells the SignService system
+that the user has been authenticated without actually doing anything).
+
+The [MockedAuthenticationHandlerConfiguration](https://github.com/swedenconnect/signservice/blob/main/authn/base/src/main/java/se/swedenconnect/signservice/authn/mock/MockedAuthenticationHandlerConfiguration.java) can be used to
+configure this handler.
 
 -----
 

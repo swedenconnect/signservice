@@ -11,6 +11,7 @@ README.md file, and the hierarchy starts at the [SignService GitHub root page](h
 
 > Note: All settings are given in "Kebab case" (words separated by dashes). However, "Camel case" will also work.
 
+<a name="application-configuration"></a>
 ## Application Configuration
 
 The documentation for the [signservice-config](https://github.com/swedenconnect/signservice/tree/main/config) module
@@ -99,17 +100,21 @@ objects themselves, so a configuration does not have to be "complete".
 | `cert.*` | Shared configuration for a key and certificate handler. See [Key and Certificate Handler Configuration](#key-and-certificate-handler-configuration) below. |
 | `audit.*` | Shared configuration for audit loggers. See [Audit Logger Configuration](#audit-logger-configuration) below.  |
 
-
+<a name="handler-configuration"></a>
 ### Handler Configuration
 
 A SignService engine is instantiated with a set of different handlers, one of each type. Handler configuration is
 standardized and described in the documentation for the [signservice-core](https://github.com/swedenconnect/signservice/tree/main/core) module. 
 
-Note: If [Shared Handler Configuration](#shared-handler-configuration) is used, a template configuration may be
+**Note:** If [Shared Handler Configuration](#shared-handler-configuration) is used, a template configuration may be
 referenced in the handler configuration using the setting `default-config-ref`. By including a reference using the
 setting that follows after `signservice.default-handler-config`, for example `authn.saml`, these properties are
 used for the handler configuration and we only have to configure common settings in one place, but still get our
 own handler instance. See [Configuration Example](#configuration-example) below.
+
+**Note 2:** If a customized handler, for a specific type, is to be used it is possible to tell the configuration system
+to use another [HandlerFactory](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/core/config/HandlerFactory.java) that what is default by using the `factory-class`
+property that points at the factory class for your customized handler. See [Configuration of Handlers](https://github.com/swedenconnect/signservice/tree/main/core#configuration-of-handlers).
 
 Below follows the main configuration entry points for each type of handler.
 

@@ -167,7 +167,7 @@ audit logger. Normally, we wish to separate audit logs for different customers (
 Audit logging is mainly performed from the engine implementation, but any handler can produce audit entries and
 have them logged via the [AuditLoggerSingleton](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/audit/AuditLoggerSingleton.java).
 
-
+<a name="configuration-of-handlers"></a>
 ## Configuration of Handlers
 
 Configuring and setting up a Signature Service application requires that a huge amount of objects/beans are created.
