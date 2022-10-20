@@ -9,7 +9,7 @@
 
 ## About
 
-The `signservice-config-spring` module contains ...
+The `signservice-config-spring` module contains Spring-specific classes that may be used during configuration in a Spring environment. See [SignService Spring Boot Starter](../../spring-boot-starter/) for examples of its use.
 
 
 -----
