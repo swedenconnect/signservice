@@ -2,7 +2,7 @@
 
 # Signature Service Audit Logging
 
-Audit logging is a central component in applications such as the Signature Service. Audit events are used for for statistics, billing, monitoring and many other areas. This page documents the different
+Audit logging is central in applications such as the Signature Service. Audit events are used for statistics, billing, monitoring and many other areas. This page documents the different
 audit events that are produced by the SignService application and engines, including what is logged
 for the different events.
 
