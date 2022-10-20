@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.signservice.certificate.base;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
@@ -41,32 +42,43 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
 import org.apache.xml.security.algorithms.MessageDigestAlgorithm;
 import org.apache.xml.security.signature.XMLSignature;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
+import se.swedenconnect.cert.extensions.AuthnContext;
+import se.swedenconnect.schemas.cert.authcont.saci_1_0.SAMLAuthContext;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
 import se.swedenconnect.security.credential.container.keytype.KeyGenType;
+import se.swedenconnect.security.credential.utils.X509Utils;
 import se.swedenconnect.signservice.authn.AuthnContextIdentifier;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.CertificateType;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
+import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappingData;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappingException;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultAttributeMapper;
+import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyChecker;
 import se.swedenconnect.signservice.certificate.base.utils.TestUtils;
 import se.swedenconnect.signservice.certificate.base.utils.X509DnNameType;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
@@ -100,8 +112,18 @@ public class AbstractKeyAndCertificateHandlerTest {
   }
 
   public AbstractKeyAndCertificateHandlerTest() throws KeyStoreException {
+
+    AttributeMapper attributeMapper = new DefaultAttributeMapper(new DefaultValuePolicyChecker() {
+      @Override public boolean isDefaultValueAllowed(@Nonnull CertificateAttributeType attributeType,
+        @Nonnull String ref, @Nonnull String value) {
+        return attributeType == CertificateAttributeType.RDN
+          && ref.equalsIgnoreCase("2.5.4.6")
+          && value.equalsIgnoreCase("SE");
+      }
+    });
+
     this.handler = new TestKeyAndCertificateHandler(
-        new SoftPkiCredentialContainer("BC", "Test1234"));
+        new SoftPkiCredentialContainer("BC", "Test1234"), attributeMapper);
     this.allTypesHandler = new TestKeyAndCertificateHandler(
         new SoftPkiCredentialContainer("BC", "Test1234"));
     ((TestKeyAndCertificateHandler) this.allTypesHandler).setCaSupportedCertificateTypes(List.of(
@@ -264,6 +286,40 @@ public class AbstractKeyAndCertificateHandlerTest {
   }
 
   @Test
+  public void testKeyAndCertDefaultValueMapping() throws Exception {
+    final IdentityAssertion assertion = this.getTestAssertionNoCountry();
+
+    final PkiCredential credential = this.handler.generateSigningCredential(
+        this.getDefaultAttrValSignRequest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, CertificateType.PKC, null, "SE", true), assertion,
+        new DefaultSignServiceContext("ctx"));
+    assertDoesNotThrow(() -> credential.getCertificate().verify(credential.getPublicKey()));
+    Assertions.assertTrue(credential.getCertificate().getSubjectX500Principal().toString().contains("C=SE"));
+  }
+
+  @Test
+  public void testKeyAndCertUnsupportedDefaultOptionalValueMapping() throws Exception {
+    final IdentityAssertion assertion = this.getTestAssertionNoCountry();
+    final PkiCredential credential = this.handler.generateSigningCredential(
+      this.getDefaultAttrValSignRequest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, CertificateType.PKC, null, "DK", false), assertion,
+      new DefaultSignServiceContext("ctx"));
+    Assertions.assertFalse(credential.getCertificate().getSubjectX500Principal().toString().contains("C="));
+  }
+
+  @Test
+  public void testKeyAndCertUnsupportedDefaultRequiredValueMapping() throws Exception {
+    final IdentityAssertion assertion = this.getTestAssertionNoCountry();
+    assertThatThrownBy(() -> {
+      this.handler.generateSigningCredential(
+        this.getDefaultAttrValSignRequest(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, CertificateType.PKC, null, "DK", true), assertion,
+        new DefaultSignServiceContext("ctx"));
+    })
+      .isInstanceOf(CertificateException.class)
+      .hasMessage("Attribute mapping failed")
+      .getCause()
+      .isInstanceOf(AttributeMappingException.class);
+  }
+
+  @Test
   public void testKeyAndCertGenMappingError() throws Exception {
     final IdentityAssertion assertion = this.getTestAssertion();
 
@@ -373,6 +429,25 @@ public class AbstractKeyAndCertificateHandlerTest {
     return assertion;
   }
 
+  private IdentityAssertion getTestAssertionNoCountry() {
+    final IdentityAssertion assertion = mock(IdentityAssertion.class);
+    final AuthnContextIdentifier aci = mock(AuthnContextIdentifier.class);
+
+    when(aci.getIdentifier()).thenReturn("http://id.elegnamnden.se/loa/1.0/loa3");
+    when(assertion.getAuthnContext()).thenReturn(aci);
+    when(assertion.getIdentifier()).thenReturn("123");
+    when(assertion.getIssuer()).thenReturn("https://www.idp.com");
+    when(assertion.getAuthnInstant()).thenReturn(Instant.now());
+    when(assertion.getIdentityAttributes()).thenReturn(List.of(
+        this.getMockAttr("urn:oid:2.5.4.42", "Nisse"),
+        this.getMockAttr("urn:oid:2.5.4.4", "Hult"),
+        this.getMockAttr("urn:oid:1.2.752.29.4.13", "1234567890"),
+        this.getMockAttr("urn:oid:0.9.2342.19200300.100.1.3", "nisse.hult@example.com"),
+        this.getMockAttr("urn:oid:2.16.840.1.113730.3.1.241", "Nisse Hult"),
+        this.getMockAttr("urn:oid:1.3.6.1.5.5.7.9.3", "M")));
+    return assertion;
+  }
+
   private IdentityAttribute<?> getMockAttr(final String oidString, final String value) {
     return new StringSamlIdentityAttribute(oidString, null, value);
   }
@@ -391,6 +466,31 @@ public class AbstractKeyAndCertificateHandlerTest {
             { CertificateAttributeType.RDN, "urn:oid:2.5.4.4", X509DnNameType.Surename.getOidString() },
             { CertificateAttributeType.RDN, "urn:oid:1.2.752.29.4.13", X509DnNameType.SerialNumber.getOidString() },
             { CertificateAttributeType.RDN, "urn:oid:2.5.4.6", X509DnNameType.Country.getOidString() },
+            { CertificateAttributeType.SAN, "urn:oid:0.9.2342.19200300.100.1.3", "1" },
+            { CertificateAttributeType.RDN, "urn:oid:2.16.840.1.113730.3.1.241", X509DnNameType.CN.getOidString() },
+            { CertificateAttributeType.SDA, "urn:oid:1.3.6.1.5.5.7.9.3", "1.3.6.1.5.5.7.9.3" }
+        }));
+    when(certificateRequirements.getSigningCertificateProfile()).thenReturn(profile);
+    when(signRequestMessage.getSignatureRequirements()).thenReturn(signatureRequirements);
+    when(signRequestMessage.getSigningCertificateRequirements()).thenReturn(certificateRequirements);
+    when(signRequestMessage.getClientId()).thenReturn("clientId");
+    return signRequestMessage;
+  }
+
+  private SignRequestMessage getDefaultAttrValSignRequest(final String signatureAlgorithm,
+      final CertificateType certType, final String profile, String defaultCountry, boolean required) {
+
+    final SignRequestMessage signRequestMessage = mock(SignRequestMessage.class);
+    final SignatureRequirements signatureRequirements = mock(SignatureRequirements.class);
+    final SigningCertificateRequirements certificateRequirements = mock(SigningCertificateRequirements.class);
+    when(signatureRequirements.getSignatureAlgorithm()).thenReturn(signatureAlgorithm);
+    when(certificateRequirements.getCertificateType()).thenReturn(certType);
+    when(certificateRequirements.getAttributeMappings()).thenReturn(this.getCertificateAttributeMappings(
+        new Object[][] {
+            { CertificateAttributeType.RDN, "urn:oid:2.5.4.42", X509DnNameType.GivenName.getOidString() },
+            { CertificateAttributeType.RDN, "urn:oid:2.5.4.4", X509DnNameType.Surename.getOidString() },
+            { CertificateAttributeType.RDN, "urn:oid:1.2.752.29.4.13", X509DnNameType.SerialNumber.getOidString() },
+            { CertificateAttributeType.RDN, "urn:oid:2.5.4.6", X509DnNameType.Country.getOidString(), defaultCountry, required },
             { CertificateAttributeType.SAN, "urn:oid:0.9.2342.19200300.100.1.3", "1" },
             { CertificateAttributeType.RDN, "urn:oid:2.16.840.1.113730.3.1.241", X509DnNameType.CN.getOidString() },
             { CertificateAttributeType.SDA, "urn:oid:1.3.6.1.5.5.7.9.3", "1.3.6.1.5.5.7.9.3" }
@@ -454,12 +554,12 @@ public class AbstractKeyAndCertificateHandlerTest {
 
             @Override
             public String getDefaultValue() {
-              return null;
+              return m.length > 3 ? (String) m[3] : null;
             }
 
             @Override
             public boolean isRequired() {
-              return false;
+              return m.length > 4 ? (Boolean) m[4] : false;
             }
 
           };
@@ -477,6 +577,10 @@ public class AbstractKeyAndCertificateHandlerTest {
 
     public TestKeyAndCertificateHandler(@Nonnull final PkiCredentialContainer keyProvider) {
       super(keyProvider, null, new DefaultAttributeMapper((p1, p2, p3) -> false), null);
+    }
+
+    public TestKeyAndCertificateHandler(@Nonnull final PkiCredentialContainer keyProvider, AttributeMapper attributeMapper) {
+      super(keyProvider, null, attributeMapper, null);
     }
 
     public TestKeyAndCertificateHandler(
