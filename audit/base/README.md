@@ -11,6 +11,7 @@
 
 The `signservice-audit-base` module contains implementations for a simple file based audit logger and an implementation that uses an underlying log system.
 
+<a name="file-audit-logger"></a>
 ## FileAuditLogger
 
 The [FileAuditLogger](https://github.com/swedenconnect/signservice/blob/main/audit/base/src/main/java/se/swedenconnect/signservice/audit/file/FileAuditLogger.java) is a simple implementation for those deployments that wish to audit log to files with no specific requirements regarding formatting of log entries. The implementation uses Java Util logging and imposes no specific requirements for any other log system.
@@ -26,6 +27,7 @@ The [FileAuditLoggerConfiguration](https://github.com/swedenconnect/signservice/
 | `principal` | The default principal to assign to audit events. It should be equal to the clientID that the audit logger is servicing. If the audit logger is a system logger, the string "SignService" should be used. | 
 | `file-name` | The audit log file name (including its full path). |
 
+<a name="log-system-audit-logger"></a>
 ## LogSystemAuditLogger
 
 The [LogSystemAuditLogger](https://github.com/swedenconnect/signservice/blob/main/audit/base/src/main/java/se/swedenconnect/signservice/audit/logsystem/LogSystemAuditLogger.java) is an implementation 

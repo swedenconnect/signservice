@@ -130,9 +130,14 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
 
     // Metadata publishing
     //
-    final EntityDescriptor entityDescriptor = this.createEntityDescriptor(conf);
+    final EntityDescriptor entityDescriptor = this.createEntityDescriptor(conf, beanLoader);
     final PkiCredential mdSignCred = Optional.ofNullable(conf.getSignatureCredential())
-        .orElseGet(() -> conf.getDefaultCredential());
+        .map(c -> c.resolvePkiCredential(beanLoader))
+        .orElseGet(() -> {
+          return Optional.ofNullable(conf.getDefaultCredential())
+              .map(c -> c.resolvePkiCredential(beanLoader))
+              .orElse(null);
+        });
     final EntityDescriptorContainer entityDescriptorContainer = new EntityDescriptorContainer(entityDescriptor,
         mdSignCred != null ? new OpenSamlCredential(mdSignCred) : null);
 
@@ -143,7 +148,7 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     // AuthnRequest generator
     //
     final AuthnRequestGenerator authnRequestGenerator =
-        this.createAuthnRequestGenerator(conf, metadataProvider, entityDescriptor);
+        this.createAuthnRequestGenerator(conf, beanLoader, metadataProvider, entityDescriptor);
 
     // Request binding
     //
@@ -198,10 +203,12 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
    * Based on the configuration an {@link EntityDescriptor} is created.
    *
    * @param config the SAML configuration
+   * @param beanLoader the bean loader
    * @return an EntityDescriptor for the SP metadata
    */
   protected EntityDescriptor createEntityDescriptor(
-      @Nonnull final SamlAuthenticationHandlerConfiguration config) {
+      @Nonnull final SamlAuthenticationHandlerConfiguration config,
+      @Nullable final BeanLoader beanLoader) {
 
     if (config.getMetadata() == null) {
       throw new IllegalArgumentException("Missing metadata configuration");
@@ -274,25 +281,28 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
       // KeyDescriptors
       final List<KeyDescriptor> keyDescriptors = new ArrayList<>();
       if (config.getSignatureCredential() != null) {
+        final PkiCredential cred = config.getSignatureCredential().resolvePkiCredential(beanLoader);
         keyDescriptors.add(KeyDescriptorBuilder.builder()
             .use(UsageType.SIGNING)
-            .keyName(config.getSignatureCredential().getName())
-            .certificate(config.getSignatureCredential().getCertificate())
+            .keyName(cred.getName())
+            .certificate(cred.getCertificate())
             .build());
       }
       if (config.getDecryptionCredential() != null) {
+        final PkiCredential cred = config.getDecryptionCredential().resolvePkiCredential(beanLoader);
         keyDescriptors.add(KeyDescriptorBuilder.builder()
             .use(UsageType.ENCRYPTION)
-            .keyName(config.getDecryptionCredential().getName())
-            .certificate(config.getDecryptionCredential().getCertificate())
+            .keyName(cred.getName())
+            .certificate(cred.getCertificate())
             .build());
         // TODO: Support for EncryptionMethod
       }
       if (config.getDefaultCredential() != null && keyDescriptors.size() < 2) {
+        final PkiCredential cred = config.getDefaultCredential().resolvePkiCredential(beanLoader);
         keyDescriptors.add(KeyDescriptorBuilder.builder()
             .use(UsageType.UNSPECIFIED)
-            .keyName(config.getDefaultCredential().getName())
-            .certificate(config.getDefaultCredential().getCertificate())
+            .keyName(cred.getName())
+            .certificate(cred.getCertificate())
             .build());
       }
       if (!keyDescriptors.isEmpty()) {
@@ -373,7 +383,8 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
         throw new IllegalArgumentException("message-replay-checker-ref can not be loaded - missing bean loader");
       }
       messageReplayChecker =
-          beanLoader.load(config.getMessageReplayCheckerRef(), se.swedenconnect.signservice.storage.MessageReplayChecker.class);
+          beanLoader.load(config.getMessageReplayCheckerRef(),
+              se.swedenconnect.signservice.storage.MessageReplayChecker.class);
     }
     else if (config.getMessageReplayChecker() != null) {
       messageReplayChecker = config.getMessageReplayChecker();
@@ -385,8 +396,8 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     SAMLObjectDecrypter objectDecrypter = null;
     if (config.getDecryptionCredential() != null || config.getDefaultCredential() != null) {
       final OpenSamlCredential cred = new OpenSamlCredential(config.getDecryptionCredential() != null
-          ? config.getDecryptionCredential()
-          : config.getDefaultCredential());
+          ? config.getDecryptionCredential().resolvePkiCredential(beanLoader)
+          : config.getDefaultCredential().resolvePkiCredential(beanLoader));
       objectDecrypter = new SAMLObjectDecrypter(cred);
     }
     if (Optional.ofNullable(config.getRequireEncryptedAssertions()).orElse(true) && objectDecrypter == null) {
@@ -442,6 +453,7 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
    * Based on the SAML configuration, metadata provider and SP metadata an {@link AuthnRequestGenerator} is created.
    *
    * @param config the SAML configuration
+   * @param beanLoader the bean loader
    * @param metadataProvider the metadata provider
    * @param entityDescriptor the SP metadata
    * @return an AuthnRequestGenerator
@@ -449,11 +461,17 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
   @Nonnull
   protected AuthnRequestGenerator createAuthnRequestGenerator(
       @Nonnull final SamlAuthenticationHandlerConfiguration config,
+      @Nullable final BeanLoader beanLoader,
       @Nonnull final MetadataProvider metadataProvider,
       @Nonnull final EntityDescriptor entityDescriptor) {
 
     final PkiCredential signCred = Optional.ofNullable(config.getSignatureCredential())
-        .orElseGet(() -> config.getDefaultCredential());
+        .map(c -> c.resolvePkiCredential(beanLoader))
+        .orElseGet(() -> {
+          return Optional.ofNullable(config.getDefaultCredential())
+              .map(c -> c.resolvePkiCredential(beanLoader))
+              .orElse(null);
+        });
     if (signCred == null && Optional.ofNullable(config.getSignAuthnRequests()).orElse(true)) {
       throw new IllegalArgumentException("No signature (or default) credential specified");
     }

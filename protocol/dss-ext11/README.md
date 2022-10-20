@@ -9,9 +9,7 @@
 
 ## About
 
-SignService Protocol Handler for DSS 1.1 extensions.
-
-> TODO
+SignService Protocol Handler for OASIS DSS 1.1 extensions - See https://docs.swedenconnect.se/technical-framework/.
 
 ### Configuration
 
@@ -21,8 +19,6 @@ The [DssProtocolHandler](https://github.com/swedenconnect/signservice/blob/main/
 | :--- | :--- | :--- |
 | `include-assertion` | Tells whether SAML assertions should be included in the response messages. | `true` |
 | `include-request-message` | Tells whether to include the request message in the response messages created. For 1.1 version and below this will always be included, but in greater versions the field is optional (actually the specs dissuade from using it). | `false` |
-
-
 
 -----
 

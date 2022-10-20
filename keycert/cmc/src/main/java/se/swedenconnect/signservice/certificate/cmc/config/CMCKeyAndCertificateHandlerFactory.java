@@ -73,6 +73,7 @@ public class CMCKeyAndCertificateHandlerFactory extends AbstractKeyAndCertificat
         .orElseThrow(() -> new IllegalArgumentException("Missing CMC request URL"));
 
     final PkiCredential clientCredential = Optional.ofNullable(conf.getCmcClientCredential())
+        .map(c -> c.resolvePkiCredential(beanLoader))
         .orElseThrow(() -> new IllegalArgumentException("Missing CMC client credential"));
 
     String signingAlgorithm = conf.getCmcSigningAlgorithm();

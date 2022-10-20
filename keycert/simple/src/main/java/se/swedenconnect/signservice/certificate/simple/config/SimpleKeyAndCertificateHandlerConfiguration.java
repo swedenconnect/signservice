@@ -26,9 +26,9 @@ import org.apache.xml.security.signature.XMLSignature;
 
 import lombok.Getter;
 import lombok.Setter;
-import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration;
 import se.swedenconnect.signservice.certificate.simple.SimpleKeyAndCertificateHandler;
+import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
 
 /**
  * Configuration for {@link SimpleKeyAndCertificateHandler}.
@@ -44,9 +44,9 @@ public class SimpleKeyAndCertificateHandlerConfiguration extends AbstractKeyAndC
   /**
    * The CA credential (private key and certificate(s)).
    */
-  @Getter
   @Setter
-  private PkiCredential caCredential;
+  @Getter
+  private PkiCredentialConfiguration caCredential;
 
   /**
    * The CA signing algorithm. Defaults to {@value XMLSignature#ALGO_ID_SIGNATURE_RSA_SHA256} or

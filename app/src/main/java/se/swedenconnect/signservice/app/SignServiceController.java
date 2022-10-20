@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import lombok.Setter;
-import se.swedenconnect.signservice.application.SignServiceEngineManager;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.engine.SignServiceEngineManager;
 import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
 
 /**
