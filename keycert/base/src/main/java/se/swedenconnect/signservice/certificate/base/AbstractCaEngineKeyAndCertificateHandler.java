@@ -227,6 +227,10 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
 
     final List<AttributeMapping> extAttrMappingList = new ArrayList<>();
     for (final AttributeMappingData attributeMappingData : certAttributes) {
+      if (attributeMappingData.isDefaultValue()) {
+        // Skipping attribute mapping in auth context extension because this is a default value and is not mapped from IdP
+        continue;
+      }
       final ObjectFactory objectFactory = new ObjectFactory();
       final AttributeMapping attributeMapping = objectFactory.createAttributeMapping();
       attributeMapping.setRef(attributeMappingData.getReference());
