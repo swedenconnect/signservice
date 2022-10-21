@@ -162,7 +162,7 @@ public class DefaultSignServiceEngineManagerTest {
         .isEqualTo(UnrecoverableErrorCodes.INTERNAL_ERROR);
 
     Assertions.assertEquals(AuditEventIds.EVENT_SYSTEM_PROCESSING_ERROR, audit.events.get(1).getId());
-    Assertions.assertTrue(audit.events.get(1).getParameters().size() == 3);
+    Assertions.assertTrue(audit.events.get(1).getParameters().size() == 4);
   }
 
   @Test
@@ -193,7 +193,7 @@ public class DefaultSignServiceEngineManagerTest {
         .isEqualTo("ERROR");
 
     Assertions.assertEquals(AuditEventIds.EVENT_SYSTEM_PROCESSING_ERROR, audit.events.get(1).getId());
-    Assertions.assertTrue(audit.events.get(1).getParameters().size() == 3);
+    Assertions.assertTrue(audit.events.get(1).getParameters().size() == 4);
   }
 
   @Test

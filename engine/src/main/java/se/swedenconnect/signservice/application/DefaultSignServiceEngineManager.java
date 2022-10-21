@@ -119,9 +119,10 @@ public class DefaultSignServiceEngineManager implements SignServiceEngineManager
       log.info("{}", msg, e);
 
       this.systemAuditLogger.auditLog(AuditEventIds.EVENT_SYSTEM_PROCESSING_ERROR, (b) -> b
-          .parameter("engine", engine.getName())
+          .parameter("path", request.getRequestURI())
+          .parameter("engine-name", engine.getName())
           .parameter("error-code", UnrecoverableErrorCodes.INTERNAL_ERROR)
-          .parameter("message", msg)
+          .parameter("error-message", msg)
           .build());
 
       throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.INTERNAL_ERROR, msg, e);
@@ -132,9 +133,10 @@ public class DefaultSignServiceEngineManager implements SignServiceEngineManager
       log.info("{}", msg, e);
 
       this.systemAuditLogger.auditLog(AuditEventIds.EVENT_SYSTEM_PROCESSING_ERROR, (b) -> b
-          .parameter("engine", engine.getName())
+          .parameter("path", request.getRequestURI())
+          .parameter("engine-name", engine.getName())
           .parameter("error-code", e.getErrorCode())
-          .parameter("message", msg)
+          .parameter("error-message", msg)
           .build());
 
       throw e;
