@@ -27,6 +27,7 @@ Below follows a description of the configuration object that is supplied to the 
 | `signservice.base-url` | The "base URL" of the SignService, i.e., the protocol, domain and context path (if set to something other than '/'). Must not end with a '/'. | Mandatory. No default value. |
 | `signservice.`<br />`default-sign-service-id` | The default SignService ID. May be overridden in engine configurations (see [Engine Configuration](#engine-configuration) below). | - |
 | `signservice.default-credential.*` | Configuration for the SignService default credential that will be used for signing responses. By setting this, several engine configurations may share the same credential. See [Credential Configuration](#credential-configuration). | - |
+| `signservice.validation-config.*` | Configuration settings for validation of messages (application wide). See [Validation Configuration](#validation-configuration) below. | The default values as described in [Validation Configuration](#validation-configuration). |
 | `signservice.common-beans.*` | The configuration for some handlers, and also some other beans, normally do not differ between different engines (clients). It is not very efficient if every engine instance instantiates their own beans (for handlers or other base components). Instead the engine configuration can point to an already existing bean. This configuration properties class defines the configuration for components that may be "common". See [Common Beans Configuration](#common-beans-configuration). <br /><br />**Note:** If your application should only serve one client (engine), there is no point in using this setting. | - |
 | `signservice.`<br />`default-handler-config.*` | Shared, or default, configuration properties that may be merged into the engine configuration. The idea is to enter common values for the different handlers used in the engine configurations in order to avoid repeating the same configuration values. For example, a SAML-SP configuration may be identical between different clients except for its entityID and assertion consumer service URL. In these cases all engine configurations may all point at the same "default settings" and only configure what is unique for a given engine. See [Shared Handler Configuration](#shared-handler-configuration) below. <br /><br />**Note:** If your application should only serve one client (engine), there is no point in using this setting. | - |
 | `signservice.system-audit.*` | Configuration for the system (application) audit logger. Note that each engine also has its own audit logger. The system audit logger logs entries that has to do with the actual application (start-up, shutdown, fatal errors, ...).<br />See [Audit Logger Configuration](#audit-logger-configuration) below.  | Mandatory. No default value. |
@@ -190,6 +191,17 @@ configuration.
 `cred` - Assignment of an already instantiated `PkiCredential`. This setting is not possible to use when 
 configuring the application using properties files, only when a programmatic setup is made.
 
+<a name="validation-configuration"></a>
+#### Validation Configuration
+
+The [ValidationConfiguration](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/core/config/ValidationConfiguration.java) class defines generic
+settings used during validation of messages. This object is also accessible using the `getValidationConfig` method of the [AbstractHandlerFactory](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/core/config/AbstractHandlerFactory.java) class.
+
+| Property | Description | Default value |
+| :--- | :--- | :--- |
+| `allowed-clock-skew` | Duration telling the clock skew that we accept during checks of time stamps. | 30 seconds |
+| `max-message-age` | Duration telling the maximum amount of time that has passed since a message we are receiving, and processing, was sent. This is based on the message's "created-at" property (or similar). | 3 minutes |
+
 <a name="configuration-example"></a>
 ## Configuration Example
 
@@ -215,6 +227,9 @@ signservice:
       type: JKS
       password: secret
       key-password: secret
+  validation-config:
+    allowed-clock-skew: PT30S
+    max-message-age: PT3M
 
   #
   # Configuration for common beans used by several engine configurations

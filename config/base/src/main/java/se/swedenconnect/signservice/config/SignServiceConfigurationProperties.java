@@ -25,6 +25,7 @@ import se.swedenconnect.opensaml.saml2.response.replay.MessageReplayChecker;
 import se.swedenconnect.signservice.config.audit.AuditLoggerConfigurationProperties;
 import se.swedenconnect.signservice.config.common.CommonBeansConfigurationProperties;
 import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
+import se.swedenconnect.signservice.core.config.ValidationConfiguration;
 import se.swedenconnect.signservice.session.SessionHandler;
 import se.swedenconnect.signservice.session.impl.DefaultSessionHandler;
 import se.swedenconnect.signservice.storage.impl.DefaultMessageReplayChecker;
@@ -70,6 +71,17 @@ public interface SignServiceConfigurationProperties {
    */
   @Nullable
   PkiCredentialConfiguration getDefaultCredential();
+
+  /**
+   * Configuration for application wide validation settings.
+   * <p>
+   * If no validation settings are configured a default instance of {@link ValidationConfiguration} will be used.
+   * </p>
+   *
+   * @return validation configuration
+   */
+  @Nullable
+  ValidationConfiguration getValidationConfig();
 
   /**
    * Common beans configuration.
