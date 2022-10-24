@@ -127,10 +127,7 @@ signservice:
             key-password: secret
         sign-authn-requests: true
         require-encrypted-assertions: true
-        response-validation:
-          strict-validation: false
-          require-signed-assertions: true
-          allowed-clock-skew: PT60S
+        require-signed-assertions: true
         message-replay-checker-ref: signservice.MessageReplayChecker 
         metadata:
           entity-categories:
@@ -144,7 +141,6 @@ signservice:
           - http://id.swedenconnect.se/general-ec/1.0/secure-authenticator-binding
           - http://id.swedenconnect.se/general-ec/1.0/accepts-coordination-number
           authn-requests-signed: true
-          want-assertions-signed: true
           requested-attributes:
           - name: urn:oid:1.2.752.29.4.13
             required: false
