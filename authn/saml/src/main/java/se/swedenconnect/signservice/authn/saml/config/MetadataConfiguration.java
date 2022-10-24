@@ -61,11 +61,6 @@ public class MetadataConfiguration {
   private Boolean authnRequestsSigned;
 
   /**
-   * Whether SAML assertions should be signed by the IdP.
-   */
-  private Boolean wantAssertionsSigned;
-
-  /**
    * Configuration for the UIInfo extension.
    */
   private UIInfoConfig uiInfo;

@@ -43,6 +43,8 @@ import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.core.config.HandlerFactory;
 import se.swedenconnect.signservice.core.config.HandlerFactoryRegistry;
+import se.swedenconnect.signservice.core.config.ValidationConfiguration;
+import se.swedenconnect.signservice.engine.DefaultSignRequestMessageVerifier;
 import se.swedenconnect.signservice.engine.DefaultSignServiceEngine;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.engine.SignServiceEngineManager;
@@ -103,6 +105,15 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
     //
     final BeanLoader bLoader = new BeanLoaderWrapper(beanLoader);
     final BeanRegistrator bRegistrator = new BeanRegistratorWrapper(beanRegistrator);
+
+    // Validation configuration ...
+    //
+    final ValidationConfiguration validationConfig = Optional.ofNullable(configuration.getValidationConfig())
+        .orElseGet(() -> {
+          final ValidationConfiguration config = new ValidationConfiguration();
+          config.init();
+          return config;
+        });
 
     // Handle the default credential ...
     //
@@ -282,6 +293,10 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
 
       final DefaultSignServiceEngine engine =
           new DefaultSignServiceEngine(conf, sessionHandler, messageReplayChecker, systemAuditLogger);
+      final DefaultSignRequestMessageVerifier verifier = new DefaultSignRequestMessageVerifier();
+      verifier.setAllowedClockSkew(validationConfig.getAllowedClockSkew());
+      verifier.setMaxMessageAge(validationConfig.getMaxMessageAge());
+      engine.setSignRequestMessageVerifier(verifier);
       engine.init();
 
       engines.add(engine);

@@ -35,7 +35,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.w3c.dom.Element;
 
 import se.swedenconnect.opensaml.common.utils.LocalizedString;
-import se.swedenconnect.opensaml.saml2.response.validation.ResponseValidationSettings;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.factory.KeyStoreFactoryBean;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
@@ -142,11 +141,8 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
   @Test
   public void testCreateMetadataConfig() throws Exception {
     final SamlAuthenticationHandlerConfiguration conf = this.buildConfiguration();
+    conf.setRequireSignedAssertions(true);
     conf.getSpPaths().setAdditionalAssertionConsumerPath("/saml/additional");
-
-    final ResponseValidationSettings rvs = new ResponseValidationSettings();
-    rvs.setRequireSignedAssertions(true);
-    conf.setResponseValidation(rvs);
 
     final MetadataConfiguration md = new MetadataConfiguration();
     md.setAuthnRequestsSigned(true);
