@@ -22,6 +22,7 @@ import java.time.Instant;
 import javax.annotation.Nonnull;
 
 import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.signservice.core.config.ValidationConfiguration;
 import se.swedenconnect.signservice.engine.config.EngineConfiguration;
 import se.swedenconnect.signservice.engine.session.EngineContext;
 import se.swedenconnect.signservice.protocol.ProtocolProcessingRequirements;
@@ -36,10 +37,10 @@ import se.swedenconnect.signservice.protocol.msg.MessageConditions;
 public class DefaultSignRequestMessageVerifier implements SignRequestMessageVerifier {
 
   /** The clock skew that we accept during checks of time stamps. */
-  private Duration allowedClockSkew = Duration.ofSeconds(30);
+  private Duration allowedClockSkew = ValidationConfiguration.DEFAULT_ALLOWED_CLOCK_SKEW;
 
   /** The maximum amount of time that has passed since the request message was created. */
-  private Duration maxMessageAge = Duration.ofMinutes(3);
+  private Duration maxMessageAge = ValidationConfiguration.DEFAULT_MAX_MESSAGE_AGE;
 
   /** {@inheritDoc} */
   @Override
@@ -95,6 +96,8 @@ public class DefaultSignRequestMessageVerifier implements SignRequestMessageVeri
     if (issuedAt == null) {
       log.info("{}: Sign request message does not have an issued-at field [id: '{}', request-id: '{}']",
           configuration.getName(), context.getId(), signRequestMessage.getRequestId());
+      // Note: In all sensible implementations the "issued at" should be mandatory (and checked by the
+      // protocol handler). This is the case for OASIS DSS ...
     }
     else {
       final Instant now = Instant.now();
@@ -113,7 +116,7 @@ public class DefaultSignRequestMessageVerifier implements SignRequestMessageVeri
       else if ((now.toEpochMilli() - issuedAt.toEpochMilli())
           > (this.maxMessageAge.toMillis() + this.allowedClockSkew.toMillis())) {
 
-        log.info("{}: The received sign request message has expired [id: '{}', request-id: '{}']",
+        log.info("{}: The received sign request message exceeds the maximum allowed age of messages [id: '{}', request-id: '{}']",
             configuration.getName(), context.getId(), signRequestMessage.getRequestId());
 
         throw new SignServiceErrorException(new SignServiceError(SignServiceErrorCode.REQUEST_EXPIRED));
