@@ -45,11 +45,6 @@ import se.swedenconnect.signservice.signature.tbsdata.impl.XMLTBSDataProcessor;
  */
 public class DefaultSignatureHandlerFactory extends AbstractHandlerFactory<SignatureHandler> {
 
-  /** TBS data processor type XML */
-  private final static String XML = "xml";
-  /** TBS data processor type PDF */
-  private final static String PDF = "pdf";
-
   /** {@inheritDoc} */
   @Override
   protected SignatureHandler createHandler(
@@ -123,12 +118,12 @@ public class DefaultSignatureHandlerFactory extends AbstractHandlerFactory<Signa
     Objects.requireNonNull(type, "Type must not be null");
     final AbstractTBSDataProcessor tbsDataProcessor;
     switch (type) {
-    case XML:
+    case TBSDataProcessorConfiguration.XML_TYPE:
       tbsDataProcessor = supportedProcessingRules == null
        ? new XMLTBSDataProcessor()
        : new XMLTBSDataProcessor(supportedProcessingRules);
       break;
-    case PDF:
+    case TBSDataProcessorConfiguration.PDF_TYPE:
       tbsDataProcessor = supportedProcessingRules == null
         ? new PDFTBSDataProcessor()
         : new PDFTBSDataProcessor(supportedProcessingRules);
