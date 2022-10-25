@@ -23,6 +23,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -141,9 +142,12 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
             throw new InvalidRequestException("Signing time is not allowed in PAdES requests in strict processing");
           }
         }
+        // Test if signing time is current
+        this.checkSigningTime(Objects.requireNonNull(getCmsSigningTime(signedAttributes),
+          "Null signing time with present signing time attribute").toInstant());
       }
     }
-    catch (final IOException e) {
+    catch (final IOException | IllegalArgumentException e) {
       throw new InvalidRequestException(e.getMessage());
     }
   }

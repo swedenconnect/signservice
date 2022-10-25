@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.security.SignatureException;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.signature.AdESType;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureType;
@@ -195,7 +197,7 @@ class PDFTBSDataProcessorTest {
 
     testCasePddTbsDataProcessor("No PAdES signature with signing time and strict", tdpStrict,
       getRequestedSignatureTask(
-        TestData.tbsDataPdf01, SignatureType.PDF, null, null),
+        TestData.fixCMSSigTime(TestData.tbsDataPdf01), SignatureType.PDF, null, null),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
       null, null
@@ -215,6 +217,42 @@ class PDFTBSDataProcessorTest {
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
       TestData.resultNoPadesNoTime, null
+    );
+  }
+
+  @Test
+  public void testOldSigningTime() throws Exception {
+    Instant signingTime = Instant.now().minusSeconds(250);
+    testCasePddTbsDataProcessor("Testing PDF signing with too old signing time", tdpStrict,
+      getRequestedSignatureTask(
+        TestData.fixCMSSigTime(TestData.tbsDataPdf01, signingTime), SignatureType.PDF, null, null),
+      testECCredential,
+      TestAlgorithms.getEcdsaSha256(),
+      null, SignatureException.class
+    );
+  }
+
+  @Test
+  public void testFutureSigningTime() throws Exception {
+    Instant signingTime = Instant.now().plusSeconds(50);
+    testCasePddTbsDataProcessor("Testing PDF signing with future signing time", tdpStrict,
+      getRequestedSignatureTask(
+        TestData.fixCMSSigTime(TestData.tbsDataPdf01, signingTime), SignatureType.PDF, null, null),
+      testECCredential,
+      TestAlgorithms.getEcdsaSha256(),
+      null, SignatureException.class
+    );
+  }
+
+  @Test
+  public void testBadSigningTime() throws Exception {
+
+    testCasePddTbsDataProcessor("Testing PDF signing with bad signing time", tdpStrict,
+      getRequestedSignatureTask(
+        TestData.fixCMSSigTime(TestData.tbsDataPdf01, Instant.now(), true), SignatureType.PDF, null, null),
+      testECCredential,
+      TestAlgorithms.getEcdsaSha256(),
+      null, SignatureException.class
     );
   }
 

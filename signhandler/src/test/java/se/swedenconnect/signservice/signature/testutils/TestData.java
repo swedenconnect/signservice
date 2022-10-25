@@ -15,6 +15,26 @@
  */
 package se.swedenconnect.signservice.signature.testutils;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERUTCTime;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.util.encoders.Base64;
+import se.swedenconnect.signservice.signature.tbsdata.impl.PDFTBSDataProcessor;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.sql.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Test data
  */
@@ -89,5 +109,54 @@ public class TestData {
       + "8L2RzOlNpZ25lZEluZm8+";
 
   public static String signatureId01 = "id-87db0dfc8e58c29471da934c194910b3";
+
+
+  public static String fixXAdESSigTime(String adesObjectB64) {
+    return fixXAdESSigTime(adesObjectB64, Instant.now());
+  }
+
+  public static String fixXAdESSigTime(String adesObjectB64, Instant time) {
+    String adesObject = new String(Base64.decode(adesObjectB64), StandardCharsets.UTF_8);
+    Pattern sigTimePattern = Pattern.compile("xades:SigningTime>\\S+</xades:SigningTime");
+    Matcher matcher = sigTimePattern.matcher(adesObject);
+    if (matcher.find()){
+      String sigTimeData = matcher.group(0);
+      String nowTimeString = DateTimeFormatter.ISO_OFFSET_DATE_TIME.withZone(ZoneId.systemDefault()).format(time);
+      String fixedAdesObject = adesObject.replace(sigTimeData, "xades:SigningTime>" + nowTimeString + "</xades:SigningTime");
+      return Base64.toBase64String(fixedAdesObject.getBytes(StandardCharsets.UTF_8));
+    }
+    return adesObjectB64;
+  }
+
+  public static String fixCMSSigTime(String signedAttrB64) throws IOException {
+    return fixCMSSigTime(signedAttrB64, Instant.now());
+  }
+
+  public static String fixCMSSigTime(String signedAttrB64, Instant time) throws IOException {
+    return fixCMSSigTime(signedAttrB64, time, false);
+  }
+
+  public static String fixCMSSigTime(String signedAttrB64, Instant time, boolean insertError) throws IOException {
+    List<Attribute> attributes = PDFTBSDataProcessor.parseSignedAttributeBytes(Base64.decode(signedAttrB64));
+    ASN1EncodableVector valueSetVector = new ASN1EncodableVector();
+    DERUTCTime fixedTime = new DERUTCTime(Date.from(time));
+    if (insertError) {
+      // Generate error by inserting an OID instead of a time element
+      valueSetVector.add(CMSAttributes.signingTime);
+    } else {
+      // Insert time
+      valueSetVector.add(fixedTime);
+    }
+    Attribute fixedSigningTimeAttr = new Attribute(CMSAttributes.signingTime, new DERSet(valueSetVector));
+    List<Attribute> fixedAttributeList = PDFTBSDataProcessor.replaceAttribute(attributes, CMSAttributes.signingTime,
+      fixedSigningTimeAttr);
+    ASN1EncodableVector attributeSetVector = new ASN1EncodableVector();
+    for (Attribute fixedAttr : fixedAttributeList){
+      attributeSetVector.add(fixedAttr);
+    }
+    String fixedB64SignedAttr = Base64.toBase64String(new DERSet(attributeSetVector).getEncoded(ASN1Encoding.DER));
+    return fixedB64SignedAttr;
+  }
+
 
 }

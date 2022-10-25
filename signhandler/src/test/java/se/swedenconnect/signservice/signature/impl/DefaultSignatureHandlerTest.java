@@ -27,12 +27,17 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -344,21 +349,21 @@ public class DefaultSignatureHandlerTest {
         getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
             getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES,
                 TestData.signatureId01,
-                TestData.tbsDataXmlAdes01, null))),
+                TestData.fixXAdESSigTime(TestData.reqAdesObject01), null))),
         null, null);
 
     checkRequirementsTestInstance("Conflicting algorithms", handler,
         getSignRequest(TestAlgorithms.getEcdsaSha256(), List.of(
             getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES,
                 TestData.signatureId01,
-                TestData.tbsDataXmlAdes01, null))),
+                TestData.fixXAdESSigTime(TestData.reqAdesObject01), null))),
         null, InvalidRequestException.class);
 
     checkRequirementsTestInstance("No algorithm", handler,
         getSignRequest(null, List.of(
             getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES,
                 TestData.signatureId01,
-                TestData.tbsDataXmlAdes01, null))),
+                TestData.fixXAdESSigTime(TestData.reqAdesObject01), null))),
         null, InvalidRequestException.class);
 
     checkRequirementsTestInstance("No sign tasks", handler,
@@ -367,7 +372,7 @@ public class DefaultSignatureHandlerTest {
     checkRequirementsTestInstance("No signature Id in XML AdES request", handler,
         getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
             getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES, null,
-                TestData.tbsDataXmlAdes01, null))),
+              TestData.fixXAdESSigTime(TestData.reqAdesObject01), null))),
         null, InvalidRequestException.class);
 
     checkRequirementsTestInstance("Illegal XML request data", handler,
@@ -394,7 +399,7 @@ public class DefaultSignatureHandlerTest {
         getSignRequest(TestAlgorithms.getRsaSha256(), List.of(
             getRequestedSignatureTask(TestData.tbsDataXmlAdes01, SignatureType.XML, AdESType.BES,
                 TestData.signatureId01,
-                TestData.reqAdesObject01, null))),
+                TestData.fixXAdESSigTime(TestData.reqAdesObject01), null))),
         testRSACredential, null, null);
 
     signTestInstance("XML Signature, ECDSA-SAH256, BES with AdES object", handler,
