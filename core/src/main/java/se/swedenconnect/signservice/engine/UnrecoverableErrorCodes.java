@@ -35,6 +35,9 @@ public class UnrecoverableErrorCodes {
   /** The client is not not known to the SignService (i.e., is not registered). */
   public static final String UNKNOWN_CLIENT = ERROR_PREFIX + "unknown-client";
 
+  /** The content of the sign request message is incorrect. */
+  public static final String INVALID_MESSAGE_CONTENT = ERROR_PREFIX + "message-content";
+
   /** Replay-attack detected. */
   public static final String REPLAY_ATTACK = ERROR_PREFIX + "replay-attack-detected";
 
@@ -45,8 +48,6 @@ public class UnrecoverableErrorCodes {
 
   /** A request received could not be successfully decoded. */
   public static final String PROTOCOL_ERROR = ERROR_PREFIX + "protocol-error";
-
-  // TODO: Define more error codes
 
   /** Represents an state error. */
   public static final String STATE_ERROR = ERROR_PREFIX + "state-error";

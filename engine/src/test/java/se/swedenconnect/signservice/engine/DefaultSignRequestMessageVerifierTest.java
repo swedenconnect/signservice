@@ -22,6 +22,7 @@ import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -38,6 +39,8 @@ import se.swedenconnect.signservice.protocol.msg.MessageConditions;
  */
 public class DefaultSignRequestMessageVerifierTest {
 
+  private static final String SIGNSERVICE_ID = "https://www.example.com/signservice";
+
   private EngineContext context;
 
   private DefaultEngineConfiguration config;
@@ -51,12 +54,13 @@ public class DefaultSignRequestMessageVerifierTest {
 
     this.config = new DefaultEngineConfiguration();
     this.config.setName("Name");
+    this.config.setSignServiceId(SIGNSERVICE_ID);
     final DefaultClientConfiguration client = new DefaultClientConfiguration();
     client.setClientId("client");
     this.config.setClientConfiguration(client);
 
     this.msg = Mockito.mock(SignRequestMessage.class);
-    Mockito.when(this.msg.getSignServiceId()).thenReturn("id");
+    Mockito.when(this.msg.getSignServiceId()).thenReturn(SIGNSERVICE_ID);
     Mockito.when(this.msg.getClientId()).thenReturn("client");
     final ProtocolProcessingRequirements ppr = Mockito.mock(ProtocolProcessingRequirements.class);
     Mockito.when(ppr.getRequestSignatureRequirement())
@@ -91,6 +95,22 @@ public class DefaultSignRequestMessageVerifierTest {
       verifier.verifyMessage(this.msg, this.config, this.context);
     }).isInstanceOf(UnrecoverableSignServiceException.class)
         .hasMessageContaining("Unknown clientID - ");
+  }
+
+  @Test
+  public void testMismatchingSignServiceId() {
+    final DefaultSignRequestMessageVerifier verifier = new DefaultSignRequestMessageVerifier();
+    Mockito.when(this.msg.getSignServiceId()).thenReturn("https://other.signservice.com");
+    assertThatThrownBy(() -> {
+      verifier.verifyMessage(this.msg, this.config, this.context);
+    }).isInstanceOf(UnrecoverableSignServiceException.class)
+        .hasMessageContaining("Unexpected SignService ID in request");
+
+    // Should work, but never happens for OASIS DSS ext.
+    Mockito.when(this.msg.getSignServiceId()).thenReturn(null);
+    Assertions.assertDoesNotThrow(() -> {
+      verifier.verifyMessage(this.msg, this.config, this.context);
+    });
   }
 
   @Test
