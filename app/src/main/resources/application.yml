@@ -140,7 +140,6 @@ signservice:
           - http://id.swedenconnect.se/contract/sc/eid-choice-2017
           - http://id.swedenconnect.se/general-ec/1.0/secure-authenticator-binding
           - http://id.swedenconnect.se/general-ec/1.0/accepts-coordination-number
-          authn-requests-signed: true
           requested-attributes:
           - name: urn:oid:1.2.752.29.4.13
             required: false

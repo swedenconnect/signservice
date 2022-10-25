@@ -56,11 +56,6 @@ public class MetadataConfiguration {
   private List<String> entityCategories;
 
   /**
-   * Whether AuthnRequest messages are signed by the SP. The default is true.
-   */
-  private Boolean authnRequestsSigned;
-
-  /**
    * Configuration for the UIInfo extension.
    */
   private UIInfoConfig uiInfo;

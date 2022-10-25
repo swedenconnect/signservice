@@ -145,7 +145,6 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     conf.getSpPaths().setAdditionalAssertionConsumerPath("/saml/additional");
 
     final MetadataConfiguration md = new MetadataConfiguration();
-    md.setAuthnRequestsSigned(true);
     md.setEntityCategories(Arrays.asList("http://id.elegnamnden.se/st/1.0/sigservice",
       "http://id.elegnamnden.se/ec/1.0/loa3-pnr"));
     md.setServiceNames(Arrays.asList(new LocalizedString("demo", Locale.ENGLISH)));
