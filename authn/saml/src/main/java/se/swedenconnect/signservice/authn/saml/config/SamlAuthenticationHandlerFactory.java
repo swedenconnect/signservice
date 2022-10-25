@@ -54,6 +54,7 @@ import se.swedenconnect.opensaml.saml2.request.DefaultAuthnRequestGenerator;
 import se.swedenconnect.opensaml.saml2.response.ResponseProcessor;
 import se.swedenconnect.opensaml.saml2.response.ResponseProcessorImpl;
 import se.swedenconnect.opensaml.saml2.response.replay.MessageReplayChecker;
+import se.swedenconnect.opensaml.saml2.response.validation.ResponseValidationSettings;
 import se.swedenconnect.opensaml.sweid.saml2.request.SwedishEidAuthnRequestGenerator;
 import se.swedenconnect.opensaml.sweid.saml2.signservice.SignMessageEncrypter;
 import se.swedenconnect.opensaml.sweid.saml2.validation.SwedishEidResponseProcessorImpl;
@@ -261,10 +262,7 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
       final SPSSODescriptor desc = builder.object().getSPSSODescriptor(SAMLConstants.SAML20P_NS);
 
       // Want assertions signed?
-      final Boolean wantAssertionsSigned = config.getResponseValidation() != null
-          ? config.getResponseValidation().isRequireSignedAssertions()
-          : null;
-      desc.setWantAssertionsSigned(wantAssertionsSigned);
+      desc.setWantAssertionsSigned(config.getRequireSignedAssertions());
 
       // Is AuthnRequest messages signed?
       desc.setAuthnRequestsSigned(Optional.ofNullable(config.getSignAuthnRequests()).orElse(true));
@@ -439,7 +437,14 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     processor.setMessageReplayChecker(messageReplayChecker);
     processor.setMetadataResolver(metadataProvider.getMetadataResolver());
     processor.setRequireEncryptedAssertions(Optional.ofNullable(config.getRequireEncryptedAssertions()).orElse(true));
-    processor.setResponseValidationSettings(config.getResponseValidation());
+
+    final ResponseValidationSettings validationSettings = new ResponseValidationSettings();
+    validationSettings.setAllowedClockSkew(this.getValidationConfig().getAllowedClockSkew());
+    validationSettings.setMaxAgeResponse(this.getValidationConfig().getMaxMessageAge());
+    if (config.getRequireSignedAssertions() != null) {
+      validationSettings.setRequireSignedAssertions(config.getRequireSignedAssertions().booleanValue());
+    }
+    processor.setResponseValidationSettings(validationSettings);
     try {
       processor.initialize();
     }

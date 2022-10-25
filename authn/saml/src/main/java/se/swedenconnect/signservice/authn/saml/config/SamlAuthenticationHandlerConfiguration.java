@@ -25,7 +25,6 @@ import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
-import se.swedenconnect.opensaml.saml2.response.validation.ResponseValidationSettings;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.core.config.AbstractHandlerConfiguration;
 import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
@@ -128,18 +127,18 @@ public class SamlAuthenticationHandlerConfiguration
   private Boolean signAuthnRequests;
 
   /**
-   * Whether encrypted assertions are required. The default is {@code true}
+   * Whether encrypted assertions are required. The default is {@code true}.
    */
   @Setter
   @Getter
   private Boolean requireEncryptedAssertions;
 
   /**
-   * Response validation settings.
+   * Whether signed assertions are required. The default is {@code false}.
    */
   @Setter
   @Getter
-  private ResponseValidationSettings responseValidation;
+  private Boolean requireSignedAssertions;
 
   /**
    * The preferred SAML binding to use when sending authenticaion requests. Possible values are "redirect" and "post".

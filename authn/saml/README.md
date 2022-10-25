@@ -79,7 +79,7 @@ Below follows a description of [SamlAuthenticationHandlerConfiguration](https://
 | `message-replay-checker-ref` | A bean name reference to a ([MessageReplayChecker](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/storage/MessageReplayChecker.java)) bean. Mutually exclusive with `message-replay-checker` above. Also see the configuration of the application setting `signservice.message-replay-checker-bean-name` in the [Application Configuration](https://docs.swedenconnect.se/signservice/configuration.html#application-configuration) section. | - |
 | `sign-authn-requests` | Boolean telling whether SAML authentication requests should be signed. | `true` |
 | `require-encrypted-assertions` | Boolean telling whether we require SAML assertions to be encrypted. | `true` |
-| `response-validation.*` | Configuration for response validation. See [Response Validation Configuration](#response-validation-configuration) below. | See default values under [Response Validation Configuration](#response-validation-configuration). |
+| `require-signed-assertions` | Boolean telling whether we require SAML assertions to be signed. <br />Note that the response message is generally signed. | `false` |
 | `preferred-binding` | Tells which binding that should be preferred when sending the authentication request. Possible values are `redirect` and `post`. | `redirect` |
 
 <a name="saml-sp-url-configuration"></a>
@@ -93,13 +93,6 @@ Under the configuration key `sp-paths` a set of URLs for the SAML SP are configu
 | `assertion-consumer-path` | The path to where the SP receives SAML responses. Relative `base-url`. Must begin with a `/`. | Mandatory. No default value. |
 | `additional-assertion-consumer-path` | Optional additional path for receiving SAML responses. Relative to `base-url`. May be useful when testing and debugging. | - |
 | `metadata-publishing-path` | The path to where the SP exposes its metadata. Relative to `base-url`. Must begin with a `/`. | Mandatory. No default value. |
-
-<a name="response-validation-configuration"></a>
-#### Response Validation Configuration
-
-Configuration used when validating a SAML response message.
-
-> Note: Currently the [ResponseValidationSettings](https://github.com/swedenconnect/opensaml-addons/blob/main/src/main/java/se/swedenconnect/opensaml/saml2/response/validation/ResponseValidationSettings.java) from the [opensaml-addons](https://github.com/swedenconnect/opensaml-addons) repository is used. We should introduce our own configuration class for this.
 
 <a name="metadata-provider-configuration"></a>
 #### Metadata Provider Configuration

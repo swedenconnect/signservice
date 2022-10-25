@@ -28,6 +28,7 @@ import se.swedenconnect.opensaml.saml2.response.replay.MessageReplayChecker;
 import se.swedenconnect.signservice.config.audit.AuditLoggerConfigurationProperties;
 import se.swedenconnect.signservice.config.common.CommonBeansConfigurationProperties;
 import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
+import se.swedenconnect.signservice.core.config.ValidationConfiguration;
 import se.swedenconnect.signservice.session.SessionHandler;
 import se.swedenconnect.signservice.session.impl.DefaultSessionHandler;
 import se.swedenconnect.signservice.storage.impl.DefaultMessageReplayChecker;
@@ -58,10 +59,20 @@ public class DefaultSignServiceConfigurationProperties implements SignServiceCon
   private String defaultSignServiceId;
 
   /**
-   * Configuration for the SignService default credential. By setting this, several engines may share the same credential.
+   * Configuration for the SignService default credential. By setting this, several engines may share the same
+   * credential.
    */
   @Setter
   private PkiCredentialConfiguration defaultCredential;
+
+  /**
+   * Configuration for application wide validation settings.
+   * <p>
+   * If no validation settings are configured a default instance of {@link ValidationConfiguration} will be used.
+   * </p>
+   */
+  @Setter
+  private ValidationConfiguration validationConfig;
 
   /**
    * Common beans configuration.
@@ -140,6 +151,13 @@ public class DefaultSignServiceConfigurationProperties implements SignServiceCon
   /** {@inheritDoc} */
   @Override
   @Nullable
+  public ValidationConfiguration getValidationConfig() {
+    return this.validationConfig;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @Nullable
   public CommonBeansConfigurationProperties getCommonBeans() {
     return this.commonBeans;
   }
@@ -196,6 +214,10 @@ public class DefaultSignServiceConfigurationProperties implements SignServiceCon
     if (StringUtils.isBlank(this.baseUrl)) {
       throw new IllegalArgumentException("signservice.base-url must be set");
     }
+    if (this.validationConfig == null) {
+      this.validationConfig = new ValidationConfiguration();
+    }
+    this.validationConfig.init();
     if (this.systemAudit == null) {
       throw new IllegalArgumentException("signservice.system-audit.* must be set");
     }

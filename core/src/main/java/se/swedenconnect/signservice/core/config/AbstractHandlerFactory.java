@@ -82,4 +82,14 @@ public abstract class AbstractHandlerFactory<T extends SignServiceHandler> imple
    */
   protected abstract Class<T> getHandlerType();
 
+  /**
+   * Gets the application wide {@link ValidationConfiguration} object.
+   *
+   * @return the ValidationConfiguration
+   */
+  @Nonnull
+  protected ValidationConfiguration getValidationConfig() {
+    return ValidationConfigurationSingleton.getConfig();
+  }
+
 }
