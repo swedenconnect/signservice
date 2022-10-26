@@ -41,6 +41,9 @@ public class UnrecoverableErrorCodes {
   /** Replay-attack detected. */
   public static final String REPLAY_ATTACK = ERROR_PREFIX + "replay-attack-detected";
 
+  /** A time-stamp check failed. */
+  public static final String TIMESTAMP_ERROR = ERROR_PREFIX + "time-stamp";
+
   /**
    * A request received from the client could not be validated, i.e., its signature failed to verify.
    */
