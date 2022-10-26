@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.MessageDigest;
 import java.security.SignatureException;
+import java.time.Instant;
 import java.util.Date;
 
 import org.apache.xml.security.binding.xmldsig.ObjectType;
@@ -99,7 +100,7 @@ class XMLTBSDataProcessorTest {
       .description("Default request with input AdES object")
       .sigType(SignatureType.XML).adESType(AdESType.BES).processingRules(null)
       .tbsData(TestData.tbsDataXmlAdes01)
-      .requestAdesObject(TestData.reqAdesObject01)
+      .requestAdesObject(TestData.fixXAdESSigTime(TestData.reqAdesObject01))
       .signatureId(TestData.signatureId01)
       .credential(testRSACredential)
       .signatureAlgorithm(TestAlgorithms.getRsaSha256())
@@ -109,7 +110,7 @@ class XMLTBSDataProcessorTest {
       .description("RSA signing request with wrong algorithm")
       .sigType(SignatureType.XML).adESType(AdESType.BES).processingRules(null)
       .tbsData(TestData.tbsDataXmlAdes01)
-      .requestAdesObject(TestData.reqAdesObject01)
+      .requestAdesObject(TestData.fixXAdESSigTime(TestData.reqAdesObject01))
       .signatureId(TestData.signatureId01)
       .credential(testRSACredential)
       .signatureAlgorithm(TestAlgorithms.getRsaPssSha384())
@@ -148,7 +149,7 @@ class XMLTBSDataProcessorTest {
       .description("Remove V1 Signing Certificate ref")
       .sigType(SignatureType.XML).adESType(AdESType.BES).processingRules(null)
       .tbsData(TestData.tbsDataXmlAdes01)
-      .requestAdesObject(reqAdesObjectWithV1CertRef)
+      .requestAdesObject(TestData.fixXAdESSigTime(reqAdesObjectWithV1CertRef))
       .signatureId(TestData.signatureId01)
       .credential(testRSACredential)
       .signatureAlgorithm(TestAlgorithms.getRsaSha256())
@@ -203,6 +204,34 @@ class XMLTBSDataProcessorTest {
       .tbsData(TestData.tbsDataXmlAdes01)
       .credential(testECCredential)
       .signatureAlgorithm(TestAlgorithms.getEcdsaSha256())
+      .exception(SignatureException.class)
+      .build());
+  }
+
+  @Test void toOldSignningTimeTest() throws Exception {
+    Instant signingTime = Instant.now().minusSeconds(250);
+    testCase(TestInput.builder()
+      .description("Signing time to old")
+      .sigType(SignatureType.XML).adESType(AdESType.BES).processingRules(null)
+      .tbsData(TestData.tbsDataXmlAdes01)
+      .requestAdesObject(TestData.fixXAdESSigTime(TestData.reqAdesObject01, signingTime))
+      .signatureId(TestData.signatureId01)
+      .credential(testRSACredential)
+      .signatureAlgorithm(TestAlgorithms.getRsaSha256())
+      .exception(SignatureException.class)
+      .build());
+  }
+
+  @Test void futureSignningTimeTest() throws Exception {
+    Instant signingTime = Instant.now().plusSeconds(50);
+    testCase(TestInput.builder()
+      .description("Future signing time")
+      .sigType(SignatureType.XML).adESType(AdESType.BES).processingRules(null)
+      .tbsData(TestData.tbsDataXmlAdes01)
+      .requestAdesObject(TestData.fixXAdESSigTime(TestData.reqAdesObject01, signingTime))
+      .signatureId(TestData.signatureId01)
+      .credential(testRSACredential)
+      .signatureAlgorithm(TestAlgorithms.getRsaSha256())
       .exception(SignatureException.class)
       .build());
   }

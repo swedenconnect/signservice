@@ -19,13 +19,32 @@ import java.io.Serializable;
 
 /**
  * Representation of an AdES object.
+ *
+ * <p>
+ *   The AdES Object is an optional object that carries AdES information associated with a signature.
+ *   This is relevant for XAdES signatures where the AdES data is provided in an XMLSignature object.
+ *   The type of data provided in the AdES object is defined by each signature type.
+ * </p>
  */
 public interface AdESObject extends Serializable {
 
-  // TODO: Stefan. Provide documentation
+  /**
+   * The ID of the signature this AdESObject is associated with if relevant.
+   *
+   * <p>
+   *   Some AdES profiles requires the AdES object to refer to the signature it is associated with. This is
+   *   relevant for XAdES signatures.
+   * </p>
+   *
+   * @return The ID of the associated signature
+   */
   String getSignatureId();
 
-  // TODO: Stefan. Provide documentation
+  /**
+   * Getter for AdES object data
+   *
+   * @return AdES object data
+   */
   byte[] getObjectBytes();
 
 }

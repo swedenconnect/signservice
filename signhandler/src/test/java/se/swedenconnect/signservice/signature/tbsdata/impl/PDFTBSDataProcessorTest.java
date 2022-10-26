@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.security.SignatureException;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -195,7 +196,7 @@ class PDFTBSDataProcessorTest {
 
     testCasePddTbsDataProcessor("No PAdES signature with signing time and strict", tdpStrict,
       getRequestedSignatureTask(
-        TestData.tbsDataPdf01, SignatureType.PDF, null, null),
+        TestData.fixCMSSigTime(TestData.tbsDataPdf01), SignatureType.PDF, null, null),
       testECCredential,
       TestAlgorithms.getEcdsaSha256(),
       null, null
@@ -219,15 +220,51 @@ class PDFTBSDataProcessorTest {
   }
 
   @Test
+  public void testOldSigningTime() throws Exception {
+    Instant signingTime = Instant.now().minusSeconds(250);
+    testCasePddTbsDataProcessor("Testing PDF signing with too old signing time", tdpStrict,
+      getRequestedSignatureTask(
+        TestData.fixCMSSigTime(TestData.tbsDataPdf01, signingTime), SignatureType.PDF, null, null),
+      testECCredential,
+      TestAlgorithms.getEcdsaSha256(),
+      null, SignatureException.class
+    );
+  }
+
+  @Test
+  public void testFutureSigningTime() throws Exception {
+    Instant signingTime = Instant.now().plusSeconds(50);
+    testCasePddTbsDataProcessor("Testing PDF signing with future signing time", tdpStrict,
+      getRequestedSignatureTask(
+        TestData.fixCMSSigTime(TestData.tbsDataPdf01, signingTime), SignatureType.PDF, null, null),
+      testECCredential,
+      TestAlgorithms.getEcdsaSha256(),
+      null, SignatureException.class
+    );
+  }
+
+  @Test
+  public void testBadSigningTime() throws Exception {
+
+    testCasePddTbsDataProcessor("Testing PDF signing with bad signing time", tdpStrict,
+      getRequestedSignatureTask(
+        TestData.fixCMSSigTime(TestData.tbsDataPdf01, Instant.now(), true), SignatureType.PDF, null, null),
+      testECCredential,
+      TestAlgorithms.getEcdsaSha256(),
+      null, SignatureException.class
+    );
+  }
+
+  @Test
   public void generalStaticFunctionTests() throws Exception {
     Exception e = assertThrows(IOException.class, () -> PDFTBSDataProcessor.parseSignedAttributeBytes(new byte[] {}));
     log.info("Caught exception parsing illegal tbs data {}", e.toString());
 
     List<Attribute> attributes = PDFTBSDataProcessor.parseSignedAttributeBytes(Base64.decode(TestData.tbsDataPdf01));
-    Date cmsSigningTime = PDFTBSDataProcessor.getCmsSigningTime(attributes);
+    Date cmsSigningTime = PDFTBSDataProcessor.getCmsSigningTime(
+      PDFTBSDataProcessor.getAttribute(CMSAttributes.signingTime, attributes));
     log.info("Found signing time: {} - {} ms since epoch", cmsSigningTime, cmsSigningTime.getTime());
     assertEquals(1654724214000L, cmsSigningTime.getTime());
-
   }
 
   private void testCasePddTbsDataProcessor(String message, PDFTBSDataProcessor pdftbsDataProcessor,

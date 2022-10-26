@@ -17,6 +17,8 @@ package se.swedenconnect.signservice.signature.tbsdata.impl;
 
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -28,6 +30,7 @@ import javax.annotation.Nullable;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
+import se.swedenconnect.signservice.core.config.ValidationConfiguration;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.signature.AdESObject;
 import se.swedenconnect.signservice.signature.AdESType;
@@ -59,6 +62,17 @@ public abstract class AbstractTBSDataProcessor implements TBSDataProcessor {
 
   /** Supported processing rules */
   private final List<String> supportedProcessingRules;
+
+  /** The clock skew that we accept during checks of time stamps. */
+  @Setter
+  protected Duration allowedClockSkew = ValidationConfiguration.DEFAULT_ALLOWED_CLOCK_SKEW;
+
+  /**
+   * The maximum amount of time that has passed since a message we are receiving was sent. This is based on the
+   * message's "created-at" property (or similar).
+   */
+  @Setter
+  protected Duration maxMessageAge = ValidationConfiguration.DEFAULT_MAX_MESSAGE_AGE;
 
   /**
    * Constructor.
@@ -95,6 +109,27 @@ public abstract class AbstractTBSDataProcessor implements TBSDataProcessor {
         log.debug("Null requested processing rule is accepted among supported processing rules. {}",
             this.supportedProcessingRules);
       }
+    }
+  }
+
+  /**
+   * Check signing time provided in the sign request
+   *
+   * @param signingTime signing time
+   * @throws InvalidRequestException
+   */
+  protected void checkSigningTime(@Nonnull final Instant signingTime) throws InvalidRequestException {
+    final Instant now = Instant.now();
+    // Maximum time into the future  allowed for signing time.
+    final Instant notAfter = now.plusMillis(this.allowedClockSkew.toMillis());
+    // Maximum time in the past allowed for signing time.
+    final Instant notBefore = now.minusMillis(this.maxMessageAge.toMillis())
+      .minusMillis(this.allowedClockSkew.toMillis());
+    if (signingTime.isAfter(notAfter)){
+      throw new InvalidRequestException("Signature request contains an illegal signing time (future date)");
+    }
+    if (signingTime.isBefore(notBefore)){
+      throw new InvalidRequestException("Signature request contains an illegal signing time (too old)");
     }
   }
 

@@ -24,6 +24,7 @@ import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Objects;
@@ -176,6 +177,18 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
             .orElseThrow(() -> new InvalidRequestException("Signature ID must not be null in a XAdES signature"));
       }
 
+      // Checking any present signing time if it is too old or not yet valid
+      if (adESObject != null && adESObject.getObjectBytes() != null) {
+        final Document adesObjectDocument = DOMUtils.bytesToDocument(adESObject.getObjectBytes());
+        final ObjectType adesObjectType = JAXBUnmarshaller.unmarshall(adesObjectDocument, ObjectType.class);
+        final XadesQualifyingProperties xadesObject = new XadesQualifyingProperties(adesObjectType);
+        // We only care about signing time if is set
+        if (xadesObject.getSigningTime() != null) {
+          // A signing time is present, check that it is current.
+          this.checkSigningTime(Instant.ofEpochMilli(xadesObject.getSigningTime()));
+        }
+      }
+
       final Document tbsDocument = DOMUtils.bytesToDocument(tbsData);
       final SignedInfoType signedInfo = JAXBUnmarshaller.unmarshall(tbsDocument, SignedInfoType.class);
 
@@ -201,7 +214,7 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
       }
 
     }
-    catch (final JAXBException | NoSuchAlgorithmException | IOException | InternalXMLException e) {
+    catch (final JAXBException | NoSuchAlgorithmException | IOException | InternalXMLException | SignatureException e) {
       throw new InvalidRequestException(e.getMessage(), e);
     }
   }

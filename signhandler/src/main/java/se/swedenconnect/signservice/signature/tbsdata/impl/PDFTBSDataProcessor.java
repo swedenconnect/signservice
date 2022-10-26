@@ -135,12 +135,15 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
       log.debug("TBS input has required signed attributes");
 
       // Test signing time
-      if (isAttributePresent(CMSAttributes.signingTime, signedAttributes)) {
+      Attribute signingTimeAttribute = getAttribute(CMSAttributes.signingTime, signedAttributes);
+      if (signingTimeAttribute != null) {
         if (ades) {
           if (this.isStrictProcessing()) {
             throw new InvalidRequestException("Signing time is not allowed in PAdES requests in strict processing");
           }
         }
+        // Test if signing time is current
+        this.checkSigningTime(getCmsSigningTime(signingTimeAttribute).toInstant());
       }
     }
     catch (final IOException e) {
@@ -380,19 +383,33 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
   }
 
   /**
-   * Check if a particular attribute is present in the list of attributes.
+   * Predicament testing if a particular attribute is present in an attribute list
+   *
+   * @param attributeOid attribute OID
+   * @param attributeList list of attributes
+   * @return true if the attribute is present in the attribute list.
+   */
+  public static boolean isAttributePresent(@Nullable final ASN1ObjectIdentifier attributeOid,
+    @Nullable final List<Attribute> attributeList) {
+    return getAttribute(attributeOid, attributeList) != null;
+  }
+
+  /**
+   * Get a particular attribute is present in the list of attributes.
    *
    * @param attributeOid target attribute OID
    * @param attributeList list of attributes to examine
-   * @return true if the target attribute OID is present in the attribute list
+   * @return attribute with specified OID from the attribute list if present or null
    */
-  public static boolean isAttributePresent(@Nullable final ASN1ObjectIdentifier attributeOid,
+  public static Attribute getAttribute(@Nullable final ASN1ObjectIdentifier attributeOid,
       @Nullable final List<Attribute> attributeList) {
     if (attributeOid == null || attributeList == null) {
-      return false;
+      return null;
     }
     return attributeList.stream()
-        .anyMatch(attribute -> attributeOid.equals(attribute.getAttrType()));
+      .filter(attribute -> attributeOid.equals(attribute.getAttrType()))
+      .findFirst()
+      .orElse(null);
   }
 
   /**
@@ -431,24 +448,19 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
   /**
    * Get the signing time in CMS signed attributes data if present.
    *
-   * @param signedAttributes CMS signed attributes
-   * @return signing time if present or null
-   * @throws IOException if the input data contains illegal ASN.1
+   * @param signingTimeAttribute CMS signing time attribute
+   * @return signing time in the signing time attribute
+   * @throws IOException if the input contains illegal data
    */
-  public static Date getCmsSigningTime(@Nonnull final List<Attribute> signedAttributes) throws IOException {
-    for (final Attribute attr : signedAttributes) {
-      if (CMSAttributes.signingTime.equals(attr.getAttrType())) {
-        try {
-          final ASN1Encodable[] attributeValues = attr.getAttributeValues();
-          final ASN1UTCTime time = ASN1UTCTime.getInstance(attributeValues[0]);
-          return time.getAdjustedDate();
-        }
-        catch (final ParseException e) {
-          throw new IOException("Illegal date in signed attributes", e);
-        }
-      }
+  public static Date getCmsSigningTime(@Nonnull final Attribute signingTimeAttribute) throws IOException {
+    try {
+      final ASN1Encodable[] attributeValues = signingTimeAttribute.getAttributeValues();
+      final ASN1UTCTime time = ASN1UTCTime.getInstance(attributeValues[0]);
+      return time.getAdjustedDate();
     }
-    return null;
+    catch (final ParseException | IllegalArgumentException | NullPointerException e) {
+      throw new IOException("Illegal time information in the provided signing time attribute", e);
+    }
   }
 
 }
