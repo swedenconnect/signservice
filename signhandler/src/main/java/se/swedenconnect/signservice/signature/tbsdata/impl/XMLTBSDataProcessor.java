@@ -178,7 +178,7 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
       }
 
       // Checking any present signing time if it is too old or not yet valid
-      if (adESObject != null && adESObject.getObjectBytes() != null){
+      if (adESObject != null && adESObject.getObjectBytes() != null) {
         final Document adesObjectDocument = DOMUtils.bytesToDocument(adESObject.getObjectBytes());
         final ObjectType adesObjectType = JAXBUnmarshaller.unmarshall(adesObjectDocument, ObjectType.class);
         final XadesQualifyingProperties xadesObject = new XadesQualifyingProperties(adesObjectType);

@@ -142,11 +142,10 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
           }
         }
         // Test if signing time is current
-        this.checkSigningTime(Objects.requireNonNull(getCmsSigningTime(signedAttributes),
-          "Null signing time with present signing time attribute").toInstant());
+        this.checkSigningTime(getCmsSigningTime(signedAttributes).toInstant());
       }
     }
-    catch (final IOException | IllegalArgumentException e) {
+    catch (final IOException e) {
       throw new InvalidRequestException(e.getMessage());
     }
   }
@@ -446,12 +445,12 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
           final ASN1UTCTime time = ASN1UTCTime.getInstance(attributeValues[0]);
           return time.getAdjustedDate();
         }
-        catch (final ParseException e) {
+        catch (final ParseException | IllegalArgumentException | NullPointerException e) {
           throw new IOException("Illegal date in signed attributes", e);
         }
       }
     }
-    return null;
+    throw new IOException("No signing time present in provided signed attributes");
   }
 
 }
