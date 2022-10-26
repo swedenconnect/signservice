@@ -261,10 +261,10 @@ class PDFTBSDataProcessorTest {
     log.info("Caught exception parsing illegal tbs data {}", e.toString());
 
     List<Attribute> attributes = PDFTBSDataProcessor.parseSignedAttributeBytes(Base64.decode(TestData.tbsDataPdf01));
-    Date cmsSigningTime = PDFTBSDataProcessor.getCmsSigningTime(attributes);
+    Date cmsSigningTime = PDFTBSDataProcessor.getCmsSigningTime(
+      PDFTBSDataProcessor.getAttribute(CMSAttributes.signingTime, attributes));
     log.info("Found signing time: {} - {} ms since epoch", cmsSigningTime, cmsSigningTime.getTime());
     assertEquals(1654724214000L, cmsSigningTime.getTime());
-
   }
 
   private void testCasePddTbsDataProcessor(String message, PDFTBSDataProcessor pdftbsDataProcessor,
