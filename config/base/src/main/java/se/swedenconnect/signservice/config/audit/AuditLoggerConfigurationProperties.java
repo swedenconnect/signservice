@@ -24,6 +24,7 @@ import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.actuator.ActuatorAuditLoggerConfiguration;
+import se.swedenconnect.signservice.audit.callback.CallbackAuditLoggerConfiguration;
 import se.swedenconnect.signservice.audit.file.FileAuditLoggerConfiguration;
 import se.swedenconnect.signservice.audit.logsystem.LogSystemAuditLoggerConfiguration;
 import se.swedenconnect.signservice.config.HandlerConfigurationProperties;
@@ -55,6 +56,13 @@ public class AuditLoggerConfigurationProperties implements HandlerConfigurationP
   private LogSystemAuditLoggerConfiguration logSystem;
 
   /**
+   * Configuration for audit logging using callbacks to a listener.
+   */
+  @Getter
+  @Setter
+  private CallbackAuditLoggerConfiguration callback;
+
+  /**
    * Configuration for using Spring Boot's actuator for audit logging.
    */
   @Getter
@@ -80,6 +88,7 @@ public class AuditLoggerConfigurationProperties implements HandlerConfigurationP
   public HandlerConfiguration<AuditLogger> getHandlerConfiguration() throws IllegalArgumentException {
     final int noAssigned =
         (this.external != null ? 1 : 0) + (this.file != null ? 1 : 0) + (this.logSystem != null ? 1 : 0)
+            + (this.callback != null ? 1 : 0)
             + (this.actuator != null && Optional.ofNullable(this.actuator.getActive()).orElse(true) ? 1 : 0);
     if (noAssigned > 1) {
       throw new IllegalArgumentException("Several audit configurations supplied, only one can be assigned");
@@ -89,8 +98,9 @@ public class AuditLoggerConfigurationProperties implements HandlerConfigurationP
     }
     return this.file != null ? this.file
         : this.logSystem != null ? this.logSystem
-            : this.actuator != null && Optional.ofNullable(this.actuator.getActive()).orElse(true) ? this.actuator
-                : this.external;
+            : this.callback != null ? this.callback
+                : this.actuator != null && Optional.ofNullable(this.actuator.getActive()).orElse(true) ? this.actuator
+                    : this.external;
   }
 
   /** {@inheritDoc} */
@@ -103,6 +113,9 @@ public class AuditLoggerConfigurationProperties implements HandlerConfigurationP
     else if ("log-system".equalsIgnoreCase(name) || "logSystem".equalsIgnoreCase(name)
         || "LOG_SYSTEM".equalsIgnoreCase(name)) {
       return this.logSystem;
+    }
+    else if ("callback".equalsIgnoreCase(name)) {
+      return this.callback;
     }
     else if ("actuator".equalsIgnoreCase(name)) {
       return this.actuator;

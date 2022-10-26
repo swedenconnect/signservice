@@ -37,7 +37,7 @@ import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
  * </p>
  */
 @Slf4j
-public class LogSystemAuditLogger extends AbstractAuditLogger implements AuditLogger {
+public class LogSystemAuditLogger extends AbstractAuditLogger {
 
   /** The logger instance. */
   private final Logger auditLogger;

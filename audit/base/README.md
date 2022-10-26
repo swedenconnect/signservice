@@ -9,7 +9,7 @@
 
 ## About
 
-The `signservice-audit-base` module contains implementations for a simple file based audit logger and an implementation that uses an underlying log system.
+The `signservice-audit-base` module contains implementations for a simple file based audit logger, an implementation that uses an underlying log system and a callback logger.
 
 <a name="file-audit-logger"></a>
 ## FileAuditLogger
@@ -75,6 +75,24 @@ The [LogSystemAuditLoggerConfiguration](https://github.com/swedenconnect/signser
 | :--- | :--- |
 | `principal` | The default principal to assign to audit events. It should be equal to the clientID that the audit logger is servicing. If the audit logger is a system logger, the string "SignService" should be used. | 
 | `logger-name` | The logger name to use for the log system audit logger. |
+
+<a name="callback-audit-logger"></a>
+## CallbackAuditLogger
+
+The [CallbackAuditLogger](https://github.com/swedenconnect/signservice/blob/main/audit/base/src/main/java/se/swedenconnect/signservice/audit/callback/CallbackAuditLogger.java) is an implementation that offers an application
+to define an [AuditLoggerListener](https://github.com/swedenconnect/signservice/blob/main/audit/base/src/main/java/se/swedenconnect/signservice/audit/callback/AuditLoggerListener.java) that will be handed all events logged by the
+audit logger. This provides for great flexibility and the implementation of the listener can log in any way that the
+application developer wants.
+
+### Configuration
+
+The [CallbackAuditLoggerConfiguration](https://github.com/swedenconnect/signservice/blob/main/audit/base/src/main/java/se/swedenconnect/signservice/audit/callback/CallbackAuditLoggerConfiguration.java) class describes the configuration for a [CallbackAuditLogger](https://github.com/swedenconnect/signservice/blob/main/audit/base/src/main/java/se/swedenconnect/signservice/audit/callback/CallbackAuditLogger.java) instance.
+
+| Property | Description |
+| :--- | :--- |
+| `principal` | The default principal to assign to audit events. It should be equal to the clientID that the audit logger is servicing. If the audit logger is a system logger, the string "SignService" should be used. | 
+| `listener` | An [AuditLoggerListener](https://github.com/swedenconnect/signservice/blob/main/audit/base/src/main/java/se/swedenconnect/signservice/audit/callback/AuditLoggerListener.java) instance. Mutually exclusive with `listener-ref`. |
+| `listener-ref` | The name of a bean referring to an [AuditLoggerListener](https://github.com/swedenconnect/signservice/blob/main/audit/base/src/main/java/se/swedenconnect/signservice/audit/callback/AuditLoggerListener.java) instance. Mutually exclusive with `listener`. |
 
 -----
 
