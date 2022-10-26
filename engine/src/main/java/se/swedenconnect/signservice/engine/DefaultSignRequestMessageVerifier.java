@@ -57,6 +57,20 @@ public class DefaultSignRequestMessageVerifier implements SignRequestMessageVeri
           UnrecoverableErrorCodes.UNKNOWN_CLIENT, "Unknown clientID - " + signRequestMessage.getClientId());
     }
 
+    // Check that the message is intended for "me" ...
+    //
+    if (signRequestMessage.getSignServiceId() != null) {
+      if (!signRequestMessage.getSignServiceId().equals(configuration.getSignServiceId())) {
+        log.info("{} Invalid SignService ID is request ({}) - expected {} [id: '{}']",
+            configuration.getName(), signRequestMessage.getSignServiceId(), configuration.getSignServiceId(),
+            context.getId());
+
+        throw new UnrecoverableSignServiceException(
+            UnrecoverableErrorCodes.INVALID_MESSAGE_CONTENT,
+            "Unexpected SignService ID in request - " + signRequestMessage.getSignServiceId());
+      }
+    }
+
     // Next, check the signature on the message ...
     //
     final ProtocolProcessingRequirements processingRequirements = signRequestMessage.getProcessingRequirements();
@@ -110,8 +124,8 @@ public class DefaultSignRequestMessageVerifier implements SignRequestMessageVeri
           throw new SignServiceErrorException(new SignServiceError(SignServiceErrorCode.REQUEST_EXPIRED, null, msg));
         }
       }
-      else if ((now.toEpochMilli() - issuedAt.toEpochMilli())
-          > (this.maxMessageAge.toMillis() + this.allowedClockSkew.toMillis())) {
+      else if ((now.toEpochMilli() - issuedAt.toEpochMilli()) > (this.maxMessageAge.toMillis()
+          + this.allowedClockSkew.toMillis())) {
 
         log.info("{}: The received sign request message has expired [id: '{}', request-id: '{}']",
             configuration.getName(), context.getId(), signRequestMessage.getRequestId());
