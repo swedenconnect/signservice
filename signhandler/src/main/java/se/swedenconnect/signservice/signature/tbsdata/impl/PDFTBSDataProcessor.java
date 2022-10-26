@@ -448,9 +448,8 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
   /**
    * Get the signing time in CMS signed attributes data if present.
    *
-   * @return signing time if present or null
    * @param signingTimeAttribute CMS signing time attribute
-   * @return signing time in the signing time attriubte
+   * @return signing time in the signing time attribute
    * @throws IOException if the input contains illegal data
    */
   public static Date getCmsSigningTime(@Nonnull final Attribute signingTimeAttribute) throws IOException {
