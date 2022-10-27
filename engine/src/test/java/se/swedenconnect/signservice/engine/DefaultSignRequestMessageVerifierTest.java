@@ -168,8 +168,8 @@ public class DefaultSignRequestMessageVerifierTest {
 
     assertThatThrownBy(() -> {
       verifier.verifyMessage(this.msg, this.config, this.context);
-    }).isInstanceOf(SignServiceErrorException.class)
-        .hasMessage(SignServiceErrorCode.REQUEST_EXPIRED.getDefaultMessage());
+    }).isInstanceOf(UnrecoverableSignServiceException.class)
+        .hasMessageContaining("The issued-at field of the sign request indicates that the message is not yet valid");
   }
 
   @Test
@@ -193,8 +193,8 @@ public class DefaultSignRequestMessageVerifierTest {
 
     assertThatThrownBy(() -> {
       verifier.verifyMessage(this.msg, this.config, this.context);
-    }).isInstanceOf(SignServiceErrorException.class)
-        .hasMessage(SignServiceErrorCode.REQUEST_EXPIRED.getDefaultMessage());
+    }).isInstanceOf(UnrecoverableSignServiceException.class)
+        .hasMessage("The received sign request message exceeds the maximum allowed age of messages");
   }
 
   @Test

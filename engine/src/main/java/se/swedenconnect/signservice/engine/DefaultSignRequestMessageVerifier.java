@@ -124,16 +124,17 @@ public class DefaultSignRequestMessageVerifier implements SignRequestMessageVeri
           log.info("{}: {} [id: '{}', request-id: '{}']",
               configuration.getName(), msg, context.getId(), signRequestMessage.getRequestId());
 
-          throw new SignServiceErrorException(new SignServiceError(SignServiceErrorCode.REQUEST_EXPIRED, null, msg));
+          throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.TIMESTAMP_ERROR, msg);
         }
       }
       else if ((now.toEpochMilli() - issuedAt.toEpochMilli()) > (this.maxMessageAge.toMillis()
           + this.allowedClockSkew.toMillis())) {
 
-        log.info("{}: The received sign request message exceeds the maximum allowed age of messages [id: '{}', request-id: '{}']",
-            configuration.getName(), context.getId(), signRequestMessage.getRequestId());
+        final String msg = "The received sign request message exceeds the maximum allowed age of messages";
+        log.info("{}: {} [id: '{}', request-id: '{}']", msg, configuration.getName(), context.getId(),
+            signRequestMessage.getRequestId());
 
-        throw new SignServiceErrorException(new SignServiceError(SignServiceErrorCode.REQUEST_EXPIRED));
+        throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.TIMESTAMP_ERROR, msg);
       }
     }
 
