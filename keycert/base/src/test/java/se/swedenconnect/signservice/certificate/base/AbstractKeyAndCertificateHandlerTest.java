@@ -81,6 +81,8 @@ import se.swedenconnect.signservice.certificate.attributemapping.DefaultAttribut
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyChecker;
 import se.swedenconnect.signservice.certificate.base.utils.TestUtils;
 import se.swedenconnect.signservice.certificate.base.utils.X509DnNameType;
+import se.swedenconnect.signservice.context.DefaultSignServiceContext;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
@@ -90,8 +92,6 @@ import se.swedenconnect.signservice.protocol.msg.CertificateAttributeMapping;
 import se.swedenconnect.signservice.protocol.msg.RequestedCertificateAttribute;
 import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
-import se.swedenconnect.signservice.session.SignServiceContext;
-import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 
 /**
  * Tests for AbstractKeyAndCertificateHandler and AbstractCaEngineKeyAndCertificateHandler.

@@ -37,6 +37,7 @@ import se.swedenconnect.signservice.audit.AuditEventParameter;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerException;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
@@ -54,10 +55,16 @@ public class DefaultSignServiceEngineManagerTest {
     Mockito.when(msg.getUrl()).thenReturn("https://www.example.com/response");
     Mockito.when(msg.getMethod()).thenReturn("GET");
 
+    final SignServiceContext context = Mockito.mock(SignServiceContext.class);
+
+    final SignServiceProcessingResult result = Mockito.mock(SignServiceProcessingResult.class);
+    Mockito.when(result.getSignServiceContext()).thenReturn(context);
+    Mockito.when(result.getHttpRequestMessage()).thenReturn(msg);
+
     final SignServiceEngine engine = Mockito.mock(SignServiceEngine.class);
     Mockito.when(engine.getName()).thenReturn("ENGINE");
     Mockito.when(engine.canProcess(Mockito.any())).thenReturn(true);
-    Mockito.when(engine.processRequest(Mockito.any(), Mockito.any())).thenReturn(msg);
+    Mockito.when(engine.processRequest(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(result);
 
     final TestAuditLogger audit = new TestAuditLogger();
 
@@ -77,9 +84,9 @@ public class DefaultSignServiceEngineManagerTest {
     Assertions.assertEquals(AuditEventIds.EVENT_SYSTEM_STARTED, audit.events.get(0).getId());
     Assertions.assertTrue(audit.events.get(0).getParameters().isEmpty());
 
-    final HttpRequestMessage result = manager.processRequest(request, response);
-    Assertions.assertEquals("GET", result.getMethod());
-    Assertions.assertEquals("https://www.example.com/response", result.getUrl());
+    final SignServiceProcessingResult presult = manager.processRequest(request, response, context);
+    Assertions.assertEquals("GET", presult.getHttpRequestMessage().getMethod());
+    Assertions.assertEquals("https://www.example.com/response", presult.getHttpRequestMessage().getUrl());
   }
 
   @Test
@@ -90,10 +97,16 @@ public class DefaultSignServiceEngineManagerTest {
     Mockito.when(msg.getMethod()).thenReturn("POST");
     Mockito.when(msg.getHttpParameters()).thenReturn(Map.of("p1", "v1", "p2", "v2"));
 
+    final SignServiceContext context = Mockito.mock(SignServiceContext.class);
+
+    final SignServiceProcessingResult result = Mockito.mock(SignServiceProcessingResult.class);
+    Mockito.when(result.getSignServiceContext()).thenReturn(context);
+    Mockito.when(result.getHttpRequestMessage()).thenReturn(msg);
+
     final SignServiceEngine engine = Mockito.mock(SignServiceEngine.class);
     Mockito.when(engine.getName()).thenReturn("ENGINE");
     Mockito.when(engine.canProcess(Mockito.any())).thenReturn(true);
-    Mockito.when(engine.processRequest(Mockito.any(), Mockito.any())).thenReturn(msg);
+    Mockito.when(engine.processRequest(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(result);
 
     final AuditLogger audit = Mockito.mock(AuditLogger.class);
 
@@ -106,10 +119,10 @@ public class DefaultSignServiceEngineManagerTest {
 
     final DefaultSignServiceEngineManager manager = new DefaultSignServiceEngineManager(Arrays.asList(engine), audit);
 
-    final HttpRequestMessage result = manager.processRequest(request, response);
-    Assertions.assertEquals("POST", result.getMethod());
-    Assertions.assertEquals("https://www.example.com/response", result.getUrl());
-    Assertions.assertEquals(Map.of("p1", "v1", "p2", "v2"), result.getHttpParameters());
+    final SignServiceProcessingResult presult = manager.processRequest(request, response, context);
+    Assertions.assertEquals("POST", presult.getHttpRequestMessage().getMethod());
+    Assertions.assertEquals("https://www.example.com/response", result.getHttpRequestMessage().getUrl());
+    Assertions.assertEquals(Map.of("p1", "v1", "p2", "v2"), result.getHttpRequestMessage().getHttpParameters());
   }
 
   @Test
@@ -118,7 +131,8 @@ public class DefaultSignServiceEngineManagerTest {
     final SignServiceEngine engine = Mockito.mock(SignServiceEngine.class);
     Mockito.when(engine.getName()).thenReturn("ENGINE");
     Mockito.when(engine.canProcess(Mockito.any())).thenReturn(true);
-    Mockito.when(engine.processRequest(Mockito.any(), Mockito.any())).thenReturn(null);
+    Mockito.when(engine.processRequest(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(
+        new DefaultSignServiceProcessingResult(null, null));
 
     final TestAuditLogger audit = new TestAuditLogger();
 
@@ -131,7 +145,8 @@ public class DefaultSignServiceEngineManagerTest {
 
     final DefaultSignServiceEngineManager manager = new DefaultSignServiceEngineManager(Arrays.asList(engine), audit);
 
-    Assertions.assertNull(manager.processRequest(request, response));
+    final SignServiceProcessingResult result = manager.processRequest(request, response, null);
+    Assertions.assertNull(result.getHttpRequestMessage());
   }
 
   @Test
@@ -140,7 +155,8 @@ public class DefaultSignServiceEngineManagerTest {
     final SignServiceEngine engine = Mockito.mock(SignServiceEngine.class);
     Mockito.when(engine.getName()).thenReturn("ENGINE");
     Mockito.when(engine.canProcess(Mockito.any())).thenReturn(true);
-    Mockito.when(engine.processRequest(Mockito.any(), Mockito.any())).thenReturn(null);
+    Mockito.when(engine.processRequest(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(
+        new DefaultSignServiceProcessingResult(null, null));
 
     final TestAuditLogger audit = new TestAuditLogger();
 
@@ -155,7 +171,7 @@ public class DefaultSignServiceEngineManagerTest {
     final DefaultSignServiceEngineManager manager = new DefaultSignServiceEngineManager(Arrays.asList(engine), audit);
 
     assertThatThrownBy(() -> {
-      manager.processRequest(request, response);
+      manager.processRequest(request, response, null);
     }).isInstanceOf(UnrecoverableSignServiceException.class)
         .hasMessageContaining("Failed to write resource")
         .extracting((e) -> ((UnrecoverableSignServiceException) e).getErrorCode())
@@ -171,7 +187,8 @@ public class DefaultSignServiceEngineManagerTest {
     final SignServiceEngine engine = Mockito.mock(SignServiceEngine.class);
     Mockito.when(engine.getName()).thenReturn("ENGINE");
     Mockito.when(engine.canProcess(Mockito.any())).thenReturn(true);
-    Mockito.when(engine.processRequest(Mockito.any(), Mockito.any())).thenThrow(new UnrecoverableSignServiceException("ERROR", "error"));
+    Mockito.when(engine.processRequest(Mockito.any(), Mockito.any(), Mockito.any()))
+      .thenThrow(new UnrecoverableSignServiceException("ERROR", "error"));
 
     final TestAuditLogger audit = new TestAuditLogger();
 
@@ -186,7 +203,7 @@ public class DefaultSignServiceEngineManagerTest {
     final DefaultSignServiceEngineManager manager = new DefaultSignServiceEngineManager(Arrays.asList(engine), audit);
 
     assertThatThrownBy(() -> {
-      manager.processRequest(request, response);
+      manager.processRequest(request, response, null);
     }).isInstanceOf(UnrecoverableSignServiceException.class)
         .hasMessage("error")
         .extracting((e) -> ((UnrecoverableSignServiceException) e).getErrorCode())
@@ -215,7 +232,7 @@ public class DefaultSignServiceEngineManagerTest {
     final DefaultSignServiceEngineManager manager = new DefaultSignServiceEngineManager(Arrays.asList(engine), audit);
 
     assertThatThrownBy(() -> {
-      manager.processRequest(request, response);
+      manager.processRequest(request, response, null);
     }).isInstanceOf(UnrecoverableSignServiceException.class)
         .hasMessage("No such resource")
         .extracting((e) -> ((UnrecoverableSignServiceException) e).getErrorCode())

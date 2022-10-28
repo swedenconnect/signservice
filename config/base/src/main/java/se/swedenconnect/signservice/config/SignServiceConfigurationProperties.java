@@ -26,8 +26,6 @@ import se.swedenconnect.signservice.config.audit.AuditLoggerConfigurationPropert
 import se.swedenconnect.signservice.config.common.CommonBeansConfigurationProperties;
 import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
 import se.swedenconnect.signservice.core.config.ValidationConfiguration;
-import se.swedenconnect.signservice.session.SessionHandler;
-import se.swedenconnect.signservice.session.impl.DefaultSessionHandler;
 import se.swedenconnect.signservice.storage.impl.DefaultMessageReplayChecker;
 import se.swedenconnect.signservice.storage.impl.InMemoryReplayCheckerStorageContainer;
 import se.swedenconnect.signservice.storage.impl.ReplayCheckerStorageContainer;
@@ -106,15 +104,6 @@ public interface SignServiceConfigurationProperties {
    */
   @Nonnull
   AuditLoggerConfigurationProperties getSystemAudit();
-
-  /**
-   * Gets the bean name of the {@link SessionHandler} that should be used by the SignService application. If not
-   * assigned, a {@link DefaultSessionHandler} instance will be used.
-   *
-   * @return the session handler
-   */
-  @Nullable
-  String getSessionHandlerBeanName();
 
   /**
    * Refers to a {@link MessageReplayChecker} bean that will be used by the application to detect message replay

@@ -43,8 +43,8 @@ import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * CMC based key and certificate handler obtaining certificates from a remote CA using CMC.

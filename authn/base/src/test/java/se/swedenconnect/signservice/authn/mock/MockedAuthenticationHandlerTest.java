@@ -27,10 +27,10 @@ import se.swedenconnect.signservice.authn.AuthenticationResult;
 import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
 import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.authn.impl.SimpleAuthnContextIdentifier;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultAuthnRequirements;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * Test cases for MockedAuthenticationHandler.

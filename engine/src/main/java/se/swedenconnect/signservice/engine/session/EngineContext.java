@@ -21,9 +21,9 @@ import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
+import se.swedenconnect.signservice.context.DefaultSignServiceContext;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
-import se.swedenconnect.signservice.session.SignServiceContext;
-import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 
 /**
  * The {@code EngineContext} is a wrapper for the {@link SignServiceContext} that declares methods for context elements
@@ -57,6 +57,9 @@ public class EngineContext {
    */
   public EngineContext(final SignServiceContext context) {
     this.context = Objects.requireNonNull(context, "context must not be null");
+    if (!this.isActive()) {
+      throw new IllegalStateException("Invalid context - it is not valid");
+    }
   }
 
   /**
@@ -74,6 +77,20 @@ public class EngineContext {
   }
 
   /**
+   * Marks the context as non-active, i.e., terminated.
+   */
+  public void terminateContext() {
+    this.updateState(SignOperationState.TERMINATED);
+  }
+
+  /**
+   * Will reset the context to a new context.
+   */
+  public void resetContext() {
+    this.context = createSignServiceContext();
+  }
+
+  /**
    * Gets the ID of the wrapped SignService context.
    *
    * @return the ID
@@ -88,7 +105,7 @@ public class EngineContext {
    * @return the SignService context
    */
   public SignServiceContext getContext() {
-    return this.context;
+    return this.isActive() ? this.context : null;
   }
 
   /**
@@ -112,6 +129,9 @@ public class EngineContext {
 
     if (newState == SignOperationState.NEW) {
       throw new IllegalStateException("Illegal state transition - Cannot set state to NEW");
+    }
+    if (currentState == SignOperationState.TERMINATED && newState != SignOperationState.TERMINATED) {
+      throw new IllegalStateException("Illegal state transition - State is terminated");
     }
     if (currentState == SignOperationState.SIGNING && newState == SignOperationState.AUTHN_ONGOING) {
       throw new IllegalStateException("Illegal state transition - Cannot go backwards in state transitions");
@@ -174,6 +194,15 @@ public class EngineContext {
    */
   public Boolean getSignMessageDisplayed() {
     return this.context.get(SIGN_MESSAGE_DISPLAYED_KEY, Boolean.class);
+  }
+
+  /**
+   * Predicate that tells whether this context is active or not
+   *
+   * @return true if the context is active and false otherwise
+   */
+  private boolean isActive() {
+    return this.getState() != SignOperationState.TERMINATED;
   }
 
 }

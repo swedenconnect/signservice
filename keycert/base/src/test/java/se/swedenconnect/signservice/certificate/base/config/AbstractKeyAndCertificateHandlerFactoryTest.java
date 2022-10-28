@@ -48,11 +48,11 @@ import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappin
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyCheckerImpl;
 import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration.DefaultValuePolicyCheckerConfiguration;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * Test cases for AbstractKeyAndCertificateHandlerFactory.

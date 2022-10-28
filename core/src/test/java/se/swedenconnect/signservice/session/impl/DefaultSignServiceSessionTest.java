@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import se.swedenconnect.signservice.session.SignServiceContext;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.session.SignServiceSession;
 
 /**

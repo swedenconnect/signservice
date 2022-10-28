@@ -35,6 +35,8 @@ import org.apache.commons.lang.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.application.DefaultSignServiceProcessingResult;
+import se.swedenconnect.signservice.application.SignServiceProcessingResult;
 import se.swedenconnect.signservice.audit.AuditEventIds;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerSingleton;
@@ -42,6 +44,7 @@ import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
 import se.swedenconnect.signservice.authn.AuthenticationResult;
 import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
 import se.swedenconnect.signservice.authn.UserAuthenticationException;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
@@ -60,9 +63,6 @@ import se.swedenconnect.signservice.protocol.msg.CertificateAttributeMapping;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultSignerAuthnInfo;
-import se.swedenconnect.signservice.session.SessionHandler;
-import se.swedenconnect.signservice.session.SignServiceContext;
-import se.swedenconnect.signservice.session.SignServiceSession;
 import se.swedenconnect.signservice.signature.CompletedSignatureTask;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureHandler;
@@ -78,9 +78,6 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   /** The engine's configuration. */
   private final EngineConfiguration engineConfiguration;
 
-  /** The session handler. */
-  private final SessionHandler sessionHandler;
-
   /** The message replay checker. */
   private final MessageReplayChecker messageReplayChecker;
 
@@ -94,17 +91,14 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
    * Constructor.
    *
    * @param engineConfiguration the engine configuration
-   * @param sessionHandler the session handler to use
    * @param messageReplayChecker the message replay checker
    * @param systemAuditLogger the system audit logger
    */
   public DefaultSignServiceEngine(
       final EngineConfiguration engineConfiguration,
-      final SessionHandler sessionHandler,
       final MessageReplayChecker messageReplayChecker,
       final AuditLogger systemAuditLogger) {
     this.engineConfiguration = Objects.requireNonNull(engineConfiguration, "engineConfiguration must not be null");
-    this.sessionHandler = Objects.requireNonNull(sessionHandler, "sessionHandler must not be null");
     this.messageReplayChecker = Objects.requireNonNull(messageReplayChecker, "messageReplayChecker must not be null");
     this.systemAuditLogger = Objects.requireNonNull(systemAuditLogger, "systemAuditLogger must not be null");
   }
@@ -134,8 +128,9 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   /** {@inheritDoc} */
   @Override
   @Nullable
-  public HttpRequestMessage processRequest(
-      @Nonnull final HttpServletRequest httpRequest, @Nonnull final HttpServletResponse httpResponse)
+  public SignServiceProcessingResult processRequest(
+      @Nonnull final HttpServletRequest httpRequest, @Nonnull final HttpServletResponse httpResponse,
+      @Nullable final SignServiceContext signServiceContext)
       throws UnrecoverableSignServiceException {
 
     log.debug("{}: Received request [path: '{}', client-ip: '{}']",
@@ -156,7 +151,8 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
         log.debug("{}: Getting resource ... [path: '{}']",
             this.getName(), httpRequest.getRequestURI());
         resourceProvider.getResource(httpRequest, httpResponse);
-        return null;
+        // TODO
+        return new DefaultSignServiceProcessingResult(signServiceContext, null);
       }
       catch (final IOException e) {
         log.info("{}: Error getting HTTP resource '{}' - {}",
@@ -170,12 +166,15 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
     //
     EngineContext context = null;
     try {
-      context = this.getContext(httpRequest);
+      context = this.setupContext(signServiceContext);
 
       if (this.isSignRequestEndpoint(httpRequest)) {
         if (context.getState() == SignOperationState.NEW) {
           // Initiate new operation ...
-          return this.processSignRequest(httpRequest, context);
+
+          // TODO
+          final HttpRequestMessage res = this.processSignRequest(httpRequest, context);
+          return new DefaultSignServiceProcessingResult(context.getContext(), res);
         }
         else if (context.getState() == SignOperationState.AUTHN_ONGOING) {
           // OK, it seems that we have received a SignRequest in a session that is not
@@ -192,7 +191,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
               .map(SignRequestMessage::getRequestId)
               .orElseGet(() -> "-");
 
-          context = this.resetContext(httpRequest);
+          context.resetContext();
           log.info("{}: New context has been created [id: '{}']", this.getName(), context.getId());
 
           this.engineConfiguration.getAuditLogger().auditLog(AuditEventIds.EVENT_ENGINE_SESSION_RESET, (b) -> b
@@ -201,7 +200,9 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
               .parameter("abandoned-request-id", previousSignRequestId)
               .build());
 
-          return this.processSignRequest(httpRequest, context);
+          // TODO
+          final HttpRequestMessage res = this.processSignRequest(httpRequest, context);
+          return new DefaultSignServiceProcessingResult(context.getContext(), res);
         }
         // else: We are in state "SIGNING", and this is really odd. It must mean that the
         // user after he/she has authenticated has opened a new web browser tab and initiated
@@ -210,10 +211,13 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
       }
       else if (context.getState() == SignOperationState.AUTHN_ONGOING) {
         try {
-          return this.resumeAuthentication(httpRequest, context);
+          // TODO
+          final HttpRequestMessage res = this.resumeAuthentication(httpRequest, context);
+          return new DefaultSignServiceProcessingResult(context.getContext(), res);
         }
         catch (final SignServiceErrorException e) {
-          return this.sendErrorResponse(httpRequest, context, e.getError());
+          final HttpRequestMessage res = this.sendErrorResponse(httpRequest, context, e.getError());
+          return new DefaultSignServiceProcessingResult(context.getContext(), res);
         }
       }
       log.info("{}: State error - Engine is is '{}' state. Can not process request '{}' [id: '{}']",
@@ -240,7 +244,9 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
               .parameter("error-message", e.getMessage())
               .build());
 
-      this.removeContext(httpRequest);
+      if (context != null) {
+        context.terminateContext();
+      }
       throw e;
     }
   }
@@ -417,7 +423,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
               .build());
 
       // Clean up the context
-      this.removeContext(httpRequest);
+      context.terminateContext();
 
       return result;
     }
@@ -757,7 +763,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
 
       // Clear the sign service context ...
       //
-      this.removeContext(httpRequest);
+      context.terminateContext();
 
       return result;
     }
@@ -811,44 +817,30 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   }
 
   /**
-   * Given a HTTP request the method gets an {@link EngineContext}.
+   * Given a {@link SignServiceContext} the method sets up an {@link EngineContext}.
+   * <p>
+   * If the supplied context is terminated, a new {@link SignServiceContext} object is created.
+   * This helps applications that does not manage sessions correctly to function anyway.
+   * </p>
    *
-   * @param httpRequest the HTTP request
+   * @param signServiceContext the SignService context, or null
    * @return an engine context
    */
-  protected EngineContext getContext(final HttpServletRequest httpRequest) {
-    final SignServiceSession session = this.sessionHandler.getSession(httpRequest);
-    SignServiceContext context = session.getSignServiceContext();
-    if (context == null) {
-      context = EngineContext.createSignServiceContext();
+  protected EngineContext setupContext(@Nullable final SignServiceContext signServiceContext) {
+    final String id = Optional.ofNullable(signServiceContext).map(SignServiceContext::getId).orElse(null);
+    try {
+      final SignServiceContext context = Optional.ofNullable(signServiceContext)
+          .orElseGet(() -> EngineContext.createSignServiceContext());
+      return new EngineContext(context);
     }
-    session.setSignServiceContext(context);
-    return new EngineContext(context);
-  }
+    catch (final IllegalStateException e) {
+      log.info("{}: Supplied context is terminated [id: '{}']", this.getName(), id);
 
-  /**
-   * Given a HTTP request the method removed the current SignService context.
-   *
-   * @param httpRequest the HTTP request
-   */
-  protected void removeContext(final HttpServletRequest httpRequest) {
-    final SignServiceSession session = this.sessionHandler.getSession(httpRequest, false);
-    if (session != null) {
-      session.removeSignServiceContext();
+      final SignServiceContext newContext = EngineContext.createSignServiceContext();
+      log.info("{}: New context created [id: '{}']", this.getName(), newContext.getId());
+
+      return new EngineContext(newContext);
     }
-  }
-
-  /**
-   * Resets the SignService context. Needed if we abandon an already started context.
-   *
-   * @param httpRequest the HTTP request
-   * @return a new engine context
-   */
-  protected EngineContext resetContext(final HttpServletRequest httpRequest) {
-    final SignServiceContext context = EngineContext.createSignServiceContext();
-    final SignServiceSession session = this.sessionHandler.getSession(httpRequest);
-    session.setSignServiceContext(context);
-    return new EngineContext(context);
   }
 
   /**

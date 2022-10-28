@@ -46,9 +46,9 @@ import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * A simple key and certificate handler.

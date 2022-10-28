@@ -32,6 +32,7 @@ import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.application.DefaultSignServiceEngineManager;
+import se.swedenconnect.signservice.application.SignServiceEngineManager;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerConfiguration;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
@@ -47,11 +48,8 @@ import se.swedenconnect.signservice.core.config.ValidationConfiguration;
 import se.swedenconnect.signservice.engine.DefaultSignRequestMessageVerifier;
 import se.swedenconnect.signservice.engine.DefaultSignServiceEngine;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
-import se.swedenconnect.signservice.engine.SignServiceEngineManager;
 import se.swedenconnect.signservice.engine.config.DefaultEngineConfiguration;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
-import se.swedenconnect.signservice.session.SessionHandler;
-import se.swedenconnect.signservice.session.impl.DefaultSessionHandler;
 import se.swedenconnect.signservice.signature.SignatureHandler;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
 import se.swedenconnect.signservice.storage.impl.DefaultMessageReplayChecker;
@@ -66,9 +64,6 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
 
   /** The bean name used if the factory creates and registers a {@link MessageReplayChecker} bean. */
   public static final String MESSAGE_REPLAY_CHECKER_BEAN_NAME = "signservice.MessageReplayChecker";
-
-  /** The bean name used if the factory creates and registers a {@link SessionHandler} bean. */
-  public static final String DEFAULT_SESSION_HANDLER_BEAN_NAME = "signservice.SessionHandler";
 
   /** The handler factory registry. */
   private final HandlerFactoryRegistry handlerFactoryRegistry;
@@ -147,22 +142,6 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
       log.info("Registering MessageReplayChecker bean with name '{}'", MESSAGE_REPLAY_CHECKER_BEAN_NAME);
       bRegistrator.registerBean(
           MESSAGE_REPLAY_CHECKER_BEAN_NAME, MessageReplayChecker.class, messageReplayChecker);
-    }
-
-    // Session handler
-    //
-    SessionHandler sessionHandler = null;
-    if (configuration.getSessionHandlerBeanName() != null) {
-      log.info("Loading bean {} ...", configuration.getSessionHandlerBeanName());
-      sessionHandler = bLoader.load(configuration.getSessionHandlerBeanName(), SessionHandler.class);
-    }
-    else {
-      log.info("No SessionHandler bean provided, using DefaultSessionHandler");
-      sessionHandler = new DefaultSessionHandler();
-
-      // Register this bean ...
-      log.info("Registering SessionHandler bean with name '{}'", DEFAULT_SESSION_HANDLER_BEAN_NAME);
-      bRegistrator.registerBean(DEFAULT_SESSION_HANDLER_BEAN_NAME, SessionHandler.class, sessionHandler);
     }
 
     // System audit logger
@@ -292,7 +271,7 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
       conf.init();
 
       final DefaultSignServiceEngine engine =
-          new DefaultSignServiceEngine(conf, sessionHandler, messageReplayChecker, systemAuditLogger);
+          new DefaultSignServiceEngine(conf, messageReplayChecker, systemAuditLogger);
       final DefaultSignRequestMessageVerifier verifier = new DefaultSignRequestMessageVerifier();
       verifier.setAllowedClockSkew(validationConfig.getAllowedClockSkew());
       verifier.setMaxMessageAge(validationConfig.getMaxMessageAge());

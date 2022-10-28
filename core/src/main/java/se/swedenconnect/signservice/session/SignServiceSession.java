@@ -21,6 +21,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import se.swedenconnect.signservice.context.SignServiceContext;
+
 /**
  * A representation of a session. The {@code SignServiceSession} is basically the same as {@link HttpSession}, but since
  * we don't want to get stuck in a particular session implementation, we introduce this session abstraction.

@@ -15,6 +15,8 @@
  */
 package se.swedenconnect.signservice.session;
 
+import se.swedenconnect.signservice.context.SignServiceContext;
+
 /**
  * Singleton that holds a session object in thread local storage (TLS). This object will be initiated by the SignService
  * Engine and may be used by SignService modules that need access to other session attributes than

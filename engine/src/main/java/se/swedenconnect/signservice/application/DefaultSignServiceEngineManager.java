@@ -28,9 +28,9 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.audit.AuditEventIds;
 import se.swedenconnect.signservice.audit.AuditLogger;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
-import se.swedenconnect.signservice.engine.SignServiceEngineManager;
 import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
 import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
 
@@ -62,9 +62,10 @@ public class DefaultSignServiceEngineManager implements SignServiceEngineManager
 
   /** {@inheritDoc} */
   @Override
-  @Nullable
-  public HttpRequestMessage processRequest(
-      @Nonnull final HttpServletRequest request, @Nonnull final HttpServletResponse response)
+  @Nonnull
+  public SignServiceProcessingResult processRequest(
+      @Nonnull final HttpServletRequest request, @Nonnull final HttpServletResponse response,
+      @Nullable final SignServiceContext signServiceContext)
       throws UnrecoverableSignServiceException {
 
     log.debug("Received {} request [path: '{}', client-ip: '{}']",
@@ -93,23 +94,25 @@ public class DefaultSignServiceEngineManager implements SignServiceEngineManager
     // Hand the request over to the engine ...
     //
     try {
-      final HttpRequestMessage result = engine.processRequest(request, response);
+      final SignServiceProcessingResult result = engine.processRequest(request, response, signServiceContext);
 
-      if (result == null) {
+      if (result.getHttpRequestMessage() == null) {
         // If the result from the processing is null, it means that the engine, or any of its
         // sub-components, has served a resource and written it to the HttpServletResponse. All we
         // have to do now is commit the response ...
         //
         log.debug("Engine '{}' has served resource, flushing buffer ...", engine.getName());
         response.flushBuffer();
-        return null;
+        return result;
       }
       else {
-        if ("GET".equals(result.getMethod())) {
-          log.debug("Engine '{}' redirecting to: {}", engine.getName(), result.getUrl());
+        final HttpRequestMessage resultMessage = result.getHttpRequestMessage();
+
+        if ("GET".equals(resultMessage.getMethod())) {
+          log.debug("Engine '{}' redirecting to: {}", engine.getName(), resultMessage.getUrl());
         }
         else {
-          log.debug("Engine '{}' posting to: {}", engine.getName(), result.getUrl());
+          log.debug("Engine '{}' posting to: {}", engine.getName(), resultMessage.getUrl());
         }
         return result;
       }

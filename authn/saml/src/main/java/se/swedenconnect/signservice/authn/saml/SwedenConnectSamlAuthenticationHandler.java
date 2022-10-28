@@ -59,11 +59,11 @@ import se.swedenconnect.opensaml.sweid.saml2.signservice.sap.SADRequest;
 import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
 import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.authn.saml.config.SpUrlConfiguration;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * A SAML authentication handler that implements the SAML profiles stated in

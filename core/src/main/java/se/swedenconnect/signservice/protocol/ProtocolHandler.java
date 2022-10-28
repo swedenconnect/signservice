@@ -18,10 +18,10 @@ package se.swedenconnect.signservice.protocol;
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.SignServiceHandler;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.engine.SignServiceError;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * A handler interface for decoding and encoding Sign request and response messages.

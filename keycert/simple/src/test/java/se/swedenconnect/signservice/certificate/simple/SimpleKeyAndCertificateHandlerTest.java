@@ -69,6 +69,7 @@ import se.swedenconnect.signservice.certificate.attributemapping.DefaultAttribut
 import se.swedenconnect.signservice.certificate.simple.ca.BasicCAServiceBuilder;
 import se.swedenconnect.signservice.certificate.simple.ca.DefaultSelfSignedCaCertificateGenerator;
 import se.swedenconnect.signservice.certificate.simple.ca.SelfSignedCaCertificateGenerator;
+import se.swedenconnect.signservice.context.DefaultSignServiceContext;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
@@ -79,7 +80,6 @@ import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultCertificateAttributeMapping;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificateAttribute;
-import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 
 /**
  * Tests for the simple key and certificate handler

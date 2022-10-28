@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.session;
+package se.swedenconnect.signservice.context;
 
 import java.time.Instant;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 
 /**
  * Test cases for DefaultSignServiceContext.
@@ -35,9 +32,11 @@ public class DefaultSignServiceContextTest {
     context.put("Item2", Integer.valueOf(17));
     context.put("Item3", new String[] { "A", "B", "C" });
 
-    final DefaultSignServiceContext context2 = SerializationUtils.roundtrip(context);
+    final String encoding = context.serialize();
 
-    Assertions.assertEquals("ID1", context.getId());
+    final DefaultSignServiceContext context2 = DefaultSignServiceContext.deserialize(encoding);
+
+    Assertions.assertEquals("ID1", context2.getId());
     Assertions.assertEquals("Hejsan", context2.get("Item1"));
     Assertions.assertEquals(Integer.valueOf(17), context2.get("Item2"));
     Assertions.assertArrayEquals(new String[] { "A", "B", "C" }, context2.get("Item3"));

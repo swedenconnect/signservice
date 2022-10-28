@@ -38,12 +38,12 @@ import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.authn.impl.DefaultIdentityAssertion;
 import se.swedenconnect.signservice.authn.impl.SimpleAuthnContextIdentifier;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * A mocked authentication handler that may be used in testing scenarios.

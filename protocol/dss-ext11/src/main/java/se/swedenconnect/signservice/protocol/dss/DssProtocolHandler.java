@@ -30,6 +30,7 @@ import se.idsec.signservice.xml.DOMUtils;
 import se.idsec.signservice.xml.InternalXMLException;
 import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.dss_1_0.SignRequest;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.core.http.impl.DefaultHttpRequestMessage;
@@ -39,7 +40,6 @@ import se.swedenconnect.signservice.protocol.ProtocolHandler;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.SignResponseMessage;
 import se.swedenconnect.signservice.protocol.SignResponseResult;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * The {@link ProtocolHandler} implementation for sign request and response messages according to <a href=

@@ -26,6 +26,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 
 import lombok.Setter;
+import se.swedenconnect.signservice.application.SignServiceEngineManager;
 import se.swedenconnect.signservice.audit.actuator.ActuatorAuditLoggerFactory;
 import se.swedenconnect.signservice.config.BeanRegistrator;
 import se.swedenconnect.signservice.config.DefaultSignServiceFactory;
@@ -38,7 +39,6 @@ import se.swedenconnect.signservice.config.spring.converters.SignServiceConverte
 import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerFactoryRegistry;
 import se.swedenconnect.signservice.core.config.spring.SpringBeanLoader;
-import se.swedenconnect.signservice.engine.SignServiceEngineManager;
 
 /**
  * Main configuration for a SignService application.

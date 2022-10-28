@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.engine;
+package se.swedenconnect.signservice.application;
 
 import java.util.List;
 
@@ -23,7 +23,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import se.swedenconnect.signservice.audit.AuditLogger;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.engine.SignServiceEngine;
+import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
+import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
 
 /**
  * The SignService engine manager is responsible of routing every call to a matching engine and is seen as the main
@@ -48,12 +52,15 @@ public interface SignServiceEngineManager {
    *
    * @param request the HTTP servlet request
    * @param response the HTTP servlet response
-   * @return a HttpRequestMessage or null if a resource was written to the response parameter
+   * @param signServiceContext the SignService context (may be null if this is the first request in an signature
+   *          operation)
+   * @return TODO
    * @throws UnrecoverableSignServiceException for non-recoverable errors (should be displayed in an error view)
    */
-  @Nullable
-  HttpRequestMessage processRequest(
-      @Nonnull final HttpServletRequest request, @Nonnull final HttpServletResponse response)
+  @Nonnull
+  SignServiceProcessingResult processRequest(
+      @Nonnull final HttpServletRequest request, @Nonnull final HttpServletResponse response,
+      @Nullable final SignServiceContext signServiceContext)
       throws UnrecoverableSignServiceException;
 
   /**

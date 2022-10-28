@@ -18,6 +18,9 @@ import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import se.swedenconnect.signservice.application.SignServiceProcessingResult;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 
 /**
@@ -43,15 +46,15 @@ public interface SignServiceEngine {
    *
    * @param httpRequest the HTTP request
    * @param httpResponse the HTTP response
-   * @return a HttpRequestMessage that informs the calling application which HTTP message to send,
-   *         or null if the request processed was a request to a resource
+   * @return TODO
    * @throws UnrecoverableSignServiceException if a HTTP message can not be sent as a result of the
    *         processing. This can occur in cases when the engine can not successfully produce a
    *         response message to send
    */
-  @Nullable
-  HttpRequestMessage processRequest(
-      @Nonnull final HttpServletRequest httpRequest, @Nonnull final HttpServletResponse httpResponse) throws UnrecoverableSignServiceException;
+  @Nonnull
+  SignServiceProcessingResult processRequest(
+      @Nonnull final HttpServletRequest httpRequest, @Nonnull final HttpServletResponse httpResponse,
+      @Nullable final SignServiceContext signServiceContext) throws UnrecoverableSignServiceException;
 
   /**
    * A predicate that given a request tells whether this engine instance can process the request.

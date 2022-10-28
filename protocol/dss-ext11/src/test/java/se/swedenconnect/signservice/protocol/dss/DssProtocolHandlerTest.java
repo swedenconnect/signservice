@@ -32,13 +32,13 @@ import se.idsec.signservice.utils.ProtocolVersion;
 import se.idsec.signservice.xml.DOMUtils;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.engine.SignServiceError;
 import se.swedenconnect.signservice.engine.SignServiceErrorCode;
 import se.swedenconnect.signservice.protocol.ProtocolException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.SignResponseResult;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * Test cases for DssProtocolHandler
