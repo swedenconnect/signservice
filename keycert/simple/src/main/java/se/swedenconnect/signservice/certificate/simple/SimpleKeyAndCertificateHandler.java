@@ -28,7 +28,6 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
@@ -48,6 +47,7 @@ import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
 import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 
 /**
@@ -150,10 +150,10 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
 
   /** {@inheritDoc} */
   @Override
-  public void getResource(@Nonnull final HttpServletRequest httpRequest,
+  public void getResource(@Nonnull final HttpUserRequest httpRequest,
       @Nonnull final HttpServletResponse httpResponse) throws IOException {
 
-    log.debug("Request to download CRL [{}]", httpRequest.getRemoteAddr());
+    log.debug("Request to download CRL [{}]", httpRequest.getClientIpAddress());
 
     if (!this.supports(httpRequest)) {
       log.info("Invalid call to getResource on {}", this.getClass().getSimpleName());
@@ -176,11 +176,11 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
 
   /** {@inheritDoc} */
   @Override
-  public boolean supports(@Nonnull final HttpServletRequest httpRequest) {
+  public boolean supports(@Nonnull final HttpUserRequest httpRequest) {
     if (!"GET".equals(httpRequest.getMethod())) {
       return false;
     }
-    return this.crlPublishPath != null && this.crlPublishPath.equalsIgnoreCase(httpRequest.getServletPath());
+    return this.crlPublishPath != null && this.crlPublishPath.equalsIgnoreCase(httpRequest.getServerServletPath());
   }
 
 }

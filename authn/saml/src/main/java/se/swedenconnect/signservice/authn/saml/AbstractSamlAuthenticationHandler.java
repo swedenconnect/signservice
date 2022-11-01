@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
@@ -84,6 +83,7 @@ import se.swedenconnect.signservice.core.attribute.AttributeException;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
 
@@ -256,7 +256,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public AuthenticationResultChoice resumeAuthentication(@Nonnull final HttpServletRequest httpRequest,
+  public AuthenticationResultChoice resumeAuthentication(@Nonnull final HttpUserRequest httpRequest,
       @Nonnull final SignServiceContext context) throws UserAuthenticationException {
 
     log.debug("{}: Authentication handler '{}' received request to resume authentication (process response)",
@@ -377,7 +377,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
 
   /** {@inheritDoc} */
   @Override
-  public boolean canProcess(@Nonnull final HttpServletRequest httpRequest, @Nullable final SignServiceContext context) {
+  public boolean canProcess(@Nonnull final HttpUserRequest httpRequest, @Nullable final SignServiceContext context) {
     // If the request is received on any of the registered assertion consumer service URLs
     // AND we are waiting for a response message we return true, otherwise false.
     //
@@ -393,7 +393,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
       return false;
     }
 
-    final String requestPath = httpRequest.getServletPath();
+    final String requestPath = httpRequest.getServerServletPath();
     if (!(requestPath.equalsIgnoreCase(this.urlConfiguration.getAssertionConsumerPath())
         || (this.urlConfiguration.getAdditionalAssertionConsumerPath() != null
             && requestPath.equalsIgnoreCase(this.urlConfiguration.getAdditionalAssertionConsumerPath())))) {
@@ -413,10 +413,10 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
   /** {@inheritDoc} */
   @Override
   public void getResource(
-      @Nonnull final HttpServletRequest httpRequest, @Nonnull final HttpServletResponse httpResponse)
+      @Nonnull final HttpUserRequest httpRequest, @Nonnull final HttpServletResponse httpResponse)
       throws IOException {
 
-    log.debug("Request to download metadata from {}", httpRequest.getRemoteAddr());
+    log.debug("Request to download metadata from {}", httpRequest.getClientIpAddress());
 
     if (!this.supports(httpRequest)) {
       log.info("Invalid call to getResource on {}", this.getClass().getSimpleName());
@@ -459,11 +459,11 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
 
   /** {@inheritDoc} */
   @Override
-  public boolean supports(@Nonnull final HttpServletRequest httpRequest) {
+  public boolean supports(@Nonnull final HttpUserRequest httpRequest) {
     if (!"GET".equals(httpRequest.getMethod())) {
       return false;
     }
-    return httpRequest.getServletPath().equalsIgnoreCase(this.urlConfiguration.getMetadataPublishingPath());
+    return httpRequest.getServerServletPath().equalsIgnoreCase(this.urlConfiguration.getMetadataPublishingPath());
   }
 
   /**
@@ -588,17 +588,16 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
    *
    * @param authnRequest the AuthnRequest corresponding to the response
    * @param sentRelayState the RelayState that we sent along in the request (may be null)
-   * @param httpRequest the HTTP servlet request
+   * @param httpRequest the HTTP request
    * @param context the SignService context
    * @return a ResponseProcessingInput object
    */
   @Nonnull
   protected ResponseProcessingInput createResponseProcessingInput(
       @Nonnull AuthnRequest authnRequest, @Nullable String sentRelayState,
-      @Nonnull final HttpServletRequest httpRequest, @Nonnull final SignServiceContext context) {
+      @Nonnull final HttpUserRequest httpRequest, @Nonnull final SignServiceContext context) {
 
     final Instant received = Instant.now();
-    final String baseUrl = this.urlConfiguration.getBaseUrl();
 
     return new ResponseProcessingInput() {
 
@@ -617,7 +616,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
 
       @Override
       public String getReceiveURL() {
-        return baseUrl + httpRequest.getServletPath();
+        return httpRequest.getRequestUrl();
       }
 
       @Override
@@ -645,13 +644,13 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
    * The default implementation returns {@code null}.
    * </p>
    *
-   * @param httpRequest the HTTP servlet request
+   * @param httpRequest the HTTP request
    * @param context the SignService context.
    * @return a ValidationContext or null
    */
   @Nullable
   protected ValidationContext createValidationContext(
-      @Nonnull final HttpServletRequest httpRequest, @Nonnull final SignServiceContext context) {
+      @Nonnull final HttpUserRequest httpRequest, @Nonnull final SignServiceContext context) {
     return null;
   }
 

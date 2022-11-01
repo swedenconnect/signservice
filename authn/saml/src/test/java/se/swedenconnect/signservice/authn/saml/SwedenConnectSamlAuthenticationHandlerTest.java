@@ -26,8 +26,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -70,6 +68,7 @@ import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.authn.saml.config.SpUrlConfiguration;
 import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultAuthnRequirements;
@@ -318,8 +317,8 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
     final SwedenConnectSamlAuthenticationHandler handler =
         (SwedenConnectSamlAuthenticationHandler) this.createHandler();
 
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
@@ -409,8 +408,8 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
     final SwedenConnectSamlAuthenticationHandler handler =
         (SwedenConnectSamlAuthenticationHandler) this.createHandler();
 
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
@@ -476,8 +475,8 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
     final SwedenConnectSamlAuthenticationHandler handler =
         (SwedenConnectSamlAuthenticationHandler) this.createHandler();
 
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
@@ -655,8 +654,8 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
     final SwedenConnectSamlAuthenticationHandler handler =
         (SwedenConnectSamlAuthenticationHandler) this.createHandler();
 
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
@@ -761,8 +760,8 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
     final SwedenConnectSamlAuthenticationHandler handler =
         (SwedenConnectSamlAuthenticationHandler) this.createHandler();
 
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);

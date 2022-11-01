@@ -25,7 +25,6 @@ import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.xml.DOMUtils;
@@ -42,6 +41,7 @@ import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
 
@@ -152,7 +152,7 @@ public class MockedAuthenticationHandler extends AbstractSignServiceHandler impl
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public AuthenticationResultChoice resumeAuthentication(@Nonnull final HttpServletRequest httpRequest,
+  public AuthenticationResultChoice resumeAuthentication(@Nonnull final HttpUserRequest httpRequest,
       @Nonnull final SignServiceContext context) throws UserAuthenticationException {
 
     throw new UserAuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHN_ERROR,
@@ -161,7 +161,7 @@ public class MockedAuthenticationHandler extends AbstractSignServiceHandler impl
 
   /** {@inheritDoc} */
   @Override
-  public boolean canProcess(@Nonnull final HttpServletRequest httpRequest, @Nullable final SignServiceContext context) {
+  public boolean canProcess(@Nonnull final HttpUserRequest httpRequest, @Nullable final SignServiceContext context) {
     return false;
   }
 

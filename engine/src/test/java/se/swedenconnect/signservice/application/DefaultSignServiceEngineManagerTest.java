@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.Assertions;
@@ -39,6 +38,7 @@ import se.swedenconnect.signservice.audit.AuditLoggerException;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
 import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
 import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
@@ -68,9 +68,9 @@ public class DefaultSignServiceEngineManagerTest {
 
     final TestAuditLogger audit = new TestAuditLogger();
 
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRequestURI()).thenReturn("/sign/process");
-    Mockito.when(request.getRemoteAddr()).thenReturn("158.174.14.166");
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getRequestUrl()).thenReturn("https://www.example.com/sign/process");
+    Mockito.when(request.getClientIpAddress()).thenReturn("158.174.14.166");
     Mockito.when(request.getMethod()).thenReturn("GET");
 
     final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
@@ -110,9 +110,9 @@ public class DefaultSignServiceEngineManagerTest {
 
     final AuditLogger audit = Mockito.mock(AuditLogger.class);
 
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRequestURI()).thenReturn("/sign/process");
-    Mockito.when(request.getRemoteAddr()).thenReturn("158.174.14.166");
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getRequestUrl()).thenReturn("https://www.example.com/sign/process");
+    Mockito.when(request.getClientIpAddress()).thenReturn("158.174.14.166");
     Mockito.when(request.getMethod()).thenReturn("POST");
 
     final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
@@ -136,9 +136,9 @@ public class DefaultSignServiceEngineManagerTest {
 
     final TestAuditLogger audit = new TestAuditLogger();
 
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRequestURI()).thenReturn("/sign/resource");
-    Mockito.when(request.getRemoteAddr()).thenReturn("158.174.14.166");
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getRequestUrl()).thenReturn("https://www.example.com/sign/resource");
+    Mockito.when(request.getClientIpAddress()).thenReturn("158.174.14.166");
     Mockito.when(request.getMethod()).thenReturn("GET");
 
     final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
@@ -160,9 +160,9 @@ public class DefaultSignServiceEngineManagerTest {
 
     final TestAuditLogger audit = new TestAuditLogger();
 
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRequestURI()).thenReturn("/sign/resource");
-    Mockito.when(request.getRemoteAddr()).thenReturn("158.174.14.166");
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getRequestUrl()).thenReturn("https://www.example.com/sign/resource");
+    Mockito.when(request.getClientIpAddress()).thenReturn("158.174.14.166");
     Mockito.when(request.getMethod()).thenReturn("GET");
 
     final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
@@ -192,9 +192,9 @@ public class DefaultSignServiceEngineManagerTest {
 
     final TestAuditLogger audit = new TestAuditLogger();
 
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRequestURI()).thenReturn("/sign/resource");
-    Mockito.when(request.getRemoteAddr()).thenReturn("158.174.14.166");
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getRequestUrl()).thenReturn("https://www.example.com/sign/resource");
+    Mockito.when(request.getClientIpAddress()).thenReturn("158.174.14.166");
     Mockito.when(request.getMethod()).thenReturn("GET");
 
     final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
@@ -222,9 +222,9 @@ public class DefaultSignServiceEngineManagerTest {
 
     final TestAuditLogger audit = new TestAuditLogger();
 
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRequestURI()).thenReturn("/sign/process");
-    Mockito.when(request.getRemoteAddr()).thenReturn("158.174.14.166");
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getRequestUrl()).thenReturn("https://www.example.com/sign/process");
+    Mockito.when(request.getClientIpAddress()).thenReturn("158.174.14.166");
     Mockito.when(request.getMethod()).thenReturn("GET");
 
     final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
@@ -242,8 +242,8 @@ public class DefaultSignServiceEngineManagerTest {
     Assertions.assertTrue(audit.events.get(1).getParameters().size() == 2);
     Assertions.assertEquals("GET", audit.events.get(1).getParameters().stream()
         .filter(p -> "method".equals(p.getName())).map(AuditEventParameter::getValue).findFirst().orElse(null));
-    Assertions.assertEquals("/sign/process", audit.events.get(1).getParameters().stream()
-        .filter(p -> "path".equals(p.getName())).map(AuditEventParameter::getValue).findFirst().orElse(null));
+    Assertions.assertEquals("https://www.example.com/sign/process", audit.events.get(1).getParameters().stream()
+        .filter(p -> "url".equals(p.getName())).map(AuditEventParameter::getValue).findFirst().orElse(null));
 
   }
 

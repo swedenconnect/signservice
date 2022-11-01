@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
@@ -73,6 +72,7 @@ import se.swedenconnect.signservice.context.DefaultSignServiceContext;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.msg.CertificateAttributeMapping;
@@ -256,9 +256,9 @@ class SimpleKeyAndCertificateHandlerTest {
 
   @Test
   public void testSupports() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRemoteAddr()).thenReturn("227.123.34.21");
-    Mockito.when(request.getServletPath()).thenReturn(crlPath);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getClientIpAddress()).thenReturn("227.123.34.21");
+    Mockito.when(request.getServerServletPath()).thenReturn(crlPath);
 
     Mockito.when(request.getMethod()).thenReturn("POST");
     Assertions.assertFalse(defaultHandler.supports(request));
@@ -266,15 +266,15 @@ class SimpleKeyAndCertificateHandlerTest {
     Mockito.when(request.getMethod()).thenReturn("GET");
     Assertions.assertTrue(defaultHandler.supports(request));
 
-    Mockito.when(request.getServletPath()).thenReturn("/other/path.crl");
+    Mockito.when(request.getServerServletPath()).thenReturn("/other/path.crl");
     Assertions.assertFalse(defaultHandler.supports(request));
   }
 
   @Test
   public void testGetResource() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRemoteAddr()).thenReturn("227.123.34.21");
-    Mockito.when(request.getServletPath()).thenReturn(crlPath);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getClientIpAddress()).thenReturn("227.123.34.21");
+    Mockito.when(request.getServerServletPath()).thenReturn(crlPath);
     Mockito.when(request.getMethod()).thenReturn("GET");
 
     final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
@@ -291,9 +291,9 @@ class SimpleKeyAndCertificateHandlerTest {
 
   @Test
   public void testGetResourceError() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRemoteAddr()).thenReturn("227.123.34.21");
-    Mockito.when(request.getServletPath()).thenReturn(crlPath);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getClientIpAddress()).thenReturn("227.123.34.21");
+    Mockito.when(request.getServerServletPath()).thenReturn(crlPath);
     Mockito.when(request.getMethod()).thenReturn("POST");
 
     final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);

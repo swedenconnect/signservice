@@ -28,7 +28,6 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
@@ -48,6 +47,7 @@ import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.engine.config.EngineConfiguration;
 import se.swedenconnect.signservice.engine.session.EngineContext;
@@ -129,12 +129,12 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   @Override
   @Nullable
   public SignServiceProcessingResult processRequest(
-      @Nonnull final HttpServletRequest httpRequest, @Nonnull final HttpServletResponse httpResponse,
+      @Nonnull final HttpUserRequest httpRequest, @Nonnull final HttpServletResponse httpResponse,
       @Nullable final SignServiceContext signServiceContext)
       throws UnrecoverableSignServiceException {
 
-    log.debug("{}: Received request [path: '{}', client-ip: '{}']",
-        this.getName(), httpRequest.getRequestURI(), httpRequest.getRemoteAddr());
+    log.debug("{}: Received request [url: '{}', client-ip: '{}']",
+        this.getName(), httpRequest.getRequestUrl(), httpRequest.getClientIpAddress());
 
     // Assign the audit logger to TLS so that any underlying component can get hold of the logger.
     //
@@ -148,15 +148,15 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
         .orElse(null);
     if (resourceProvider != null) {
       try {
-        log.debug("{}: Getting resource ... [path: '{}']",
-            this.getName(), httpRequest.getRequestURI());
+        log.debug("{}: Getting resource ... [url: '{}']",
+            this.getName(), httpRequest.getRequestUrl());
         resourceProvider.getResource(httpRequest, httpResponse);
         // TODO
         return new DefaultSignServiceProcessingResult(signServiceContext, null);
       }
       catch (final IOException e) {
         log.info("{}: Error getting HTTP resource '{}' - {}",
-            this.getName(), httpRequest.getRequestURI(), e.getMessage(), e);
+            this.getName(), httpRequest.getRequestUrl(), e.getMessage(), e);
         throw new UnrecoverableSignServiceException(
             UnrecoverableErrorCodes.HTTP_GET_ERROR, "Failed to get resource", e);
       }
@@ -221,7 +221,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
         }
       }
       log.info("{}: State error - Engine is is '{}' state. Can not process request '{}' [id: '{}']",
-          this.getName(), context.getState(), httpRequest.getRequestURI(), context.getId());
+          this.getName(), context.getState(), httpRequest.getRequestUrl(), context.getId());
 
       throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.STATE_ERROR,
           "State error - did not expect message");
@@ -254,13 +254,14 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   /**
    * Initializes the processing of a sign request message.
    *
-   * @param httpRequest the HTTP servlet request
+   * @param httpRequest the HTTP request
    * @param context the engine context
    * @return a HttpRequestMessage
    * @throws UnrecoverableSignServiceException for unrecoverable errors
    */
   protected HttpRequestMessage processSignRequest(
-      final HttpServletRequest httpRequest, final EngineContext context) throws UnrecoverableSignServiceException {
+      @Nonnull final HttpUserRequest httpRequest, @Nonnull final EngineContext context)
+      throws UnrecoverableSignServiceException {
 
     try {
       // Decode the incoming request ...
@@ -342,7 +343,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
    * @throws UnrecoverableSignServiceException for unrecoverable errors
    */
   protected HttpRequestMessage finalizeSignRequest(
-      final HttpServletRequest httpRequest, final AuthenticationResult authnResult, final EngineContext context)
+      final HttpUserRequest httpRequest, final AuthenticationResult authnResult, final EngineContext context)
       throws UnrecoverableSignServiceException {
 
     PkiCredential signingCredential = null;
@@ -470,13 +471,14 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   /**
    * Decodes a sign request message.
    *
-   * @param httpRequest the HTTP servlet request
+   * @param httpRequest the HTTP request
    * @param context the engine context
    * @return a generic representation of the sign request message
    * @throws UnrecoverableSignServiceException for unrecoverable errors
    */
   protected SignRequestMessage decodeMessage(
-      final HttpServletRequest httpRequest, final EngineContext context) throws UnrecoverableSignServiceException {
+      @Nonnull final HttpUserRequest httpRequest, @Nonnull final EngineContext context)
+      throws UnrecoverableSignServiceException {
     try {
       log.debug("{}: Decoding sign request message ... [id: '{}']",
           this.getName(), context.getId());
@@ -511,7 +513,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
    * @throws SignServiceErrorException for errors (will lead to an error response)
    */
   protected AuthenticationResultChoice initAuthentication(
-      final HttpServletRequest httpRequest, final SignRequestMessage signRequest, final EngineContext context)
+      final HttpUserRequest httpRequest, final SignRequestMessage signRequest, final EngineContext context)
       throws SignServiceErrorException {
 
     log.debug("{}: Initializing authentication ... [id: '{}', request-id: '{}']",
@@ -554,17 +556,17 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
    * @throws SignServiceErrorException for errors that should be passed back to the client (as an error response)
    */
   protected HttpRequestMessage resumeAuthentication(
-      final HttpServletRequest httpRequest, final EngineContext context)
+      final HttpUserRequest httpRequest, final EngineContext context)
       throws UnrecoverableSignServiceException, SignServiceErrorException {
 
     // Assert that the request was received on a correct endpoint ...
     //
     if (!this.engineConfiguration.getAuthenticationHandler().canProcess(httpRequest, context.getContext())) {
-      log.info("{}: Unexpected path '{}' [id: '{}']",
-          this.getName(), httpRequest.getRequestURI(), context.getId());
+      log.info("{}: Unexpected request URL '{}' [id: '{}']",
+          this.getName(), httpRequest.getRequestUrl(), context.getId());
 
       throw new UnrecoverableSignServiceException(
-          UnrecoverableErrorCodes.NOT_FOUND, "Not found - " + httpRequest.getRequestURI());
+          UnrecoverableErrorCodes.NOT_FOUND, "Not found - " + httpRequest.getRequestUrl());
     }
 
     try {
@@ -635,7 +637,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
    * @throws SignServiceErrorException for errors that should be passed back to the client (as an error response)
    */
   protected void completeAuthentication(
-      final HttpServletRequest httpRequest, final AuthenticationResult authnResult, final EngineContext context)
+      final HttpUserRequest httpRequest, final AuthenticationResult authnResult, final EngineContext context)
       throws UnrecoverableSignServiceException, SignServiceErrorException {
 
     log.debug("{}: Authentication result: {} [id: '{}', request-id: '{}']",
@@ -713,14 +715,14 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   /**
    * Method that is invoked to create an error response message that is to be sent back to the client.
    *
-   * @param httpRequest the servlet request
+   * @param httpRequest the HTTP request
    * @param context the engine context
    * @param error the representation of the error to send
    * @return a HttpRequestMessage to return back to the application
    * @throws UnrecoverableSignServiceException for unrecoverable errors
    */
   protected HttpRequestMessage sendErrorResponse(
-      final HttpServletRequest httpRequest, final EngineContext context, final SignServiceError error)
+      final HttpUserRequest httpRequest, final EngineContext context, final SignServiceError error)
       throws UnrecoverableSignServiceException {
 
     try {
@@ -783,7 +785,7 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
 
   /** {@inheritDoc} */
   @Override
-  public boolean canProcess(@Nonnull final HttpServletRequest httpRequest) {
+  public boolean canProcess(@Nonnull final HttpUserRequest httpRequest) {
     AuditLoggerSingleton.init(this.engineConfiguration.getAuditLogger());
 
     if (this.isSignRequestEndpoint(httpRequest)) {
@@ -810,8 +812,8 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
    * @param httpRequest the HTTP request
    * @return true if the request is sent to a SignRequest endpoint and false otherwise
    */
-  protected boolean isSignRequestEndpoint(final HttpServletRequest httpRequest) {
-    final String request = httpRequest.getServletPath();
+  protected boolean isSignRequestEndpoint(final HttpUserRequest httpRequest) {
+    final String request = httpRequest.getServerServletPath();
     return this.engineConfiguration.getProcessingPaths().stream()
         .anyMatch(p -> p.equalsIgnoreCase(request));
   }
@@ -819,8 +821,8 @@ public class DefaultSignServiceEngine implements SignServiceEngine {
   /**
    * Given a {@link SignServiceContext} the method sets up an {@link EngineContext}.
    * <p>
-   * If the supplied context is terminated, a new {@link SignServiceContext} object is created.
-   * This helps applications that does not manage sessions correctly to function anyway.
+   * If the supplied context is terminated, a new {@link SignServiceContext} object is created. This helps applications
+   * that does not manage sessions correctly to function anyway.
    * </p>
    *
    * @param signServiceContext the SignService context, or null

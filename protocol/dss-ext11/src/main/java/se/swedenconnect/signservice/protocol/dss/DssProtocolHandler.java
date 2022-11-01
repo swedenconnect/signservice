@@ -19,7 +19,6 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +32,7 @@ import se.swedenconnect.schemas.dss_1_0.SignRequest;
 import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.core.http.impl.DefaultHttpRequestMessage;
 import se.swedenconnect.signservice.engine.SignServiceError;
 import se.swedenconnect.signservice.protocol.ProtocolException;
@@ -76,7 +76,7 @@ public class DssProtocolHandler extends AbstractSignServiceHandler implements Pr
   @Override
   @Nonnull
   public SignRequestMessage decodeRequest(
-      @Nonnull final HttpServletRequest httpRequest, @Nonnull final SignServiceContext context)
+      @Nonnull final HttpUserRequest httpRequest, @Nonnull final SignServiceContext context)
       throws ProtocolException {
 
     // We only handle POST ...

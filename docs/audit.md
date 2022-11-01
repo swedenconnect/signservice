@@ -29,7 +29,7 @@ SignService client.
 
 | Parameter name | Description |
 | :--- | :--- |
-| `path` | The path of the request that can not be served, i.e., the path following the protocol and domain of the URL. |
+| `url` | The request URL that could not be served. |
 | `method` | The HTTP method (GET, POST, ...). |
 
 ### Processing Error
@@ -44,7 +44,7 @@ errors. Otherwise an error response is sent back to the client.
 
 | Parameter name | Description |
 | :--- | :--- |
-| `path` | The path of the request that led to an unrecoverable error, i.e., the path following the protocol and domain of the URL. |
+| `url` | The request URL of the request that led to an unrecoverable error. |
 | `engine-name` | The name of the engine instance that processed the request. |
 | `error-code` | The error code of the error. |
 | `error-message` | The error message. |

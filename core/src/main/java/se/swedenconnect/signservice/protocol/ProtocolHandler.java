@@ -16,11 +16,11 @@
 package se.swedenconnect.signservice.protocol;
 
 import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
 
 import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.SignServiceHandler;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.engine.SignServiceError;
 
 /**
@@ -29,24 +29,25 @@ import se.swedenconnect.signservice.engine.SignServiceError;
 public interface ProtocolHandler extends SignServiceHandler {
 
   /**
-   * Given a message (the HTTP servlet request) and the context the handler decodes the message into a
-   * {@link SignRequestMessage} instance.
+   * Given a message (the HTTP request received by the SignService frontend/application) and the context the handler
+   * decodes the message into a {@link SignRequestMessage} instance.
    * <p>
    * No validation of the message is performed, other than ensuring that a decode operation is possible.
    * </p>
    *
-   * @param httpRequest the HTTP servlet request from where the message can be obtained
+   * @param httpRequest the HTTP request received by the SignService frontend/application
    * @param context the SignService context
    * @return a SignRequestMessage
    * @throws ProtocolException for decoding errors
    */
   @Nonnull
   SignRequestMessage decodeRequest(
-      @Nonnull final HttpServletRequest httpRequest, @Nonnull final SignServiceContext context)
+      @Nonnull final HttpUserRequest httpRequest, @Nonnull final SignServiceContext context)
       throws ProtocolException;
 
   /**
-   * A factory method that creates a {@link SignResponseMessage} given the context and the corresponding request message.
+   * A factory method that creates a {@link SignResponseMessage} given the context and the corresponding request
+   * message.
    * <p>
    * Which parts of the {@link SignResponseMessage} that is populated is implementation dependent, but the
    * {@link ProtocolProcessingRequirements} of the created object will always be present, i.e.,

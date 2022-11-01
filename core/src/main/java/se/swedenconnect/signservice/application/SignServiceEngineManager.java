@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
 import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
@@ -50,7 +51,7 @@ public interface SignServiceEngineManager {
    * that signals a HTTP redirect or POST.
    * </p>
    *
-   * @param request the HTTP servlet request
+   * @param request the HTTP request received from the user's browser
    * @param response the HTTP servlet response
    * @param signServiceContext the SignService context (may be null if this is the first request in an signature
    *          operation)
@@ -59,7 +60,7 @@ public interface SignServiceEngineManager {
    */
   @Nonnull
   SignServiceProcessingResult processRequest(
-      @Nonnull final HttpServletRequest request, @Nonnull final HttpServletResponse response,
+      @Nonnull final HttpUserRequest request, @Nonnull final HttpServletResponse response,
       @Nullable final SignServiceContext signServiceContext)
       throws UnrecoverableSignServiceException;
 

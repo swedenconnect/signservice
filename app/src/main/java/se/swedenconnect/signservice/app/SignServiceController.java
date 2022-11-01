@@ -29,6 +29,7 @@ import se.swedenconnect.signservice.application.SignServiceEngineManager;
 import se.swedenconnect.signservice.application.SignServiceProcessingResult;
 import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.core.http.servletapi.ServletApiHttpUserRequest;
 import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
 
 /**
@@ -51,7 +52,8 @@ public class SignServiceController {
     final HttpSession session = request.getSession();
     final SignServiceContext context = (SignServiceContext) session.getAttribute(SIGNSERVICE_CONTEXT_NAME);
 
-    final SignServiceProcessingResult result = this.manager.processRequest(request, response, context);
+    final SignServiceProcessingResult result = this.manager.processRequest(
+        new ServletApiHttpUserRequest(request), response, context);
 
     // Update the SignService context ...
     //

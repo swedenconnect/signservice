@@ -17,7 +17,6 @@ package se.swedenconnect.signservice.core.http;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -29,19 +28,19 @@ public interface HttpResourceProvider {
    * Gets an HTTP resource. The returned resource will be written to the supplied {@link HttpServletResponse}, but it
    * will <b>not</b> commit the response. This is the responsibility of the caller.
    *
-   * @param httpRequest the HTTP request
+   * @param httpRequest the HTTP user request received by the SignService frontend/application
    * @param httpResponse the HTTP response
    * @throws IOException for processing errors
    */
-  void getResource(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) throws IOException;
+  void getResource(final HttpUserRequest httpRequest, final HttpServletResponse httpResponse) throws IOException;
 
   /**
    * Given the request the method determines whether it can supply a resource (via
-   * {@link #getResource(HttpServletRequest, HttpServletResponse)}).
+   * {@link #getResource(HttpUserRequest, HttpServletResponse)}).
    *
-   * @param httpRequest the HTTP request
+   * @param httpRequest the HTTP user request received by the SignService frontend/application
    * @return true if the handler can process the request and provide an HTTP resource and false otherwise
    */
-  boolean supports(final HttpServletRequest httpRequest);
+  boolean supports(final HttpUserRequest httpRequest);
 
 }
