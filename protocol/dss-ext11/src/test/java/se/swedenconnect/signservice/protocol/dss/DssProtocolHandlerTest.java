@@ -31,7 +31,7 @@ import se.idsec.signservice.xml.DOMUtils;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.context.SignServiceContext;
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.core.http.HttpResponseAction;
 import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.engine.SignServiceError;
 import se.swedenconnect.signservice.engine.SignServiceErrorCode;
@@ -309,11 +309,12 @@ public class DssProtocolHandlerTest {
 
     response.sign(this.getTestCredential());
 
-    final HttpRequestMessage msg = protocolHandler.encodeResponse(response, context);
+    final HttpResponseAction action = protocolHandler.encodeResponse(response, context);
 
-    Assertions.assertNotNull(msg.getHttpParameters().get("EidSignResponse"));
-    Assertions.assertEquals(DssProtocolHandler.BINDING, msg.getHttpParameters().get("Binding"));
-    Assertions.assertEquals(response.getRelayState(), msg.getHttpParameters().get("RelayState"));
+    Assertions.assertEquals(request.getResponseUrl(), action.getPost().getUrl());
+    Assertions.assertNotNull(action.getPost().getParameters().get("EidSignResponse"));
+    Assertions.assertEquals(DssProtocolHandler.BINDING, action.getPost().getParameters().get("Binding"));
+    Assertions.assertEquals(response.getRelayState(), action.getPost().getParameters().get("RelayState"));
   }
 
   @Test

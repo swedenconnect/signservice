@@ -15,23 +15,27 @@
  */
 package se.swedenconnect.signservice.authn;
 
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import se.swedenconnect.signservice.core.http.HttpResponseAction;
 import se.swedenconnect.signservice.core.types.Choice;
 
 /**
  * Represents the result from an authentication call ({@link AuthenticationHandler}). The result is either an
- * {@link AuthenticationResult} that represents a completed, and successful, authentication or a HTTP request message
- * which is used to indicate to the caller that the user should be directed to remote authentication service.
+ * {@link AuthenticationResult} that represents a completed, and successful, authentication or a
+ * {@link HttpResponseAction} which is used to indicate to the caller that the user should be directed to remote
+ * authentication service.
  */
-public class AuthenticationResultChoice extends Choice<HttpRequestMessage, AuthenticationResult> {
+public class AuthenticationResultChoice extends Choice<HttpResponseAction, AuthenticationResult> {
 
   /**
-   * Constructor setting the {@link HttpRequestMessage}.
+   * Constructor setting the {@link HttpResponseAction}.
    *
-   * @param httpRequestMessage the HTTP request message
+   * @param responseAction the HTTP response action
    */
-  public AuthenticationResultChoice(final HttpRequestMessage httpRequestMessage) {
-    super(httpRequestMessage, null);
+  public AuthenticationResultChoice(@Nonnull final HttpResponseAction responseAction) {
+    super(responseAction, null);
   }
 
   /**
@@ -39,16 +43,17 @@ public class AuthenticationResultChoice extends Choice<HttpRequestMessage, Authe
    *
    * @param authenticationResult the authentication result
    */
-  public AuthenticationResultChoice(final AuthenticationResult authenticationResult) {
+  public AuthenticationResultChoice(@Nonnull final AuthenticationResult authenticationResult) {
     super(null, authenticationResult);
   }
 
   /**
-   * Gets the {@link HttpRequestMessage}.
+   * Gets the {@link HttpResponseAction}.
    *
-   * @return the HTTP request message or null
+   * @return the HTTP response action or null
    */
-  public HttpRequestMessage getHttpRequestMessage() {
+  @Nullable
+  public HttpResponseAction getResponseAction() {
     return this.getFirst();
   }
 
@@ -57,6 +62,7 @@ public class AuthenticationResultChoice extends Choice<HttpRequestMessage, Authe
    *
    * @return the authentication result or null
    */
+  @Nullable
   public AuthenticationResult getAuthenticationResult() {
     return this.getSecond();
   }

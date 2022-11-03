@@ -19,12 +19,9 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.context.SignServiceContext;
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
 import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
 import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
@@ -41,27 +38,20 @@ public interface SignServiceEngineManager {
    * {@code processRequest} method.
    * <p>
    * Based on which URL the request was received a {@link SignServiceEngine} is selected, and its
-   * {@link SignServiceEngine#processRequest(HttpServletRequest, HttpServletResponse)} method is called. If no matching
+   * {@link SignServiceEngine#processRequest(HttpUserRequest, SignServiceContext)} method is called. If no matching
    * engine is found, an {@link UnrecoverableSignServiceException} exception with the code
    * {@link UnrecoverableErrorCodes#NOT_FOUND} will be thrown.
    * </p>
-   * <p>
-   * If the request is for a engine resource, the engine will write this resource to the {@code response} parameter and
-   * return {@code null}. In all other cases the {@code processRequest} method will return a {@link HttpRequestMessage}
-   * that signals a HTTP redirect or POST.
-   * </p>
    *
    * @param request the HTTP request received from the user's browser
-   * @param response the HTTP servlet response
    * @param signServiceContext the SignService context (may be null if this is the first request in an signature
    *          operation)
-   * @return TODO
+   * @return a SignServiceProcessingResult
    * @throws UnrecoverableSignServiceException for non-recoverable errors (should be displayed in an error view)
    */
   @Nonnull
   SignServiceProcessingResult processRequest(
-      @Nonnull final HttpUserRequest request, @Nonnull final HttpServletResponse response,
-      @Nullable final SignServiceContext signServiceContext)
+      @Nonnull final HttpUserRequest request, @Nullable final SignServiceContext signServiceContext)
       throws UnrecoverableSignServiceException;
 
   /**

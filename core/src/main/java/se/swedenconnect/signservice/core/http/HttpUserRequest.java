@@ -85,6 +85,9 @@ public interface HttpUserRequest {
    * Request parameters are extra information sent with the request. For HTTP servlets, parameters are contained in the
    * query string or posted form data.
    * </p>
+   * <p>
+   * In case you know, or want to be sure, that the parameter contains multiple values, use {@link #getParameters()}.
+   * </p>
    *
    * @param name the parameter name
    * @return the parameter value, or null if it does not exist
@@ -94,8 +97,8 @@ public interface HttpUserRequest {
   String getParameter(@Nonnull final String name);
 
   /**
-   * Gets a map of all request parameters, where the map entry key is the parameter name and the map entry value is the
-   * parameter value.
+   * Gets a map of all request parameters, where the map entry key is the parameter name and the map entry value(s) is
+   * the parameter value.
    * <p>
    * Request parameters are extra information sent with the request. For HTTP servlets, parameters are contained in the
    * query string or posted form data.
@@ -105,13 +108,13 @@ public interface HttpUserRequest {
    * @see #getParameter(String)
    */
   @Nonnull
-  Map<String, String> getParameters();
+  Map<String, String[]> getParameters();
 
   /**
    * Gets the value of the specified request header. If the request did not include a header of the specified name, this
    * method returns {@code null}.
    * <p>
-   * If there are multiple headers with the same name, this method returns the first head in the request.
+   * If there are multiple headers with the same name, this method returns the first header value in the request.
    * </p>
    * <p>
    * Note: The header name is case insensitive.
@@ -126,12 +129,12 @@ public interface HttpUserRequest {
 
   /**
    * Gets a map of all request headers where the map entry key is the header name and the map entry value is the header
-   * value.
+   * value(s).
    *
    * @return a (possibly empty) map of header names and values
    * @see #getHeader(String)
    */
   @Nonnull
-  Map<String, String> getHeaders();
+  Map<String, String[]> getHeaders();
 
 }

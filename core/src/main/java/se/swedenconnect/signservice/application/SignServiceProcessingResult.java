@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import se.swedenconnect.signservice.context.SignServiceContext;
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.core.http.HttpResponseAction;
 
 /**
  * An interface representing the result from a call to the SignService engine manager.
@@ -40,8 +40,20 @@ public interface SignServiceProcessingResult {
   @Nullable
   SignServiceContext getSignServiceContext();
 
-  // TODO: will be changed
+  /**
+   * Depending on the type of request processed the SignService engine manager can respond with one of the following
+   * types of responses:
+   * <ul>
+   * <li>The user's browser should be redirected to a given URL.</li>
+   * <li>The user's browser should be posted to a given URL with a set of parameters.</li>
+   * <li>A response message should be written (HTTP Status 200).</li>
+   * </ul>
+   * This method returns a {@link HttpResponseAction} that tells how the caller (application/frontend) should respond to
+   * the request that it fed to the SignService engine manager.
+   *
+   * @return a HttpResponseAction
+   */
   @Nonnull
-  HttpRequestMessage getHttpRequestMessage();
+  HttpResponseAction getResponseAction();
 
 }

@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
 
 import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.SignServiceHandler;
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.core.http.HttpResponseAction;
 import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.engine.SignServiceError;
 
@@ -66,7 +66,7 @@ public interface ProtocolHandler extends SignServiceHandler {
 
   /**
    * Encodes a response message so that it can be returned to the SignService application. The method will create a
-   * {@link HttpRequestMessage} representing the response message as a HTTP request.
+   * {@link HttpResponseAction} representing the response message as a HTTP request (redirect or post).
    *
    * @param responseMessage the response message to encode
    * @param context the SignService context
@@ -74,7 +74,7 @@ public interface ProtocolHandler extends SignServiceHandler {
    * @throws ProtocolException for encoding errors
    */
   @Nonnull
-  HttpRequestMessage encodeResponse(
+  HttpResponseAction encodeResponse(
       @Nonnull final SignResponseMessage responseMessage, @Nonnull final SignServiceContext context)
       throws ProtocolException;
 

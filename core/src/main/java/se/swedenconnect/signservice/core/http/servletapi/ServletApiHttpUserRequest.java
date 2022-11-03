@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.signservice.core.http.servletapi;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -102,11 +103,8 @@ public class ServletApiHttpUserRequest implements HttpUserRequest {
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public Map<String, String> getParameters() {
-    return this.request.getParameterMap().entrySet().stream()
-        .filter(e -> e.getValue() != null && e.getValue().length > 0)
-        .map(e -> Map.entry(e.getKey(), e.getValue()[0]))
-        .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+  public Map<String, String[]> getParameters() {
+    return this.request.getParameterMap();
   }
 
   /** {@inheritDoc} */
@@ -119,10 +117,10 @@ public class ServletApiHttpUserRequest implements HttpUserRequest {
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public Map<String, String> getHeaders() {
+  public Map<String, String[]> getHeaders() {
     final Iterable<String> it = () -> this.request.getHeaderNames().asIterator();
     return StreamSupport.stream(it.spliterator(), false)
-        .map(n -> Map.entry(n, this.request.getHeader(n)))
+        .map(n -> Map.entry(n, Collections.list(this.request.getHeaders(n)).toArray(String[]::new)))
         .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 

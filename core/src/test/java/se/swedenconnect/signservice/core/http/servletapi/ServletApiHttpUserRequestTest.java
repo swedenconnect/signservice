@@ -20,6 +20,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -44,7 +45,6 @@ public class ServletApiHttpUserRequestTest {
 
     final Map<String, String[]> parameters = Map.ofEntries(
         Map.entry("p1", new String[] { "v1" }),
-        Map.entry("p2", new String[] {}),
         Map.entry("p3", new String[] { "v3", "v33" }));
     Mockito.when(httpServletRequest.getParameterMap()).thenReturn(parameters);
     Mockito.when(httpServletRequest.getParameter(Mockito.anyString())).then(a -> {
@@ -53,14 +53,19 @@ public class ServletApiHttpUserRequestTest {
         return null;
       }
       return values[0];
-      });
+    });
 
-    final Map<String, String> headers = Map.of(
-        "H1", "V1",
-        "H2", "V2",
-        "H3", "V3");
+    final Map<String, String[]> headers = Map.of(
+        "H1", new String[] { "V1" },
+        "H2", new String[] { "V2", "V22" },
+        "H3", new String[] { "V3" });
     Mockito.when(httpServletRequest.getHeader(Mockito.anyString())).then(a -> {
-      return headers.get(a.getArgument(0, String.class));
+      final String[] values = headers.get(a.getArgument(0, String.class));
+      return values != null ? values[0] : null;
+    });
+    Mockito.when(httpServletRequest.getHeaders(Mockito.anyString())).then(a -> {
+      final String[] values = headers.get(a.getArgument(0, String.class));
+      return values != null ?  Collections.enumeration(Arrays.asList(values)) : Collections.emptyEnumeration();
     });
     Mockito.when(httpServletRequest.getHeaderNames()).thenReturn(Collections.enumeration(headers.keySet()));
 
@@ -71,15 +76,20 @@ public class ServletApiHttpUserRequestTest {
     Assertions.assertEquals("/path1/path2", request.getServerServletPath());
     Assertions.assertEquals("127.0.0.1", request.getClientIpAddress());
     Assertions.assertEquals("v1", request.getParameter("p1"));
-    Assertions.assertNull(request.getParameter("v2"));
     Assertions.assertEquals("v3", request.getParameter("p3"));
-    final Map<String, String> pars = request.getParameters();
+    final Map<String, String[]> pars = request.getParameters();
     Assertions.assertEquals(2, pars.size());
-    Assertions.assertEquals("v1", pars.get("p1"));
-    Assertions.assertEquals("v3", pars.get("p3"));
+    Assertions.assertArrayEquals(parameters.get("p1"), pars.get("p1"));
+    Assertions.assertArrayEquals(parameters.get("p3"), pars.get("p3"));
     Assertions.assertEquals("V1", request.getHeader("H1"));
+    Assertions.assertEquals("V2", request.getHeader("H2"));
     Assertions.assertNull(request.getHeader("H4"));
-    Assertions.assertEquals(headers, request.getHeaders());
+    final Map<String, String[]> h = request.getHeaders();
+    Assertions.assertEquals(headers.size(), h.size());
+    Assertions.assertArrayEquals(headers.get("H1"), h.get("H1"));
+    Assertions.assertArrayEquals(headers.get("H2"), h.get("H2"));
+    Assertions.assertArrayEquals(headers.get("H3"), h.get("H3"));
+
   }
 
 }

@@ -15,27 +15,49 @@
  */
 package se.swedenconnect.signservice.application;
 
-import se.swedenconnect.signservice.context.SignServiceContext;
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import java.util.Objects;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import se.swedenconnect.signservice.context.SignServiceContext;
+import se.swedenconnect.signservice.core.http.HttpResponseAction;
+
+/**
+ * Default implementation of the {@link SignServiceProcessingResult} interface.
+ */
 public class DefaultSignServiceProcessingResult implements SignServiceProcessingResult {
 
-  private final HttpRequestMessage httpRequestMessage;
+  /** The SignService context. */
   private final SignServiceContext context;
 
-  public DefaultSignServiceProcessingResult(final SignServiceContext context, final HttpRequestMessage httpRequestMessage) {
+  /** The response action. */
+  private final HttpResponseAction responseAction;
+
+  /**
+   * Constructor.
+   *
+   * @param context the context (may be null)
+   * @param responseAction the response action
+   */
+  public DefaultSignServiceProcessingResult(
+      @Nullable final SignServiceContext context, @Nonnull final HttpResponseAction responseAction) {
     this.context = context;
-    this.httpRequestMessage = httpRequestMessage;
+    this.responseAction = Objects.requireNonNull(responseAction, "responseAction must not be null");
   }
 
+  /** {@inheritDoc} */
   @Override
+  @Nullable
   public SignServiceContext getSignServiceContext() {
     return this.context;
   }
 
+  /** {@inheritDoc} */
   @Override
-  public HttpRequestMessage getHttpRequestMessage() {
-    return this.httpRequestMessage;
+  @Nonnull
+  public HttpResponseAction getResponseAction() {
+    return this.responseAction;
   }
 
 }

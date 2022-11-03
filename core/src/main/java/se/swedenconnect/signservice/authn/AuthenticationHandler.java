@@ -35,8 +35,8 @@ import se.swedenconnect.signservice.protocol.msg.SignMessage;
  * supplied session context. If the authentication can be performed without directing the user to a remote
  * authentication service the result is delivered directly in the result object
  * {@link AuthenticationResultChoice#getAuthenticationResult()} If the user needs to be directed to a remote
- * authentication service the result object will contain the HTTP request object, see
- * {@link AuthenticationResultChoice#getHttpRequestMessage()}. In these cases, the authentication process is resumed by
+ * authentication service the result object will contain the HTTP response action object, see
+ * {@link AuthenticationResultChoice#getResponseAction()}. In these cases, the authentication process is resumed by
  * invoking {@code resumeAuthentication}.
  * </p>
  * <p>
@@ -76,8 +76,8 @@ public interface AuthenticationHandler extends SignServiceHandler {
    * @param request the HTTP request received by the SignService frontend/application (containing authentication result
    *          from the remote authentication service)
    * @param context the SignService context
-   * @return a choice object holding the authentication result or a HTTP request object (indicating that the user should
-   *           be directed to an authentication service)
+   * @return a choice object holding the authentication result or a HTTP response action object (indicating that the
+   *           user should be directed to an authentication service)
    * @throws UserAuthenticationException for authentication errors
    */
   @Nonnull

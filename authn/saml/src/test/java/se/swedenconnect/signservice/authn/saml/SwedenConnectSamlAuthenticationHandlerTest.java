@@ -131,9 +131,9 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
     final AuthenticationResultChoice result = handler.authenticate(authnReqs, signMessage, this.context);
 
     Assertions.assertNull(result.getAuthenticationResult());
-    Assertions.assertEquals("POST", result.getHttpRequestMessage().getMethod());
-    Assertions.assertEquals(IDP_DESTINATION, result.getHttpRequestMessage().getUrl());
-    Assertions.assertNotNull(result.getHttpRequestMessage().getHttpParameters().get("SAMLRequest"));
+    Assertions.assertNotNull(result.getResponseAction().getPost());
+    Assertions.assertEquals(IDP_DESTINATION, result.getResponseAction().getPost().getUrl());
+    Assertions.assertNotNull(result.getResponseAction().getPost().getParameters().get("SAMLRequest"));
 
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHNREQUEST_KEY),
         ArgumentMatchers.notNull());
@@ -258,9 +258,9 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
     final AuthenticationResultChoice result = handler.authenticate(authnReqs, signMessage, this.context);
 
     Assertions.assertNull(result.getAuthenticationResult());
-    Assertions.assertEquals("POST", result.getHttpRequestMessage().getMethod());
-    Assertions.assertEquals(IDP_DESTINATION, result.getHttpRequestMessage().getUrl());
-    Assertions.assertNotNull(result.getHttpRequestMessage().getHttpParameters().get("SAMLRequest"));
+    Assertions.assertNotNull(result.getResponseAction().getPost());
+    Assertions.assertEquals(IDP_DESTINATION, result.getResponseAction().getPost().getUrl());
+    Assertions.assertNotNull(result.getResponseAction().getPost().getParameters().get("SAMLRequest"));
 
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHNREQUEST_KEY),
         ArgumentMatchers.notNull());
@@ -370,7 +370,7 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
 
     final AuthenticationResultChoice result = handler.resumeAuthentication(request, this.context);
 
-    Assertions.assertNull(result.getHttpRequestMessage());
+    Assertions.assertNull(result.getResponseAction());
     Assertions.assertNotNull(result.getAuthenticationResult());
     Assertions.assertTrue(result.getAuthenticationResult().signMessageDisplayed());
     final IdentityAssertion assertion = result.getAuthenticationResult().getAssertion();
@@ -524,7 +524,7 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
 
     final AuthenticationResultChoice result = handler.resumeAuthentication(request, this.context);
 
-    Assertions.assertNull(result.getHttpRequestMessage());
+    Assertions.assertNull(result.getResponseAction());
     Assertions.assertNotNull(result.getAuthenticationResult());
     Assertions.assertFalse(result.getAuthenticationResult().signMessageDisplayed());
     final IdentityAssertion assertion = result.getAuthenticationResult().getAssertion();
@@ -718,7 +718,7 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
     handler.setSadValidator(sadValidator);
     final AuthenticationResultChoice result = handler.resumeAuthentication(request, this.context);
 
-    Assertions.assertNull(result.getHttpRequestMessage());
+    Assertions.assertNull(result.getResponseAction());
     Assertions.assertNotNull(result.getAuthenticationResult());
     Assertions.assertTrue(result.getAuthenticationResult().signMessageDisplayed());
     final IdentityAssertion assertion = result.getAuthenticationResult().getAssertion();

@@ -67,7 +67,7 @@ public class MockedAuthenticationHandlerTest {
     handler.setName("mocked");
     Assertions.assertEquals("mocked", handler.getName());
     final AuthenticationResultChoice choice = handler.authenticate(authnReqs, signMessage, context);
-    Assertions.assertNull(choice.getHttpRequestMessage());
+    Assertions.assertNull(choice.getResponseAction());
 
     final AuthenticationResult result = choice.getAuthenticationResult();
     Assertions.assertNotNull(result);

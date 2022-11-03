@@ -16,8 +16,8 @@
 package se.swedenconnect.signservice.certificate.simple;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -28,7 +28,6 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.cert.X509CRLHolder;
@@ -46,6 +45,8 @@ import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
 import se.swedenconnect.signservice.context.SignServiceContext;
+import se.swedenconnect.signservice.core.http.DefaultHttpBodyAction;
+import se.swedenconnect.signservice.core.http.HttpBodyAction;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
 import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
@@ -150,8 +151,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
 
   /** {@inheritDoc} */
   @Override
-  public void getResource(@Nonnull final HttpUserRequest httpRequest,
-      @Nonnull final HttpServletResponse httpResponse) throws IOException {
+  public HttpBodyAction getResource(@Nonnull final HttpUserRequest httpRequest) throws IOException {
 
     log.debug("Request to download CRL [{}]", httpRequest.getClientIpAddress());
 
@@ -161,17 +161,20 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
     }
     final X509CRLHolder crl = this.caService.getCurrentCrl();
 
-    httpResponse.setContentType("application/octet-stream");
-    httpResponse.setHeader("Content-disposition", "attachment; filename=cacrl.crl");
+    final DefaultHttpBodyAction action = new DefaultHttpBodyAction();
+    action.addHeader("Content-Type", "application/octet-stream");
+    action.addHeader("Content-disposition", "attachment; filename=cacrl.crl");
 
     try (final ByteArrayInputStream bis = new ByteArrayInputStream(crl.getEncoded());
-        final OutputStream os = httpResponse.getOutputStream()) {
+        final ByteArrayOutputStream os = new ByteArrayOutputStream()) {
       final byte[] buffer = new byte[4096];
       int numBytesRead;
       while ((numBytesRead = bis.read(buffer)) > 0) {
         os.write(buffer, 0, numBytesRead);
       }
+      action.setContents(os.toByteArray());
     }
+    return action;
   }
 
   /** {@inheritDoc} */

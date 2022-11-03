@@ -15,6 +15,8 @@
  */
 package se.swedenconnect.signservice.core.types;
 
+import javax.annotation.Nullable;
+
 /**
  * Base class for representing a Choice between two objects, where one is set and the other is {@code null}.
  *
@@ -51,6 +53,7 @@ public class Choice<F, S> {
    *
    * @return the first choice or null
    */
+  @Nullable
   public F getFirst() {
     return this.first;
   }
@@ -60,6 +63,7 @@ public class Choice<F, S> {
    *
    * @return the second choice or null
    */
+  @Nullable
   public S getSecond() {
     return this.second;
   }

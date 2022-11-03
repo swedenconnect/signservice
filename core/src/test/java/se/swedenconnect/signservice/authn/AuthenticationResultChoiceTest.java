@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.core.http.HttpResponseAction;
 
 /**
  * Test cases for AuthenticationResultChoice.
@@ -29,7 +29,7 @@ public class AuthenticationResultChoiceTest {
   @Test
   public void testNull() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      new AuthenticationResultChoice((HttpRequestMessage) null);
+      new AuthenticationResultChoice((HttpResponseAction) null);
     });
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       new AuthenticationResultChoice((AuthenticationResult) null);
@@ -38,8 +38,8 @@ public class AuthenticationResultChoiceTest {
 
   @Test
   public void testMsg() {
-    final AuthenticationResultChoice choice = new AuthenticationResultChoice(Mockito.mock(HttpRequestMessage.class));
-    Assertions.assertNotNull(choice.getHttpRequestMessage());
+    final AuthenticationResultChoice choice = new AuthenticationResultChoice(Mockito.mock(HttpResponseAction.class));
+    Assertions.assertNotNull(choice.getResponseAction());
     Assertions.assertNotNull(choice.getFirst());
     Assertions.assertNull(choice.getAuthenticationResult());
     Assertions.assertNull(choice.getSecond());
@@ -51,7 +51,7 @@ public class AuthenticationResultChoiceTest {
     final AuthenticationResultChoice choice = new AuthenticationResultChoice(Mockito.mock(AuthenticationResult.class));
     Assertions.assertNotNull(choice.getAuthenticationResult());
     Assertions.assertNotNull(choice.getSecond());
-    Assertions.assertNull(choice.getHttpRequestMessage());
+    Assertions.assertNull(choice.getResponseAction());
     Assertions.assertNull(choice.getFirst());
   }
 

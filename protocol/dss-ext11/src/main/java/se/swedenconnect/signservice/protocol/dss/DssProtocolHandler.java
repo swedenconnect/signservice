@@ -31,9 +31,11 @@ import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.dss_1_0.SignRequest;
 import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.core.http.DefaultHttpPostAction;
+import se.swedenconnect.signservice.core.http.DefaultHttpResponseAction;
+import se.swedenconnect.signservice.core.http.HttpPostAction;
+import se.swedenconnect.signservice.core.http.HttpResponseAction;
 import se.swedenconnect.signservice.core.http.HttpUserRequest;
-import se.swedenconnect.signservice.core.http.impl.DefaultHttpRequestMessage;
 import se.swedenconnect.signservice.engine.SignServiceError;
 import se.swedenconnect.signservice.protocol.ProtocolException;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
@@ -169,7 +171,7 @@ public class DssProtocolHandler extends AbstractSignServiceHandler implements Pr
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public HttpRequestMessage encodeResponse(
+  public HttpResponseAction encodeResponse(
       @Nonnull final SignResponseMessage responseMessage, @Nonnull final SignServiceContext context)
       throws ProtocolException {
 
@@ -177,13 +179,15 @@ public class DssProtocolHandler extends AbstractSignServiceHandler implements Pr
       throw new ProtocolException("Can not encode SignResponse - destination URL is unknown");
     }
     final String encodedMessage = responseMessage.encode();
-    final DefaultHttpRequestMessage httpMsg = new DefaultHttpRequestMessage(
-        responseMessage.getProcessingRequirements().getResponseSendMethod(), responseMessage.getDestinationUrl());
-    httpMsg.addHttpParameter("EidSignResponse", encodedMessage);
-    httpMsg.addHttpParameter("RelayState", responseMessage.getRelayState());
-    httpMsg.addHttpParameter("Binding", BINDING);
 
-    return httpMsg;
+    final HttpPostAction action = DefaultHttpPostAction.builder()
+        .url(responseMessage.getDestinationUrl())
+        .parameter("EidSignResponse", encodedMessage)
+        .parameter("RelayState", responseMessage.getRelayState())
+        .parameter("Binding", BINDING)
+        .build();
+
+    return new DefaultHttpResponseAction(action);
   }
 
   /** {@inheritDoc} */

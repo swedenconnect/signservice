@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.security.Security;
@@ -33,8 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -44,7 +41,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.mock.web.DelegatingServletOutputStream;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -72,6 +68,7 @@ import se.swedenconnect.signservice.context.DefaultSignServiceContext;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.http.HttpBodyAction;
 import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
@@ -277,16 +274,9 @@ class SimpleKeyAndCertificateHandlerTest {
     Mockito.when(request.getServerServletPath()).thenReturn(crlPath);
     Mockito.when(request.getMethod()).thenReturn("GET");
 
-    final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+    final HttpBodyAction action = defaultHandler.getResource(request);
 
-    final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    final DelegatingServletOutputStream dos = new DelegatingServletOutputStream(bos);
-
-    Mockito.when(response.getOutputStream()).thenReturn(dos);
-
-    defaultHandler.getResource(request, response);
-
-    Assertions.assertTrue(bos.toByteArray().length > 0);
+    Assertions.assertTrue(action.getContents().length > 0);
   }
 
   @Test
@@ -296,10 +286,8 @@ class SimpleKeyAndCertificateHandlerTest {
     Mockito.when(request.getServerServletPath()).thenReturn(crlPath);
     Mockito.when(request.getMethod()).thenReturn("POST");
 
-    final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-
     assertThatThrownBy(() -> {
-      defaultHandler.getResource(request, response);
+      defaultHandler.getResource(request);
     }).isInstanceOf(IOException.class)
         .hasMessage("Invalid call");
   }

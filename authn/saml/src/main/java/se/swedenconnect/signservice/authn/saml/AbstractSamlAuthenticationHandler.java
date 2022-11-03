@@ -15,20 +15,18 @@
  */
 package se.swedenconnect.signservice.authn.saml;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensaml.core.xml.io.MarshallingException;
@@ -81,8 +79,13 @@ import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
 import se.swedenconnect.signservice.core.attribute.AttributeConverter;
 import se.swedenconnect.signservice.core.attribute.AttributeException;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.core.http.DefaultHttpBodyAction;
+import se.swedenconnect.signservice.core.http.DefaultHttpPostAction;
+import se.swedenconnect.signservice.core.http.DefaultHttpRedirectAction;
+import se.swedenconnect.signservice.core.http.DefaultHttpResponseAction;
+import se.swedenconnect.signservice.core.http.HttpBodyAction;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
+import se.swedenconnect.signservice.core.http.HttpResponseAction;
 import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
@@ -218,33 +221,20 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
         context.put(SIGNMESSAGE_KEY, signMessage);
       }
 
-      // Build a return object (containing directions on how to redirect/POST the request).
+      // Build a response object (containing directions on how to redirect/POST the request).
       //
-      final HttpRequestMessage message = new HttpRequestMessage() {
+      final HttpResponseAction responseAction;
+      if ("GET".equalsIgnoreCase(requestObject.getMethod())) {
+        responseAction = new DefaultHttpResponseAction(new DefaultHttpRedirectAction(requestObject.getSendUrl()));
+      }
+      else { // POST
+        final DefaultHttpPostAction postAction = new DefaultHttpPostAction(requestObject.getSendUrl());
+        postAction.setParameters(requestObject.getRequestParameters());
+        responseAction = new DefaultHttpResponseAction(postAction);
+      }
 
-        @Override
-        public String getUrl() {
-          return requestObject.getSendUrl();
-        }
-
-        @Override
-        public String getMethod() {
-          return requestObject.getMethod();
-        }
-
-        @Override
-        public Map<String, String> getHttpParameters() {
-          return Optional.ofNullable(requestObject.getRequestParameters()).orElseGet(() -> Collections.emptyMap());
-        }
-
-        @Override
-        public Map<String, String> getHttpHeaders() {
-          return Optional.ofNullable(requestObject.getHttpHeaders()).orElseGet(() -> Collections.emptyMap());
-        }
-      };
-
-      log.debug("{}: AuthnRequest generated - {}: {}", context.getId(), message.getMethod(), message.getUrl());
-      return new AuthenticationResultChoice(message);
+      log.debug("{}: AuthnRequest generated - {}", context.getId(), responseAction);
+      return new AuthenticationResultChoice(responseAction);
     }
     catch (final RequestGenerationException e) {
       final String msg = String.format("Failed to generate SAML authentication request - %s", e.getMessage());
@@ -412,9 +402,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
 
   /** {@inheritDoc} */
   @Override
-  public void getResource(
-      @Nonnull final HttpUserRequest httpRequest, @Nonnull final HttpServletResponse httpResponse)
-      throws IOException {
+  public HttpBodyAction getResource(@Nonnull final HttpUserRequest httpRequest) throws IOException {
 
     log.debug("Request to download metadata from {}", httpRequest.getClientIpAddress());
 
@@ -438,18 +426,23 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
 
       // Assign the HTTP headers.
       //
+      final DefaultHttpBodyAction bodyAction = new DefaultHttpBodyAction();
       final String acceptHeader = httpRequest.getHeader("Accept");
       if (acceptHeader != null && acceptHeader.contains(APPLICATION_SAML_METADATA)) {
-        httpResponse.setHeader("Content-Type", APPLICATION_SAML_METADATA);
+        bodyAction.addHeader("Content-Type", APPLICATION_SAML_METADATA);
       }
       else {
-        httpResponse.setHeader("Content-Type", "application/xml");
+        bodyAction.addHeader("Content-Type", "application/xml");
       }
 
       // Get the DOM for the metadata, serialize it and write it to the response ...
       //
       final Element dom = this.entityDescriptorContainer.marshall();
-      SerializeSupport.writeNode(dom, httpResponse.getOutputStream());
+      try (final ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+        SerializeSupport.writeNode(dom, os);
+        bodyAction.setContents(os.toByteArray());
+      }
+      return bodyAction;
     }
     catch (final SignatureException | MarshallingException e) {
       log.error("Failed to return valid metadata", e);
