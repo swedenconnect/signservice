@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,7 +30,7 @@ import se.swedenconnect.signservice.core.http.HttpUserRequest;
  * An implementation that wraps a {@link HttpServletRequest} as a {@link HttpUserRequest}.
  * <p>
  * Note: This class can not be used in a frontend/backend deployment where the frontend communicates with the backend
- * over a REST API.
+ * over a REST API since it wraps a {@link HttpServletRequest}.
  * </p>
  */
 public class ServletApiHttpUserRequest implements HttpUserRequest {
@@ -118,8 +117,7 @@ public class ServletApiHttpUserRequest implements HttpUserRequest {
   @Override
   @Nonnull
   public Map<String, String[]> getHeaders() {
-    final Iterable<String> it = () -> this.request.getHeaderNames().asIterator();
-    return StreamSupport.stream(it.spliterator(), false)
+    return Collections.list(this.request.getHeaderNames()).stream()
         .map(n -> Map.entry(n, Collections.list(this.request.getHeaders(n)).toArray(String[]::new)))
         .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
   }

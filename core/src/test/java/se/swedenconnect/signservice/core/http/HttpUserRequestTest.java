@@ -13,69 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.core.http.servletapi;
+package se.swedenconnect.signservice.core.http;
 
-import java.util.Collections;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import se.swedenconnect.signservice.core.http.HttpUserRequest;
-
 /**
- * Test cases for ServletApiHttpUserRequest.
+ * Test cases for HttpUserRequest and DefaultHttpUserRequest.
  */
-public class ServletApiHttpUserRequestTest {
+public class HttpUserRequestTest {
 
   @Test
-  public void test() throws Exception {
-    final HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(httpServletRequest.getMethod()).thenReturn("GET");
-    Mockito.when(httpServletRequest.getRequestURL()).thenReturn(
-        new StringBuffer("https://www.example.com/ctx/path1/path2"));
-    Mockito.when(httpServletRequest.getScheme()).thenReturn("https");
-    Mockito.when(httpServletRequest.getServerPort()).thenReturn(443);
-    Mockito.when(httpServletRequest.getServerName()).thenReturn("www.example.com");
-    Mockito.when(httpServletRequest.getContextPath()).thenReturn("/ctx");
-    Mockito.when(httpServletRequest.getServletPath()).thenReturn("/path1/path2");
-    Mockito.when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
+  public void testUsage() throws Exception {
 
     final Map<String, String[]> parameters = Map.ofEntries(
         Map.entry("p1", new String[] { "v1" }),
         Map.entry("p3", new String[] { "v3", "v33" }));
-    Mockito.when(httpServletRequest.getParameterMap()).thenReturn(parameters);
-    Mockito.when(httpServletRequest.getParameter(Mockito.anyString())).then(a -> {
-      final String[] values = parameters.get(a.getArgument(0, String.class));
-      if (values == null || values.length == 0) {
-        return null;
-      }
-      return values[0];
-    });
 
     final Map<String, String[]> headers = Map.of(
         "H1", new String[] { "V1" },
         "H2", new String[] { "V2", "V22" },
         "H3", new String[] { "V3" });
-    Mockito.when(httpServletRequest.getHeader(Mockito.anyString())).then(a -> {
-      final String[] values = headers.get(a.getArgument(0, String.class));
-      return values != null ? values[0] : null;
-    });
-    Mockito.when(httpServletRequest.getHeaders(Mockito.anyString())).then(a -> {
-      final String[] values = headers.get(a.getArgument(0, String.class));
-      return values != null ?  Collections.enumeration(Arrays.asList(values)) : Collections.emptyEnumeration();
-    });
-    Mockito.when(httpServletRequest.getHeaderNames()).then(a -> {
-      return Collections.enumeration(headers.keySet());
-    });
 
-    final ServletApiHttpUserRequest request = new ServletApiHttpUserRequest(httpServletRequest);
+    final DefaultHttpUserRequest request = new DefaultHttpUserRequest();
+    request.setMethod("GET");
+    request.setClientIpAddress("127.0.0.1");
+    request.setRequestUrl("https://www.example.com/ctx/path1/path2");
+    request.setServerBaseUrl("https://www.example.com/ctx");
+    request.setServerServletPath("/path1/path2");
+    request.setParameters(parameters);
+    request.setHeaders(headers);
+
     Assertions.assertEquals("GET", request.getMethod());
     Assertions.assertEquals("https://www.example.com/ctx/path1/path2", request.getRequestUrl());
     Assertions.assertEquals("https://www.example.com/ctx", request.getServerBaseUrl());

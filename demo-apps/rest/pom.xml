@@ -1,0 +1,75 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>signservice-demo-rest-parent</artifactId>
+  <packaging>pom</packaging>
+
+  <parent>
+    <groupId>se.swedenconnect.signservice.demo</groupId>
+    <artifactId>signservice-demo-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <name>Sweden Connect :: SignService :: Demo :: REST</name>
+  <description>SignService Demo Apps REST Parent</description>
+  <url>https://github.com/swedenconnect/signservice</url>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:https://github.com/swedenconnect/signservice.git</connection>
+    <developerConnection>scm:git:https://github.com/swedenconnect/signservice.git</developerConnection>
+    <url>https://github.com/idsec/signservice/tree/master</url>
+  </scm>
+
+  <organization>
+    <name>Sweden Connect</name>
+    <url>https://www.swedenconnect.se</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <name>Martin Lindström</name>
+      <email>martin@idsec.se</email>
+      <organization>IDsec Solutions AB</organization>
+      <organizationUrl>https://www.idsec.se</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Stefan Santesson</name>
+      <email>stefan@idsec.se</email>
+      <organization>IDsec Solutions AB</organization>
+      <organizationUrl>https://www.idsec.se</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Magnus Hoflin</name>
+      <email>magnus.hoflin@digg.se</email>
+      <organization>DIGG</organization>
+      <organizationUrl>https://www.digg.se</organizationUrl>
+    </developer>
+
+    <developer>
+      <name>Henric Norlander</name>
+      <email>extern.henric.norlander@digg.se</email>
+      <organization>DIGG</organization>
+      <organizationUrl>https://www.digg.se</organizationUrl>
+    </developer>
+
+  </developers>
+
+  <modules>
+    <!-- TODO -->
+    <module>frontend</module>
+    <module>backend</module>
+  </modules>
+
+</project>

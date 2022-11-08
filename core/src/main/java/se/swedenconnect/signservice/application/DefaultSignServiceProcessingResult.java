@@ -41,7 +41,8 @@ public class DefaultSignServiceProcessingResult implements SignServiceProcessing
    * @param responseAction the response action
    */
   public DefaultSignServiceProcessingResult(
-      @Nullable final SignServiceContext context, @Nonnull final HttpResponseAction responseAction) {
+      @Nullable final SignServiceContext context,
+      @Nonnull final HttpResponseAction responseAction) {
     this.context = context;
     this.responseAction = Objects.requireNonNull(responseAction, "responseAction must not be null");
   }

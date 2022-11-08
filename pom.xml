@@ -99,7 +99,7 @@
     <module>config</module>
     <module>spring-boot-starter</module>
     <module>bom</module>
-    <module>app</module>
+    <module>demo-apps</module>
   </modules>
 
   <dependencyManagement>

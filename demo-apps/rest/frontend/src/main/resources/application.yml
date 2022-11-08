@@ -1,0 +1,37 @@
+#
+# SignService Frontend configuration
+#
+
+server:
+  port: 8443
+  servlet:
+    context-path: /
+  ssl:
+    enabled: true
+    key-store: classpath:localhost.jks
+    key-store-type: JKS
+    key-alias: localhost
+    key-store-password: secret
+    key-password: secret
+  error:
+    include-message: always
+    
+signservice:
+  frontend:
+    backend-url: https://localhost:8543/signapi
+    process-path: /process
+    
+#
+# Logging
+#
+logging:
+  level:
+    se:
+      swedenconnect:
+        security: DEBUG
+        signservice: DEBUG
+#    org:
+#      springframework:
+#        web:
+#          filter:
+#            CommonsRequestLoggingFilter: DEBUG

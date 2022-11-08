@@ -20,6 +20,8 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  * Representation of the HTTP request message that is received by the SignService application/frontend.
  * <p>
@@ -29,10 +31,11 @@ import javax.annotation.Nullable;
  * transfered between the front- and backend (for example in a REST API-call).
  * </p>
  */
+@JsonDeserialize(as = DefaultHttpUserRequest.class)
 public interface HttpUserRequest {
 
   /**
-   * Gets the HTTP method with which this request was made (i.e., {@code GET}, {@code POST}, {@code PUT})..
+   * Gets the HTTP method with which this request was made (i.e., {@code GET}, {@code POST}, {@code PUT}, ...).
    *
    * @return name of HTTP method used to send the request
    */
@@ -49,7 +52,7 @@ public interface HttpUserRequest {
   String getRequestUrl();
 
   /**
-   * Gets the frontend "server base URL", which is the protocol, host, (host) and context path.
+   * Gets the frontend "server base URL", which is the protocol, host and context path.
    *
    * @return the frontend server base URL
    */

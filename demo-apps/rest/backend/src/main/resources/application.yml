@@ -1,0 +1,274 @@
+#
+# SignService configuration
+#
+
+server:
+  port: 8543
+  servlet:
+    context-path: /signapi
+  ssl:
+    enabled: true
+    key-store: classpath:localhost.jks
+    key-store-type: JKS
+    key-alias: localhost
+    key-store-password: secret
+    key-password: secret
+
+#
+# Management
+#
+management:
+  server:
+    port: 8081
+  auditevents:
+    enabled: true
+  endpoint:
+    auditevents:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,auditevents
+
+signservice:
+  domain: localhost
+  # This is the frontend base-URL! 
+  base-url: https://${signservice.domain}:8443
+  system-audit:
+    actuator:
+      name: "SignService System Audit Logger"
+      principal: "SignService"
+  default-sign-service-id: https://localhost.swedenconnect.se/signservice
+  default-credential:
+    props:
+      name: SignService
+      resource: classpath:signservice.jks
+      alias: signservice
+      type: JKS
+      password: secret
+      key-password: secret
+  validation-config:
+    allowed-clock-skew: PT30S
+    max-message-age: PT3M
+
+  #
+  # Configuration for common beans used by several engine configurations
+  #  
+  common-beans:
+    protocol:
+      bean-name: signservice.DssProtocolHandler
+      dss:
+        include-assertion: true
+        include-request-message: false
+    sign:
+      bean-name: signservice.DefaultSignatureHandler
+      default-handler:
+        name: DefaultSignatureHandler
+        tbs-processors:
+        - type: xml
+          strict-processing: false
+          include-issuer-serial: true
+        - type: pdf
+    key-provider:
+      bean-name: signservice.DefaultKeyProvider
+      security-provider: BC
+    cert:
+      bean-name: signservice.BuiltInCa
+      built-in-ca:
+        base-url: ${signservice.base-url}
+        ca-credential:
+          props:            
+            resource: classpath:ca/test-ca.jks
+            type: JKS
+            password: secret
+            alias: test-ca
+            key-password: secret
+        ca-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256                
+        key-provider-ref: signservice.DefaultKeyProvider
+        cert-validity: P365D
+        crl-validity: P2D
+        crl-dp-path: /sign/signca/signca.crl
+        crl-file-location: ${SIGNSERVICE_HOME}/signca/signca.crl
+        default-value-policy-checker:
+          default-reply: false
+          rules:
+          - attribute-type: rdn
+            ref: "2.5.4.6"
+            allowed-values:
+            - SE
+    saml:
+      metadata-provider:
+        bean-name: signservice.SamlMetadataProvider
+        url: https://eid.svelegtest.se/metadata/mdx/role/idp.xml
+        backup-file: ${SIGNSERVICE_HOME}/sandbox-metadata.xml
+        validation-certificate: classpath:sandbox/sandbox-metadata.crt
+                        
+  default-handler-config:
+    authn:
+      saml:
+        saml-type: sweden-connect
+        sp-paths:
+          base-url: ${signservice.base-url}
+        metadata-provider-ref: signservice.SamlMetadataProvider
+        signature-credential:
+          props:
+            name: SignService SAML Signing
+            resource: classpath:sandbox/saml-sp.jks
+            alias: sign
+            type: JKS
+            password: secret
+            key-password: secret
+        decryption-credential:
+          props:            
+            name: SignService SAML Decryption
+            resource: classpath:sandbox/saml-sp.jks
+            alias: encrypt
+            type: JKS
+            password: secret
+            key-password: secret
+        sign-authn-requests: true
+        require-encrypted-assertions: true
+        require-signed-assertions: true
+        message-replay-checker-ref: signservice.MessageReplayChecker 
+        metadata:
+          entity-categories:
+          - http://id.elegnamnden.se/st/1.0/sigservice
+          - http://id.elegnamnden.se/ec/1.0/loa3-pnr
+          - http://id.swedenconnect.se/ec/sc/uncertified-loa3-pnr
+          - http://id.elegnamnden.se/ec/1.0/eidas-naturalperson
+          - http://id.elegnamnden.se/st/1.0/public-sector-sp
+          - http://id.swedenconnect.se/contract/sc/sweden-connect
+          - http://id.swedenconnect.se/contract/sc/eid-choice-2017
+          - http://id.swedenconnect.se/general-ec/1.0/secure-authenticator-binding
+          - http://id.swedenconnect.se/general-ec/1.0/accepts-coordination-number
+          requested-attributes:
+          - name: urn:oid:1.2.752.29.4.13
+            required: false
+          - name: urn:oid:1.2.752.201.3.4
+            required: false
+          service-names:
+          - "sv-SignService Demo"
+          - "en-SignService Demo"
+          ui-info:
+            display-names:
+            - "sv-Sweden Connect Demo SignService"
+            - "en-Sweden Connect Demo SignService"
+            descriptions:
+            - "sv-Sweden Connect Underskriftstjänst för test och demonstration"
+            - "en-Sweden Connect SignService for test and demonstration"
+            logos:
+            - path: /images/logo.svg
+              height: 56
+              width: 280
+            - path: /images/logo-notext.svg
+              height: 256
+              width: 256
+          organization:
+            names:
+            - "sv-Sweden Connect"
+            - "en-Sweden Connect"
+            display-names:
+            - "sv-Sweden Connect"
+            - "en-Sweden Connect"
+            urls:
+            - "en-https://www.swedenconnect.se"
+          contact-persons:
+            support:
+              company: "Sweden Connect"
+              email-address: operations@swedenconnect.se
+            technical:
+              company: "Sweden Connect"
+              email-address: operations@swedenconnect.se
+  engines:
+  
+  #
+  # Configuration for the "Test my Signature"-client running on localhost. 
+  # See https://github.com/idsec-solutions/signservice-integration.
+  #
+  - name: "test-my-signature-localhost"
+    processing-paths:
+    - /sign/testmysignature/signreq
+    client:
+      client-id: http://sandbox.swedenconnect.se/testmyeid
+      trusted-certificates:
+      - classpath:clients/test-my-signature/client.crt
+    protocol:
+      external:
+        bean-name: signservice.DssProtocolHandler
+    authn:
+      saml:        
+        default-config-ref: authn.saml
+        entity-id: http://sandbox.swedenconnect.se/testmyeid/localsign
+        sp-paths:
+          metadata-publishing-path: /sign/testmysignature/saml/metadata
+          assertion-consumer-path: /sign/testmysignature/saml/sso
+        metadata:
+          ui-info:
+            display-names:
+            - "en-Test your eID (localhost)"
+            - "sv-Testa ditt eID (localhost)"
+            descriptions:
+            - "en-Application for testing your eID (localhost)"
+            - "sv-Applikation för att testa ditt eID (localhost)"
+    sign:
+      external:
+        bean-name: signservice.DefaultSignatureHandler
+    cert:
+      external:
+        bean-name: signservice.BuiltInCa
+    audit:
+      file:
+        name: "test-my-signature-audit-logger"
+        file-name: ${SIGNSERVICE_HOME}/testmysignature/audit.log
+        
+  #
+  # Configuration for the "Signature Service Test Application" (https://sig.sandbox.swedenconnect.se/testsp).
+  # Log in using the user "signserviceuser" with the password "signserviceuser".
+  #
+  - name: "signservice-test-localhost"
+    processing-paths:
+    - /sign/testapp/signreq
+    client:
+      client-id: https://eid2cssp.3xasecurity.com/sign
+      trusted-certificates:
+      - classpath:clients/signservice-testapp/eid2cssp.3xasecurity.com.crt
+    protocol:
+      external:
+        bean-name: signservice.DssProtocolHandler
+    authn:
+      saml:        
+        default-config-ref: authn.saml
+        entity-id: https://localhost.swedenconnect.se/eid2cssp
+        sp-paths:
+          metadata-publishing-path: /sign/testapp/saml/metadata
+          assertion-consumer-path: /sign/testapp/saml/sso
+        preferred-binding: POST
+        metadata:
+          ui-info:
+            display-names:
+            - "en-Sweden Connect Localhost Signature Service Test"
+            - "sv-Sweden Connect test för underskriftstjänster (localhost)"
+            descriptions:
+            - "en-Sweden Connect test application for signature services running on localhost"
+            - "sv-Sweden Connect testapplikation för underskriftstjänster (localhost)"
+    sign:
+      external:
+        bean-name: signservice.DefaultSignatureHandler
+    cert:
+      external:
+        bean-name: signservice.BuiltInCa
+    audit:
+      file:
+        name: "signservice-test-localhost-audit"
+        file-name: ${SIGNSERVICE_HOME}/signservice-testapp/audit.log
+
+#
+# Logging
+#
+logging:
+  level:
+    se:
+      swedenconnect:
+        security: DEBUG
+        signservice: DEBUG
+
