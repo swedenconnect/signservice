@@ -15,7 +15,10 @@
  */
 package se.swedenconnect.signservice.application.rest;
 
+import java.util.Objects;
 import java.util.Optional;
+
+import javax.annotation.Nonnull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -56,11 +59,14 @@ public class RestProcessRequestResult {
    *
    * @param result a SignServiceProcessingResult object
    */
-  public RestProcessRequestResult(final SignServiceProcessingResult result) {
+  public RestProcessRequestResult(@Nonnull final SignServiceProcessingResult result) {
+    Objects.requireNonNull(result, "result must not be null");
+
+    this.responseAction = Optional.ofNullable(result.getResponseAction())
+        .orElseThrow(() -> new IllegalArgumentException("No response action present"));
     this.context = Optional.ofNullable(result.getSignServiceContext())
         .map(SignServiceContext::serialize)
         .orElse(null);
-    this.responseAction = result.getResponseAction();
   }
 
 }

@@ -26,24 +26,23 @@ the following methods:
 
 #### processRequest
 
-`HttpRequestMessage processRequest(HttpServletRequest, HttpServletResponse httpResponse)`
+`SignServiceProcessingResult processRequest(HttpUserRequest, SignServiceContext)`
 
-The main entry point for a SignService Engine. The SignService application (the engine manager) supplies the HTTP servlet request and response object from the HTTP request that it is servicing and the engine processes it.
-
-The internals, and the current state, of the engine will find out the type of message and process it accordingly.
+The main entry point for a SignService Engine. The [SignServiceEngineManager](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/application/SignServiceEngineManager.java) accepts HTTP
+user requests passed from the application/frontend, and after deciding which engine instance that 
+can serve this request invokes this method to process the request. The engine will find out the 
+type of message and process it accordingly.
 
 Apart from processing requests, the engine may also serve resources. Examples of such resources
-are status pages and authentication provider metadata. When a request being processed is a
-request for a resource the method will not return a [HttpRequestMessage](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/core/http/HttpRequestMessage.java), but instead
-`null` and write the resource to the supplied `HttpServletResponse`. However, it will **not** commit the response.
-This is the responsibility of the caller.
-
+are status pages and authentication provider metadata.
+   
 #### canProcess
 
-`boolean canProcess(HttpServletRequest)`
+`boolean canProcess(HttpUserRequest)`
 
-A predicate that given a request tells whether this engine instance can process the request. This method
-will always be invoked by the application (i.e., the engine manager) before `processRequest` is called.
+A predicate that given a request tells whether this engine instance can process the request. 
+This method will always be invoked by the application (i.e., the engine manager) before
+`processRequest` is called.
 
 ---
 
@@ -58,20 +57,18 @@ The [ProtocolHandler](https://github.com/swedenconnect/signservice/blob/main/cor
 
 #### decodeRequest
 
-`SignRequestMessage decodeRequest(HttpServletRequest, SignServiceContext)`
+`SignRequestMessage decodeRequest(HttpUserRequest, SignServiceContext)`
 
-Given a message (the HTTP servlet request) and the context the handler decodes the message into a
-[SignRequestMessage](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/protocol/SignRequestMessage.java) instance (which is the internal, and protocol-agnostic, representation
-of a SignRequest message).
+Given a message (the HTTP user request) and the context the handler decodes the message into a
+[SignRequestMessage](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/protocol/SignRequestMessage.java) instance (which is the internal, and protocol-agnostic, representation of a SignRequest message).
 
 No validation of the message is performed, other than ensuring that a decode operation is possible.
 
 #### createSignResponseMessage
 
-`SignResponseMessage createSignResponseMessage(SignServiceContext, SignRequestMessage signRequestMessage)`
+`SignResponseMessage createSignResponseMessage(SignServiceContext, SignRequestMessage)`
 
-A factory method that creates a [SignResponseMessage](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/protocol/SignResponseMessage.java) given the context and the corresponding 
-request message. The [SignResponseMessage](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/protocol/SignResponseMessage.java) is the internal, and protocol-agnostic, representation
+A factory method that creates a [SignResponseMessage](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/protocol/SignResponseMessage.java) given the context and the corresponding request message. The [SignResponseMessage](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/protocol/SignResponseMessage.java) is the internal, and protocol-agnostic, representation
 of a SignResponse message.
 
 Which parts of the [SignResponseMessage](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/protocol/SignResponseMessage.java) that is populated is implementation dependent. 
@@ -80,7 +77,7 @@ The caller of the method can now populate the response message based on the curr
 
 #### encodeResponse
 
-`HttpRequestMessage encodeResponse(SignResponseMessage, SignServiceContext)`
+`HttpResponseAction encodeResponse(SignResponseMessage, SignServiceContext)`
 
 Encodes a response message so that it can be returned to the SignService application.
 
@@ -97,7 +94,7 @@ defined:
 
 #### authenticate
 
-`AuthenticationResultChoice authenticate(AuthnRequirements, SignMessage, SignServiceContext context)` 
+`AuthenticationResultChoice authenticate(AuthnRequirements, SignMessage, SignServiceContext)` 
 
 Initiates authentication of the user. Depending on the authentication scheme the return result object 
 may contain the authentication result (assertion) or a request to direct the user to a remote service.
@@ -109,12 +106,11 @@ performed under an accepted authentication context.
 
 #### resumeAuthentication
 
-`AuthenticationResultChoice resumeAuthentication(HttpServletRequest, SignServiceContext)`
+`AuthenticationResultChoice resumeAuthentication(HttpUserRequest, SignServiceContext)`
 
 Resumes an authentication process. This method is invoked when the authentication scheme used leads
 to that the user is directed to an external authentication service (IdP). When the user returns to the
-client/service provider (the SignService application), the authentication process is resumed (and completed)
-by invoking this method.
+client/service provider (the SignService application), the authentication process is resumed (and completed) by invoking this method.
 
 ---
 

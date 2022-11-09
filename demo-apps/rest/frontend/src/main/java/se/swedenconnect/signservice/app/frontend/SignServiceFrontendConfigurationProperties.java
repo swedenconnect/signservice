@@ -16,14 +16,16 @@
 package se.swedenconnect.signservice.app.frontend;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 import lombok.Data;
 
 /**
  * Configuration properties for the SignService Frontend application.
  */
-@Data
+@Component
 @ConfigurationProperties(prefix = "signservice.frontend")
+@Data
 public class SignServiceFrontendConfigurationProperties {
 
   /**

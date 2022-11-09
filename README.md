@@ -36,9 +36,9 @@ This repository comprises of the following modules:
 
 * [config](config) - Application configuration support.
 
-* [spring-boot-starter](spring-boot-starter) - A Spring Boot Starter module that is useful when building a Signature Service using Spring Boot.
+* [spring-boot-starter](spring-boot-starter) - A Spring Boot Starter module that is useful when building a Signature Service application using Spring Boot.
 
-* [app](app) - A sample Signature Service application built using Spring Boot. 
+* [demo-apps](demo-apps) - Sample SignService applications.
 
 * [bom](bom) - A Maven Bill-of-Materials POM that is useful when building SignService applications.
 
