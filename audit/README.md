@@ -10,7 +10,7 @@
 The `audit` directory contains code for implementing the [AuditLogger](https://github.com/swedenconnect/signservice/blob/main/core/src/main/java/se/swedenconnect/signservice/audit/AuditLogger.java) interface.
 
 
-- [base](base) - Common code for all implementations. It also includes two implementations; a file based audit implementation and an implementation making use of an underlying log system (for example Logback or Log4j).
+- [base](base) - Common code for all implementations. It also includes three implementations; a file based audit implementation, an implementation making use of an underlying log system (for example Logback or Log4j) and a logger that published events to an installed audit listener bean.
 
 - [actuator](actuator) - A Spring Actuator implementation.
 

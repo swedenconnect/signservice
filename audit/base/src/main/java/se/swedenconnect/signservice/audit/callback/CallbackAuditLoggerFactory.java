@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.audit.actuator;
+package se.swedenconnect.signservice.audit.callback;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-import org.springframework.context.ApplicationEventPublisher;
+import org.apache.commons.lang.StringUtils;
 
-import lombok.Setter;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerFactory;
@@ -28,37 +26,40 @@ import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 
 /**
- * Factory for creating actuator audit logger objects.
+ * A handler factory for creating {@link CallbackAuditLogger} instances.
  */
-public class ActuatorAuditLoggerFactory extends AbstractAuditLoggerFactory {
-
-  /** The ApplicationEventPublisher used to publish events. */
-  @Setter
-  private ApplicationEventPublisher publisher;
+public class CallbackAuditLoggerFactory extends AbstractAuditLoggerFactory {
 
   /** {@inheritDoc} */
   @Override
   @Nonnull
   protected AbstractAuditLogger createAuditLogger(
-      @Nonnull final HandlerConfiguration<AuditLogger> configuration, @Nullable final BeanLoader beanLoader)
+      @Nonnull final HandlerConfiguration<AuditLogger> configuration, @Nonnull final BeanLoader beanLoader)
       throws IllegalArgumentException {
 
     if (configuration == null) {
-      throw new IllegalArgumentException("Missing configuration for " + ActuatorAuditLogger.class.getSimpleName());
+      throw new IllegalArgumentException("Missing configuration for " + CallbackAuditLogger.class.getSimpleName());
     }
-    if (!ActuatorAuditLoggerConfiguration.class.isInstance(configuration)) {
+
+    if (!CallbackAuditLoggerConfiguration.class.isInstance(configuration)) {
       throw new IllegalArgumentException(
           "Unknown configuration object supplied - " + configuration.getClass().getSimpleName());
     }
-    final Boolean isActive = ((ActuatorAuditLoggerConfiguration) configuration).getActive();
-    if (isActive != null && !isActive.booleanValue()) {
-      throw new IllegalArgumentException("The active property is false - factory should never has been called");
+    final CallbackAuditLoggerConfiguration conf = CallbackAuditLoggerConfiguration.class.cast(configuration);
+    AuditLoggerListener listener = null;
+    if (conf.getListener() != null) {
+      listener = conf.getListener();
     }
-    if (this.publisher == null) {
-      throw new IllegalArgumentException("No ApplicationEventPublisher has been assigned, can not create "
-          + ActuatorAuditLogger.class.getSimpleName());
+    else if (StringUtils.isNotBlank(conf.getListenerRef())) {
+      if (beanLoader == null) {
+        throw new IllegalArgumentException("No bean loader provided - can not load listener-ref");
+      }
+      listener = beanLoader.load(conf.getListenerRef(), AuditLoggerListener.class);
     }
-    return new ActuatorAuditLogger(new ActuatorAuditLoggerListener(this.publisher));
+    if (listener == null) {
+      throw new IllegalArgumentException("Missing audit logger listener");
+    }
+    return new CallbackAuditLogger(listener);
   }
 
 }

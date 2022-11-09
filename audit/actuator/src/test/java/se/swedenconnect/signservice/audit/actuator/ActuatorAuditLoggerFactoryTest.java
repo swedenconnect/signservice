@@ -47,6 +47,7 @@ public class ActuatorAuditLoggerFactoryTest {
 
     final ActuatorAuditLoggerConfiguration config = new ActuatorAuditLoggerConfiguration();
     config.setName("AUDIT_LOGGER_HANDLER");
+    config.setActive(true);
 
     final ActuatorAuditLoggerFactory factory = new ActuatorAuditLoggerFactory();
     factory.setPublisher(mockPublisher);
@@ -56,6 +57,10 @@ public class ActuatorAuditLoggerFactoryTest {
     Assertions.assertTrue(ActuatorAuditLogger.class.isInstance(logger));
 
     Assertions.assertEquals("AUDIT_LOGGER_HANDLER", logger.getName());
+
+    // Default for active is true
+    config.setActive(null);
+    Assertions.assertNotNull(factory.create(config));
   }
 
   @Test
@@ -68,11 +73,12 @@ public class ActuatorAuditLoggerFactoryTest {
 
     final ActuatorAuditLoggerFactory factory = new ActuatorAuditLoggerFactory();
     factory.setPublisher(mockPublisher);
+
+
     assertThatThrownBy(() -> {
       factory.create(config);
     }).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("The active property is false - factory should never has been called");
-
   }
 
   @Test

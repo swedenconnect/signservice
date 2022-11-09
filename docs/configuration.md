@@ -129,6 +129,7 @@ An [AuditLogger](https://github.com/swedenconnect/signservice/blob/main/core/src
 | `external.bean-name` | A bean name for an externally created handler bean. |
 | `file.*` | File-based audit logging, see [FileAuditLogger](https://github.com/swedenconnect/signservice/tree/main/audit/base#fileauditlogger). |
 | `log-system.*` | Audit-logging that uses an underlying log system, via Slf4j, to produce audit log entries. See [LogSystemAuditLogger](https://github.com/swedenconnect/signservice/tree/main/audit/base#log-system-audit-logger). |
+| `callback.*` | Audit-logging that uses callbacks to a configured [AuditLoggerListener](https://github.com/swedenconnect/signservice/blob/main/audit/base/src/main/java/se/swedenconnect/signservice/audit/callback/AuditLoggerListener.java) object. See [CallbackAuditLogger](https://github.com/swedenconnect/signservice/tree/main/audit/base#callback-audit-logger). |
 | `actuator.*` | For Spring Boot only. Uses Spring Boot's Actuator to publish audit log entries. See [ActuatorAuditLogger](https://github.com/swedenconnect/signservice/tree/main/audit/actuator). |
 
 

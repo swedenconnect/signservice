@@ -16,8 +16,6 @@
 package se.swedenconnect.signservice.audit.actuator;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -30,30 +28,30 @@ import org.springframework.boot.actuate.audit.listener.AuditApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 
 import se.swedenconnect.signservice.audit.AuditEvent;
-import se.swedenconnect.signservice.audit.AuditLoggerException;
+import se.swedenconnect.signservice.audit.callback.CallbackAuditLogger;
 
 /**
- * Test cases for ActuatorAuditLogger.
+ * Test cases for ActuatorAuditLoggerListener.
  */
-public class ActuatorAuditLoggerTest {
+public class ActuatorAuditLoggerListenerTest {
 
   @Test
   public void testAuditLog() {
     final ApplicationEventPublisher mockPublisher = mock(ApplicationEventPublisher.class);
 
-    final ActuatorAuditLogger auditLogger = new ActuatorAuditLogger();
-    auditLogger.setApplicationEventPublisher(mockPublisher);
+    final ActuatorAuditLoggerListener listener = new ActuatorAuditLoggerListener(mockPublisher);
 
-    doNothing().when(mockPublisher).publishEvent(any(AuditApplicationEvent.class));
+    doNothing().when(mockPublisher).publishEvent(Mockito.any(AuditApplicationEvent.class));
 
-    final AuditEvent event = auditLogger.createAuditEvent("id");
+    final CallbackAuditLogger logger = new CallbackAuditLogger((e) -> {});
+    final AuditEvent event = logger.createAuditEvent("id");
     event.setPrincipal("principal");
     event.addParameter("param1", "value1");
 
-    auditLogger.auditLog(event);
+    listener.onAuditEvent(event);
 
     verify(mockPublisher, times(1))
-        .publishEvent(any(AuditApplicationEvent.class));
+        .publishEvent(Mockito.any(AuditApplicationEvent.class));
 
     final ArgumentCaptor<AuditApplicationEvent> eventArgumentCaptor =
         ArgumentCaptor.forClass(AuditApplicationEvent.class);
@@ -68,40 +66,5 @@ public class ActuatorAuditLoggerTest {
     assertThat(actualEvent.getData()).containsEntry("param1", "value1");
   }
 
-  @Test
-  public void testAuditLogError() {
-    final ApplicationEventPublisher mockPublisher = mock(ApplicationEventPublisher.class);
-
-    final ActuatorAuditLogger auditLogger = new ActuatorAuditLogger();
-    auditLogger.setApplicationEventPublisher(mockPublisher);
-
-    Mockito.doThrow(IllegalArgumentException.class).when(mockPublisher).publishEvent(any(AuditApplicationEvent.class));
-
-    final AuditEvent event = auditLogger.createAuditEvent("id");
-    event.setPrincipal("principal");
-    event.addParameter("param1", "value1");
-
-    assertThatThrownBy(() -> {
-      auditLogger.auditLog(event);
-    }).isInstanceOf(AuditLoggerException.class)
-        .hasMessageContaining("Failed to publish audit event -");
-
-    final ActuatorAuditLogger auditLogger2 = new ActuatorAuditLogger();
-
-    assertThatThrownBy(() -> {
-      auditLogger2.auditLog(event);
-    }).isInstanceOf(AuditLoggerException.class)
-        .getCause()
-        .isInstanceOf(NullPointerException.class);
-  }
-
-  @Test
-  public void testAuditLogNullEvent() {
-    final ActuatorAuditLogger auditLogger = new ActuatorAuditLogger();
-    assertThatThrownBy(() -> {
-      auditLogger.auditLog(null);
-    }).isInstanceOf(AuditLoggerException.class)
-        .hasMessage("event must not be null");
-  }
 
 }

@@ -13,26 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.audit.actuator;
+package se.swedenconnect.signservice.audit.callback;
 
-import javax.annotation.Nonnull;
-
-import se.swedenconnect.signservice.audit.AuditLogger;
-import se.swedenconnect.signservice.audit.callback.AuditLoggerListener;
-import se.swedenconnect.signservice.audit.callback.CallbackAuditLogger;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * An {@link AuditLogger} Spring actuator implementation.
+ * Test cases for CallbackAuditLoggerConfiguration.
  */
-public class ActuatorAuditLogger extends CallbackAuditLogger {
+public class CallbackAuditLoggerConfigurationTest {
 
-  /**
-   * Constructor.
-   *
-   * @param listener the audit logger listener
-   */
-  public ActuatorAuditLogger(@Nonnull final AuditLoggerListener listener) {
-    super(listener);
+  @Test
+  public void test() {
+    final CallbackAuditLoggerConfiguration conf = new CallbackAuditLoggerConfiguration();
+    Assertions.assertEquals(CallbackAuditLoggerFactory.class.getName(), conf.getFactoryClass());
   }
 
 }
