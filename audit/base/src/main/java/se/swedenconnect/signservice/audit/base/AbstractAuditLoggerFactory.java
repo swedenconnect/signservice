@@ -35,7 +35,7 @@ public abstract class AbstractAuditLoggerFactory extends AbstractHandlerFactory<
   /**
    * Based on the supplied configuration the method creates an {@link AuditLogger} instance. Note that the
    * implementation does not have to handle the setting of the handler name and the event factory. This is handled by
-   * {@link AbstractAuditLoggerFactory#createHandler(ObjectConfiguration)}.
+   * {@link AbstractAuditLoggerFactory#createHandler(HandlerConfiguration, BeanLoader)}.
    *
    * @param configuration
    *          the configuration (may be null)

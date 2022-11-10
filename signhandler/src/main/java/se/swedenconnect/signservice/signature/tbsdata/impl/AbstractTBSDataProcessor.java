@@ -116,7 +116,7 @@ public abstract class AbstractTBSDataProcessor implements TBSDataProcessor {
    * Check signing time provided in the sign request
    *
    * @param signingTime signing time
-   * @throws InvalidRequestException
+   * @throws InvalidRequestException for invalid input
    */
   protected void checkSigningTime(@Nonnull final Instant signingTime) throws InvalidRequestException {
     final Instant now = Instant.now();

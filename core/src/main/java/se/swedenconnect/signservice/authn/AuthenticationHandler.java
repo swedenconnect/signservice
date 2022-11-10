@@ -31,7 +31,7 @@ import se.swedenconnect.signservice.protocol.msg.SignMessage;
  * that require that the user is directed to a remote authentication service (IdP) there are two methods defined:
  * </p>
  * <p>
- * <b>authenticate><b> - Initiates the authentication operation with the supplied authentication requirements and the
+ * <b>authenticate</b> - Initiates the authentication operation with the supplied authentication requirements and the
  * supplied session context. If the authentication can be performed without directing the user to a remote
  * authentication service the result is delivered directly in the result object
  * {@link AuthenticationResultChoice#getAuthenticationResult()} If the user needs to be directed to a remote

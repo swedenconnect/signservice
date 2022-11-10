@@ -310,7 +310,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
   /**
    * Assigns the type of certificates that the underlying CA issues.
    *
-   * @param supportedCertificateTypes the certificate type
+   * @param caSupportedCertificateTypes the supported certificate type(s)
    */
   public void setCaSupportedCertificateTypes(@Nonnull final List<CertificateType> caSupportedCertificateTypes) {
     if (caSupportedCertificateTypes != null) {

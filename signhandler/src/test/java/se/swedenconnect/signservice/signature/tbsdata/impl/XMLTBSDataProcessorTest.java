@@ -263,10 +263,10 @@ class XMLTBSDataProcessorTest {
 
     // Non exception test
     TBSProcessingData tbsData = tbsDP.processSignTaskData(requestedSignatureTask, input.credential.getCertificate(), input.signatureAlgorithm);
-    log.info("Result tbs data:\n{}", TestUtils.base64Print(tbsData.getTBSBytes()));
-    if (tbsData.getAdESObject() != null) {
-      log.info("Result AdES object:\n{}", TestUtils.base64Print(tbsData.getAdESObject().getObjectBytes()));
-      log.info("Result AdES object signature ID: {}", tbsData.getAdESObject().getSignatureId());
+    log.info("Result tbs data:\n{}", TestUtils.base64Print(tbsData.getTbsBytes()));
+    if (tbsData.getAdesObject() != null) {
+      log.info("Result AdES object:\n{}", TestUtils.base64Print(tbsData.getAdesObject().getObjectBytes()));
+      log.info("Result AdES object signature ID: {}", tbsData.getAdesObject().getSignatureId());
     }
     else {
       log.info("No result AdES object");
@@ -275,7 +275,7 @@ class XMLTBSDataProcessorTest {
     Document inpTbsDocument = DOMUtils.bytesToDocument(Base64.decode(input.tbsData));
     SignedInfoType inpSignedInfo = JAXBUnmarshaller.unmarshall(inpTbsDocument, SignedInfoType.class);
 
-    Document tbsDocument = DOMUtils.bytesToDocument(tbsData.getTBSBytes());
+    Document tbsDocument = DOMUtils.bytesToDocument(tbsData.getTbsBytes());
     SignedInfoType signedInfo = JAXBUnmarshaller.unmarshall(tbsDocument, SignedInfoType.class);
 
     assertEquals(inpSignedInfo.getCanonicalizationMethod().getAlgorithm(),
@@ -289,13 +289,13 @@ class XMLTBSDataProcessorTest {
 
     if (input.adESType == null) {
       // This is a non AdES test
-      assertNull(tbsData.getAdESObject());
-      assertArrayEquals(Base64.decode(input.tbsData), tbsData.getTBSBytes());
+      assertNull(tbsData.getAdesObject());
+      assertArrayEquals(Base64.decode(input.tbsData), tbsData.getTbsBytes());
       log.info("Non AdES request. input data and TBS data match");
       return;
     }
 
-    Document adesObjectDocument = DOMUtils.bytesToDocument(tbsData.getAdESObject().getObjectBytes());
+    Document adesObjectDocument = DOMUtils.bytesToDocument(tbsData.getAdesObject().getObjectBytes());
     ObjectType adesObjectType = JAXBUnmarshaller.unmarshall(adesObjectDocument, ObjectType.class);
     Element qpElement = (Element) adesObjectType.getContent().get(0);
     QualifyingProperties qp = JAXBUnmarshaller.unmarshall(qpElement, QualifyingProperties.class);

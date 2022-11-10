@@ -227,7 +227,7 @@ public class PDFTBSDataProcessor extends AbstractTBSDataProcessor {
       // Assemble and return data to be signed
       return TBSProcessingData.builder()
           .processingRules(signatureTask.getProcessingRulesUri())
-          .tBSBytes(consolidateTBSData(signedAttributes))
+          .tbsBytes(consolidateTBSData(signedAttributes))
           .build();
     }
     catch (final IOException | NoSuchAlgorithmException | CertificateException e) {

@@ -269,14 +269,14 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
 
         return TBSProcessingData.builder()
             .processingRules(signatureTask.getProcessingRulesUri())
-            .adESObject(updatedAdesObject)
-            .tBSBytes(updatedTbsData)
+            .adesObject(updatedAdesObject)
+            .tbsBytes(updatedTbsData)
             .build();
       }
       else {
         return TBSProcessingData.builder()
             .processingRules(signatureTask.getProcessingRulesUri())
-            .tBSBytes(tbsBytes)
+            .tbsBytes(tbsBytes)
             .build();
       }
     }

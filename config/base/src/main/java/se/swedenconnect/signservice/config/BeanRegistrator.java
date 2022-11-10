@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
 
 /**
  * An interface describing a callback that is used by
- * {@link SignServiceFactory#createSignServiceEngineManager(SignServiceConfiguration, se.swedenconnect.signservice.core.config.BeanLoader, BeanRegistrator)}
+ * {@link SignServiceFactory#createSignServiceEngineManager(SignServiceConfigurationProperties, se.swedenconnect.signservice.core.config.BeanLoader, BeanRegistrator)}
  * to register beans.
  */
 public interface BeanRegistrator {

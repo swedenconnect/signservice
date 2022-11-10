@@ -289,13 +289,13 @@ class PDFTBSDataProcessorTest {
       signatureAlgorithm);
 
     // Remove later
-    log.debug(Base64.toBase64String(tbsData.getTBSBytes()));
+    log.debug(Base64.toBase64String(tbsData.getTbsBytes()));
 
-    log.info("Result tbs data:\n{}", TestUtils.base64Print(tbsData.getTBSBytes(), 80));
+    log.info("Result tbs data:\n{}", TestUtils.base64Print(tbsData.getTbsBytes(), 80));
     if (expectedResult != null) {
-      assertArrayEquals(Base64.decode(expectedResult), tbsData.getTBSBytes());
+      assertArrayEquals(Base64.decode(expectedResult), tbsData.getTbsBytes());
     }
-    assertEquals(null, tbsData.getAdESObject());
+    assertEquals(null, tbsData.getAdesObject());
     assertEquals(signatureTask.getProcessingRulesUri(), tbsData.getProcessingRules());
   }
 

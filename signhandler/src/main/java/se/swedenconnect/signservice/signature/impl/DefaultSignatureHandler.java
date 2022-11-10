@@ -192,13 +192,13 @@ public class DefaultSignatureHandler extends AbstractSignServiceHandler implemen
         signingCredential.getCertificate(),
         signatureAlgorithm);
 
-    final byte[] signature = signer.sign(tbsProcessingData.getTBSBytes(), signingCredential.getPrivateKey(),
+    final byte[] signature = signer.sign(tbsProcessingData.getTbsBytes(), signingCredential.getPrivateKey(),
         signatureAlgorithm);
     final DefaultCompletedSignatureTask completedSignatureTask = new DefaultCompletedSignatureTask(signatureTask);
     completedSignatureTask.setSignature(signature);
     completedSignatureTask.setSignatureAlgorithmUri(signatureAlgorithmUri);
-    completedSignatureTask.setTbsData(tbsProcessingData.getTBSBytes());
-    completedSignatureTask.setAdESObject(tbsProcessingData.getAdESObject());
+    completedSignatureTask.setTbsData(tbsProcessingData.getTbsBytes());
+    completedSignatureTask.setAdESObject(tbsProcessingData.getAdesObject());
     completedSignatureTask.setProcessingRulesUri(tbsProcessingData.getProcessingRules());
     log.debug("Sign task completed");
 
