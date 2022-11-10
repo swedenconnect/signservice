@@ -29,7 +29,7 @@ import se.swedenconnect.signservice.audit.base.events.DefaultAuditEventFactory;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class FileAuditLoggerTest {
 
-  private static final String LOG_FILE = "target/fileaudit.log";
+  private static final String LOG_FILE = "target/fileauditloggertest.log";
 
   private MemoryAppender memoryAppenderDebug;
 
