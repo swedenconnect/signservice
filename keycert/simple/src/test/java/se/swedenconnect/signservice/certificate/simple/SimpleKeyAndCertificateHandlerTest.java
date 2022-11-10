@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.security.Security;
@@ -33,9 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -45,7 +41,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.mock.web.DelegatingServletOutputStream;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -69,9 +64,12 @@ import se.swedenconnect.signservice.certificate.attributemapping.DefaultAttribut
 import se.swedenconnect.signservice.certificate.simple.ca.BasicCAServiceBuilder;
 import se.swedenconnect.signservice.certificate.simple.ca.DefaultSelfSignedCaCertificateGenerator;
 import se.swedenconnect.signservice.certificate.simple.ca.SelfSignedCaCertificateGenerator;
+import se.swedenconnect.signservice.context.DefaultSignServiceContext;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.http.HttpBodyAction;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.msg.CertificateAttributeMapping;
@@ -79,7 +77,6 @@ import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultCertificateAttributeMapping;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificateAttribute;
-import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 
 /**
  * Tests for the simple key and certificate handler
@@ -256,9 +253,9 @@ class SimpleKeyAndCertificateHandlerTest {
 
   @Test
   public void testSupports() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRemoteAddr()).thenReturn("227.123.34.21");
-    Mockito.when(request.getServletPath()).thenReturn(crlPath);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getClientIpAddress()).thenReturn("227.123.34.21");
+    Mockito.when(request.getServerServletPath()).thenReturn(crlPath);
 
     Mockito.when(request.getMethod()).thenReturn("POST");
     Assertions.assertFalse(defaultHandler.supports(request));
@@ -266,40 +263,31 @@ class SimpleKeyAndCertificateHandlerTest {
     Mockito.when(request.getMethod()).thenReturn("GET");
     Assertions.assertTrue(defaultHandler.supports(request));
 
-    Mockito.when(request.getServletPath()).thenReturn("/other/path.crl");
+    Mockito.when(request.getServerServletPath()).thenReturn("/other/path.crl");
     Assertions.assertFalse(defaultHandler.supports(request));
   }
 
   @Test
   public void testGetResource() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRemoteAddr()).thenReturn("227.123.34.21");
-    Mockito.when(request.getServletPath()).thenReturn(crlPath);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getClientIpAddress()).thenReturn("227.123.34.21");
+    Mockito.when(request.getServerServletPath()).thenReturn(crlPath);
     Mockito.when(request.getMethod()).thenReturn("GET");
 
-    final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+    final HttpBodyAction action = defaultHandler.getResource(request);
 
-    final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    final DelegatingServletOutputStream dos = new DelegatingServletOutputStream(bos);
-
-    Mockito.when(response.getOutputStream()).thenReturn(dos);
-
-    defaultHandler.getResource(request, response);
-
-    Assertions.assertTrue(bos.toByteArray().length > 0);
+    Assertions.assertTrue(action.getContents().length > 0);
   }
 
   @Test
   public void testGetResourceError() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getRemoteAddr()).thenReturn("227.123.34.21");
-    Mockito.when(request.getServletPath()).thenReturn(crlPath);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getClientIpAddress()).thenReturn("227.123.34.21");
+    Mockito.when(request.getServerServletPath()).thenReturn(crlPath);
     Mockito.when(request.getMethod()).thenReturn("POST");
 
-    final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-
     assertThatThrownBy(() -> {
-      defaultHandler.getResource(request, response);
+      defaultHandler.getResource(request);
     }).isInstanceOf(IOException.class)
         .hasMessage("Invalid call");
   }

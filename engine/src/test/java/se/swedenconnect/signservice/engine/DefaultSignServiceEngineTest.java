@@ -24,20 +24,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +38,7 @@ import org.junit.jupiter.api.Test;
 
 import lombok.Getter;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.application.SignServiceProcessingResult;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditEventIds;
 import se.swedenconnect.signservice.audit.AuditEventParameter;
@@ -63,8 +57,13 @@ import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.client.ClientConfiguration;
 import se.swedenconnect.signservice.core.attribute.impl.DefaultIdentityAttributeIdentifier;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.core.http.DefaultHttpBodyAction;
+import se.swedenconnect.signservice.core.http.DefaultHttpPostAction;
+import se.swedenconnect.signservice.core.http.DefaultHttpRedirectAction;
+import se.swedenconnect.signservice.core.http.DefaultHttpResponseAction;
 import se.swedenconnect.signservice.core.http.HttpResourceProvider;
+import se.swedenconnect.signservice.core.http.HttpResponseAction;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.engine.config.EngineConfiguration;
 import se.swedenconnect.signservice.protocol.ProtocolException;
@@ -78,8 +77,6 @@ import se.swedenconnect.signservice.protocol.msg.SignerAuthnInfo;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultCertificateAttributeMapping;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificateAttribute;
-import se.swedenconnect.signservice.session.SessionHandler;
-import se.swedenconnect.signservice.session.SignServiceSession;
 import se.swedenconnect.signservice.signature.CompletedSignatureTask;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureHandler;
@@ -103,9 +100,6 @@ public class DefaultSignServiceEngineTest {
   private AuthenticationHandler authnHandler;
   private ProtocolHandler protHandler;
 
-  private SessionHandler sessionHandler;
-  private TestSignServiceSession session;
-
   private MessageReplayChecker messageReplayChecker;
 
   private SignRequestMessageVerifier signRequestMessageVerifier;
@@ -115,9 +109,7 @@ public class DefaultSignServiceEngineTest {
 
   private SignRequestMessage signRequestMessage;
 
-  private HttpServletRequest httpRequest;
-
-  private HttpServletResponse httpResponse;
+  private HttpUserRequest httpRequest;
 
   @BeforeEach
   public void setup() throws Exception {
@@ -126,16 +118,26 @@ public class DefaultSignServiceEngineTest {
     when(this.engineConfiguration.getProcessingPaths()).thenReturn(List.of(SIGNREQUEST_PATH));
 
     final HttpResourceProvider provider1 = mock(HttpResourceProvider.class);
-    doNothing().when(provider1).getResource(any(), any());
-    when(provider1.supports(any())).thenAnswer(a -> {
-      final HttpServletRequest req = a.getArgument(0, HttpServletRequest.class);
-      return RESOURCE_PATH.equals(req.getServletPath());
+
+    when(provider1.getResource(any())).thenAnswer(a -> {
+      final HttpUserRequest req = a.getArgument(0, HttpUserRequest.class);
+      if (RESOURCE_PATH.equals(req.getServerServletPath())) {
+        return DefaultHttpBodyAction.builder().contents("provider1".getBytes()).build();
+      }
+      else {
+        throw new IOException("No such resource");
+      }
     });
+    when(provider1.supports(any())).thenAnswer(a -> {
+      final HttpUserRequest req = a.getArgument(0, HttpUserRequest.class);
+      return RESOURCE_PATH.equals(req.getServerServletPath());
+    });
+
     final HttpResourceProvider provider2 = mock(HttpResourceProvider.class);
-    doThrow(IOException.class).when(provider2).getResource(any(), any());
+    doThrow(IOException.class).when(provider2).getResource(any());
     when(provider2.supports(any())).thenAnswer(a -> {
-      final HttpServletRequest req = a.getArgument(0, HttpServletRequest.class);
-      return ERROR_RESOURCE_PATH.equals(req.getServletPath());
+      final HttpUserRequest req = a.getArgument(0, HttpUserRequest.class);
+      return ERROR_RESOURCE_PATH.equals(req.getServerServletPath());
     });
     when(this.engineConfiguration.getHttpResourceProviders()).thenReturn(List.of(provider1, provider2));
 
@@ -150,11 +152,12 @@ public class DefaultSignServiceEngineTest {
     when(this.authnHandler.getName()).thenReturn("DummyAuthn");
 
     when(this.authnHandler.canProcess(any(), any())).thenAnswer(a -> {
-      final HttpServletRequest req = a.getArgument(0, HttpServletRequest.class);
-      return SAML_POST_PATH.equals(req.getServletPath()) || METADATA_PATH.equals(req.getServletPath());
+      final HttpUserRequest req = a.getArgument(0, HttpUserRequest.class);
+      return SAML_POST_PATH.equals(req.getServerServletPath()) || METADATA_PATH.equals(req.getServerServletPath());
     });
 
-    final HttpRequestMessage authnRequest = mock(HttpRequestMessage.class);
+    final HttpResponseAction authnRequest = new DefaultHttpResponseAction(
+        new DefaultHttpRedirectAction("https://www.idp.com?REQ=ABC"));
     final AuthenticationResultChoice arc1 = new AuthenticationResultChoice(authnRequest);
     when(this.authnHandler.authenticate(any(), any(), any())).thenReturn(arc1);
 
@@ -205,34 +208,13 @@ public class DefaultSignServiceEngineTest {
 
     when(protHandler.encodeResponse(any(), any())).thenAnswer(e -> {
       final SignResponseMessage srm = e.getArgument(0, SignResponseMessage.class);
-      return new HttpRequestMessage() {
-
-        @Override
-        public String getUrl() {
-          return CLIENT_RESPONSE_URL;
-        }
-
-        @Override
-        public String getMethod() {
-          return "POST";
-        }
-
-        @Override
-        public Map<String, String> getHttpParameters() {
-          final Map<String, String> map = new HashMap<>();
-          if (srm != null) {
-            map.put("result-code", srm.getSignResponseResult().isSuccess()
-                ? "SUCCESS"
-                : srm.getSignResponseResult().getErrorCode());
-          }
-          return map;
-        }
-
-        @Override
-        public Map<String, String> getHttpHeaders() {
-          return null;
-        }
-      };
+      return new DefaultHttpResponseAction(
+          DefaultHttpPostAction.builder()
+              .url(CLIENT_RESPONSE_URL)
+              .parameter("result-code", srm == null || srm.getSignResponseResult().isSuccess()
+                  ? "SUCCESS"
+                  : srm.getSignResponseResult().getErrorCode())
+              .build());
     });
 
     when(this.engineConfiguration.getProtocolHandler()).thenReturn(protHandler);
@@ -249,11 +231,6 @@ public class DefaultSignServiceEngineTest {
     when(sigHandler.sign(any(), any(), any(), any())).thenReturn(cst);
     when(this.engineConfiguration.getSignatureHandler()).thenReturn(sigHandler);
 
-    this.sessionHandler = mock(SessionHandler.class);
-    this.session = new TestSignServiceSession();
-    when(this.sessionHandler.getSession(any())).thenReturn(this.session);
-    // when(this.sessionHandler.getSession(any(), any())).thenReturn(this.session);
-
     this.messageReplayChecker = mock(MessageReplayChecker.class);
     doNothing().when(this.messageReplayChecker).checkReplay(any());
 
@@ -262,11 +239,9 @@ public class DefaultSignServiceEngineTest {
 
     this.systemAuditLogger = new TestAuditLogger();
 
-    this.httpRequest = mock(HttpServletRequest.class);
-    when(this.httpRequest.getServletPath()).thenReturn(SIGNREQUEST_PATH);
-    when(this.httpRequest.getRemoteAddr()).thenReturn("187.11.12.45");
-
-    this.httpResponse = mock(HttpServletResponse.class);
+    this.httpRequest = mock(HttpUserRequest.class);
+    when(this.httpRequest.getServerServletPath()).thenReturn(SIGNREQUEST_PATH);
+    when(this.httpRequest.getClientIpAddress()).thenReturn("187.11.12.45");
   }
 
   private SignRequestMessage setupSignRequestMessage() {
@@ -323,7 +298,7 @@ public class DefaultSignServiceEngineTest {
   @Test
   public void testInit() {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
     assertDoesNotThrow(() -> {
@@ -338,7 +313,7 @@ public class DefaultSignServiceEngineTest {
   @Test
   public void testInitCreateDefaultVerifier() {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
 
     assertDoesNotThrow(() -> {
       engine.init();
@@ -348,19 +323,21 @@ public class DefaultSignServiceEngineTest {
   @Test
   public void testProcessSignRequest() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    HttpRequestMessage result = engine.processRequest(this.httpRequest, this.httpResponse);
+    SignServiceProcessingResult result = engine.processRequest(this.httpRequest, null);
     Assertions.assertNotNull(result);
+    Assertions.assertNotNull(result.getSignServiceContext());
 
     // OK, now the user has been to the IdP and is posted back ...
 
-    when(this.httpRequest.getServletPath()).thenReturn(SAML_POST_PATH);
+    when(this.httpRequest.getServerServletPath()).thenReturn(SAML_POST_PATH);
 
-    result = engine.processRequest(this.httpRequest, this.httpResponse);
+    result = engine.processRequest(this.httpRequest, result.getSignServiceContext());
     Assertions.assertNotNull(result);
-    Assertions.assertEquals("SUCCESS", result.getHttpParameters().get("result-code"));
+    Assertions.assertNull(result.getSignServiceContext());
+    Assertions.assertEquals("SUCCESS", result.getResponseAction().getPost().getParameters().get("result-code"));
 
     // Assert audit logging
     final TestAuditLogger auditLogger = (TestAuditLogger) this.engineConfiguration.getAuditLogger();
@@ -373,14 +350,17 @@ public class DefaultSignServiceEngineTest {
   @Test
   public void testProcessSignRequestAbandonedSession() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    HttpRequestMessage result = engine.processRequest(this.httpRequest, this.httpResponse);
+    SignServiceProcessingResult result = engine.processRequest(this.httpRequest, null);
     Assertions.assertNotNull(result);
+    Assertions.assertNotNull(result.getSignServiceContext());
 
     // Send a new request. The previous session will be abandoned ...
-    engine.processRequest(this.httpRequest, this.httpResponse);
+    result = engine.processRequest(this.httpRequest, result.getSignServiceContext());
+    Assertions.assertNotNull(result);
+    Assertions.assertNotNull(result.getSignServiceContext());
 
     final TestAuditLogger auditLogger = (TestAuditLogger) this.engineConfiguration.getAuditLogger();
     Assertions.assertTrue(auditLogger.getEvents().size() == 1);
@@ -388,11 +368,12 @@ public class DefaultSignServiceEngineTest {
 
     // OK, now the user has been to the IdP and is posted back ...
 
-    when(this.httpRequest.getServletPath()).thenReturn(SAML_POST_PATH);
+    when(this.httpRequest.getServerServletPath()).thenReturn(SAML_POST_PATH);
 
-    result = engine.processRequest(this.httpRequest, this.httpResponse);
+    result = engine.processRequest(this.httpRequest, result.getSignServiceContext());
     Assertions.assertNotNull(result);
-    Assertions.assertEquals("SUCCESS", result.getHttpParameters().get("result-code"));
+    Assertions.assertNull(result.getSignServiceContext());
+    Assertions.assertEquals("SUCCESS", result.getResponseAction().getPost().getParameters().get("result-code"));
 
     // Assert audit logging
     Assertions.assertTrue(auditLogger.getEvents().size() == 3);
@@ -404,13 +385,13 @@ public class DefaultSignServiceEngineTest {
   @Test
   public void testProcessSignRequestReplayCheckerError() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
     doThrow(MessageReplayException.class).when(this.messageReplayChecker).checkReplay(any());
 
     assertThatThrownBy(() -> {
-      engine.processRequest(this.httpRequest, this.httpResponse);
+      engine.processRequest(this.httpRequest, null);
     }).isInstanceOf(UnrecoverableSignServiceException.class)
         .hasMessage("Message is already being processed")
         .extracting((e) -> UnrecoverableSignServiceException.class.cast(e).getErrorCode())
@@ -429,13 +410,13 @@ public class DefaultSignServiceEngineTest {
   @Test
   public void testProcessSignRequestDecodeError() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
     when(protHandler.decodeRequest(any(), any())).thenThrow(ProtocolException.class);
 
     assertThatThrownBy(() -> {
-      engine.processRequest(this.httpRequest, this.httpResponse);
+      engine.processRequest(this.httpRequest, null);
     }).isInstanceOf(UnrecoverableSignServiceException.class)
         .hasMessage("Failed to decode sign request")
         .extracting((e) -> UnrecoverableSignServiceException.class.cast(e).getErrorCode())
@@ -445,14 +426,15 @@ public class DefaultSignServiceEngineTest {
   @Test
   public void testProcessSignRequestCheckRequirementsFailed() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
     doThrow(InvalidRequestException.class).when(this.certHandler).checkRequirements(any(), any());
 
-    final HttpRequestMessage result = engine.processRequest(this.httpRequest, this.httpResponse);
+    final SignServiceProcessingResult result = engine.processRequest(this.httpRequest, null);
+    Assertions.assertNull(result.getSignServiceContext());
     Assertions.assertEquals(SignServiceErrorCode.REQUEST_INCORRECT.name(),
-        result.getHttpParameters().get("result-code"));
+        result.getResponseAction().getPost().getParameters().get("result-code"));
 
     // Assert audit logging
     final TestAuditLogger auditLogger = (TestAuditLogger) this.engineConfiguration.getAuditLogger();
@@ -467,7 +449,7 @@ public class DefaultSignServiceEngineTest {
   @Test
   public void testProcessSignRequestNoAuthnRedirect() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
     final AuthenticationResult ar = mock(AuthenticationResult.class);
@@ -477,88 +459,92 @@ public class DefaultSignServiceEngineTest {
     });
     when(this.authnHandler.authenticate(any(), any(), any())).thenReturn(new AuthenticationResultChoice(ar));
 
-    final HttpRequestMessage result = engine.processRequest(this.httpRequest, this.httpResponse);
+    final SignServiceProcessingResult result = engine.processRequest(this.httpRequest, null);
     Assertions.assertNotNull(result);
-    Assertions.assertEquals("SUCCESS", result.getHttpParameters().get("result-code"));
+    Assertions.assertNull(result.getSignServiceContext());
+    Assertions.assertEquals("SUCCESS", result.getResponseAction().getPost().getParameters().get("result-code"));
   }
 
   @Test
   public void testProcessSignRequestInitAuthnFailedCancel() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
     when(this.authnHandler.authenticate(any(), any(), any())).thenThrow(
         new UserAuthenticationException(AuthenticationErrorCode.USER_CANCEL, "msg"));
 
-    final HttpRequestMessage result = engine.processRequest(this.httpRequest, this.httpResponse);
+    final SignServiceProcessingResult result = engine.processRequest(this.httpRequest, null);
+    Assertions.assertNotNull(result);
+    Assertions.assertNull(result.getSignServiceContext());
     Assertions.assertEquals(SignServiceErrorCode.AUTHN_USER_CANCEL.name(),
-        result.getHttpParameters().get("result-code"));
+        result.getResponseAction().getPost().getParameters().get("result-code"));
   }
 
   @Test
   public void testProcessSignRequestResumeAuthnFailedCancel() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    engine.processRequest(this.httpRequest, this.httpResponse);
+    SignServiceProcessingResult result = engine.processRequest(this.httpRequest, null);
 
-    when(this.httpRequest.getServletPath()).thenReturn(SAML_POST_PATH);
+    when(this.httpRequest.getServerServletPath()).thenReturn(SAML_POST_PATH);
     when(this.authnHandler.resumeAuthentication(any(), any())).thenThrow(
         new UserAuthenticationException(AuthenticationErrorCode.USER_CANCEL, "msg"));
 
-    final HttpRequestMessage result = engine.processRequest(this.httpRequest, this.httpResponse);
+    result = engine.processRequest(this.httpRequest, result.getSignServiceContext());
+    Assertions.assertNull(result.getSignServiceContext());
     Assertions.assertEquals(SignServiceErrorCode.AUTHN_USER_CANCEL.name(),
-        result.getHttpParameters().get("result-code"));
+        result.getResponseAction().getPost().getParameters().get("result-code"));
   }
 
   @Test
   public void testProcessSignRequestInitAuthnFailedUnsupportedAuthnContext() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
     when(this.authnHandler.authenticate(any(), any(), any())).thenThrow(
         new UserAuthenticationException(AuthenticationErrorCode.UNSUPPORTED_AUTHNCONTEXT, "msg"));
 
-    final HttpRequestMessage result = engine.processRequest(this.httpRequest, this.httpResponse);
+    final SignServiceProcessingResult result = engine.processRequest(this.httpRequest, null);
     Assertions.assertEquals(SignServiceErrorCode.AUTHN_UNSUPPORTED_AUTHNCONTEXT.name(),
-        result.getHttpParameters().get("result-code"));
+        result.getResponseAction().getPost().getParameters().get("result-code"));
   }
 
   @Test
   public void testProcessSignRequestInitAuthnFailedMismatch() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
     when(this.authnHandler.authenticate(any(), any(), any())).thenThrow(
         new UserAuthenticationException(AuthenticationErrorCode.MISMATCHING_IDENTITY_ATTRIBUTES, "msg"));
 
-    final HttpRequestMessage result = engine.processRequest(this.httpRequest, this.httpResponse);
+    final SignServiceProcessingResult result = engine.processRequest(this.httpRequest, null);
     Assertions.assertEquals(SignServiceErrorCode.AUTHN_USER_MISMATCH.name(),
-        result.getHttpParameters().get("result-code"));
+        result.getResponseAction().getPost().getParameters().get("result-code"));
   }
 
   @Test
   public void testProcessSignRequestInitAuthnFailedGeneral() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
     when(this.authnHandler.authenticate(any(), any(), any())).thenThrow(
         new UserAuthenticationException(AuthenticationErrorCode.FAILED_AUTHN, "msg"));
 
-    final HttpRequestMessage result = engine.processRequest(this.httpRequest, this.httpResponse);
+    final SignServiceProcessingResult result = engine.processRequest(this.httpRequest, null);
     Assertions.assertEquals(SignServiceErrorCode.AUTHN_FAILURE.name(),
-        result.getHttpParameters().get("result-code"));
+        result.getResponseAction().getPost().getParameters().get("result-code"));
   }
 
   @Test
   public void testCanProcessSignRequest() {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
     Assertions.assertTrue(engine.canProcess(this.httpRequest));
@@ -567,10 +553,10 @@ public class DefaultSignServiceEngineTest {
   @Test
   public void testCanProcessMetadata() {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    when(this.httpRequest.getServletPath()).thenReturn(METADATA_PATH);
+    when(this.httpRequest.getServerServletPath()).thenReturn(METADATA_PATH);
 
     Assertions.assertTrue(engine.canProcess(this.httpRequest));
   }
@@ -578,10 +564,10 @@ public class DefaultSignServiceEngineTest {
   @Test
   public void testCanProcessFalse() {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    when(this.httpRequest.getServletPath()).thenReturn("/other");
+    when(this.httpRequest.getServerServletPath()).thenReturn("/other");
 
     Assertions.assertFalse(engine.canProcess(this.httpRequest));
   }
@@ -589,10 +575,10 @@ public class DefaultSignServiceEngineTest {
   @Test
   public void testCanProcessTrue() {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    when(this.httpRequest.getServletPath()).thenReturn("/other");
+    when(this.httpRequest.getServerServletPath()).thenReturn("/other");
 
     final HttpResourceProvider p = mock(HttpResourceProvider.class);
     when(p.supports(any())).thenReturn(true);
@@ -604,23 +590,24 @@ public class DefaultSignServiceEngineTest {
   @Test
   public void testServeResource() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    when(this.httpRequest.getServletPath()).thenReturn(RESOURCE_PATH);
-    Assertions.assertNull(engine.processRequest(this.httpRequest, this.httpResponse));
+    when(this.httpRequest.getServerServletPath()).thenReturn(RESOURCE_PATH);
+    final SignServiceProcessingResult result = engine.processRequest(this.httpRequest, null);
+    Assertions.assertNotNull(result.getResponseAction().getBody());
   }
 
   @Test
   public void testServeResourceError() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    when(this.httpRequest.getServletPath()).thenReturn(ERROR_RESOURCE_PATH);
+    when(this.httpRequest.getServerServletPath()).thenReturn(ERROR_RESOURCE_PATH);
 
     assertThatThrownBy(() -> {
-      engine.processRequest(this.httpRequest, this.httpResponse);
+      engine.processRequest(this.httpRequest, null);
     }).isInstanceOf(UnrecoverableSignServiceException.class)
         .hasMessage("Failed to get resource")
         .extracting((e) -> UnrecoverableSignServiceException.class.cast(e).getErrorCode())
@@ -630,13 +617,13 @@ public class DefaultSignServiceEngineTest {
   @Test
   public void testStateError() throws Exception {
     final DefaultSignServiceEngine engine = new DefaultSignServiceEngine(
-        this.engineConfiguration, this.sessionHandler, this.messageReplayChecker, this.systemAuditLogger);
+        this.engineConfiguration, this.messageReplayChecker, this.systemAuditLogger);
     engine.setSignRequestMessageVerifier(this.signRequestMessageVerifier);
 
-    when(this.httpRequest.getServletPath()).thenReturn(SAML_POST_PATH);
+    when(this.httpRequest.getServerServletPath()).thenReturn(SAML_POST_PATH);
 
     assertThatThrownBy(() -> {
-      engine.processRequest(this.httpRequest, this.httpResponse);
+      engine.processRequest(this.httpRequest, null);
     }).isInstanceOf(UnrecoverableSignServiceException.class)
         .hasMessage("State error - did not expect message")
         .extracting((e) -> UnrecoverableSignServiceException.class.cast(e).getErrorCode())
@@ -652,67 +639,6 @@ public class DefaultSignServiceEngineTest {
     @Override
     public void auditLog(@Nonnull final AuditEvent event) throws AuditLoggerException {
       this.events.add(event);
-    }
-
-  }
-
-  private static class TestSignServiceSession implements SignServiceSession {
-
-    private final Map<String, Serializable> attributes = new HashMap<>();
-
-    private final Instant created;
-    private final String id;
-
-    public TestSignServiceSession() {
-      this.created = Instant.now();
-      this.id = UUID.randomUUID().toString();
-    }
-
-    @Override
-    public String getId() {
-      return this.id;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Serializable> T getAttribute(final String name) throws IllegalStateException {
-      return (T) this.attributes.get(name);
-    }
-
-    @Override
-    public <T extends Serializable> T getAttribute(final String name, final Class<T> type)
-        throws IllegalStateException, ClassCastException {
-      return type.cast(this.attributes.get(name));
-    }
-
-    @Override
-    public List<String> getAttributeNames() throws IllegalStateException {
-      return this.attributes.keySet().stream().collect(Collectors.toList());
-    }
-
-    @Override
-    public <T extends Serializable> void setAttribute(final String name, final T attribute)
-        throws IllegalStateException {
-      this.attributes.put(name, attribute);
-    }
-
-    @Override
-    public void removeAttribute(final String name) throws IllegalStateException {
-      this.attributes.remove(name);
-    }
-
-    @Override
-    public void invalidate() {
-    }
-
-    @Override
-    public Instant getCreationTime() throws IllegalStateException {
-      return this.created;
-    }
-
-    @Override
-    public Instant getLastAccessedTime() throws IllegalStateException {
-      return null;
     }
 
   }

@@ -20,10 +20,10 @@ import java.security.SignatureException;
 import javax.annotation.Nonnull;
 
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.SignServiceHandler;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * A {@code SignatureHandler} instance is responsible of signing a supplied signature task using the provided

@@ -17,8 +17,6 @@ package se.swedenconnect.signservice.authn.mock;
 
 import java.util.Arrays;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,10 +25,11 @@ import se.swedenconnect.signservice.authn.AuthenticationResult;
 import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
 import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.authn.impl.SimpleAuthnContextIdentifier;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultAuthnRequirements;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * Test cases for MockedAuthenticationHandler.
@@ -68,7 +67,7 @@ public class MockedAuthenticationHandlerTest {
     handler.setName("mocked");
     Assertions.assertEquals("mocked", handler.getName());
     final AuthenticationResultChoice choice = handler.authenticate(authnReqs, signMessage, context);
-    Assertions.assertNull(choice.getHttpRequestMessage());
+    Assertions.assertNull(choice.getResponseAction());
 
     final AuthenticationResult result = choice.getAuthenticationResult();
     Assertions.assertNotNull(result);
@@ -84,14 +83,14 @@ public class MockedAuthenticationHandlerTest {
   public void testCanProcess() {
     final MockedAuthenticationHandler handler = new MockedAuthenticationHandler();
     Assertions.assertEquals(MockedAuthenticationHandler.class.getSimpleName(), handler.getName());
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     Assertions.assertFalse(handler.canProcess(request, null));
   }
 
   @Test
   public void testResumeAuthentication() {
     final MockedAuthenticationHandler handler = new MockedAuthenticationHandler();
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
     Assertions.assertThrows(UserAuthenticationException.class, () -> {

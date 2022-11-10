@@ -69,6 +69,8 @@ import se.swedenconnect.signservice.certificate.cmc.testutils.ca.BadCAService;
 import se.swedenconnect.signservice.certificate.cmc.testutils.ca.TestCA;
 import se.swedenconnect.signservice.certificate.cmc.testutils.ca.TestCAHolder;
 import se.swedenconnect.signservice.certificate.cmc.testutils.ca.TestServices;
+import se.swedenconnect.signservice.context.DefaultSignServiceContext;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
@@ -79,8 +81,6 @@ import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultCertificateAttributeMapping;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificateAttribute;
-import se.swedenconnect.signservice.session.SignServiceContext;
-import se.swedenconnect.signservice.session.impl.DefaultSignServiceContext;
 
 /**
  * Tests for CMC based certificate issuance

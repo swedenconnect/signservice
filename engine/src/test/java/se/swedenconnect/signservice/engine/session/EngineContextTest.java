@@ -22,8 +22,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import se.swedenconnect.signservice.authn.IdentityAssertion;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * Test cases for EngineContext.

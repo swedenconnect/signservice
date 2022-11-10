@@ -19,8 +19,6 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Base64;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -32,13 +30,14 @@ import se.idsec.signservice.utils.ProtocolVersion;
 import se.idsec.signservice.xml.DOMUtils;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.context.SignServiceContext;
+import se.swedenconnect.signservice.core.http.HttpResponseAction;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.engine.SignServiceError;
 import se.swedenconnect.signservice.engine.SignServiceErrorCode;
 import se.swedenconnect.signservice.protocol.ProtocolException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.SignResponseResult;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * Test cases for DssProtocolHandler
@@ -58,7 +57,7 @@ public class DssProtocolHandlerTest {
 
   @Test
   public void testDecodeRequest() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
     // Setup SignRequest
@@ -87,7 +86,7 @@ public class DssProtocolHandlerTest {
 
   @Test
   public void testDecodeRequestGET() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
     // Setup SignRequest
@@ -108,7 +107,7 @@ public class DssProtocolHandlerTest {
 
   @Test
   public void testDecodeRequestBinding() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
     // Setup SignRequest
@@ -134,7 +133,7 @@ public class DssProtocolHandlerTest {
 
   @Test
   public void testDecodeRequestRelayStateMissing() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
     // Setup SignRequest
@@ -155,7 +154,7 @@ public class DssProtocolHandlerTest {
 
   @Test
   public void testDecodeRequestRelayStateMismatch() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
     // Setup SignRequest
@@ -176,7 +175,7 @@ public class DssProtocolHandlerTest {
 
   @Test
   public void testDecodeRequestMissingSignRequest() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
     Mockito.when(request.getMethod()).thenReturn("POST");
@@ -193,7 +192,7 @@ public class DssProtocolHandlerTest {
 
   @Test
   public void testDecodeRequestMissingInvalidSignRequest() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
     final String xml = "<bad-xml>Hello</bad-xml>";
@@ -212,7 +211,7 @@ public class DssProtocolHandlerTest {
 
   @Test
   public void testDecodeRequestMissingSignRequestNotBase64() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
     Mockito.when(request.getMethod()).thenReturn("POST");
@@ -229,7 +228,7 @@ public class DssProtocolHandlerTest {
 
   @Test
   public void testDecodeRequestNotAccordingToSpec() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
     // Setup SignRequest
@@ -310,11 +309,12 @@ public class DssProtocolHandlerTest {
 
     response.sign(this.getTestCredential());
 
-    final HttpRequestMessage msg = protocolHandler.encodeResponse(response, context);
+    final HttpResponseAction action = protocolHandler.encodeResponse(response, context);
 
-    Assertions.assertNotNull(msg.getHttpParameters().get("EidSignResponse"));
-    Assertions.assertEquals(DssProtocolHandler.BINDING, msg.getHttpParameters().get("Binding"));
-    Assertions.assertEquals(response.getRelayState(), msg.getHttpParameters().get("RelayState"));
+    Assertions.assertEquals(request.getResponseUrl(), action.getPost().getUrl());
+    Assertions.assertNotNull(action.getPost().getParameters().get("EidSignResponse"));
+    Assertions.assertEquals(DssProtocolHandler.BINDING, action.getPost().getParameters().get("Binding"));
+    Assertions.assertEquals(response.getRelayState(), action.getPost().getParameters().get("RelayState"));
   }
 
   @Test
@@ -378,7 +378,7 @@ public class DssProtocolHandlerTest {
   }
 
   private DssSignRequestMessage getTestRequest() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     final SignServiceContext context = Mockito.mock(SignServiceContext.class);
 
     // Setup SignRequest

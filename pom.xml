@@ -99,7 +99,7 @@
     <module>config</module>
     <module>spring-boot-starter</module>
     <module>bom</module>
-    <module>app</module>
+    <module>demo-apps</module>
   </modules>
 
   <dependencyManagement>
@@ -220,11 +220,6 @@
   </dependencyManagement>
 
   <dependencies>
-
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>javax.annotation</groupId>

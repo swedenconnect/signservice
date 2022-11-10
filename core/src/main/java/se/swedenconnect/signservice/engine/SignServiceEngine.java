@@ -16,50 +16,48 @@ package se.swedenconnect.signservice.engine;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+
+import se.swedenconnect.signservice.application.SignServiceEngineManager;
+import se.swedenconnect.signservice.application.SignServiceProcessingResult;
+import se.swedenconnect.signservice.context.SignServiceContext;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 
 /**
- * The main interface for SignService processing of signature requests.
+ * Interface for a SignService engine that is processing of signature requests.
+ * <p>
+ * A SignService engine is an instance serving one SignService client.
+ * </p>
  */
 public interface SignServiceEngine {
 
   /**
-   * The main entry point for a SignService Engine. The SignService application supplies the
-   * {@link HttpServletRequest} and {@link HttpServletResponse} objects from the HTTP request that
-   * it is servicing and the engine processes it.
+   * The main entry point for a SignService Engine. The {@link SignServiceEngineManager} accepts HTTP user requests
+   * passed from the application/frontend, and after deciding which engine instance that can serve this request invokes
+   * this method to process the request. The engine will find out the type of message and process it accordingly.
    * <p>
-   * The internals, and the current state, of the engine will find out the type of message and
-   * process it accordingly.
-   * </p>
-   * <p>
-   * Apart from processing requests, the engine may also serve resources. Examples of such resources
-   * are status pages and authentication provider metadata. When a request being processed is a
-   * request for a resource the method will not return a {@link HttpRequestMessage}, but instead
-   * {@code null} and write the resource to the supplied {@link HttpServletResponse}. However, it
-   * will <b>not</b> commit the response. This is the responsibility of the caller.
+   * Apart from processing requests, the engine may also serve resources. Examples of such resources are status pages
+   * and authentication provider metadata.
    * </p>
    *
-   * @param httpRequest the HTTP request
-   * @param httpResponse the HTTP response
-   * @return a HttpRequestMessage that informs the calling application which HTTP message to send,
-   *         or null if the request processed was a request to a resource
-   * @throws UnrecoverableSignServiceException if a HTTP message can not be sent as a result of the
-   *         processing. This can occur in cases when the engine can not successfully produce a
-   *         response message to send
+   * @param httpRequest the HTTP user request received by the SignService frontend/application
+   * @param signServiceContext the SignService context (may be null if this is the first request in an signature
+   *          operation)
+   * @return a SignServiceProcessingResult
+   * @throws UnrecoverableSignServiceException if a HTTP message can not be sent as a result of the processing. This can
+   *           occur in cases when the engine can not successfully produce a response message to send
    */
-  @Nullable
-  HttpRequestMessage processRequest(
-      @Nonnull final HttpServletRequest httpRequest, @Nonnull final HttpServletResponse httpResponse) throws UnrecoverableSignServiceException;
+  @Nonnull
+  SignServiceProcessingResult processRequest(
+      @Nonnull final HttpUserRequest httpRequest, @Nullable final SignServiceContext signServiceContext)
+      throws UnrecoverableSignServiceException;
 
   /**
    * A predicate that given a request tells whether this engine instance can process the request.
    *
-   * @param httpRequest the HTTP request
+   * @param request the HTTP user request received by the SignService frontend/application
    * @return true if the engine can process the request and false otherwise
    */
-  boolean canProcess(@Nonnull final HttpServletRequest httpRequest);
+  boolean canProcess(@Nonnull final HttpUserRequest request);
 
   /**
    * Gets the name of the engine.

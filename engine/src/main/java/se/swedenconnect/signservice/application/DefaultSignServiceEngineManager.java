@@ -15,22 +15,19 @@
  */
 package se.swedenconnect.signservice.application;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.audit.AuditEventIds;
 import se.swedenconnect.signservice.audit.AuditLogger;
-import se.swedenconnect.signservice.core.http.HttpRequestMessage;
+import se.swedenconnect.signservice.context.SignServiceContext;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.engine.SignServiceEngine;
-import se.swedenconnect.signservice.engine.SignServiceEngineManager;
 import se.swedenconnect.signservice.engine.UnrecoverableErrorCodes;
 import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;
 
@@ -62,13 +59,13 @@ public class DefaultSignServiceEngineManager implements SignServiceEngineManager
 
   /** {@inheritDoc} */
   @Override
-  @Nullable
-  public HttpRequestMessage processRequest(
-      @Nonnull final HttpServletRequest request, @Nonnull final HttpServletResponse response)
+  @Nonnull
+  public SignServiceProcessingResult processRequest(
+      @Nonnull final HttpUserRequest request, @Nullable final SignServiceContext signServiceContext)
       throws UnrecoverableSignServiceException {
 
-    log.debug("Received {} request [path: '{}', client-ip: '{}']",
-        request.getMethod(), request.getRequestURI(), request.getRemoteAddr());
+    log.debug("Received {} request [url: '{}', client-ip: '{}']",
+        request.getMethod(), request.getRequestUrl(), request.getClientIpAddress());
 
     // Find an engine that can process the request ...
     //
@@ -78,62 +75,35 @@ public class DefaultSignServiceEngineManager implements SignServiceEngineManager
         .orElse(null);
 
     if (engine == null) {
-      log.info("No SignServiceEngine can service {} request on {}", request.getMethod(), request.getRequestURI());
+      log.info("No SignServiceEngine can service {} request on {}", request.getMethod(), request.getRequestUrl());
       this.systemAuditLogger.auditLog(AuditEventIds.EVENT_SYSTEM_NOTFOUND,
           (b) -> b
-              .parameter("path", request.getRequestURI())
+              .parameter("url", request.getRequestUrl())
               .parameter("method", request.getMethod())
               .build());
 
       throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.NOT_FOUND, "No such resource");
     }
-    log.debug("Engine '{}' is processing {} request [path: '{}']", engine.getName(), request.getMethod(),
-        request.getRequestURI());
+    log.debug("Engine '{}' is processing {} request [url: '{}']", engine.getName(), request.getMethod(),
+        request.getRequestUrl());
 
     // Hand the request over to the engine ...
     //
     try {
-      final HttpRequestMessage result = engine.processRequest(request, response);
+      final SignServiceProcessingResult result = engine.processRequest(request, signServiceContext);
 
-      if (result == null) {
-        // If the result from the processing is null, it means that the engine, or any of its
-        // sub-components, has served a resource and written it to the HttpServletResponse. All we
-        // have to do now is commit the response ...
-        //
-        log.debug("Engine '{}' has served resource, flushing buffer ...", engine.getName());
-        response.flushBuffer();
-        return null;
-      }
-      else {
-        if ("GET".equals(result.getMethod())) {
-          log.debug("Engine '{}' redirecting to: {}", engine.getName(), result.getUrl());
-        }
-        else {
-          log.debug("Engine '{}' posting to: {}", engine.getName(), result.getUrl());
-        }
-        return result;
-      }
-    }
-    catch (final IOException e) {
-      final String msg = String.format("Failed to write resource %s - %s", request.getRequestURI(), e.getMessage());
-      log.info("{}", msg, e);
+      log.debug("Engine '{}' processed request {} '{}': {}", engine.getName(), request.getMethod(),
+          request.getRequestUrl(), result);
 
-      this.systemAuditLogger.auditLog(AuditEventIds.EVENT_SYSTEM_PROCESSING_ERROR, (b) -> b
-          .parameter("path", request.getRequestURI())
-          .parameter("engine-name", engine.getName())
-          .parameter("error-code", UnrecoverableErrorCodes.INTERNAL_ERROR)
-          .parameter("error-message", msg)
-          .build());
-
-      throw new UnrecoverableSignServiceException(UnrecoverableErrorCodes.INTERNAL_ERROR, msg, e);
+      return result;
     }
     catch (final UnrecoverableSignServiceException e) {
       final String msg = String.format("Engine '%s' reported error '%s' when processing request received on '%s' - %s",
-          engine.getName(), e.getErrorCode(), request.getRequestURI(), e.getMessage());
+          engine.getName(), e.getErrorCode(), request.getRequestUrl(), e.getMessage());
       log.info("{}", msg, e);
 
       this.systemAuditLogger.auditLog(AuditEventIds.EVENT_SYSTEM_PROCESSING_ERROR, (b) -> b
-          .parameter("path", request.getRequestURI())
+          .parameter("url", request.getRequestUrl())
           .parameter("engine-name", engine.getName())
           .parameter("error-code", e.getErrorCode())
           .parameter("error-message", msg)

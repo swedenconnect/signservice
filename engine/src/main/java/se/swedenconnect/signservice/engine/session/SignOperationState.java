@@ -27,6 +27,9 @@ public enum SignOperationState {
   AUTHN_ONGOING,
 
   /** State that tells that the engine is in the process of performing the signing operation. */
-  SIGNING;
+  SIGNING,
+
+  /** State that tells that the current operation is finished, and the context should be terminated. */
+  TERMINATED;
 
 }

@@ -10,7 +10,7 @@ engine is intended to support a specific configuration, and normally there is an
 instance and a specific SignService client (i.e., a relying party).
 
 Each engine is configured with a number of modules for handling tasks like user authentication, protocol
-handling, session management, certificate issuance and more. Normally, an engine instance serves one
+handling, certificate issuance and more. Normally, an engine instance serves one
 client, but nothing in the design should prevent several relying parties from sharing the same configuration
 (except for keys and such).
 
@@ -29,8 +29,17 @@ The API between the application and the engine is very simple. The engine expose
 and the return value from this method can be any of:
 
 - POST data to given URL,
-- Perform a HTTP-Redirect with the given data to a given URL,
+- perform a HTTP-Redirect with the given data to a given URL,
+- write data to the HTTP response,
 - or, in rare cases, display an error message.
+
+It is possible to deploy a SignService application in two ways:
+
+- As a compound application that accepts user requests directly from the user (browser).
+
+- As a frontend/backend deployment where the frontend accepts user requests and communicates with the backend logic using REST-calls.
+
+![Deployments](images/deployments.png)
 
 ## SignService Engine
 

@@ -22,10 +22,10 @@ import javax.annotation.Nonnull;
 
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.SignServiceHandler;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * Defines the handler that is responsible of generating keys and issuing signing certificates.

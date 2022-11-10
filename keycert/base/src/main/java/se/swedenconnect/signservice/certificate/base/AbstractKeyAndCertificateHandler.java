@@ -45,12 +45,12 @@ import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappingData;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappingException;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * Abstract base class for the {@link KeyAndCertificateHandler} interface.

@@ -11,7 +11,6 @@
 
 Contains the main processing logic for processing a signature request and to complete a signature operation.
 
-> TODO: More
 
 -----
 

@@ -70,6 +70,18 @@
   </properties>
 
   <dependencies>
+  
+    <!-- For Servlet-API specific classes -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <optional>true</optional>
+    </dependency>
+  
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>  
       
     <dependency>
       <groupId>se.idsec.signservice.commons</groupId>

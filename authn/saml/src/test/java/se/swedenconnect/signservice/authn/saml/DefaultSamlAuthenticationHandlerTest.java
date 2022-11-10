@@ -28,10 +28,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,12 +66,14 @@ import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.authn.UserAuthenticationException;
 import se.swedenconnect.signservice.authn.impl.SimpleAuthnContextIdentifier;
 import se.swedenconnect.signservice.authn.saml.config.SpUrlConfiguration;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
+import se.swedenconnect.signservice.core.http.HttpBodyAction;
+import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultAuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultSignatureActivationRequestData;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * Test cases for DefaultSamlAuthenticationHandler.
@@ -122,7 +120,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
   public void setup() throws Exception {
     this.handler = this.createHandler();
 
-    Mockito.when(context.getId()).thenReturn(CONTEXT_ID);
+    Mockito.when(this.context.getId()).thenReturn(CONTEXT_ID);
 
     Mockito
         .when(this.metadataProvider.getEntityDescriptor(eq(IDP), eq(IDPSSODescriptor.DEFAULT_ELEMENT_NAME)))
@@ -137,7 +135,8 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
                 se.swedenconnect.opensaml.saml2.attribute.AttributeConstants.ASSURANCE_CERTIFICATION_ATTRIBUTE_NAME)
             .value(LevelOfAssuranceUris.AUTHN_CONTEXT_URI_LOA3)
             .build();
-    final EntityAttributes ea = (EntityAttributes) XMLObjectSupport.buildXMLObject(EntityAttributes.DEFAULT_ELEMENT_NAME);
+    final EntityAttributes ea =
+        (EntityAttributes) XMLObjectSupport.buildXMLObject(EntityAttributes.DEFAULT_ELEMENT_NAME);
     ea.getAttributes().add(attribute);
     extensions.getUnknownXMLObjects().add(ea);
     Mockito.when(this.idpMetadata.getExtensions()).thenReturn(extensions);
@@ -150,10 +149,10 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
 
   @Test
   public void testName() {
-    Assertions.assertEquals("DefaultSamlAuthenticationHandler", handler.getName());
+    Assertions.assertEquals("DefaultSamlAuthenticationHandler", this.handler.getName());
 
-    handler.setName("Handler");
-    Assertions.assertEquals("Handler", handler.getName());
+    this.handler.setName("Handler");
+    Assertions.assertEquals("Handler", this.handler.getName());
   }
 
   @Test
@@ -169,8 +168,8 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
       private static final long serialVersionUID = 1L;
 
       {
-        put("SAMLRequest", "ENCODED_REQUEST");
-        put("RelayState", CONTEXT_ID);
+        this.put("SAMLRequest", "ENCODED_REQUEST");
+        this.put("RelayState", CONTEXT_ID);
       }
     });
     Mockito.when(this.authnRequestGenerator.generateAuthnRequest(eq(IDP), anyString(), any()))
@@ -182,12 +181,12 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
           return requestObject;
         });
 
-    final AuthenticationResultChoice result = handler.authenticate(authnReqs, null, context);
+    final AuthenticationResultChoice result = this.handler.authenticate(authnReqs, null, this.context);
 
     Assertions.assertNull(result.getAuthenticationResult());
-    Assertions.assertEquals("POST", result.getHttpRequestMessage().getMethod());
-    Assertions.assertEquals(IDP_DESTINATION, result.getHttpRequestMessage().getUrl());
-    Assertions.assertNotNull(result.getHttpRequestMessage().getHttpParameters().get("SAMLRequest"));
+    Assertions.assertNotNull(result.getResponseAction().getPost());
+    Assertions.assertEquals(IDP_DESTINATION, result.getResponseAction().getPost().getUrl());
+    Assertions.assertNotNull(result.getResponseAction().getPost().getParameters().get("SAMLRequest"));
 
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHNREQUEST_KEY),
         ArgumentMatchers.notNull());
@@ -211,8 +210,8 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
       private static final long serialVersionUID = 1L;
 
       {
-        put("SAMLRequest", "ENCODED_REQUEST");
-        put("RelayState", CONTEXT_ID);
+        this.put("SAMLRequest", "ENCODED_REQUEST");
+        this.put("RelayState", CONTEXT_ID);
       }
     });
     Mockito.when(this.authnRequestGenerator.generateAuthnRequest(eq(IDP), anyString(), any()))
@@ -225,9 +224,9 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
         });
 
     assertThatThrownBy(() -> {
-      handler.authenticate(authnReqs, null, context);
+      this.handler.authenticate(authnReqs, null, this.context);
     }).isInstanceOf(UserAuthenticationException.class)
-      .hasMessage("None of the requested authn context URIs are supported by the IdP");
+        .hasMessage("None of the requested authn context URIs are supported by the IdP");
 
   }
 
@@ -240,7 +239,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
     final SignMessage sm = Mockito.mock(SignMessage.class);
 
     assertThatThrownBy(() -> {
-      handler.authenticate(authnReqs, sm, this.context);
+      this.handler.authenticate(authnReqs, sm, this.context);
     }).isInstanceOf(UserAuthenticationException.class)
         .hasMessage("Authentication requirements states that a SAD request should be sent "
             + "but the IdP does not support the Signature Activation Data extension");
@@ -252,7 +251,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
     Mockito.when(sm.getMustShow()).thenReturn(true);
 
     try {
-      handler.authenticate(this.getAuthnRequirements(), sm, this.context);
+      this.handler.authenticate(this.getAuthnRequirements(), sm, this.context);
       Assertions.fail("Expected UserAuthenticationException");
     }
     catch (final UserAuthenticationException e) {
@@ -268,7 +267,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
         .thenReturn(null);
 
     try {
-      handler.authenticate(authnReqs, null, this.context);
+      this.handler.authenticate(authnReqs, null, this.context);
       Assertions.fail("Expected UserAuthenticationException");
     }
     catch (final UserAuthenticationException e) {
@@ -278,7 +277,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
     Mockito.when(this.metadataProvider.getEntityDescriptor(eq(IDP), eq(IDPSSODescriptor.DEFAULT_ELEMENT_NAME)))
         .thenThrow(new ResolverException("resolver error"));
     try {
-      handler.authenticate(authnReqs, null, this.context);
+      this.handler.authenticate(authnReqs, null, this.context);
       Assertions.fail("Expected UserAuthenticationException");
     }
     catch (final UserAuthenticationException e) {
@@ -287,7 +286,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
 
     ((DefaultAuthnRequirements) authnReqs).setAuthnServiceID(null);
     try {
-      handler.authenticate(authnReqs, null, this.context);
+      this.handler.authenticate(authnReqs, null, this.context);
       Assertions.fail("Expected UserAuthenticationException");
     }
     catch (final UserAuthenticationException e) {
@@ -298,75 +297,75 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
 
   @Test
   public void testCanProcess() {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("response");
 
     Mockito.when(this.context.get(eq(AbstractSamlAuthenticationHandler.AUTHNREQUEST_KEY)))
         .thenReturn("ENCODED_AUTHNREQUEST");
 
-    Assertions.assertTrue(handler.canProcess(request, this.context));
-    Assertions.assertTrue(handler.canProcess(request, null));
+    Assertions.assertTrue(this.handler.canProcess(request, this.context));
+    Assertions.assertTrue(this.handler.canProcess(request, null));
   }
 
   @Test
   public void testCanProcessMatchAdditional() {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("response");
 
     Mockito.when(this.spUrlConfiguration.getAdditionalAssertionConsumerPath()).thenReturn("/saml/response2");
 
-    Assertions.assertTrue(handler.canProcess(request, null));
+    Assertions.assertTrue(this.handler.canProcess(request, null));
   }
 
   @Test
   public void testCanProcessMismatchingPath() {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn("/saml/other");
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn("/saml/other");
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("response");
 
-    Assertions.assertFalse(handler.canProcess(request, null));
+    Assertions.assertFalse(this.handler.canProcess(request, null));
   }
 
   @Test
   public void testCanProcessBadMethod() {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     Mockito.when(request.getMethod()).thenReturn("GET");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("response");
 
-    Assertions.assertFalse(handler.canProcess(request, null));
+    Assertions.assertFalse(this.handler.canProcess(request, null));
   }
 
   @Test
   public void testCanProcessMissingResponse() {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn(null);
 
-    Assertions.assertFalse(handler.canProcess(request, null));
+    Assertions.assertFalse(this.handler.canProcess(request, null));
   }
 
   @Test
   public void testCanProcessMissingAuthnRequest() {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("response");
 
     Mockito.when(this.context.get(eq(AbstractSamlAuthenticationHandler.AUTHNREQUEST_KEY)))
         .thenReturn(null);
 
-    Assertions.assertFalse(handler.canProcess(request, context));
+    Assertions.assertFalse(this.handler.canProcess(request, this.context));
   }
 
   @Test
   public void testResumeAuthentication() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
@@ -408,9 +407,9 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
     Mockito.when(this.responseProcessor.processSamlResponse(anyString(), anyString(), any(), any()))
         .thenReturn(processingResult);
 
-    final AuthenticationResultChoice result = handler.resumeAuthentication(request, this.context);
+    final AuthenticationResultChoice result = this.handler.resumeAuthentication(request, this.context);
 
-    Assertions.assertNull(result.getHttpRequestMessage());
+    Assertions.assertNull(result.getResponseAction());
     Assertions.assertNotNull(result.getAuthenticationResult());
     Assertions.assertFalse(result.getAuthenticationResult().signMessageDisplayed());
     final IdentityAssertion assertion = result.getAuthenticationResult().getAssertion();
@@ -441,20 +440,20 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
 
   @Test
   public void testResumeAuthenticationCantProcess() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn(null);
 
     Assertions.assertThrows(UserAuthenticationException.class, () -> {
-      handler.resumeAuthentication(request, this.context);
+      this.handler.resumeAuthentication(request, this.context);
     });
   }
 
   @Test
   public void testResumeAuthenticationNoAuthnRequest() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
@@ -463,7 +462,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
         .thenReturn(null);
 
     Assertions.assertThrows(UserAuthenticationException.class, () -> {
-      handler.resumeAuthentication(request, this.context);
+      this.handler.resumeAuthentication(request, this.context);
     });
 
     // Assert that the context was cleaned
@@ -475,8 +474,8 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
 
   @Test
   public void testResumeAuthenticationUserCancel() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
@@ -506,7 +505,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
         .thenThrow(statusException);
 
     try {
-      handler.resumeAuthentication(request, this.context);
+      this.handler.resumeAuthentication(request, this.context);
       Assertions.fail("Expected UserAuthenticationException");
     }
     catch (final UserAuthenticationException e) {
@@ -522,8 +521,8 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
 
   @Test
   public void testResumeAuthenticationNoIdP() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
@@ -553,7 +552,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
         .thenThrow(statusException);
 
     try {
-      handler.resumeAuthentication(request, this.context);
+      this.handler.resumeAuthentication(request, this.context);
       Assertions.fail("Expected UserAuthenticationException");
     }
     catch (final UserAuthenticationException e) {
@@ -564,8 +563,8 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
 
   @Test
   public void testResumeAuthenticationNoAuthnContext() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
@@ -595,7 +594,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
         .thenThrow(statusException);
 
     try {
-      handler.resumeAuthentication(request, this.context);
+      this.handler.resumeAuthentication(request, this.context);
       Assertions.fail("Expected UserAuthenticationException");
     }
     catch (final UserAuthenticationException e) {
@@ -612,8 +611,8 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
 
   @Test
   public void testResumeAuthenticationFailedAuthn() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
@@ -643,7 +642,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
         .thenThrow(statusException);
 
     try {
-      handler.resumeAuthentication(request, this.context);
+      this.handler.resumeAuthentication(request, this.context);
       Assertions.fail("Expected UserAuthenticationException");
     }
     catch (final UserAuthenticationException e) {
@@ -662,8 +661,8 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
 
   @Test
   public void testResumeAuthenticationProcessingError() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(ASSERTION_CONSUMER_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
     Mockito.when(request.getParameter(eq("SAMLResponse"))).thenReturn("SAML-RESPONSE");
     Mockito.when(request.getParameter(eq("RelayState"))).thenReturn(CONTEXT_ID);
@@ -681,7 +680,7 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
         .thenThrow(new ResponseProcessingException("ERROR_MSG"));
 
     try {
-      handler.resumeAuthentication(request, this.context);
+      this.handler.resumeAuthentication(request, this.context);
       Assertions.fail("Expected UserAuthenticationException");
     }
     catch (final UserAuthenticationException e) {
@@ -698,104 +697,93 @@ public class DefaultSamlAuthenticationHandlerTest extends OpenSamlTestBase {
 
   @Test
   public void testSupports() {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(METADATA_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(METADATA_PATH);
     Mockito.when(request.getMethod()).thenReturn("GET");
 
-    Assertions.assertTrue(handler.supports(request));
+    Assertions.assertTrue(this.handler.supports(request));
   }
 
   @Test
   public void testSupportsBadMethod() {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(METADATA_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(METADATA_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
 
-    Assertions.assertFalse(handler.supports(request));
+    Assertions.assertFalse(this.handler.supports(request));
   }
 
   @Test
   public void testSupportsBadPath() {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn("/other");
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn("/other");
     Mockito.when(request.getMethod()).thenReturn("GET");
 
-    Assertions.assertFalse(handler.supports(request));
+    Assertions.assertFalse(this.handler.supports(request));
   }
 
   @Test
   public void testGetResource() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(METADATA_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(METADATA_PATH);
     Mockito.when(request.getMethod()).thenReturn("GET");
     Mockito.when(request.getHeader(eq("Accept"))).thenReturn(null);
-
-    final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-    final ServletOutputStream os = Mockito.mock(ServletOutputStream.class);
-    Mockito.when(response.getOutputStream()).thenReturn(os);
 
     Mockito.when(this.entityDescriptorContainer.updateRequired(anyBoolean())).thenReturn(true);
     Mockito.when(this.entityDescriptorContainer.marshall()).thenReturn(this.getEntityDescriptorElement());
 
-    handler.getResource(request, response);
+    final HttpBodyAction action = this.handler.getResource(request);
 
     Mockito.verify(this.entityDescriptorContainer).update(anyBoolean());
-    Mockito.verify(response).setHeader(eq("Content-Type"), eq("application/xml"));
-    Mockito.verify(response).getOutputStream();
+
+    Assertions.assertNotNull(action.getContents());
+    Assertions.assertEquals("application/xml", action.getHeaders().get("Content-Type"));
   }
 
   @Test
   public void testGetResourceNotUpdated() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(METADATA_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(METADATA_PATH);
     Mockito.when(request.getMethod()).thenReturn("GET");
     Mockito.when(request.getHeader(eq("Accept")))
         .thenReturn(AbstractSamlAuthenticationHandler.APPLICATION_SAML_METADATA);
 
-    final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-    final ServletOutputStream os = Mockito.mock(ServletOutputStream.class);
-    Mockito.when(response.getOutputStream()).thenReturn(os);
-
     Mockito.when(this.entityDescriptorContainer.updateRequired(anyBoolean())).thenReturn(false);
     Mockito.when(this.entityDescriptorContainer.marshall()).thenReturn(this.getEntityDescriptorElement());
 
-    handler.getResource(request, response);
+    final HttpBodyAction action = this.handler.getResource(request);
 
     Mockito.verify(this.entityDescriptorContainer, never()).update(anyBoolean());
-    Mockito.verify(response).setHeader(eq("Content-Type"),
-        eq(AbstractSamlAuthenticationHandler.APPLICATION_SAML_METADATA));
-    Mockito.verify(response).getOutputStream();
+
+    Assertions.assertNotNull(action.getContents());
+    Assertions.assertEquals(AbstractSamlAuthenticationHandler.APPLICATION_SAML_METADATA,
+        action.getHeaders().get("Content-Type"));
   }
 
   @Test
   public void testGetResourceFailed() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(METADATA_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(METADATA_PATH);
     Mockito.when(request.getMethod()).thenReturn("GET");
     Mockito.when(request.getHeader(eq("Accept"))).thenReturn(null);
-
-    final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-    final ServletOutputStream os = Mockito.mock(ServletOutputStream.class);
-    Mockito.when(response.getOutputStream()).thenReturn(os);
 
     Mockito.when(this.entityDescriptorContainer.updateRequired(anyBoolean())).thenReturn(true);
     Mockito.when(this.entityDescriptorContainer.update(anyBoolean()))
         .thenThrow(new org.opensaml.xmlsec.signature.support.SignatureException("error"));
 
     Assertions.assertThrows(IOException.class, () -> {
-      handler.getResource(request, response);
+      this.handler.getResource(request);
     });
   }
 
   @Test
   public void testGetResourceSupportsFails() throws Exception {
-    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    Mockito.when(request.getServletPath()).thenReturn(METADATA_PATH);
+    final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
+    Mockito.when(request.getServerServletPath()).thenReturn(METADATA_PATH);
     Mockito.when(request.getMethod()).thenReturn("POST");
-    final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
 
     Assertions.assertThrows(IOException.class, () -> {
-      handler.getResource(request, response);
+      this.handler.getResource(request);
     });
   }
 

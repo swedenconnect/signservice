@@ -54,10 +54,10 @@ import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.CertificateType;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMappingData;
+import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
-import se.swedenconnect.signservice.session.SignServiceContext;
 
 /**
  * An abstract base class to be used by implementations that rely on the CA engine.
