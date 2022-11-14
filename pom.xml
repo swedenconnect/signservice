@@ -10,7 +10,7 @@
 
   <name>Sweden Connect :: SignService :: Parent POM</name>
   <description>Parent POM for SignService libraries</description>
-  <url>https://github.com/swedenconnect/signservice</url>
+  <url>https://docs.swedenconnect.se/signservice</url>
 
   <licenses>
     <license>
@@ -357,7 +357,6 @@
             <link>https://idsec-solutions.github.io/signservice-commons/javadoc/signservice-commons/</link>
             <link>https://idsec-solutions.github.io/signservice-commons/javadoc/xml-commons/</link>
             <link>https://docs.swedenconnect.se/credentials-support/apidoc/</link>
-            <link>https://docs.swedenconnect.se/signservice/apidocs/</link>
           </links>
           <detectJavaApiLink>true</detectJavaApiLink>
         </configuration>        

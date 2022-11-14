@@ -13,7 +13,7 @@
 
   <name>Sweden Connect :: SignService :: KeyAndCertificate :: CMC</name>
   <description>SignService KeyAndCertificate CMC Implementation</description>
-  <url>https://github.com/swedenconnect/signservice</url>
+  <url>https://docs.swedenconnect.se/signservice</url>
 
   <licenses>
     <license>

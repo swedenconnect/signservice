@@ -10,7 +10,7 @@
 
   <name>Sweden Connect :: SignService :: Application BOM</name>
   <description>BOM for SignService Applications</description>
-  <url>https://github.com/swedenconnect/signservice</url>
+  <url>https://docs.swedenconnect.se/signservice</url>
 
   <licenses>
     <license>

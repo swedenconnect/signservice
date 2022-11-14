@@ -14,7 +14,7 @@
 
   <name>Sweden Connect :: SignService :: Protocol :: DSS Extensions 1.1</name>
   <description>SignService Protocol DSS Extensions 1.1</description>
-  <url>https://github.com/swedenconnect/signservice</url>
+  <url>https://docs.swedenconnect.se/signservice</url>
 
   <licenses>
     <license>
