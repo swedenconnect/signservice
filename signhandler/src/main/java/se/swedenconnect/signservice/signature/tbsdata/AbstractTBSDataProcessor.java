@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.tbsdata.impl;
+package se.swedenconnect.signservice.signature.tbsdata;
 
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
@@ -35,8 +35,6 @@ import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.signature.AdESObject;
 import se.swedenconnect.signservice.signature.AdESType;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
-import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
-import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 
 /**
  * Abstract implementation of TBS data processor

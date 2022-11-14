@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.signer.impl;
+package se.swedenconnect.signservice.signature.signer;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -25,7 +25,6 @@ import java.security.SignatureException;
 import lombok.NonNull;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.SignatureType;
-import se.swedenconnect.signservice.signature.signer.SignServiceSigner;
 import se.swedenconnect.signservice.signature.signer.crypto.EcdsaSigValue;
 import se.swedenconnect.signservice.signature.signer.crypto.PkCrypto;
 

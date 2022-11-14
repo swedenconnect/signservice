@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.tbsdata.impl;
+package se.swedenconnect.signservice.signature.tbsdata;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

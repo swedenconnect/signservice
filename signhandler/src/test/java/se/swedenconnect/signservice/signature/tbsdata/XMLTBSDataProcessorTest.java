@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.tbsdata.impl;
+package se.swedenconnect.signservice.signature.tbsdata;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,7 +58,6 @@ import se.swedenconnect.signservice.signature.impl.DefaultAdESObject;
 import se.swedenconnect.signservice.signature.impl.DefaultRequestedSignatureTask;
 import se.swedenconnect.signservice.signature.signer.TestAlgorithms;
 import se.swedenconnect.signservice.signature.signer.TestCredentials;
-import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 import se.swedenconnect.signservice.signature.testutils.TestData;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
 

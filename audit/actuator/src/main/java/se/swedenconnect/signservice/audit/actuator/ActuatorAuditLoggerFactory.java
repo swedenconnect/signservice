@@ -20,7 +20,6 @@ import javax.annotation.Nullable;
 
 import org.springframework.context.ApplicationEventPublisher;
 
-import lombok.Setter;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerFactory;
@@ -33,7 +32,6 @@ import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 public class ActuatorAuditLoggerFactory extends AbstractAuditLoggerFactory {
 
   /** The ApplicationEventPublisher used to publish events. */
-  @Setter
   private ApplicationEventPublisher publisher;
 
   /** {@inheritDoc} */
@@ -59,6 +57,14 @@ public class ActuatorAuditLoggerFactory extends AbstractAuditLoggerFactory {
           + ActuatorAuditLogger.class.getSimpleName());
     }
     return new ActuatorAuditLogger(new ActuatorAuditLoggerListener(this.publisher));
+  }
+
+  /**
+   * Assigns the ApplicationEventPublisher used to publish events.
+   * @param publisher the publisher
+   */
+  public void setPublisher(@Nonnull final ApplicationEventPublisher publisher) {
+    this.publisher = publisher;
   }
 
 }

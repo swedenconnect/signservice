@@ -22,7 +22,8 @@ import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.util.encoders.Base64;
-import se.swedenconnect.signservice.signature.tbsdata.impl.PDFTBSDataProcessor;
+
+import se.swedenconnect.signservice.signature.tbsdata.PDFTBSDataProcessor;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

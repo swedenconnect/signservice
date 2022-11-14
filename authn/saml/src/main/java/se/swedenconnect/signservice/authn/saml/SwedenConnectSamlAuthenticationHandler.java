@@ -34,8 +34,9 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Extensions;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.SSODescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import lombok.extern.slf4j.Slf4j;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorContainer;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorUtils;
@@ -69,8 +70,10 @@ import se.swedenconnect.signservice.protocol.msg.SignMessage;
  * A SAML authentication handler that implements the SAML profiles stated in
  * <a href="https://docs.swedenconnect.se/technical-framework/">Sweden Connect eID Framework</a>.
  */
-@Slf4j
 public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenticationHandler {
+
+  /** Logger. */
+  private static final Logger log = LoggerFactory.getLogger(SwedenConnectSamlAuthenticationHandler.class);
 
   /** Key for storing the SAD Id. */
   public static final String SAD_ID_KEY = SwedenConnectSamlAuthenticationHandler.class.getPackageName() + ".SadID";

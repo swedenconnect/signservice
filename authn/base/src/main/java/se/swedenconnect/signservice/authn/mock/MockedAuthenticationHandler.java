@@ -26,7 +26,9 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import se.idsec.signservice.xml.DOMUtils;
 import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
@@ -48,8 +50,10 @@ import se.swedenconnect.signservice.protocol.msg.SignMessage;
 /**
  * A mocked authentication handler that may be used in testing scenarios.
  */
-@Slf4j
 public class MockedAuthenticationHandler extends AbstractSignServiceHandler implements AuthenticationHandler {
+
+  /** Logger. */
+  private static final Logger log = LoggerFactory.getLogger(MockedAuthenticationHandler.class);
 
   /** The default authentication context URI to use if none has been specified. */
   public static final String DEFAULT_LOA = "http://id.elegnamnden.se/loa/1.0/loa3";

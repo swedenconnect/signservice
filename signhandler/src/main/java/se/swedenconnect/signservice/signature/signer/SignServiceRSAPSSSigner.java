@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.signer.impl;
+package se.swedenconnect.signservice.signature.signer;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,6 @@ import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.jcajce.provider.util.DigestFactory;
 import se.swedenconnect.security.algorithms.RSAPSSSignatureAlgorithm;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
-import se.swedenconnect.signservice.signature.signer.SignServiceSigner;
 import se.swedenconnect.signservice.signature.signer.crypto.PSSPadding;
 import se.swedenconnect.signservice.signature.signer.crypto.PkCrypto;
 

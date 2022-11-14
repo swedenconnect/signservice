@@ -23,21 +23,22 @@ import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.PreDestroy;
 
-import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditLoggerException;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
-import se.swedenconnect.signservice.audit.logsystem.LogSystemAuditLogger;
 
 /**
  * A simple file logger that uses Java's util logging package to audit log. The logger is "rolling" and a new log file
  * is created per day.
  * <p>
- * Also see {@link LogSystemAuditLogger} for an audit logger that can be configured using an underlying log system.
+ * Also see {@link se.swedenconnect.signservice.audit.logsystem.LogSystemAuditLogger} for an audit logger that can be
+ * configured using an underlying log system.
  * </p>
  */
-@Slf4j
 public class FileAuditLogger extends AbstractAuditLogger {
+
+  /** Logger. */
+  private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileAuditLogger.class);
 
   /** The underlying JUL handler. */
   private final DateRollingFileHandler handler;

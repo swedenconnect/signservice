@@ -38,9 +38,9 @@ import se.swedenconnect.signservice.signature.CompletedSignatureTask;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureHandler;
 import se.swedenconnect.signservice.signature.SignatureType;
+import se.swedenconnect.signservice.signature.signer.DefaultSignServiceSignerProvider;
 import se.swedenconnect.signservice.signature.signer.SignServiceSigner;
 import se.swedenconnect.signservice.signature.signer.SignServiceSignerProvider;
-import se.swedenconnect.signservice.signature.signer.impl.DefaultSignServiceSignerProvider;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
 import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 

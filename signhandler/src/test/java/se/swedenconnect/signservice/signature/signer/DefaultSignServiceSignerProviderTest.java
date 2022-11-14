@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.signer.impl;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.xml.security.signature.XMLSignature;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
-import se.swedenconnect.signservice.signature.SignatureType;
-import se.swedenconnect.signservice.signature.signer.SignServiceSignerProvider;
+package se.swedenconnect.signservice.signature.signer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.apache.xml.security.signature.XMLSignature;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
+import se.swedenconnect.signservice.signature.SignatureType;
 
 /**
  * Tests for signer provider

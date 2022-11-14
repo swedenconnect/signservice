@@ -13,28 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.signer.impl;
+package se.swedenconnect.signservice.signature.signer;
 
-import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.util.encoders.Base64;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import se.idsec.signservice.security.certificate.CertificateUtils;
-import se.swedenconnect.security.algorithms.SignatureAlgorithm;
-import se.swedenconnect.signservice.signature.signer.SignServiceSigner;
-import se.swedenconnect.signservice.signature.signer.TestAlgorithms;
-import se.swedenconnect.signservice.signature.signer.TestCredentials;
-import se.swedenconnect.signservice.signature.signer.crypto.PKCS1V15Padding;
-import se.swedenconnect.signservice.signature.signer.crypto.PkCrypto;
-import se.swedenconnect.signservice.signature.testutils.TestUtils;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.bouncycastle.util.encoders.Base64;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import lombok.extern.slf4j.Slf4j;
+import se.idsec.signservice.security.certificate.CertificateUtils;
+import se.swedenconnect.security.algorithms.SignatureAlgorithm;
+import se.swedenconnect.signservice.signature.signer.crypto.PKCS1V15Padding;
+import se.swedenconnect.signservice.signature.signer.crypto.PkCrypto;
+import se.swedenconnect.signservice.signature.testutils.TestUtils;
 
 /**
  * Test RSA Signer

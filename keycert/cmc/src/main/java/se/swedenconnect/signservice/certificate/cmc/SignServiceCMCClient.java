@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package se.swedenconnect.signservice.certificate.cmc.ca;
+package se.swedenconnect.signservice.certificate.cmc;
 
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;

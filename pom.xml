@@ -200,7 +200,7 @@
       <scope>test</scope>
     </dependency>
 
-  </dependencies>
+  </dependencies>  
 
   <build>
 
@@ -346,6 +346,21 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <doclint>all,-missing</doclint>
+          <additionalOptions>-Xdoclint:all -Xdoclint:-missing</additionalOptions>
+          <additionalJOptions>
+            <additionalJOption>-Xdoclint:all</additionalJOption>
+            <additionalJOption>-Xdoclint:-missing</additionalJOption>
+          </additionalJOptions>
+          <links>
+            <link>https://idsec-solutions.github.io/signservice-commons/javadoc/signservice-commons/</link>
+            <link>https://idsec-solutions.github.io/signservice-commons/javadoc/xml-commons/</link>
+            <link>https://docs.swedenconnect.se/credentials-support/apidoc/</link>
+            <link>https://docs.swedenconnect.se/signservice/apidocs/</link>
+          </links>
+          <detectJavaApiLink>true</detectJavaApiLink>
+        </configuration>        
       </plugin>
 
       <plugin>
@@ -393,58 +408,6 @@
   </build>
 
   <profiles>
-
-    <profile>
-      <id>javadoc</id>
-
-      <build>
-        <plugins>
-
-          <plugin>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <phase>generate-sources</phase>
-                <goals>
-                  <goal>delombok</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-javadoc</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <sourcepath>target/generated-sources/delombok</sourcepath>
-              <doclint>all,-missing</doclint>
-              <additionalOptions>-Xdoclint:all -Xdoclint:-missing</additionalOptions>
-              <additionalJOptions>
-                <additionalJOption>-Xdoclint:all</additionalJOption>
-                <additionalJOption>-Xdoclint:-missing</additionalJOption>
-              </additionalJOptions>
-              <links>
-                <link>https://idsec-solutions.github.io/signservice-commons/javadoc/signservice-commons/</link>
-                <link>https://idsec-solutions.github.io/signservice-commons/javadoc/xml-commons/</link>
-                <!-- TODO: Add more links here -->
-              </links>
-              <detectJavaApiLink>true</detectJavaApiLink>
-            </configuration>
-          </plugin>
-
-        </plugins>
-      </build>
-
-    </profile>
 
     <profile>
       <id>release</id>
@@ -500,26 +463,13 @@
               </execution>
               <execution>
                 <id>aggregate</id>
-                <phase>site</phase>
                 <goals>
                   <goal>aggregate</goal>
                 </goals>
-              </execution>
+              </execution>              
             </executions>
             <configuration>
               <sourcepath>target/generated-sources/delombok</sourcepath>
-              <doclint>all,-missing</doclint>
-              <additionalOptions>-Xdoclint:all -Xdoclint:-missing</additionalOptions>
-              <additionalJOptions>
-                <additionalJOption>-Xdoclint:all</additionalJOption>
-                <additionalJOption>-Xdoclint:-missing</additionalJOption>
-              </additionalJOptions>
-              <links>
-                <link>https://idsec-solutions.github.io/signservice-commons/javadoc/signservice-commons/</link>
-                <link>https://idsec-solutions.github.io/signservice-commons/javadoc/xml-commons/</link>
-                <!-- TODO: Add more links here -->
-              </links>
-              <detectJavaApiLink>true</detectJavaApiLink>
             </configuration>
           </plugin>
 
@@ -566,7 +516,48 @@
       </build>
 
     </profile>
+    
+    <profile>
+      <id>aggjavadoc</id>
 
+      <build>
+        <plugins>
+
+          <plugin>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>delombok</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>aggregate</id>
+                <goals>
+                  <goal>aggregate</goal>
+                </goals>
+              </execution>              
+            </executions>
+            <configuration>
+              <doctitle>SignService API Documentation</doctitle>
+              <windowtitle>SignService API Documentation</windowtitle>            
+            </configuration>
+          </plugin>
+
+        </plugins>
+      </build>
+
+    </profile>    
+    
   </profiles>
 
 </project>

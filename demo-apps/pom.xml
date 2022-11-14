@@ -68,6 +68,8 @@
     <java.version>11</java.version>
 
     <spring.boot.version>2.7.1</spring.boot.version>
+    
+    <maven.javadoc.skip>true</maven.javadoc.skip>    
   </properties>
 
   <repositories>

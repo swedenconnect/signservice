@@ -60,8 +60,6 @@ import se.swedenconnect.signservice.certificate.attributemapping.DefaultAttribut
 import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.SigningKeyUsageDirective;
-import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
-import se.swedenconnect.signservice.certificate.cmc.ca.SignServiceCMCClient;
 import se.swedenconnect.signservice.certificate.cmc.testutils.CMCApiFactory;
 import se.swedenconnect.signservice.certificate.cmc.testutils.TestCMCHttpConnector;
 import se.swedenconnect.signservice.certificate.cmc.testutils.TestCredentials;

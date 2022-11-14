@@ -33,12 +33,12 @@ import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.signature.SignatureHandler;
 import se.swedenconnect.signservice.signature.impl.DefaultSignatureHandler;
+import se.swedenconnect.signservice.signature.signer.DefaultSignServiceSignerProvider;
 import se.swedenconnect.signservice.signature.signer.SignServiceSignerProvider;
-import se.swedenconnect.signservice.signature.signer.impl.DefaultSignServiceSignerProvider;
+import se.swedenconnect.signservice.signature.tbsdata.AbstractTBSDataProcessor;
+import se.swedenconnect.signservice.signature.tbsdata.PDFTBSDataProcessor;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
-import se.swedenconnect.signservice.signature.tbsdata.impl.AbstractTBSDataProcessor;
-import se.swedenconnect.signservice.signature.tbsdata.impl.PDFTBSDataProcessor;
-import se.swedenconnect.signservice.signature.tbsdata.impl.XMLTBSDataProcessor;
+import se.swedenconnect.signservice.signature.tbsdata.XMLTBSDataProcessor;
 
 /**
  * Factory for creating {@link DefaultSignatureHandler} handlers.

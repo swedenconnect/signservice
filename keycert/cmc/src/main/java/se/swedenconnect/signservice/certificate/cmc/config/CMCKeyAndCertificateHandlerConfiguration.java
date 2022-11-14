@@ -25,7 +25,7 @@ import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
+import se.swedenconnect.signservice.certificate.cmc.RemoteCaInformation;
 import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
 
 /**

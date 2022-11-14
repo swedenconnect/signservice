@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.certificate.cmc.ca;
+package se.swedenconnect.signservice.certificate.cmc;
 
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;

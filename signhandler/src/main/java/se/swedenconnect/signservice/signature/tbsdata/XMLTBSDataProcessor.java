@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.tbsdata.impl;
+package se.swedenconnect.signservice.signature.tbsdata;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -89,7 +89,6 @@ import se.swedenconnect.signservice.signature.AdESType;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.impl.DefaultAdESObject;
-import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 
 /**
  * XML Data to be signed processor.

@@ -23,7 +23,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerException;
@@ -36,8 +35,10 @@ import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
  * the {@link #LogSystemAuditLogger(String)} constructor.
  * </p>
  */
-@Slf4j
 public class LogSystemAuditLogger extends AbstractAuditLogger {
+
+  /** Logger. */
+  private static final Logger log = LoggerFactory.getLogger(LogSystemAuditLogger.class);
 
   /** The logger instance. */
   private final Logger auditLogger;

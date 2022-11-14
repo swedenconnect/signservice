@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.signer.impl;
+package se.swedenconnect.signservice.signature.signer;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +22,6 @@ import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.RSAPSSSignatureAlgorithm;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.SignatureType;
-import se.swedenconnect.signservice.signature.signer.SignServiceSigner;
-import se.swedenconnect.signservice.signature.signer.SignServiceSignerProvider;
 
 /**
  * Default implementation of the signer provider

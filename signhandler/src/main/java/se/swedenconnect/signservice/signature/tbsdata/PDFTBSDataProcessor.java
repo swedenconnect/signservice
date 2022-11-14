@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.signservice.signature.tbsdata.impl;
+package se.swedenconnect.signservice.signature.tbsdata;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -64,7 +64,6 @@ import se.swedenconnect.signservice.signature.AdESObject;
 import se.swedenconnect.signservice.signature.AdESType;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureType;
-import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 
 /**
  * PDF TBS Data processor that parse input data to be signed and produce the actual data to be signed by the signing

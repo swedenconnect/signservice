@@ -124,17 +124,13 @@
         <configuration>
           <doctitle>SignService Auditing Actuator - ${project.version}</doctitle>
           <windowtitle>SignService Auditing Actuator - ${project.version}</windowtitle>
+          <links>
+            <link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
+            <link>https://docs.spring.io/spring-boot/docs/current/api/</link>
+          </links>          
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>11</source>
-          <target>11</target>
-        </configuration>
-      </plugin>
-
+      
     </plugins>
 
   </build>
