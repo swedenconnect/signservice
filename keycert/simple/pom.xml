@@ -9,7 +9,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-keycert-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: KeyAndCertificate :: Simple</name>
@@ -91,7 +91,7 @@
     <dependency>
       <groupId>se.idsec.utils</groupId>
       <artifactId>print-cert</artifactId>
-      <version>[1.0.4,)</version>
+      <version>1.0.4</version>
       <scope>test</scope>
     </dependency>
     
