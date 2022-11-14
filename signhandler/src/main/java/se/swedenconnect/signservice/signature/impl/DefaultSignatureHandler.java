@@ -38,9 +38,9 @@ import se.swedenconnect.signservice.signature.CompletedSignatureTask;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureHandler;
 import se.swedenconnect.signservice.signature.SignatureType;
+import se.swedenconnect.signservice.signature.signer.DefaultSignServiceSignerProvider;
 import se.swedenconnect.signservice.signature.signer.SignServiceSigner;
 import se.swedenconnect.signservice.signature.signer.SignServiceSignerProvider;
-import se.swedenconnect.signservice.signature.signer.impl.DefaultSignServiceSignerProvider;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
 import se.swedenconnect.signservice.signature.tbsdata.TBSProcessingData;
 
@@ -192,13 +192,13 @@ public class DefaultSignatureHandler extends AbstractSignServiceHandler implemen
         signingCredential.getCertificate(),
         signatureAlgorithm);
 
-    final byte[] signature = signer.sign(tbsProcessingData.getTBSBytes(), signingCredential.getPrivateKey(),
+    final byte[] signature = signer.sign(tbsProcessingData.getTbsBytes(), signingCredential.getPrivateKey(),
         signatureAlgorithm);
     final DefaultCompletedSignatureTask completedSignatureTask = new DefaultCompletedSignatureTask(signatureTask);
     completedSignatureTask.setSignature(signature);
     completedSignatureTask.setSignatureAlgorithmUri(signatureAlgorithmUri);
-    completedSignatureTask.setTbsData(tbsProcessingData.getTBSBytes());
-    completedSignatureTask.setAdESObject(tbsProcessingData.getAdESObject());
+    completedSignatureTask.setTbsData(tbsProcessingData.getTbsBytes());
+    completedSignatureTask.setAdESObject(tbsProcessingData.getAdesObject());
     completedSignatureTask.setProcessingRulesUri(tbsProcessingData.getProcessingRules());
     log.debug("Sign task completed");
 

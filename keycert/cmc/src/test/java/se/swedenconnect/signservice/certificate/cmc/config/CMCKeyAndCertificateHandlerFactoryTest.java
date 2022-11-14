@@ -44,7 +44,7 @@ import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertif
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.CredentialContainerConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
+import se.swedenconnect.signservice.certificate.cmc.RemoteCaInformation;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
 

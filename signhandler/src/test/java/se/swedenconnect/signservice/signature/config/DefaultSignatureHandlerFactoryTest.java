@@ -27,8 +27,8 @@ import se.swedenconnect.signservice.core.config.AbstractHandlerConfiguration;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.signature.SignatureHandler;
 import se.swedenconnect.signservice.signature.impl.DefaultSignatureHandler;
-import se.swedenconnect.signservice.signature.signer.impl.DefaultSignServiceSignerProvider;
-import se.swedenconnect.signservice.signature.tbsdata.impl.XMLTBSDataProcessor;
+import se.swedenconnect.signservice.signature.signer.DefaultSignServiceSignerProvider;
+import se.swedenconnect.signservice.signature.tbsdata.XMLTBSDataProcessor;
 
 /**
  * Test cases for DefaultSignatureHandlerFactory.

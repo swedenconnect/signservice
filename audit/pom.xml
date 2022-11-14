@@ -9,12 +9,12 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Auditing</name>
   <description>SignService Auditing Parent</description>
-  <url>https://github.com/swedenconnect/signservice</url>
+  <url>https://docs.swedenconnect.se/signservice</url>
 
   <licenses>
     <license>
@@ -80,11 +80,6 @@
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-core</artifactId>
       <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
     </dependency>
 
   </dependencies>

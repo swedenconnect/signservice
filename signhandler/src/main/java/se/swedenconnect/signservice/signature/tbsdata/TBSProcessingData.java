@@ -31,25 +31,25 @@ import se.swedenconnect.signservice.signature.AdESObject;
 public class TBSProcessingData {
 
   /**
-   * The data to be signed
+   * The data to be signed.
    *
-   * @param tBSBytes data to be signed
+   * @param tbsBytes data to be signed
    * @return data to be signed
    */
-  private byte[] tBSBytes;
+  private byte[] tbsBytes;
 
   /**
-   * The ETSI advanced electronic signature data object (if applicable)
+   * The ETSI advanced electronic signature data object (if applicable).
    *
-   * @param tBSBytes ETSI advanced electronic signature data object (if applicable)
+   * @param adesObject ETSI advanced electronic signature data object (if applicable)
    * @return ETSI advanced electronic signature data object (if applicable) or null
    */
-  private AdESObject adESObject;
+  private AdESObject adesObject;
 
   /**
-   * The processing rules if set
+   * The processing rules if set.
    *
-   * @param tBSBytes processing rules URI
+   * @param processingRules processing rules URI
    * @return data processing rules URI if set or null
    */
   private String processingRules;

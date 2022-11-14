@@ -9,12 +9,12 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-protocol-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Protocol :: DSS Extensions 1.1</name>
   <description>SignService Protocol DSS Extensions 1.1</description>
-  <url>https://github.com/swedenconnect/signservice</url>
+  <url>https://docs.swedenconnect.se/signservice</url>
 
   <licenses>
     <license>

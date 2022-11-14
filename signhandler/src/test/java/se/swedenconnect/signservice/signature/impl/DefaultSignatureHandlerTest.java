@@ -82,11 +82,11 @@ import se.swedenconnect.signservice.signature.CompletedSignatureTask;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureHandler;
 import se.swedenconnect.signservice.signature.SignatureType;
+import se.swedenconnect.signservice.signature.signer.DefaultSignServiceSignerProvider;
 import se.swedenconnect.signservice.signature.signer.TestAlgorithms;
 import se.swedenconnect.signservice.signature.signer.TestCredentials;
-import se.swedenconnect.signservice.signature.signer.impl.DefaultSignServiceSignerProvider;
-import se.swedenconnect.signservice.signature.tbsdata.impl.PDFTBSDataProcessor;
-import se.swedenconnect.signservice.signature.tbsdata.impl.XMLTBSDataProcessor;
+import se.swedenconnect.signservice.signature.tbsdata.PDFTBSDataProcessor;
+import se.swedenconnect.signservice.signature.tbsdata.XMLTBSDataProcessor;
 import se.swedenconnect.signservice.signature.testutils.TestData;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
 

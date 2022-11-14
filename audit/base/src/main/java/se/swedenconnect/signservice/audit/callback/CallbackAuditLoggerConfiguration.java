@@ -16,9 +16,8 @@
 package se.swedenconnect.signservice.audit.callback;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-import lombok.Getter;
-import lombok.Setter;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerConfiguration;
 
 /**
@@ -27,14 +26,48 @@ import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerConfiguration;
 public class CallbackAuditLoggerConfiguration extends AbstractAuditLoggerConfiguration {
 
   /** The audit logger listener. Mutually exclusive with {@code listener-ref}. */
-  @Getter
-  @Setter
   private AuditLoggerListener listener;
 
   /** The bean name of the audit logger listener object to use. Mutually exclusive with {@code listener}. */
-  @Getter
-  @Setter
   private String listenerRef;
+
+  /**
+   * The audit logger listener. Mutually exclusive with {@code listener-ref}.
+   *
+   * @return the audit logger listener
+   */
+  @Nullable
+  public AuditLoggerListener getListener() {
+    return this.listener;
+  }
+
+  /**
+   * The audit logger listener. Mutually exclusive with {@code listener-ref}.
+   *
+   * @param listener the audit logger listener
+   */
+  public void setListener(@Nonnull final AuditLoggerListener listener) {
+    this.listener = listener;
+  }
+
+  /**
+   * The bean name of the audit logger listener object to use. Mutually exclusive with {@code listener}.
+   *
+   * @return the listener reference
+   */
+  @Nullable
+  public String getListenerRef() {
+    return this.listenerRef;
+  }
+
+  /**
+   * The bean name of the audit logger listener object to use. Mutually exclusive with {@code listener}.
+   *
+   * @param listenerRef the listener reference
+   */
+  public void setListenerRef(@Nonnull final String listenerRef) {
+    this.listenerRef = listenerRef;
+  }
 
   /** {@inheritDoc} */
   @Override

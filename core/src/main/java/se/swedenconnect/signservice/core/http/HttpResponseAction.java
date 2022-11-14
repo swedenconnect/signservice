@@ -24,13 +24,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  * user requests ({@link HttpUserRequest}).
  * <p>
  * The {@code HttpResponseAction} can represent three different types of responses:
+ * </p>
  * <ul>
  * <li>The user's browser should be redirected to a given URL.</li>
  * <li>The user's browser should be posted to a given URL with a set of parameters.</li>
  * <li>A response message should be written (HTTP Status 200).</li>
  * </ul>
  * <b>Note:</b> A {@code HttpResponseAction} instance can only represent one of the above types.
- * </p>
  */
 @JsonDeserialize(using = DefaultHttpResponseActionDeserializer.class)
 public interface HttpResponseAction {

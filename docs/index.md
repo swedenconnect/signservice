@@ -14,6 +14,8 @@ This is the starting point for the open source Signature Service components publ
 
 * [Auditing](audit.md) - Which events and data are being logged by the Signature Service?
 
+* [API Documentation](https://docs.swedenconnect.se/signservice/apidocs) - Java API documentation.
+
 ### Questions and Suggestions
 
 Do you have any questions regarding how to use this repository? Or do you have any suggestions on enhancements? Add an [issue](https://github.com/swedenconnect/signservice/issues)!

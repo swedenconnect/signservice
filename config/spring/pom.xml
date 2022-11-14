@@ -9,12 +9,12 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-config-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Configuration :: Spring</name>
   <description>SignService Configuration Spring Support</description>
-  <url>https://github.com/swedenconnect/signservice</url>
+  <url>https://docs.swedenconnect.se/signservice</url>
 
   <licenses>
     <license>
@@ -101,6 +101,15 @@
         <configuration>
           <doctitle>SignService Configuration Spring Support - ${project.version}</doctitle>
           <windowtitle>SignService Configuration Spring Support - ${project.version}</windowtitle>
+          <links>
+            <link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
+            <link>https://docs.spring.io/spring-boot/docs/current/api/</link>
+            <link>https://build.shibboleth.net/nexus/content/sites/site/java-opensaml/4.2.0/apidocs/</link>
+            <link>https://build.shibboleth.net/nexus/content/sites/site/java-support/8.2.1/apidocs/</link>
+            <link>https://docs.swedenconnect.se/opensaml-security-ext/javadoc/latest/</link>
+            <link>https://docs.swedenconnect.se/opensaml-addons/apidoc/</link>
+            <link>https://docs.swedenconnect.se/opensaml-swedish-eid/apidoc/</link>            
+          </links>          
         </configuration>
       </plugin>
 

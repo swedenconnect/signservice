@@ -15,11 +15,12 @@
  */
 package se.swedenconnect.signservice.signature.tbsdata;
 
-import org.junit.jupiter.api.Test;
-import se.swedenconnect.signservice.signature.impl.DefaultAdESObject;
-
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+import se.swedenconnect.signservice.signature.impl.DefaultAdESObject;
 
 /**
  * To Be Signed processing data tests
@@ -30,23 +31,23 @@ class TBSProcessingDataTest {
   void getterAndSetterTests() {
 
     TBSProcessingData pd01 = TBSProcessingData.builder()
-      .adESObject(new DefaultAdESObject("id01", null))
+      .adesObject(new DefaultAdESObject("id01", null))
       .processingRules("pr")
-      .tBSBytes(new byte[] { 0x00 })
+      .tbsBytes(new byte[] { 0x00 })
       .build();
 
-    assertEquals("id01", pd01.getAdESObject().getSignatureId());
+    assertEquals("id01", pd01.getAdesObject().getSignatureId());
     assertEquals("pr", pd01.getProcessingRules());
-    assertArrayEquals(new byte[] { 0x00 }, pd01.getTBSBytes());
+    assertArrayEquals(new byte[] { 0x00 }, pd01.getTbsBytes());
 
     TBSProcessingData pd02 = new TBSProcessingData();
-    pd02.setAdESObject(new DefaultAdESObject("id01", null));
+    pd02.setAdesObject(new DefaultAdESObject("id01", null));
     pd02.setProcessingRules("pr");
-    pd02.setTBSBytes(new byte[] { 0x00 });
+    pd02.setTbsBytes(new byte[] { 0x00 });
 
-    assertEquals("id01", pd02.getAdESObject().getSignatureId());
+    assertEquals("id01", pd02.getAdesObject().getSignatureId());
     assertEquals("pr", pd02.getProcessingRules());
-    assertArrayEquals(new byte[] { 0x00 }, pd02.getTBSBytes());
+    assertArrayEquals(new byte[] { 0x00 }, pd02.getTbsBytes());
 
   }
 }

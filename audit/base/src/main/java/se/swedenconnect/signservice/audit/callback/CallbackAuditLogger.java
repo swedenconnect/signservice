@@ -19,7 +19,9 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerException;
@@ -28,8 +30,10 @@ import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
 /**
  * An {@link AuditLogger} implementation that will hand over all events to the configured {@link AuditLoggerListener}.
  */
-@Slf4j
 public class CallbackAuditLogger extends AbstractAuditLogger {
+
+  /** Logger. */
+  private static final Logger log = LoggerFactory.getLogger(CallbackAuditLogger.class);
 
   /** The audit logger listener. */
   private final AuditLoggerListener listener;

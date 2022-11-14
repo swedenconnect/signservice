@@ -39,8 +39,8 @@ import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHa
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerFactory;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.cmc.ca.RemoteCaInformation;
-import se.swedenconnect.signservice.certificate.cmc.ca.SignServiceCMCClient;
+import se.swedenconnect.signservice.certificate.cmc.RemoteCaInformation;
+import se.swedenconnect.signservice.certificate.cmc.SignServiceCMCClient;
 import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 

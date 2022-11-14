@@ -8,12 +8,12 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-keycert-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: KeyAndCertificate :: CMC</name>
   <description>SignService KeyAndCertificate CMC Implementation</description>
-  <url>https://github.com/swedenconnect/signservice</url>
+  <url>https://docs.swedenconnect.se/signservice</url>
 
   <licenses>
     <license>
@@ -97,7 +97,7 @@
     <dependency>
       <groupId>se.idsec.utils</groupId>
       <artifactId>print-cert</artifactId>
-      <version>[1.0.4,)</version>
+      <version>1.0.4</version>
       <scope>test</scope>
     </dependency>
     
