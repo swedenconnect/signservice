@@ -14,6 +14,8 @@ Framework specifications - https://docs.swedenconnect.se/technical-framework.
 
 Go to https://docs.swedenconnect.se/signservice for documentation of how to understand and use this repository.
 
+Java API documentation: https://docs.swedenconnect.se/signservice/apidocs
+
 ## Modules
 
 This repository comprises of the following modules:
