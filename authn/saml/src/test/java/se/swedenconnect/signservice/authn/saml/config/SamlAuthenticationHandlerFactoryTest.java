@@ -159,6 +159,10 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     logo.setWidth(100);
     logo.setPath("/images/logo.svg");
     ui.setLogos(Arrays.asList(logo));
+    ui.setInformationUrls(List.of(
+        new LocalizedString("en-https://www.example.com/info"), new LocalizedString("sv-https://www.example.com/info")));
+    ui.setPrivacyStatementsUrls(List.of(
+        new LocalizedString("en-https://www.example.com/info"), new LocalizedString("sv-https://www.example.com/info")));
     md.setUiInfo(ui);
 
     final Map<ContactPersonTypeEnumeration, ContactPersonConfig> map = new HashMap<>();
