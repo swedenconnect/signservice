@@ -9,7 +9,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-config-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Configuration :: Base</name>
@@ -74,56 +74,56 @@
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-engine</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.0</version>
     </dependency>
     
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-protocol-dssext11</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.0</version>
     </dependency>
     
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-authn-base</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.0</version>
     </dependency>
     
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-authn-saml</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.1-SNAPSHOT</version>
     </dependency>    
     
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-audit-base</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.0</version>
     </dependency>
     
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-audit-actuator</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.0</version>
       <optional>true</optional>
     </dependency>    
     
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-signhandler</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-keycert-simple</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-keycert-cmc</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.0</version>
     </dependency>  
 
   </dependencies>

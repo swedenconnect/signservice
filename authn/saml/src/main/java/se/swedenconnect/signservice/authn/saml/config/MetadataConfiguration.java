@@ -125,6 +125,16 @@ public class MetadataConfiguration {
     private List<UIInfoLogo> logos;
 
     /**
+     * The privacy statement URLs. Given as "country-code"-"text".
+     */
+    private List<LocalizedString> privacyStatementsUrls;
+
+    /**
+     * Information URLs. Given as "country-code"-"text".
+     */
+    private List<LocalizedString> informationUrls;
+
+    /**
      * Builds a {@link UIInfo} element.
      *
      * @param baseUrl the system base URL
@@ -142,6 +152,8 @@ public class MetadataConfiguration {
           .displayNames(this.getDisplayNames())
           .descriptions(this.getDescriptions())
           .logos(logos)
+          .privacyStatementURLs(this.getPrivacyStatementsUrls())
+          .informationURLs(this.getInformationUrls())
           .build();
     }
 

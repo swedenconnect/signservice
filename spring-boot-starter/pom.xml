@@ -5,6 +5,7 @@
 
   <artifactId>signservice-spring-boot-starter</artifactId>
   <packaging>jar</packaging>
+  <version>1.0.1-SNAPSHOT</version>
 
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
@@ -93,31 +94,14 @@
   </dependencyManagement>
 
   <dependencies>
+    
 
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-config</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-config-spring</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.1-SNAPSHOT</version>
     </dependency>
-    
-    <dependency>
-      <groupId>se.swedenconnect.signservice</groupId>
-      <artifactId>signservice-audit-actuator</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    
+        
     <dependency>
       <groupId>se.swedenconnect.security</groupId>
       <artifactId>credentials-support</artifactId>

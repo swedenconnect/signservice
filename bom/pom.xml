@@ -6,7 +6,7 @@
   <groupId>se.swedenconnect.signservice</groupId>
   <artifactId>signservice-application-bom</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
 
   <name>Sweden Connect :: SignService :: Application BOM</name>
   <description>BOM for SignService Applications</description>
@@ -149,7 +149,7 @@
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-authn-saml</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1-SNAPSHOT</version>
       </dependency>    
       
       <dependency>
