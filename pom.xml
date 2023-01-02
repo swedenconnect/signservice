@@ -6,7 +6,7 @@
   <groupId>se.swedenconnect.signservice</groupId>
   <artifactId>signservice-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
 
   <name>Sweden Connect :: SignService :: Parent POM</name>
   <description>Parent POM for SignService libraries</description>
@@ -66,7 +66,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>11</java.version>
     
-    <spring.boot.version>2.7.1</spring.boot.version>
+    <spring.boot.version>2.7.6</spring.boot.version>
   </properties>
 
   <repositories>
@@ -110,7 +110,7 @@
         <groupId>org.springframework</groupId>
         <artifactId>spring-framework-bom</artifactId>
         <type>pom</type>
-        <version>5.3.22</version>
+        <version>5.3.24</version>
         <scope>import</scope>
       </dependency>
       
@@ -126,7 +126,7 @@
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-bom</artifactId>
-        <version>1.2.3</version>
+        <version>1.2.4</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -134,27 +134,20 @@
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-commons</artifactId>
-        <version>1.2.3</version>
+        <version>1.2.4</version>
       </dependency>
 
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-xml-commons</artifactId>
-        <version>1.2.3</version>
+        <version>1.2.4</version>
       </dependency>
       
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-pdf-commons</artifactId>
-        <version>1.2.3</version>
+        <version>1.2.4</version>
       </dependency>      
-
-      <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
-        <version>4.0.1</version>
-        <scope>provided</scope>
-      </dependency>
 
     </dependencies>
 

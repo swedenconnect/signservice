@@ -74,19 +74,19 @@
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-config</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-audit-actuator</artifactId>
-      <version>1.0.0</version>      
+      <version>${project.version}</version>      
     </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-configuration-processor</artifactId>
-      <version>2.7.1</version>
+      <version>${spring.boot.version}</version>
       <optional>true</optional>
     </dependency>
   </dependencies>

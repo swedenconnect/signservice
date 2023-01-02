@@ -9,7 +9,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-keycert-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: KeyAndCertificate :: Base</name>
@@ -76,7 +76,23 @@
       <groupId>se.swedenconnect.ca</groupId>
       <artifactId>ca-engine</artifactId>
       <optional>true</optional>
-    </dependency>    
+    </dependency>
+    
+    <!-- Until we update ca-engine -->
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpkix-jdk18on</artifactId>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcutil-jdk18on</artifactId>
+      </dependency>    
 
     <dependency>
       <groupId>org.slf4j</groupId>
