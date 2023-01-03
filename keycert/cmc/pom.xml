@@ -97,7 +97,6 @@
     <dependency>
       <groupId>se.idsec.utils</groupId>
       <artifactId>print-cert</artifactId>
-      <version>1.0.4</version>
       <scope>test</scope>
     </dependency>
     
