@@ -104,7 +104,8 @@ The [MetadataProviderConfiguration](https://github.com/swedenconnect/signservice
 | `validation-certificate` | The certificate used to validate the signature on downloaded metadata. | Optional. If no certificate is supplied no signature validation is performed. This is strongly discouraged for production systems. |
 | `url` | The URL from where metadata is downloaded. Mutually exclusive with `file` below. | - |
 | `file` | A full path to locally stored metadata. Mutually exclusive with `url` above. | - |
-| `backup-file` | Optional property. If `url` is assigned, this setting tells where a backup of the downloaded data should be saved. | - |
+| `backup-file` | Optional property. If `url` is assigned, this setting tells where a backup of the downloaded data should be saved. If the `mdq` flag has been set, this property should point to a directory and not a file. | - |
+| `mdq` | Optional property. If a metadata URL has been configured, setting this flag means that the metadata [MDQ protocol](https://www.ietf.org/id/draft-young-md-query-17.html) is used. | `false` |
 | `additional[]` | A list of additional metadata providers. Using this feature a chained metadata provider will be created where several sources of metadata will be used. | An empty list. |
 
 <a name="metadata-configuration"></a>
