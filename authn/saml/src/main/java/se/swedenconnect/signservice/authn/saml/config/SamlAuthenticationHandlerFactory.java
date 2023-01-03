@@ -91,9 +91,11 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     }
     final SamlAuthenticationHandlerConfiguration conf =
         SamlAuthenticationHandlerConfiguration.class.cast(configuration);
-
+        
     // Assert that required settings are there in the configuration object.
     //
+    this.assertSamlType(conf.getSamlType());
+    
     if (StringUtils.isBlank(conf.getEntityId())) {
       throw new IllegalArgumentException("Missing entityId from configuration object");
     }
@@ -166,6 +168,22 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
   }
 
   /**
+   * Asserts that a valid SAML type has been provided.
+   * 
+   * @param type the SAML type (if null, the default is assumed)
+   * @throws IllegalArgumentException for invalid types
+   */
+  protected void assertSamlType(@Nullable final String type) throws IllegalArgumentException {
+    if (type == null) {
+      return;
+    }
+    if (!SamlAuthenticationHandlerConfiguration.SAML_TYPE_SWEDEN_CONNECT.equals(type)
+        && !SamlAuthenticationHandlerConfiguration.SAML_TYPE_DEFAULT.equals(type)) {
+      throw new IllegalArgumentException("Unknown saml-type - " + type);
+    }
+  }
+
+  /**
    * Creates the SAML authentication handler.
    *
    * @param config the SAML configuration
@@ -189,12 +207,9 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
       handler = new SwedenConnectSamlAuthenticationHandler(authnRequestGenerator, responseProcessor, metadataProvider,
           entityDescriptorContainer, config.getSpPaths());
     }
-    else if (SamlAuthenticationHandlerConfiguration.SAML_TYPE_DEFAULT.equals(config.getSamlType())) {
+    else {
       handler = new DefaultSamlAuthenticationHandler(authnRequestGenerator, responseProcessor, metadataProvider,
           entityDescriptorContainer, config.getSpPaths());
-    }
-    else {
-      throw new IllegalArgumentException("Unknown saml-type - " + config.getSamlType());
     }
     handler.setPreferredBindingUri(preferredRequestBinding);
     return handler;
@@ -427,11 +442,8 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     if (SamlAuthenticationHandlerConfiguration.SAML_TYPE_SWEDEN_CONNECT.equalsIgnoreCase(config.getSamlType())) {
       processor = new SwedishEidResponseProcessorImpl();
     }
-    else if (SamlAuthenticationHandlerConfiguration.SAML_TYPE_DEFAULT.equalsIgnoreCase(config.getSamlType())) {
-      processor = new ResponseProcessorImpl();
-    }
     else {
-      throw new IllegalArgumentException("Unknown saml-type - " + config.getSamlType());
+      processor = new ResponseProcessorImpl();
     }
     processor.setDecrypter(decrypter);
     processor.setMessageReplayChecker(messageReplayChecker);
@@ -494,11 +506,8 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
         throw new IllegalArgumentException("Failed to initialize encrypter", e);
       }
     }
-    else if (SamlAuthenticationHandlerConfiguration.SAML_TYPE_DEFAULT.equalsIgnoreCase(config.getSamlType())) {
-      generator = new DefaultAuthnRequestGenerator(entityDescriptor, cred, metadataProvider.getMetadataResolver());
-    }
     else {
-      throw new IllegalArgumentException("Unknown saml-type - " + config.getSamlType());
+      generator = new DefaultAuthnRequestGenerator(entityDescriptor, cred, metadataProvider.getMetadataResolver());
     }
     try {
       generator.initialize();
