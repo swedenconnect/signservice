@@ -57,14 +57,14 @@ public class MetadataProviderConfiguration {
   private String url;
 
   /**
-   * Optional property. If {@code url} is assigned, this setting tells where a backup of the downloaded data should be
-   * saved.
+   * Optional property. If {@code url} is assigned, this setting points to a backup file where the downloaded data
+   * should be saved.
    * <p>
    * If the {@code mdq} flag has been set, this property should point to a directory and not a file.
    * </p>
    */
   @Nullable
-  private String backupFile;
+  private String backupLocation;
 
   /**
    * A path to locally stored metadata. Mutually exclusive with {@code url}.
@@ -99,13 +99,13 @@ public class MetadataProviderConfiguration {
       AbstractMetadataProvider provider = null;
       if (StringUtils.isNotBlank(this.url)) {
         if (this.mdq == null || !this.mdq.booleanValue()) {
-          provider = new HTTPMetadataProvider(this.url, this.backupFile,
+          provider = new HTTPMetadataProvider(this.url, this.backupLocation,
               HTTPMetadataProvider.createDefaultHttpClient(null /* trust all */, new DefaultHostnameVerifier()));
         }
         else {
           provider = new MDQMetadataProvider(this.url,
               HTTPMetadataProvider.createDefaultHttpClient(null /* trust all */, new DefaultHostnameVerifier()),
-              this.backupFile);
+              this.backupLocation);
         }
         if (this.validationCertificate == null) {
           log.warn("No validation certificate given for metadata provider ({}) - metadata can not be trusted",

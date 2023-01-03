@@ -286,7 +286,7 @@ signservice:
       metadata-provider:
         bean-name: signservice.SamlMetadataProvider
         url: https://eid.svelegtest.se/metadata/mdx/role/idp.xml
-        backup-file: ${SIGNSERVICE_HOME}/sandbox-metadata.xml
+        backup-location: ${SIGNSERVICE_HOME}/sandbox-metadata.xml
         validation-certificate: classpath:sandbox/sandbox-metadata.crt
 
   #
