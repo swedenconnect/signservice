@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,18 +32,20 @@ import org.apache.commons.io.FileUtils;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 
-import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 import se.swedenconnect.ca.engine.ca.repository.SortBy;
 import se.swedenconnect.ca.engine.ca.repository.impl.SerializableCertificateRecord;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
+import se.swedenconnect.ca.engine.revocation.crl.CRLMetadata;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
 
 /**
  * Test implementation of a CA repository
  */
+@Slf4j
 public class TestCARepository implements CARepository, CRLRevocationDataProvider {
 
   private final File crlFile;
@@ -185,11 +188,39 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
   }
 
 
-  @SneakyThrows @Override public void publishNewCrl(X509CRLHolder crl) {
+  @Override public void publishNewCrl(X509CRLHolder crl) throws IOException {
     FileUtils.writeByteArrayToFile(crlFile, crl.getEncoded());
   }
 
-  @SneakyThrows @Override public X509CRLHolder getCurrentCrl() {
-    return new X509CRLHolder(new FileInputStream(crlFile));
+  @Override public X509CRLHolder getCurrentCrl() {
+    try {
+      return new X509CRLHolder(new FileInputStream(crlFile));
+    }
+    catch (IOException e) {
+      log.debug("No current CRL is available");
+      return null;
+    }
+  }
+
+  @Override public CRLMetadata getCurrentCRLMetadata() {
+    final X509CRLHolder currentCrl = getCurrentCrl();
+    if (currentCrl == null) {
+      log.debug("No CRL file is available - Resetting CRL metadata to support initial CRL creation");
+      // No CRL is available. Return empty metadata to allow initial CRL creation;
+      return CRLMetadata.builder()
+        .crlNumber(BigInteger.ZERO)
+        .issueTime(Instant.ofEpochMilli(0L))
+        .nextUpdate(Instant.ofEpochMilli(0L))
+        .revokedCertCount(0)
+        .build();
+    }
+
+    log.debug("Returning CRL metadata from current CRL");
+    return CRLMetadata.builder()
+      .crlNumber(crlNumber)
+      .issueTime(currentCrl.getThisUpdate().toInstant())
+      .nextUpdate(currentCrl.getNextUpdate().toInstant())
+      .revokedCertCount(currentCrl.getRevokedCertificates().size())
+      .build();
   }
 }
