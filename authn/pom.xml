@@ -5,12 +5,11 @@
 
   <artifactId>signservice-authn-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.1-SNAPSHOT</version>
 
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Authentication</name>
@@ -80,7 +79,7 @@
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-core</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>

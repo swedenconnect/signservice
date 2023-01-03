@@ -88,13 +88,7 @@
   <dependencyManagement>
   
     <dependencies>
-    
-      <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcprov-jdk15on</artifactId>
-        <version>1.70</version>
-      </dependency>
-        
+            
     </dependencies>
     
   </dependencyManagement>  
@@ -104,7 +98,7 @@
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-authn-base</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
     </dependency>
         
     <dependency>

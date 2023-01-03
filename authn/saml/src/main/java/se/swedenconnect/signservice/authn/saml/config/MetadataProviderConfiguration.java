@@ -34,6 +34,7 @@ import se.swedenconnect.opensaml.saml2.metadata.provider.AbstractMetadataProvide
 import se.swedenconnect.opensaml.saml2.metadata.provider.CompositeMetadataProvider;
 import se.swedenconnect.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
 import se.swedenconnect.opensaml.saml2.metadata.provider.HTTPMetadataProvider;
+import se.swedenconnect.opensaml.saml2.metadata.provider.MDQMetadataProvider;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 
 /**
@@ -56,17 +57,27 @@ public class MetadataProviderConfiguration {
   private String url;
 
   /**
-   * Optional property. If {@code url} is assigned, this setting tells where a backup of the downloaded data should be
-   * saved.
+   * Optional property. If {@code url} is assigned, this setting points to a backup file where the downloaded data
+   * should be saved.
+   * <p>
+   * If the {@code mdq} flag has been set, this property should point to a directory and not a file.
+   * </p>
    */
   @Nullable
-  private String backupFile;
+  private String backupLocation;
 
   /**
    * A path to locally stored metadata. Mutually exclusive with {@code url}.
    */
   @Nullable
   private String file;
+
+  /**
+   * If a metadata URL has been configured, setting this flag means that the metadata MDQ
+   * (https://www.ietf.org/id/draft-young-md-query-17.html) protocol is used. The default is not to use MDQ.
+   */
+  @Nullable
+  private Boolean mdq;
 
   /**
    * Additional providers.
@@ -87,10 +98,18 @@ public class MetadataProviderConfiguration {
       }
       AbstractMetadataProvider provider = null;
       if (StringUtils.isNotBlank(this.url)) {
-        provider = new HTTPMetadataProvider(this.url, this.backupFile,
-          HTTPMetadataProvider.createDefaultHttpClient(null /* trust all */, new DefaultHostnameVerifier()));
+        if (this.mdq == null || !this.mdq.booleanValue()) {
+          provider = new HTTPMetadataProvider(this.url, this.backupLocation,
+              HTTPMetadataProvider.createDefaultHttpClient(null /* trust all */, new DefaultHostnameVerifier()));
+        }
+        else {
+          provider = new MDQMetadataProvider(this.url,
+              HTTPMetadataProvider.createDefaultHttpClient(null /* trust all */, new DefaultHostnameVerifier()),
+              this.backupLocation);
+        }
         if (this.validationCertificate == null) {
-          log.warn("No validation certificate given for metadata provider ({}) - metadata can not be trusted", this.url);
+          log.warn("No validation certificate given for metadata provider ({}) - metadata can not be trusted",
+              this.url);
         }
       }
       else if (StringUtils.isNotBlank(this.file)) {
@@ -108,7 +127,8 @@ public class MetadataProviderConfiguration {
         for (final MetadataProviderConfiguration mpc : this.additional) {
           metadataProviders.add(mpc.create());
         }
-        final CompositeMetadataProvider compositeProvider = new CompositeMetadataProvider("composite-provider", metadataProviders);
+        final CompositeMetadataProvider compositeProvider =
+            new CompositeMetadataProvider("composite-provider", metadataProviders);
         compositeProvider.initialize();
         return compositeProvider;
       }
