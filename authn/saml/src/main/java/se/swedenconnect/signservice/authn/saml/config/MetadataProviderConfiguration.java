@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 package se.swedenconnect.signservice.authn.saml.config;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -99,13 +103,13 @@ public class MetadataProviderConfiguration {
       AbstractMetadataProvider provider = null;
       if (StringUtils.isNotBlank(this.url)) {
         if (this.mdq == null || !this.mdq.booleanValue()) {
-          provider = new HTTPMetadataProvider(this.url, this.backupLocation,
+          provider = new HTTPMetadataProvider(this.url, this.preProcessBackupFile(this.backupLocation),
               HTTPMetadataProvider.createDefaultHttpClient(null /* trust all */, new DefaultHostnameVerifier()));
         }
         else {
           provider = new MDQMetadataProvider(this.url,
               HTTPMetadataProvider.createDefaultHttpClient(null /* trust all */, new DefaultHostnameVerifier()),
-              this.backupLocation);
+              this.preProcessBackupDirectory(this.backupLocation));
         }
         if (this.validationCertificate == null) {
           log.warn("No validation certificate given for metadata provider ({}) - metadata can not be trusted",
@@ -138,6 +142,44 @@ public class MetadataProviderConfiguration {
     }
     catch (final ResolverException | ComponentInitializationException e) {
       throw new IllegalArgumentException("Failed to initialize metadata provider - " + e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Makes sure that all parent directories for the supplied file exists and returns the backup file as an absolute
+   * path.
+   * 
+   * @param backupFile the backup file
+   * @return the absolute path of the backup file
+   */
+  @Nullable
+  private String preProcessBackupFile(@Nullable final String backupFile) {
+    if (backupFile == null) {
+      return null;
+    }
+    final File b = new File(backupFile);
+    this.preProcessBackupDirectory(b.getParentFile().getAbsolutePath());
+    return b.getAbsolutePath();
+  }
+
+  /**
+   * Makes sure that all parent directories exists and returns the directory as an absolute path.
+   * 
+   * @param backupDirectory the backup directory
+   * @return the absolute path of the backup directory
+   */
+  @Nullable
+  private String preProcessBackupDirectory(@Nullable final String backupDirectory) {
+    if (backupDirectory == null) {
+      return null;
+    }
+    try {
+      final Path path = Paths.get(backupDirectory);
+      Files.createDirectories(path);
+      return path.toFile().getAbsolutePath();
+    }
+    catch (final IOException e) {
+      throw new IllegalArgumentException("Invalid backup-location");
     }
   }
 
