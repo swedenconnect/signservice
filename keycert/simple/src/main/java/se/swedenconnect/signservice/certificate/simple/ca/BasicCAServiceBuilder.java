@@ -27,7 +27,6 @@ import javax.annotation.Nonnull;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
-import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 import se.swedenconnect.security.credential.PkiCredential;
 
 /**
@@ -154,10 +153,9 @@ public class BasicCAServiceBuilder {
    */
   @Nonnull
   private CRLIssuerModel getCrlIssuerModel() {
-    final CRLRevocationDataProvider crlRevocationDataProvider = this.caRepository.getCRLRevocationDataProvider();
     final CRLIssuerModel crlIssuerModel = new CRLIssuerModel(
         BcFunctions.toX509CertificateHolder.apply(this.caCredential.getCertificate()),
-        this.algorithm, this.crlValidity, crlRevocationDataProvider, this.crlDpUrl);
+        this.algorithm, this.crlValidity, this.crlDpUrl);
     crlIssuerModel.setStartOffset(this.crlStartOffset);
     return crlIssuerModel;
   }

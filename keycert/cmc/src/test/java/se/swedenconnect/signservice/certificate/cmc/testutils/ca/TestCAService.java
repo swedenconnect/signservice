@@ -43,7 +43,7 @@ import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuer;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
-import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
+import se.swedenconnect.ca.engine.revocation.crl.impl.SynchronizedCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.security.credential.PkiCredential;
 
@@ -71,7 +71,7 @@ public class TestCAService extends AbstractCAService<DefaultCertificateModelBuil
         this.getCrlIssuerModel(this.getCaRepository().getCRLRevocationDataProvider(), algorithm);
     this.crlDistributionPoints = new ArrayList<>();
     if (crlIssuerModel != null) {
-      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, caCredential);
+      this.crlIssuer = new SynchronizedCRLIssuer(crlIssuerModel, caRepository.getCRLRevocationDataProvider(), caCredential);
       this.crlDistributionPoints = Arrays.asList(crlIssuerModel.getDistributionPointUrl());
       this.publishNewCrl();
     }
@@ -81,7 +81,7 @@ public class TestCAService extends AbstractCAService<DefaultCertificateModelBuil
       final String algorithm)
       throws CertificateRevocationException {
     try {
-      return new CRLIssuerModel(this.getCaCertificate(), algorithm, Duration.ofDays(2), crlRevocationDataProvider,
+      return new CRLIssuerModel(this.getCaCertificate(), algorithm, Duration.ofDays(2),
           TestCAHolder.getFileUrl(this.crlFile));
     }
     catch (final Exception e) {

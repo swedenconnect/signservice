@@ -48,7 +48,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBui
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuer;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
-import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
+import se.swedenconnect.ca.engine.revocation.crl.impl.SynchronizedCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
@@ -103,7 +103,7 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
     this.certificateIssuer = new BasicCertificateIssuer(issuerModel, caCredential);
     this.crlDistributionPoints = new ArrayList<>();
     if (crlIssuerModel != null) {
-      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, caCredential);
+      this.crlIssuer = new SynchronizedCRLIssuer(crlIssuerModel, caRepository.getCRLRevocationDataProvider(), caCredential);
       this.crlDistributionPoints = List.of(crlIssuerModel.getDistributionPointUrl());
       try {
         this.publishNewCrl();

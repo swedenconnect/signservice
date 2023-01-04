@@ -81,21 +81,7 @@
       <dependency>
         <groupId>se.swedenconnect.ca</groupId>
         <artifactId>ca-engine</artifactId>
-        <version>1.2.3</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcutil-jdk15on</artifactId>
-          </exclusion>          
-        </exclusions>
+        <version>2.0.0</version>
       </dependency>
       
       <dependency>
