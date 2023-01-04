@@ -187,6 +187,28 @@ public class AbstractHandlerConfigurationTest {
     Assertions.assertNull(conf.getDummy().getFive()); // Couldn't be merged
     Assertions.assertEquals("1-1", conf.getDummy2().getOne());
     Assertions.assertEquals("2-2", conf.getDummy2().getTwo());
+    Assertions.assertEquals(DummyHandlerFactory.class.getName(), conf.getFactoryClass());
+  }
+  
+  @Test
+  public void testMergeFactoryClass() throws Exception {
+    final DummyHandlerConfiguration shared = new DummyHandlerConfiguration();
+    shared.setDummy(new DummyObject());
+    shared.getDummy().setOne("1");
+    shared.setFactoryClass("se.example.Dummy");
+    
+    final DummyHandlerConfiguration conf = new DummyHandlerConfiguration();
+    conf.setAbc("ABC");
+    conf.setDefaultConfig(shared);
+    
+    // Init merges
+    conf.init();
+
+    Assertions.assertNull(conf.getDefaultConfig());
+
+    Assertions.assertEquals("ABC", conf.getAbc());
+    Assertions.assertEquals("1", conf.getDummy().getOne());
+    Assertions.assertEquals("se.example.Dummy", conf.getFactoryClass());
   }
 
   @Test

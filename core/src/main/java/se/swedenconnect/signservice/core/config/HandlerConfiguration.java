@@ -37,6 +37,10 @@ import se.swedenconnect.signservice.core.SignServiceHandler;
  * Each class implementing the {@code HandlerConfiguration} must tell which {@link HandlerFactory} class that
  * understands its settings and can be used to create a handler based on the configuration. See {@link #getFactoryClass()}.
  * </p>
+ * <p>
+ * Note: An implementing class must not assign a default value for any property. Non-assigned properties must always
+ * return {@code null}. Assignment of default values should be done in the corresponding factory class. 
+ * </p>
  *
  * @param <T> the type of handler the configuration is for
  */
