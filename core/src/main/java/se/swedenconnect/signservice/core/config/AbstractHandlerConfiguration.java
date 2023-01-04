@@ -17,6 +17,7 @@ package se.swedenconnect.signservice.core.config;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -270,7 +271,11 @@ public abstract class AbstractHandlerConfiguration<T extends SignServiceHandler>
         log.trace("Checking whether value of '{}' should be merged ...", method.getName());
 
         // Get the value for the default object getter ...
-        final Object mergeValue = method.invoke(defaultObject);
+        //
+        // We have special handling of getFactoryClass since that class always returns a default
+        // value ...
+        //
+        final Object mergeValue = this.getMethodValue(method, defaultObject);
         if (mergeValue == null) {
           log.trace("Execution of {} on default configuration object returned null - will not be merged",
               method.getName());
@@ -278,7 +283,7 @@ public abstract class AbstractHandlerConfiguration<T extends SignServiceHandler>
         }
         // Get the value from the target object ...
         final Method targetMethod = targetObject.getClass().getMethod(method.getName());
-        Object targetValue = targetMethod.invoke(targetObject);
+        Object targetValue = this.getMethodValue(targetMethod, targetObject);
         if (targetValue == null) {
           log.trace("Execution of {} on target configuration object return null - merging value from default",
               method.getName());
@@ -466,6 +471,34 @@ public abstract class AbstractHandlerConfiguration<T extends SignServiceHandler>
       FieldUtils.writeField(field, targetObject, value, true);
       log.trace("Field '{}' on {} was updated with value from default config object",
           fieldName, targetObject.getClass().getName());
+    }
+  }
+
+  /**
+   * Invokes the method and returns it value.
+   * 
+   * @param method the method
+   * @param object the object
+   * @return the value
+   * @throws IllegalAccessException for illegal access
+   * @throws IllegalArgumentException for illegal arguments
+   * @throws InvocationTargetException for illegal targets
+   */
+  @Nullable
+  private Object getMethodValue(@Nonnull final Method method, @Nonnull final Object object)
+      throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    if ("getFactoryClass".equals(method.getName()) && object instanceof AbstractHandlerConfiguration) {
+      // We have special handling for getFactoryClass since it returns a default value.
+      // If used directly merging will fail since the target will never be null.
+      //
+      final Field field = FieldUtils.getField(object.getClass(), "factoryClass", true);
+      if (field == null) {
+        return method.invoke(object);
+      }
+      return field.get(object);
+    }
+    else {
+      return method.invoke(object);
     }
   }
 
