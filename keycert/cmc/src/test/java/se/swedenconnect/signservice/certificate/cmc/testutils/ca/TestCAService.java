@@ -33,7 +33,6 @@ import se.swedenconnect.ca.engine.ca.issuer.impl.AbstractCAService;
 import se.swedenconnect.ca.engine.ca.issuer.impl.BasicCertificateIssuer;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.data.AttributeMappingBuilder;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.data.AttributeRefType;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.data.SAMLAuthContextBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
@@ -45,6 +44,7 @@ import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 import se.swedenconnect.ca.engine.revocation.crl.impl.SynchronizedCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
+import se.swedenconnect.cert.extensions.data.saci.AttributeMapping;
 import se.swedenconnect.security.credential.PkiCredential;
 
 /**
@@ -157,7 +157,7 @@ public class TestCAService extends AbstractCAService<DefaultCertificateModelBuil
                 .name("urn:oid:2.5.4.3")
                 .nameFormat("http://example.com/nameFormatUri")
                 .ref("1.2.3.4")
-                .type(AttributeRefType.rdn)
+                .type(AttributeMapping.Type.rdn)
                 .build()))
             .build());
     return certModelBuilder;

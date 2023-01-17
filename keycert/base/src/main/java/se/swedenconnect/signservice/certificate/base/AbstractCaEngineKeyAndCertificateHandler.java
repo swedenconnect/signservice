@@ -42,9 +42,8 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.SubjDirectoryAtt
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.cert.extensions.QCStatements;
-import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
-import se.swedenconnect.schemas.cert.authcont.saci_1_0.ObjectFactory;
-import se.swedenconnect.schemas.saml_2_0.assertion.Attribute;
+import se.swedenconnect.cert.extensions.data.saci.AttributeMapping;
+import se.swedenconnect.cert.extensions.data.saci.SAMLAttribute;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
@@ -231,16 +230,16 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
         // Skipping attribute mapping in auth context extension because this is a default value and is not mapped from IdP
         continue;
       }
-      final ObjectFactory objectFactory = new ObjectFactory();
-      final AttributeMapping attributeMapping = objectFactory.createAttributeMapping();
+      final AttributeMapping attributeMapping = new AttributeMapping();
       attributeMapping.setRef(attributeMappingData.getReference());
-      attributeMapping.setType(attributeMappingData.getCertificateAttributeType().getType());
-      final se.swedenconnect.schemas.saml_2_0.assertion.ObjectFactory samlObjFactory =
-          new se.swedenconnect.schemas.saml_2_0.assertion.ObjectFactory();
-      final Attribute attribute = samlObjFactory.createAttribute();
+      attributeMapping.setType(AttributeMapping.Type.getTypeFromName(
+        attributeMappingData.getCertificateAttributeType().getType()));
+      final SAMLAttribute attribute = new SAMLAttribute();
       attribute.setName(attributeMappingData.getSourceId());
       attribute.setFriendlyName(attributeMappingData.getSourceFriendlyName());
-      attribute.getAttributeValues().add(attributeMappingData.getValue());
+      attribute.setAttributeValues(List.of(
+        SAMLAttribute.createStringAttributeValue(attributeMappingData.getValue())
+      ));
       attributeMapping.setAttribute(attribute);
       extAttrMappingList.add(attributeMapping);
     }
