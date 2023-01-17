@@ -36,6 +36,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel.CertificateModelBuilder;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.data.AttributeMappingBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.data.QcStatementsBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.data.SAMLAuthContextBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.SubjDirectoryAttributesModel;
@@ -43,7 +44,6 @@ import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBu
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.cert.extensions.QCStatements;
 import se.swedenconnect.cert.extensions.data.saci.AttributeMapping;
-import se.swedenconnect.cert.extensions.data.saci.SAMLAttribute;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
@@ -230,17 +230,14 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
         // Skipping attribute mapping in auth context extension because this is a default value and is not mapped from IdP
         continue;
       }
-      final AttributeMapping attributeMapping = new AttributeMapping();
-      attributeMapping.setRef(attributeMappingData.getReference());
-      attributeMapping.setType(AttributeMapping.Type.getTypeFromName(
-        attributeMappingData.getCertificateAttributeType().getType()));
-      final SAMLAttribute attribute = new SAMLAttribute();
-      attribute.setName(attributeMappingData.getSourceId());
-      attribute.setFriendlyName(attributeMappingData.getSourceFriendlyName());
-      attribute.setAttributeValues(List.of(
-        SAMLAttribute.createStringAttributeValue(attributeMappingData.getValue())
-      ));
-      attributeMapping.setAttribute(attribute);
+      final AttributeMapping attributeMapping = AttributeMappingBuilder.instance()
+        .ref(attributeMappingData.getReference())
+        .type(AttributeMapping.Type.getTypeFromName(
+          attributeMappingData.getCertificateAttributeType().getType()))
+        .name(attributeMappingData.getSourceId())
+        .friendlyName(attributeMappingData.getSourceFriendlyName())
+        .attributeStringValue(attributeMappingData.getValue())
+        .build();
       extAttrMappingList.add(attributeMapping);
     }
     return extAttrMappingList;
