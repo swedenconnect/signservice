@@ -22,17 +22,24 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.TrustManager;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder;
+import net.shibboleth.utilities.java.support.httpclient.HttpClientSupport;
+import net.shibboleth.utilities.java.support.httpclient.TLSSocketFactoryBuilder;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import se.swedenconnect.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
 import se.swedenconnect.opensaml.saml2.metadata.provider.CompositeMetadataProvider;
@@ -84,10 +91,46 @@ public class MetadataProviderConfiguration {
   private Boolean mdq;
 
   /**
+   * If the service is placed behind a HTTP proxy, this setting configures the proxy.
+   */
+  @Nullable
+  private HttpProxyConfiguration httpProxy;
+
+  /**
    * Additional providers.
    */
   @Nullable
   private List<MetadataProviderConfiguration> additional;
+
+  /**
+   * Configuration properties for an HTTP proxy.
+   */
+  @Data
+  public static class HttpProxyConfiguration {
+
+    /**
+     * The proxy host.
+     */
+    @Nonnull
+    private String host;
+
+    /**
+     * The proxy port.
+     */
+    private int port;
+
+    /**
+     * The proxy password (optional).
+     */
+    @Nullable
+    private String password;
+
+    /**
+     * The proxy user name (optional).
+     */
+    @Nullable
+    private String userName;
+  }
 
   /**
    * Based on the configuration a {@link MetadataProvider} is created.
@@ -104,11 +147,10 @@ public class MetadataProviderConfiguration {
       if (StringUtils.isNotBlank(this.url)) {
         if (this.mdq == null || !this.mdq.booleanValue()) {
           provider = new HTTPMetadataProvider(this.url, this.preProcessBackupFile(this.backupLocation),
-              HTTPMetadataProvider.createDefaultHttpClient(null /* trust all */, new DefaultHostnameVerifier()));
+              this.createHttpClient());
         }
         else {
-          provider = new MDQMetadataProvider(this.url,
-              HTTPMetadataProvider.createDefaultHttpClient(null /* trust all */, new DefaultHostnameVerifier()),
+          provider = new MDQMetadataProvider(this.url, this.createHttpClient(),
               this.preProcessBackupDirectory(this.backupLocation));
         }
         if (this.validationCertificate == null) {
@@ -146,9 +188,43 @@ public class MetadataProviderConfiguration {
   }
 
   /**
+   * Creates a HTTP client to use.
+   *
+   * @return a HttpClient
+   */
+  protected HttpClient createHttpClient() {
+    try {
+      final List<TrustManager> managers = Arrays.asList(HttpClientSupport.buildNoTrustX509TrustManager());
+      final HostnameVerifier hnv = new DefaultHostnameVerifier();
+
+      HttpClientBuilder builder = new HttpClientBuilder();
+      builder.setUseSystemProperties(true);
+      if (this.getHttpProxy() != null && this.getHttpProxy().getHost() != null) {
+        builder.setConnectionProxyHost(this.getHttpProxy().getHost());
+        builder.setConnectionProxyPort(this.getHttpProxy().getPort());
+        if (StringUtils.isNotBlank(this.getHttpProxy().getUserName())) {
+          builder.setConnectionProxyPassword(this.getHttpProxy().getUserName());
+        }
+        if (StringUtils.isNotBlank(this.getHttpProxy().getPassword())) {
+          builder.setConnectionProxyPassword(this.getHttpProxy().getPassword());
+        }
+      }
+      builder.setTLSSocketFactory(new TLSSocketFactoryBuilder()
+          .setHostnameVerifier(hnv)
+          .setTrustManagers(managers)
+          .build());
+
+      return builder.buildClient();
+    }
+    catch (final Exception e) {
+      throw new IllegalArgumentException("Failed to initialize HttpClient", e);
+    }
+  }
+
+  /**
    * Makes sure that all parent directories for the supplied file exists and returns the backup file as an absolute
    * path.
-   * 
+   *
    * @param backupFile the backup file
    * @return the absolute path of the backup file
    */
@@ -164,7 +240,7 @@ public class MetadataProviderConfiguration {
 
   /**
    * Makes sure that all parent directories exists and returns the directory as an absolute path.
-   * 
+   *
    * @param backupDirectory the backup directory
    * @return the absolute path of the backup directory
    */
