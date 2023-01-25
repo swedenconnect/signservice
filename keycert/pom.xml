@@ -9,7 +9,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: KeyAndCertificate</name>
@@ -81,30 +81,16 @@
       <dependency>
         <groupId>se.swedenconnect.ca</groupId>
         <artifactId>ca-engine</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.1</version>
       </dependency>
-      
+
       <dependency>
         <groupId>se.idsec.utils</groupId>
         <artifactId>print-cert</artifactId>
-        <version>1.0.4</version>
+        <version>1.0.5</version>
         <scope>test</scope>
-        <exclusions>
-          <exclusion>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcutil-jdk15on</artifactId>
-          </exclusion>
-        </exclusions>
-    </dependency>      
-    
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
@@ -113,7 +99,7 @@
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-core</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>

@@ -9,7 +9,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-keycert-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: KeyAndCertificate :: Base</name>
@@ -76,6 +76,17 @@
       <groupId>se.swedenconnect.ca</groupId>
       <artifactId>ca-engine</artifactId>
       <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
     </dependency>
     
     <dependency>

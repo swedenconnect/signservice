@@ -36,15 +36,14 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel.CertificateModelBuilder;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.data.AttributeMappingBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.data.QcStatementsBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.data.SAMLAuthContextBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.SubjDirectoryAttributesModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.cert.extensions.QCStatements;
-import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
-import se.swedenconnect.schemas.cert.authcont.saci_1_0.ObjectFactory;
-import se.swedenconnect.schemas.saml_2_0.assertion.Attribute;
+import se.swedenconnect.cert.extensions.data.saci.AttributeMapping;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
@@ -231,17 +230,14 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
         // Skipping attribute mapping in auth context extension because this is a default value and is not mapped from IdP
         continue;
       }
-      final ObjectFactory objectFactory = new ObjectFactory();
-      final AttributeMapping attributeMapping = objectFactory.createAttributeMapping();
-      attributeMapping.setRef(attributeMappingData.getReference());
-      attributeMapping.setType(attributeMappingData.getCertificateAttributeType().getType());
-      final se.swedenconnect.schemas.saml_2_0.assertion.ObjectFactory samlObjFactory =
-          new se.swedenconnect.schemas.saml_2_0.assertion.ObjectFactory();
-      final Attribute attribute = samlObjFactory.createAttribute();
-      attribute.setName(attributeMappingData.getSourceId());
-      attribute.setFriendlyName(attributeMappingData.getSourceFriendlyName());
-      attribute.getAttributeValues().add(attributeMappingData.getValue());
-      attributeMapping.setAttribute(attribute);
+      final AttributeMapping attributeMapping = AttributeMappingBuilder.instance()
+        .ref(attributeMappingData.getReference())
+        .type(AttributeMapping.Type.getTypeFromName(
+          attributeMappingData.getCertificateAttributeType().getType()))
+        .name(attributeMappingData.getSourceId())
+        .friendlyName(attributeMappingData.getSourceFriendlyName())
+        .attributeStringValue(attributeMappingData.getValue())
+        .build();
       extAttrMappingList.add(attributeMapping);
     }
     return extAttrMappingList;
