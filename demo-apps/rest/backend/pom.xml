@@ -9,7 +9,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice.demo</groupId>
     <artifactId>signservice-demo-rest-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Demo :: REST :: Backend</name>
