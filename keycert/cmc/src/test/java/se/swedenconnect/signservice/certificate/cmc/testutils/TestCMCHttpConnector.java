@@ -15,12 +15,13 @@
  */
 package se.swedenconnect.signservice.certificate.cmc.testutils;
 
+import java.net.Proxy;
 import java.net.URL;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.cmc.CMCException;
 import se.swedenconnect.ca.cmc.api.CMCCaApi;
-import se.swedenconnect.ca.cmc.api.CMCResponseParser;
 import se.swedenconnect.ca.cmc.api.client.CMCClientHttpConnector;
 import se.swedenconnect.ca.cmc.api.client.CMCHttpResponseData;
 import se.swedenconnect.ca.cmc.api.data.CMCRequest;
@@ -33,11 +34,8 @@ import se.swedenconnect.ca.cmc.api.data.CMCResponse;
 @Slf4j
 public class TestCMCHttpConnector implements CMCClientHttpConnector {
 
+  @Setter private Proxy proxy;
   private final CMCCaApi cmcCaApi;
-  CMCResponseParser cmcResponseParser;
-
-  static {
-  }
 
   public TestCMCHttpConnector(CMCCaApi cmcCaApi) {
     this.cmcCaApi = cmcCaApi;
@@ -58,4 +56,5 @@ public class TestCMCHttpConnector implements CMCClientHttpConnector {
     log.debug("Obtained CMC response from CA:\n{}", CMCDataPrint.printCMCResponse(cmcResponse, false));
     return new CMCHttpResponseData(cmcResponse.getCmcResponseBytes(), 200, null);
   }
+
 }

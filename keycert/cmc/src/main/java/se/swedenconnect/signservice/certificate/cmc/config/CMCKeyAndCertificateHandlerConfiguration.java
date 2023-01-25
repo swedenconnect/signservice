@@ -69,6 +69,20 @@ public class CMCKeyAndCertificateHandlerConfiguration extends AbstractKeyAndCert
   @Setter
   private RemoteCaInformation remoteCaInfo;
 
+  /**
+   * The proxy host name for the CMC client or null if no proxy is used
+   */
+  @Getter
+  @Setter
+  private String cmcClientProxyHost;
+
+  /**
+   * The proxy port for the CMC client. This parameter is ignored if cmcClientProxyHost is null.
+   */
+  @Getter
+  @Setter
+  private int cmcClientProxyPort;
+
   /** {@inheritDoc} */
   @Override
   @Nonnull

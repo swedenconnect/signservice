@@ -15,7 +15,9 @@
  */
 package se.swedenconnect.signservice.certificate.cmc.config;
 
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -98,7 +100,11 @@ public class CMCKeyAndCertificateHandlerFactory extends AbstractKeyAndCertificat
     try {
       final SignServiceCMCClient cmcClient = new SignServiceCMCClient(
           requestURL, clientCredential, signingAlgorithm, responderCertificate, caInformation);
-
+      if (StringUtils.isNotBlank(conf.getCmcClientProxyHost())) {
+        Proxy proxy = new Proxy(Proxy.Type.HTTP,
+          new InetSocketAddress(conf.getCmcClientProxyHost(), conf.getCmcClientProxyPort()));
+        cmcClient.getCmcClientHttpConnector().setProxy(proxy);
+      }
       if (conf.getProfileConfiguration() != null) {
         cmcClient.setProfileConfiguration(profileConfiguration);
       }
