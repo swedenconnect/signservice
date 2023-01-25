@@ -8,7 +8,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-keycert-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: KeyAndCertificate :: CMC</name>
@@ -65,6 +65,21 @@
 
   </developers>
 
+  <repositories>
+
+    <repository>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>https://repo1.maven.org/maven2/</url>
+    </repository>
+
+    <repository>
+      <id>shibboleth</id>
+      <name>Shibboleth Maven Repo</name>
+      <url>https://build.shibboleth.net/nexus/content/repositories/releases</url>
+    </repository>
+
+  </repositories>
 
   <properties>
   </properties>
@@ -92,6 +107,12 @@
       <groupId>se.idsec.utils</groupId>
       <artifactId>print-cert</artifactId>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>net.shibboleth.utilities</groupId>
+      <artifactId>java-support</artifactId>
+      <version>8.4.0</version>
     </dependency>
     
     <dependency>

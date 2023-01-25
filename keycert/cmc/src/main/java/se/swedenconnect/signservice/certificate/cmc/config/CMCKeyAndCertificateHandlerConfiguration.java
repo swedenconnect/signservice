@@ -18,10 +18,13 @@ package se.swedenconnect.signservice.certificate.cmc.config;
 import java.security.cert.X509Certificate;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.xml.security.signature.XMLSignature;
 
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
@@ -70,24 +73,48 @@ public class CMCKeyAndCertificateHandlerConfiguration extends AbstractKeyAndCert
   private RemoteCaInformation remoteCaInfo;
 
   /**
-   * The proxy host name for the CMC client or null if no proxy is used
+   * HTTP proxy configuration
    */
-  @Getter
   @Setter
-  private String cmcClientProxyHost;
-
-  /**
-   * The proxy port for the CMC client. This parameter is ignored if cmcClientProxyHost is null.
-   */
   @Getter
-  @Setter
-  private int cmcClientProxyPort;
+  private HttpProxyConfiguration cmcClientProxy;
 
   /** {@inheritDoc} */
   @Override
   @Nonnull
   protected String getDefaultFactoryClass() {
     return CMCKeyAndCertificateHandlerFactory.class.getName();
+  }
+
+  /**
+   * Configuration properties for an HTTP proxy.
+   */
+  @Data
+  @NoArgsConstructor
+  public static class HttpProxyConfiguration {
+
+    /**
+     * The proxy host.
+     */
+    @Nonnull
+    private String host;
+
+    /**
+     * The proxy port.
+     */
+    private int port;
+
+    /**
+     * The proxy password (optional).
+     */
+    @Nullable
+    private String password;
+
+    /**
+     * The proxy user name (optional).
+     */
+    @Nullable
+    private String userName;
   }
 
 }
