@@ -144,6 +144,7 @@ public class MetadataConfiguration {
       final List<Logo> logos = this.getLogos() != null
           ? this.getLogos().stream()
               .map(logo -> LogoBuilder.logo(String.format("%s%s", baseUrl, logo.getPath()),
+                  StringUtils.isNotBlank(logo.getLang()) ? logo.getLang() : "sv",
                   logo.getHeight(), logo.getWidth()))
               .collect(Collectors.toList())
           : null;
@@ -177,6 +178,11 @@ public class MetadataConfiguration {
        * The logotype width (in pixels).
        */
       private Integer width;
+
+      /**
+       * Language tag (defaults to "sv").
+       */
+      private String lang;
     }
   }
 
