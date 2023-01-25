@@ -47,10 +47,10 @@ The `cmcClientProxy` configuration data specifies the following information abou
 
 | Field      | Description                  |
 |:-----------|------------------------------|
-| `host`     | The host name of the proxy   |
-| `port`     | The port number of the proxy |
-| `userName` | Optional user name           |
-| `password` | Optional passwrod            |
+| `host`     | The host name of the proxy.   |
+| `port`     | The port number of the proxy. |
+| `userName` | Optional user name.           |
+| `password` | Optional password.            |
 
 
 -----
