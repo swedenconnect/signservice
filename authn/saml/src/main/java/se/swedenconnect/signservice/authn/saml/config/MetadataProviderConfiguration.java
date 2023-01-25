@@ -203,7 +203,7 @@ public class MetadataProviderConfiguration {
         builder.setConnectionProxyHost(this.getHttpProxy().getHost());
         builder.setConnectionProxyPort(this.getHttpProxy().getPort());
         if (StringUtils.isNotBlank(this.getHttpProxy().getUserName())) {
-          builder.setConnectionProxyPassword(this.getHttpProxy().getUserName());
+          builder.setConnectionProxyUsername(this.getHttpProxy().getUserName());
         }
         if (StringUtils.isNotBlank(this.getHttpProxy().getPassword())) {
           builder.setConnectionProxyPassword(this.getHttpProxy().getPassword());

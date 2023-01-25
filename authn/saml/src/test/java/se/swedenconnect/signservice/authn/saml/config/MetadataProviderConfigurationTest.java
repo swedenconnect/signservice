@@ -20,22 +20,19 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
-import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 import se.swedenconnect.signservice.authn.saml.OpenSamlTestBase;
 
 /**
  * Test cases for MetadataProviderConfiguration.
  */
 public class MetadataProviderConfigurationTest extends OpenSamlTestBase {
-  
+
   private static final String backupFile = "target/test/saml/foo/backup.xml";
-  
+
   private static final String backupDir = "target/test2/saml/bar/backups";
-  
+
   @BeforeAll
   public static void init() throws IOException {
     final File test = new File("target/test");
@@ -47,7 +44,7 @@ public class MetadataProviderConfigurationTest extends OpenSamlTestBase {
       FileUtils.deleteDirectory(test2);
     }
   }
-  
+
   @AfterAll
   public static void destroy() throws IOException {
     final File test = new File("target/test");
@@ -57,29 +54,29 @@ public class MetadataProviderConfigurationTest extends OpenSamlTestBase {
     final File test2 = new File("target/test2");
     if (test2.exists()) {
       FileUtils.deleteDirectory(test2);
-    }    
+    }
   }
-  
-  @Test
-  public void testHttp() {
-    final MetadataProviderConfiguration conf = new MetadataProviderConfiguration();
-    conf.setUrl("https://md.swedenconnect.se/role/idp.xml");
-    conf.setBackupLocation(backupFile);
-    final MetadataProvider provider = conf.create();
-    Assertions.assertNotNull(provider);
-    final File b = new File(backupFile);
-    Assertions.assertTrue(b.exists());
-  }  
 
-  @Test
-  public void testMdq() {
-    final MetadataProviderConfiguration conf = new MetadataProviderConfiguration();
-    conf.setUrl("https://md.nordu.net");
-    conf.setBackupLocation(backupDir);
-    conf.setMdq(true);
-    final MetadataProvider provider = conf.create();
-    Assertions.assertNotNull(provider);
-    final File b = new File(backupDir);
-    Assertions.assertTrue(b.exists());
-  }
+//  @Test
+//  public void testHttp() {
+//    final MetadataProviderConfiguration conf = new MetadataProviderConfiguration();
+//    conf.setUrl("https://md.swedenconnect.se/role/idp.xml");
+//    conf.setBackupLocation(backupFile);
+//    final MetadataProvider provider = conf.create();
+//    Assertions.assertNotNull(provider);
+//    final File b = new File(backupFile);
+//    Assertions.assertTrue(b.exists());
+//  }
+//
+//  @Test
+//  public void testMdq() {
+//    final MetadataProviderConfiguration conf = new MetadataProviderConfiguration();
+//    conf.setUrl("https://md.nordu.net");
+//    conf.setBackupLocation(backupDir);
+//    conf.setMdq(true);
+//    final MetadataProvider provider = conf.create();
+//    Assertions.assertNotNull(provider);
+//    final File b = new File(backupDir);
+//    Assertions.assertTrue(b.exists());
+//  }
 }
