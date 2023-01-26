@@ -16,14 +16,18 @@
 package se.swedenconnect.signservice.authn.saml.config;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.opensaml.saml.ext.saml2mdui.UIInfo;
 import org.opensaml.saml.saml2.metadata.AttributeConsumingService;
 
 import se.swedenconnect.opensaml.common.utils.LocalizedString;
 import se.swedenconnect.signservice.authn.saml.OpenSamlTestBase;
 import se.swedenconnect.signservice.authn.saml.config.MetadataConfiguration.RequestedAttributeConfig;
+import se.swedenconnect.signservice.authn.saml.config.MetadataConfiguration.UIInfoConfig;
+import se.swedenconnect.signservice.authn.saml.config.MetadataConfiguration.UIInfoConfig.UIInfoLogo;
 
 /**
  * Test cases for MetadataConfiguration.
@@ -60,6 +64,28 @@ public class MetadataConfigurationTest extends OpenSamlTestBase {
     service = config.createAttributeConsumingServiceElement();
     Assertions.assertTrue(service.getNames().size() == 1);
     Assertions.assertTrue(service.getRequestedAttributes().isEmpty());
+  }
+
+  @Test
+  public void testLogo() {
+    final UIInfoConfig ui = new UIInfoConfig();
+    ui.setDescriptions(List.of(new LocalizedString("sv-Beskrivning"), new LocalizedString("en-Description")));
+    ui.setDisplayNames(List.of(new LocalizedString("sv-Visningsnamn"), new LocalizedString("en-Display Name")));
+    final UIInfoLogo logo1 = new UIInfoLogo();
+    logo1.setPath("/images/sv-pic.jpg");
+    logo1.setHeight(50);
+    logo1.setWidth(50);
+    final UIInfoLogo logo2 = new UIInfoLogo();
+    logo2.setPath("/images/en-pic.jpg");
+    logo2.setLang("en");
+    logo2.setHeight(50);
+    logo2.setWidth(50);
+    ui.setLogos(List.of(logo1, logo2));
+
+    final UIInfo uiInfo = ui.toElement("https://www.example.com");
+    Assertions.assertTrue(uiInfo.getLogos().size() == 2);
+    Assertions.assertEquals("sv", uiInfo.getLogos().get(0).getXMLLang());
+    Assertions.assertEquals("en", uiInfo.getLogos().get(1).getXMLLang());
   }
 
 }
