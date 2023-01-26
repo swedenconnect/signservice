@@ -101,7 +101,10 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
       final CMCCertificateModelBuilder certModelBuilder = CMCCertificateModelBuilder.getInstance(
           subjectPublicKey, caIssuerCert, caInformation.getCaAlgorithm());
 
-      certModelBuilder.subject(subject);
+      certModelBuilder
+        .subject(subject)
+        .includeAki(true)
+        .includeSki(true);
 
       // Apply certificate profile
       //
