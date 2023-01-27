@@ -32,8 +32,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.xml.security.signature.XMLSignature;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -257,9 +260,14 @@ class CMCKeyAndCertificateHandlerTest {
           TestData.stdAssertion,
           context);
 
+      X509Certificate certificate = pkiCredential.getCertificate();
       log.info("Issued certificate from CA:\n{}\n{}",
-          new PrintCertificate(pkiCredential.getCertificate()).toString(true, true, true),
-          new PrintCertificate(pkiCredential.getCertificate()).toPEM());
+          new PrintCertificate(certificate).toString(true, true, true),
+          new PrintCertificate(certificate).toPEM());
+
+      X509CertificateHolder certHolder = new JcaX509CertificateHolder(certificate);
+      Assertions.assertNotNull(certHolder.getExtension(Extension.authorityKeyIdentifier));
+      Assertions.assertNotNull(certHolder.getExtension(Extension.subjectKeyIdentifier));
       return;
     }
 
