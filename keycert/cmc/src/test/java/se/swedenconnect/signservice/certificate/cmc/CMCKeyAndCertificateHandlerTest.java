@@ -144,7 +144,7 @@ class CMCKeyAndCertificateHandlerTest {
         .setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(caHolder.getCscaService())));
     CMCKeyAndCertificateHandler keyAndCertificateHandler = new CMCKeyAndCertificateHandler(
         keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES,
-      attributeMapper, algorithmRegistry, rsaCaCmcClient, CertificateRequestFormat.crmf);
+      attributeMapper, algorithmRegistry, rsaCaCmcClient, null);
     rsaCaCmcClient
         .setProfileConfiguration(CertificateProfileConfiguration.builder()
             .policies(List.of("1.2.3.4.5.6.7.8.9"))
@@ -152,7 +152,7 @@ class CMCKeyAndCertificateHandlerTest {
             .extendedKeyUsages(List.of("1.2.3.4.5.6.7", "2.3.4.5.6.7.8"))
             .usageDirective(SigningKeyUsageDirective.builder().encrypt(true).excludeNonRepudiation(true).build())
             .build());
-    log.info("Created CMC key and certificate handler using CRMF request message format");
+    log.info("Created CMC key and certificate handler using default CRMF request message format");
 
     CMCClient badRsaCaCmcClient = getCMCClient(caHolder.getCscaService());
     badRsaCaCmcClient
