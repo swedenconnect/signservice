@@ -153,7 +153,7 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
         certificateModelBuilder.subjectDirectoryAttributes(subjectDirectoryAttributes);
       }
 
-      return this.issueSigningCertificateChain(certificateModelBuilder.build(), certificateProfile, context);
+      return this.issueSigningCertificateChain(certificateModelBuilder.build(), signingKeyPair, certificateProfile, context);
     }
     catch (final CertificateIssuanceException e) {
       throw new CertificateException("Failed to issue certificate - " + e.getMessage(), e);
@@ -164,6 +164,7 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
    * Issues the signing certificate chain based on the supplied certificate model.
    *
    * @param certificateModel the certificate model
+   * @param pkiCredential signer key credentials
    * @param certificateProfile the certificate profile (may be null)
    * @param context the SignService context
    * @return a certificate chain where the signer certificate is placed first
@@ -171,7 +172,7 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
    */
   @Nonnull
   protected abstract List<X509Certificate> issueSigningCertificateChain(
-      @Nonnull final CertificateModel certificateModel,
+      @Nonnull final CertificateModel certificateModel, @Nonnull final PkiCredential pkiCredential,
       @Nullable final String certificateProfile, @Nonnull final SignServiceContext context) throws CertificateException;
 
   /**

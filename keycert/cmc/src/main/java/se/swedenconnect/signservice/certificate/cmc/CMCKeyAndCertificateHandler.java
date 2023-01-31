@@ -15,9 +15,13 @@
  */
 package se.swedenconnect.signservice.certificate.cmc;
 
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +31,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.xml.security.signature.XMLSignature;
 
 import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.security.certificate.CertificateUtils;
@@ -40,6 +45,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
@@ -58,6 +64,8 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
   /** The CA chain. */
   private final List<X509Certificate> caChain;
 
+  private final CertificateRequestFormat certificateRequestFormat;
+
   /**
    * Constructor.
    *
@@ -72,9 +80,13 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
       @Nullable final Map<String, String> algorithmKeyTypes,
       @Nonnull final AttributeMapper attributeMapper,
       @Nullable final AlgorithmRegistry algorithmRegistry,
-      @Nonnull final CMCClient cmcClient) {
+      @Nonnull final CMCClient cmcClient,
+      @Nullable final CertificateRequestFormat certificateRequestFormat) {
     super(keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry);
     this.cmcClient = Objects.requireNonNull(cmcClient, "cmcClient must not be null");
+    this.certificateRequestFormat = certificateRequestFormat == null
+      ? CertificateRequestFormat.crmf
+      : certificateRequestFormat;
     this.caChain = new ArrayList<>();
     try {
       for (final byte[] encoding : cmcClient.getStaticCAInformation().getCertificateChain()) {
@@ -90,11 +102,21 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
   @Override
   @Nonnull
   protected List<X509Certificate> issueSigningCertificateChain(@Nonnull final CertificateModel certificateModel,
-      @Nullable final String certificateProfile, @Nonnull final SignServiceContext context)
+      @Nonnull final PkiCredential pkiCredential, @Nullable final String certificateProfile,
+      @Nonnull final SignServiceContext context)
       throws CertificateException {
 
     try {
-      final CMCResponse cmcResponse = this.cmcClient.issueCertificate(certificateModel);
+      String pkcs10SigningAlgorithm = null;
+      PrivateKey requestFormatSigningKey = null;
+      byte[] regInfo = StringUtils.isNotBlank(certificateProfile) ?
+        certificateProfile.getBytes(StandardCharsets.UTF_8) : null;
+      if (certificateRequestFormat.equals(CertificateRequestFormat.pkcs10)){
+        pkcs10SigningAlgorithm = getSigningAlgorithm(pkiCredential.getPublicKey());
+        requestFormatSigningKey = pkiCredential.getPrivateKey();
+      }
+      final CMCResponse cmcResponse = this.cmcClient.issueCertificate(certificateModel, requestFormatSigningKey,
+        pkcs10SigningAlgorithm, regInfo);
       final CMCResponseStatus responseStatus = cmcResponse.getResponseStatus();
       if (!responseStatus.getStatus().equals(CMCStatusType.success)) {
         final CMCFailType failType = responseStatus.getFailType();
@@ -115,6 +137,16 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
       log.info("{}", msg, e);
       throw new CertificateException(msg, e);
     }
+  }
+
+  private String getSigningAlgorithm(PublicKey publicKey) throws CertificateException {
+    if (publicKey instanceof ECPublicKey) {
+      return XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256;
+    }
+    if (publicKey instanceof RSAPublicKey) {
+      return XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256;
+    }
+    throw new CertificateException("Unsupported key type for generating PKCS10 requests");
   }
 
   /** {@inheritDoc} */

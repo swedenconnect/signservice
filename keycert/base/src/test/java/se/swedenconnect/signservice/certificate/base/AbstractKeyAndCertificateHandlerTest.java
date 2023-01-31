@@ -603,7 +603,8 @@ public class AbstractKeyAndCertificateHandlerTest {
 
     @Override
     protected List<X509Certificate> issueSigningCertificateChain(final CertificateModel certificateModel,
-        final String certificateProfile, final SignServiceContext context) throws CertificateException {
+        final PkiCredential pkiCredential, final String certificateProfile, final SignServiceContext context)
+        throws CertificateException {
 
       final PkiCredential signingKeyPair = context.get("signingKeyPair", PkiCredentialWrapper.class).getCredential();
       context.remove("signingKeyPair");

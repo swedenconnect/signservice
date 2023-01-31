@@ -41,6 +41,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
@@ -102,7 +103,8 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
   @Override
   @Nonnull
   protected List<X509Certificate> issueSigningCertificateChain(@Nonnull final CertificateModel certificateModel,
-      @Nullable final String certificateProfile, @Nonnull final SignServiceContext context)
+      @Nonnull PkiCredential pkiCredential, @Nullable final String certificateProfile,
+      @Nonnull final SignServiceContext context)
       throws CertificateException {
 
     log.debug("Issuing certificate from certificate model");

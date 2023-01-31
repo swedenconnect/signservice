@@ -30,6 +30,7 @@ import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.operator.OperatorCreationException;
 
 import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.ca.cmc.api.client.impl.ProxyCMCClientHttpConnector;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
@@ -39,7 +40,6 @@ import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHa
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerFactory;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.cmc.ProxyCMCClientHttpConnector;
 import se.swedenconnect.signservice.certificate.cmc.RemoteCaInformation;
 import se.swedenconnect.signservice.certificate.cmc.SignServiceCMCClient;
 import se.swedenconnect.signservice.core.config.BeanLoader;
@@ -104,7 +104,8 @@ public class CMCKeyAndCertificateHandlerFactory extends AbstractKeyAndCertificat
         cmcClient.setProfileConfiguration(profileConfiguration);
       }
 
-      return new CMCKeyAndCertificateHandler(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry, cmcClient);
+      return new CMCKeyAndCertificateHandler(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry,
+        cmcClient, conf.getCertificateRequestFormat());
     }
     catch (final CertificateEncodingException | MalformedURLException | NoSuchAlgorithmException | OperatorCreationException e) {
       log.warn("Failed to create CMC client - {}", e.getMessage(), e);
