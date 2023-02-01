@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,8 @@ public class CMCKeyAndCertificateHandlerFactory extends AbstractKeyAndCertificat
       throw new IllegalArgumentException(
           "Unknown configuration object supplied - " + configuration.getClass().getSimpleName());
     }
-    final CMCKeyAndCertificateHandlerConfiguration conf = CMCKeyAndCertificateHandlerConfiguration.class.cast(configuration);
+    final CMCKeyAndCertificateHandlerConfiguration conf =
+        CMCKeyAndCertificateHandlerConfiguration.class.cast(configuration);
 
     final String requestURL = Optional.ofNullable(conf.getCmcRequestUrl())
         .filter(s -> StringUtils.isNotBlank(s))
@@ -105,14 +106,15 @@ public class CMCKeyAndCertificateHandlerFactory extends AbstractKeyAndCertificat
         cmcClient.setProfileConfiguration(profileConfiguration);
       }
 
-      CertificateRequestFormat certificateRequestFormat = conf.getCertificateRequestFormat() == null
-        ? CertificateRequestFormat.pkcs10
-        : conf.getCertificateRequestFormat();
+      final CertificateRequestFormat certificateRequestFormat = conf.getCertificateRequestFormat() == null
+          ? CertificateRequestFormat.pkcs10
+          : conf.getCertificateRequestFormat();
 
       return new CMCKeyAndCertificateHandler(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry,
-        cmcClient, certificateRequestFormat);
+          cmcClient, certificateRequestFormat);
     }
-    catch (final CertificateEncodingException | MalformedURLException | NoSuchAlgorithmException | OperatorCreationException e) {
+    catch (final CertificateEncodingException | MalformedURLException | NoSuchAlgorithmException
+        | OperatorCreationException e) {
       log.warn("Failed to create CMC client - {}", e.getMessage(), e);
       throw new IllegalArgumentException("Failed to create CMC client", e);
     }

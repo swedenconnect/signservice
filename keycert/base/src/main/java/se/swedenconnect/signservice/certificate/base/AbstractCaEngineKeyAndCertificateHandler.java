@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,7 +153,8 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
         certificateModelBuilder.subjectDirectoryAttributes(subjectDirectoryAttributes);
       }
 
-      return this.issueSigningCertificateChain(certificateModelBuilder.build(), signingKeyPair, certificateProfile, context);
+      return this.issueSigningCertificateChain(
+          certificateModelBuilder.build(), signingKeyPair, certificateProfile, context);
     }
     catch (final CertificateIssuanceException e) {
       throw new CertificateException("Failed to issue certificate - " + e.getMessage(), e);
@@ -164,7 +165,7 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
    * Issues the signing certificate chain based on the supplied certificate model.
    *
    * @param certificateModel the certificate model
-   * @param pkiCredential signer key credentials
+   * @param signerCredential signer key credentials (may be required by some implementations)
    * @param certificateProfile the certificate profile (may be null)
    * @param context the SignService context
    * @return a certificate chain where the signer certificate is placed first
@@ -172,7 +173,7 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
    */
   @Nonnull
   protected abstract List<X509Certificate> issueSigningCertificateChain(
-      @Nonnull final CertificateModel certificateModel, @Nonnull final PkiCredential pkiCredential,
+      @Nonnull final CertificateModel certificateModel, @Nullable final PkiCredential signerCredential,
       @Nullable final String certificateProfile, @Nonnull final SignServiceContext context) throws CertificateException;
 
   /**
@@ -228,17 +229,18 @@ public abstract class AbstractCaEngineKeyAndCertificateHandler extends AbstractK
     final List<AttributeMapping> extAttrMappingList = new ArrayList<>();
     for (final AttributeMappingData attributeMappingData : certAttributes) {
       if (attributeMappingData.isDefaultValue()) {
-        // Skipping attribute mapping in auth context extension because this is a default value and is not mapped from IdP
+        // Skipping attribute mapping in auth context extension because this is a default value and is not mapped from
+        // IdP
         continue;
       }
       final AttributeMapping attributeMapping = AttributeMappingBuilder.instance()
-        .ref(attributeMappingData.getReference())
-        .type(AttributeMapping.Type.getTypeFromName(
-          attributeMappingData.getCertificateAttributeType().getType()))
-        .name(attributeMappingData.getSourceId())
-        .friendlyName(attributeMappingData.getSourceFriendlyName())
-        .attributeStringValue(attributeMappingData.getValue())
-        .build();
+          .ref(attributeMappingData.getReference())
+          .type(AttributeMapping.Type.getTypeFromName(
+              attributeMappingData.getCertificateAttributeType().getType()))
+          .name(attributeMappingData.getSourceId())
+          .friendlyName(attributeMappingData.getSourceFriendlyName())
+          .attributeStringValue(attributeMappingData.getValue())
+          .build();
       extAttrMappingList.add(attributeMapping);
     }
     return extAttrMappingList;

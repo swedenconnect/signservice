@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,14 +72,14 @@ public class CMCKeyAndCertificateHandlerConfiguration extends AbstractKeyAndCert
   private RemoteCaInformation remoteCaInfo;
 
   /**
-   * HTTP proxy configuration
+   * HTTP proxy configuration.
    */
   @Setter
   @Getter
   private HttpProxyConfiguration cmcClientProxy;
 
   /**
-   * Certificate request format (crmf or pkcs10)
+   * Certificate request format (crmf or pkcs10).
    */
   @Setter
   @Getter

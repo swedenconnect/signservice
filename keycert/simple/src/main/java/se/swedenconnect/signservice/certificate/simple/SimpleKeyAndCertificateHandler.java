@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,9 +102,9 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  protected List<X509Certificate> issueSigningCertificateChain(@Nonnull final CertificateModel certificateModel,
-      @Nonnull PkiCredential pkiCredential, @Nullable final String certificateProfile,
-      @Nonnull final SignServiceContext context)
+  protected List<X509Certificate> issueSigningCertificateChain(
+      @Nonnull final CertificateModel certificateModel, @Nullable final PkiCredential ignored, 
+      @Nullable final String certificateProfile, @Nonnull final SignServiceContext context)
       throws CertificateException {
 
     log.debug("Issuing certificate from certificate model");

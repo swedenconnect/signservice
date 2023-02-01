@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -64,6 +65,7 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
   /** The CA chain. */
   private final List<X509Certificate> caChain;
 
+  /** The certificate request format. */
   private final CertificateRequestFormat certificateRequestFormat;
 
   /**
@@ -74,6 +76,8 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
    * @param attributeMapper the attribute mapper
    * @param algorithmRegistry algorithm registry
    * @param cmcClient CMC client used to issue certificates using CMC
+   * @param certificateRequestFormat the certificate request format (defaults to
+   *          {@link CertificateRequestFormat#pkcs10}).
    */
   public CMCKeyAndCertificateHandler(
       @Nonnull final PkiCredentialContainer keyProvider,
@@ -81,15 +85,15 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
       @Nonnull final AttributeMapper attributeMapper,
       @Nullable final AlgorithmRegistry algorithmRegistry,
       @Nonnull final CMCClient cmcClient,
-      @Nonnull final CertificateRequestFormat certificateRequestFormat) {
+      @Nullable final CertificateRequestFormat certificateRequestFormat) {
     super(keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry);
     this.cmcClient = Objects.requireNonNull(cmcClient, "cmcClient must not be null");
-    this.certificateRequestFormat = Objects.requireNonNull(certificateRequestFormat,
-      "CertificateRequestFormat must not be null");
+    this.certificateRequestFormat = Optional.ofNullable(certificateRequestFormat)
+        .orElse(CertificateRequestFormat.pkcs10);
     this.caChain = new ArrayList<>();
     try {
       for (final byte[] encoding : cmcClient.getStaticCAInformation().getCertificateChain()) {
-        caChain.add(CertificateUtils.decodeCertificate(encoding));
+        this.caChain.add(CertificateUtils.decodeCertificate(encoding));
       }
     }
     catch (final Exception e) {
@@ -100,22 +104,25 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  protected List<X509Certificate> issueSigningCertificateChain(@Nonnull final CertificateModel certificateModel,
-      @Nonnull final PkiCredential pkiCredential, @Nullable final String certificateProfile,
-      @Nonnull final SignServiceContext context)
+  protected List<X509Certificate> issueSigningCertificateChain(
+      @Nonnull final CertificateModel certificateModel, @Nullable final PkiCredential signerCredential,
+      @Nullable final String certificateProfile, @Nonnull final SignServiceContext context)
       throws CertificateException {
 
     try {
       String pkcs10SigningAlgorithm = null;
       PrivateKey requestFormatSigningKey = null;
-      byte[] regInfo = StringUtils.isNotBlank(certificateProfile) ?
-        certificateProfile.getBytes(StandardCharsets.UTF_8) : null;
-      if (certificateRequestFormat.equals(CertificateRequestFormat.pkcs10)){
-        pkcs10SigningAlgorithm = getCertRequestFormatSigningAlgorithm(pkiCredential.getPublicKey());
-        requestFormatSigningKey = pkiCredential.getPrivateKey();
+      final byte[] regInfo =
+          StringUtils.isNotBlank(certificateProfile) ? certificateProfile.getBytes(StandardCharsets.UTF_8) : null;
+      if (this.certificateRequestFormat.equals(CertificateRequestFormat.pkcs10)) {
+        if (signerCredential == null) {
+          throw new IllegalArgumentException("signerCredential is required for PKCS#10 request format");
+        }
+        pkcs10SigningAlgorithm = this.getCertRequestFormatSigningAlgorithm(signerCredential.getPublicKey());
+        requestFormatSigningKey = signerCredential.getPrivateKey();
       }
       final CMCResponse cmcResponse = this.cmcClient.issueCertificate(certificateModel, requestFormatSigningKey,
-        pkcs10SigningAlgorithm, regInfo);
+          pkcs10SigningAlgorithm, regInfo);
       final CMCResponseStatus responseStatus = cmcResponse.getResponseStatus();
       if (!responseStatus.getStatus().equals(CMCStatusType.success)) {
         final CMCFailType failType = responseStatus.getFailType();
@@ -138,7 +145,7 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
     }
   }
 
-  private String getCertRequestFormatSigningAlgorithm(PublicKey publicKey) throws CertificateException {
+  private String getCertRequestFormatSigningAlgorithm(final PublicKey publicKey) throws CertificateException {
     if (publicKey instanceof ECPublicKey) {
       return XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256;
     }
