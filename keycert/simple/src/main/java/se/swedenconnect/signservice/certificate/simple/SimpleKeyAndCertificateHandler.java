@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;
 import se.swedenconnect.signservice.certificate.base.AbstractCaEngineKeyAndCertificateHandler;
@@ -101,7 +102,8 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  protected List<X509Certificate> issueSigningCertificateChain(@Nonnull final CertificateModel certificateModel,
+  protected List<X509Certificate> issueSigningCertificateChain(
+      @Nonnull final CertificateModel certificateModel, @Nullable final PkiCredential ignored, 
       @Nullable final String certificateProfile, @Nonnull final SignServiceContext context)
       throws CertificateException {
 

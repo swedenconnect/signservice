@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.operator.OperatorCreationException;
 
 import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.ca.cmc.api.client.impl.ProxyCMCClientHttpConnector;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
@@ -39,7 +40,7 @@ import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHa
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerFactory;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
-import se.swedenconnect.signservice.certificate.cmc.ProxyCMCClientHttpConnector;
+import se.swedenconnect.signservice.certificate.cmc.CertificateRequestFormat;
 import se.swedenconnect.signservice.certificate.cmc.RemoteCaInformation;
 import se.swedenconnect.signservice.certificate.cmc.SignServiceCMCClient;
 import se.swedenconnect.signservice.core.config.BeanLoader;
@@ -67,7 +68,8 @@ public class CMCKeyAndCertificateHandlerFactory extends AbstractKeyAndCertificat
       throw new IllegalArgumentException(
           "Unknown configuration object supplied - " + configuration.getClass().getSimpleName());
     }
-    final CMCKeyAndCertificateHandlerConfiguration conf = CMCKeyAndCertificateHandlerConfiguration.class.cast(configuration);
+    final CMCKeyAndCertificateHandlerConfiguration conf =
+        CMCKeyAndCertificateHandlerConfiguration.class.cast(configuration);
 
     final String requestURL = Optional.ofNullable(conf.getCmcRequestUrl())
         .filter(s -> StringUtils.isNotBlank(s))
@@ -104,9 +106,15 @@ public class CMCKeyAndCertificateHandlerFactory extends AbstractKeyAndCertificat
         cmcClient.setProfileConfiguration(profileConfiguration);
       }
 
-      return new CMCKeyAndCertificateHandler(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry, cmcClient);
+      final CertificateRequestFormat certificateRequestFormat = conf.getCertificateRequestFormat() == null
+          ? CertificateRequestFormat.pkcs10
+          : conf.getCertificateRequestFormat();
+
+      return new CMCKeyAndCertificateHandler(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry,
+          cmcClient, certificateRequestFormat);
     }
-    catch (final CertificateEncodingException | MalformedURLException | NoSuchAlgorithmException | OperatorCreationException e) {
+    catch (final CertificateEncodingException | MalformedURLException | NoSuchAlgorithmException
+        | OperatorCreationException e) {
       log.warn("Failed to create CMC client - {}", e.getMessage(), e);
       throw new IllegalArgumentException("Failed to create CMC client", e);
     }

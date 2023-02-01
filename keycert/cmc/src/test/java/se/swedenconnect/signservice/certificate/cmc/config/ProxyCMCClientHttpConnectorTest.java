@@ -21,7 +21,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import se.swedenconnect.ca.cmc.api.client.CMCClientHttpConnector;
-import se.swedenconnect.signservice.certificate.cmc.ProxyCMCClientHttpConnector;
+import se.swedenconnect.ca.cmc.api.client.impl.HttpProxyConfiguration;
+import se.swedenconnect.ca.cmc.api.client.impl.ProxyCMCClientHttpConnector;
 
 /**
  * Basic but limited tests of proxy CMC connector as we have no means to use it.
@@ -32,7 +33,7 @@ class ProxyCMCClientHttpConnectorTest {
   void createTest() {
     CMCClientHttpConnector defaultConnector = new ProxyCMCClientHttpConnector(null);
     assertNotNull(defaultConnector);
-    CMCKeyAndCertificateHandlerConfiguration.HttpProxyConfiguration httpProxyConfiguration = new CMCKeyAndCertificateHandlerConfiguration.HttpProxyConfiguration();
+    HttpProxyConfiguration httpProxyConfiguration = new HttpProxyConfiguration();
     httpProxyConfiguration.setHost("127.0.0.1");
     httpProxyConfiguration.setPort(8080);
     httpProxyConfiguration.setUserName("user");

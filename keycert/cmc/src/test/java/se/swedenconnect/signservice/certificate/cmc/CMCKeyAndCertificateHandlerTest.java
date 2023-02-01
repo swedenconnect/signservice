@@ -144,7 +144,7 @@ class CMCKeyAndCertificateHandlerTest {
         .setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(caHolder.getCscaService())));
     CMCKeyAndCertificateHandler keyAndCertificateHandler = new CMCKeyAndCertificateHandler(
         keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES,
-      attributeMapper, algorithmRegistry, rsaCaCmcClient);
+      attributeMapper, algorithmRegistry, rsaCaCmcClient, CertificateRequestFormat.crmf);
     rsaCaCmcClient
         .setProfileConfiguration(CertificateProfileConfiguration.builder()
             .policies(List.of("1.2.3.4.5.6.7.8.9"))
@@ -152,13 +152,14 @@ class CMCKeyAndCertificateHandlerTest {
             .extendedKeyUsages(List.of("1.2.3.4.5.6.7", "2.3.4.5.6.7.8"))
             .usageDirective(SigningKeyUsageDirective.builder().encrypt(true).excludeNonRepudiation(true).build())
             .build());
-    log.info("Created CMC key and certificate handler");
+    log.info("Created CMC key and certificate handler using CRMF request message format");
 
     CMCClient badRsaCaCmcClient = getCMCClient(caHolder.getCscaService());
     badRsaCaCmcClient
         .setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getBadCMCApi(caHolder.getCscaService())));
     CMCKeyAndCertificateHandler badKeyAndCertificateHandler = new CMCKeyAndCertificateHandler(
-      keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES, attributeMapper, algorithmRegistry, badRsaCaCmcClient);
+      keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES, attributeMapper, algorithmRegistry, badRsaCaCmcClient,
+      CertificateRequestFormat.crmf);
     log.info("Created bad CMC key and certificate handler");
 
     TestCAHolder rsaPssCaHolder = TestServices.getTestCAs().get(TestCA.RSA_PSS_CA);
@@ -166,22 +167,25 @@ class CMCKeyAndCertificateHandlerTest {
     rsaPssCaCmcClient
         .setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(rsaPssCaHolder.getCscaService())));
     CMCKeyAndCertificateHandler rsaPssCaKeyAndCertificateHandler = new CMCKeyAndCertificateHandler(
-      keyProvider, null, attributeMapper, null, rsaPssCaCmcClient);
-    log.info("Created RSA PSS CA CMC key and certificate handler");
+      keyProvider, null, attributeMapper, null, rsaPssCaCmcClient,
+      CertificateRequestFormat.pkcs10);
+    log.info("Created RSA PSS CA CMC key and certificate handler using PKCS10 request message format");
 
     TestCAHolder ecCaHolder = TestServices.getTestCAs().get(TestCA.ECDSA_CA);
     CMCClient ecCaCmcClient = getCMCClient(ecCaHolder.getCscaService());
     ecCaCmcClient
         .setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(ecCaHolder.getCscaService())));
     CMCKeyAndCertificateHandler ecCaKeyAndCertificateHandler = new CMCKeyAndCertificateHandler(
-      keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES, attributeMapper, algorithmRegistry, ecCaCmcClient);
+      keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES, attributeMapper, algorithmRegistry, ecCaCmcClient,
+      CertificateRequestFormat.crmf);
     log.info("Created ECDSA CA CMC key and certificate handler");
 
     CMCClient badCaCmcClient = getCMCClient(ecCaHolder.getCscaService());
     badCaCmcClient.setCmcClientHttpConnector(new TestCMCHttpConnector(CMCApiFactory.getCMCApi(
         new BadCAService(TestServices.getTestCAs().get(TestCA.INSTANCE1).getCscaService()))));
     CMCKeyAndCertificateHandler badCaKeyAndCertificateHandler = new CMCKeyAndCertificateHandler(
-      keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES, attributeMapper, algorithmRegistry, badCaCmcClient);
+      keyProvider, AbstractKeyAndCertificateHandler.DEFAULT_ALGORITHM_KEY_TYPES, attributeMapper, algorithmRegistry, badCaCmcClient,
+      CertificateRequestFormat.crmf);
     log.info("Created ECDSA CA CMC key and certificate handler");
 
     keyAndCertificateHandler.checkRequirements(getCheckRequirementsRequest(CertificateType.PKC, "client-01"), null);

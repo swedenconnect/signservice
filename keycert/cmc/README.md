@@ -32,6 +32,7 @@ configuration data class describes additional configuration parameters for the C
 | `cmcResponderCertificate`  | The CMC responder certificate used to validate CMC responses from the CA.                                                                                                                                    |
 | `remoteCaInfo`             | Information about the remote CA as described below                                                                                                                                                           |
 | `cmcClientProxy`           | Optional http proxy configuration for CMC requests. This parameter is null if not proxy is used                                                                                                              |
+| `certificateRequestFormat` | Specifies the CMC certificate request format. Available values are `crmf` and `pkcs10`. Default value is `pkcs10`.                                                                                           |
 
 The [RemoteCaInformation](https://github.com/swedenconnect/signservice/blob/main/keycert/cmc/src/main/java/se/swedenconnect/signservice/certificate/cmc/ca/RemoteCaInformation.java)
 configuration data class specifies the following information about the remote CA:
