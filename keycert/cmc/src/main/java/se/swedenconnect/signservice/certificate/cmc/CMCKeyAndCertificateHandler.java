@@ -111,7 +111,7 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
       byte[] regInfo = StringUtils.isNotBlank(certificateProfile) ?
         certificateProfile.getBytes(StandardCharsets.UTF_8) : null;
       if (certificateRequestFormat.equals(CertificateRequestFormat.pkcs10)){
-        pkcs10SigningAlgorithm = getSigningAlgorithm(pkiCredential.getPublicKey());
+        pkcs10SigningAlgorithm = getCertRequestFormatSigningAlgorithm(pkiCredential.getPublicKey());
         requestFormatSigningKey = pkiCredential.getPrivateKey();
       }
       final CMCResponse cmcResponse = this.cmcClient.issueCertificate(certificateModel, requestFormatSigningKey,
@@ -138,7 +138,7 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
     }
   }
 
-  private String getSigningAlgorithm(PublicKey publicKey) throws CertificateException {
+  private String getCertRequestFormatSigningAlgorithm(PublicKey publicKey) throws CertificateException {
     if (publicKey instanceof ECPublicKey) {
       return XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256;
     }
