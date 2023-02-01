@@ -81,12 +81,11 @@ public class CMCKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertifica
       @Nonnull final AttributeMapper attributeMapper,
       @Nullable final AlgorithmRegistry algorithmRegistry,
       @Nonnull final CMCClient cmcClient,
-      @Nullable final CertificateRequestFormat certificateRequestFormat) {
+      @Nonnull final CertificateRequestFormat certificateRequestFormat) {
     super(keyProvider, algorithmKeyTypes, attributeMapper, algorithmRegistry);
     this.cmcClient = Objects.requireNonNull(cmcClient, "cmcClient must not be null");
-    this.certificateRequestFormat = certificateRequestFormat == null
-      ? CertificateRequestFormat.crmf
-      : certificateRequestFormat;
+    this.certificateRequestFormat = Objects.requireNonNull(certificateRequestFormat,
+      "CertificateRequestFormat must not be null");
     this.caChain = new ArrayList<>();
     try {
       for (final byte[] encoding : cmcClient.getStaticCAInformation().getCertificateChain()) {

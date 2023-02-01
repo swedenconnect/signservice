@@ -40,6 +40,7 @@ import se.swedenconnect.signservice.certificate.base.AbstractKeyAndCertificateHa
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerFactory;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
+import se.swedenconnect.signservice.certificate.cmc.CertificateRequestFormat;
 import se.swedenconnect.signservice.certificate.cmc.RemoteCaInformation;
 import se.swedenconnect.signservice.certificate.cmc.SignServiceCMCClient;
 import se.swedenconnect.signservice.core.config.BeanLoader;
@@ -104,8 +105,12 @@ public class CMCKeyAndCertificateHandlerFactory extends AbstractKeyAndCertificat
         cmcClient.setProfileConfiguration(profileConfiguration);
       }
 
+      CertificateRequestFormat certificateRequestFormat = conf.getCertificateRequestFormat() == null
+        ? CertificateRequestFormat.pkcs10
+        : conf.getCertificateRequestFormat();
+
       return new CMCKeyAndCertificateHandler(keyProvider, algorithmKeyTypeMap, attributeMapper, algorithmRegistry,
-        cmcClient, conf.getCertificateRequestFormat());
+        cmcClient, certificateRequestFormat);
     }
     catch (final CertificateEncodingException | MalformedURLException | NoSuchAlgorithmException | OperatorCreationException e) {
       log.warn("Failed to create CMC client - {}", e.getMessage(), e);
