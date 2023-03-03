@@ -9,7 +9,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-config-parent</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Configuration :: Spring</name>
@@ -74,13 +74,13 @@
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-config</artifactId>
-      <version>1.0.2-SNAPSHOT</version>
+      <version>1.0.2</version>
     </dependency>
     
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-audit-actuator</artifactId>
-      <version>1.0.2-SNAPSHOT</version>      
+      <version>1.0.2</version>      
     </dependency>
 
     <dependency>

@@ -9,7 +9,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-keycert-parent</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: KeyAndCertificate :: Simple</name>
@@ -74,7 +74,7 @@
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-keycert-base</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.2</version>
     </dependency>
     
     <dependency>
