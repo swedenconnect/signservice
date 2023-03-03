@@ -6,7 +6,7 @@
   <groupId>se.swedenconnect.signservice</groupId>
   <artifactId>signservice-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.2</version>
 
   <name>Sweden Connect :: SignService :: Parent POM</name>
   <description>Parent POM for SignService libraries</description>
@@ -66,7 +66,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>11</java.version>
     
-    <spring.boot.version>2.7.6</spring.boot.version>
+    <spring.boot.version>2.7.9</spring.boot.version>
   </properties>
 
   <repositories>
@@ -104,7 +104,9 @@
     <module>config</module>
     <module>spring-boot-starter</module>
     <module>bom</module>
+    <!-- 
     <module>demo-apps</module>
+    -->
   </modules>
 
   <dependencyManagement>
@@ -115,7 +117,7 @@
         <groupId>org.springframework</groupId>
         <artifactId>spring-framework-bom</artifactId>
         <type>pom</type>
-        <version>5.3.24</version>
+        <version>5.3.25</version>
         <scope>import</scope>
       </dependency>
       
