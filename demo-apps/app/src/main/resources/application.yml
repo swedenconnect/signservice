@@ -191,9 +191,6 @@ signservice:
       client-id: http://sandbox.swedenconnect.se/testmyeid
       trusted-certificates:
       - classpath:clients/test-my-signature/client.crt
-    protocol:
-      external:
-        bean-name: signservice.DssProtocolHandler
     authn:
       saml:        
         default-config-ref: authn.saml
@@ -209,12 +206,6 @@ signservice:
             descriptions:
             - "en-Application for testing your eID (localhost)"
             - "sv-Applikation för att testa ditt eID (localhost)"
-    sign:
-      external:
-        bean-name: signservice.DefaultSignatureHandler
-    cert:
-      external:
-        bean-name: signservice.BuiltInCa
     audit:
       file:
         name: "test-my-signature-audit-logger"
@@ -231,9 +222,6 @@ signservice:
       client-id: https://eid2cssp.3xasecurity.com/sign
       trusted-certificates:
       - classpath:clients/signservice-testapp/eid2cssp.3xasecurity.com.crt
-    protocol:
-      external:
-        bean-name: signservice.DssProtocolHandler
     authn:
       saml:        
         default-config-ref: authn.saml
@@ -250,12 +238,6 @@ signservice:
             descriptions:
             - "en-Sweden Connect test application for signature services running on localhost"
             - "sv-Sweden Connect testapplikation för underskriftstjänster (localhost)"
-    sign:
-      external:
-        bean-name: signservice.DefaultSignatureHandler
-    cert:
-      external:
-        bean-name: signservice.BuiltInCa
     audit:
       file:
         name: "signservice-test-localhost-audit"

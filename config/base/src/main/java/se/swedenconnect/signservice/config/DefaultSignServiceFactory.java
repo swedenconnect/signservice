@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,9 +39,13 @@ import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerConfiguration;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.config.audit.AuditLoggerConfigurationProperties;
+import se.swedenconnect.signservice.config.cert.KeyAndCertificateHandlerConfigurationProperties;
 import se.swedenconnect.signservice.config.common.CommonBeansConfigurationProperties;
+import se.swedenconnect.signservice.config.protocol.ProtocolHandlerConfigurationProperties;
+import se.swedenconnect.signservice.config.sign.SignatureHandlerConfigurationProperties;
 import se.swedenconnect.signservice.core.SignServiceHandler;
 import se.swedenconnect.signservice.core.config.BeanLoader;
+import se.swedenconnect.signservice.core.config.BeanReferenceHandlerConfiguration;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.core.config.HandlerFactory;
 import se.swedenconnect.signservice.core.config.HandlerFactoryRegistry;
@@ -99,7 +104,7 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
     // Setup the bean handlers ...
     //
     final BeanLoader bLoader = new BeanLoaderWrapper(beanLoader);
-    final BeanRegistrator bRegistrator = new BeanRegistratorWrapper(beanRegistrator);
+    final BeanRegistratorWrapper bRegistrator = new BeanRegistratorWrapper(beanRegistrator);
 
     // Validation configuration ...
     //
@@ -190,6 +195,25 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
 
       // Protocol handler
       //
+      
+      // First check if we should apply default bean ...
+      if (ecp.getProtocol() == null) {
+        final List<String> beanNames = bRegistrator.getBeanNames(ProtocolHandler.class);
+        if (beanNames.isEmpty()) {
+          throw new IllegalArgumentException("No protocol given for engine (and no default bean)");
+        }
+        else if (beanNames.size() > 1) {
+          throw new IllegalArgumentException("No protocol given for engine (and several default beans registered)");
+        }        
+        final ProtocolHandlerConfigurationProperties props = new ProtocolHandlerConfigurationProperties();
+        final BeanReferenceHandlerConfiguration<ProtocolHandler> ext = new BeanReferenceHandlerConfiguration<ProtocolHandler>();
+        ext.setBeanName(beanNames.get(0));
+        ext.init();
+        props.setExternal(ext);
+        log.info("No protocol assigned for engine {} - using default: {}", ecp.getName(), beanNames.get(0));
+        ecp.setProtocol(props);
+      }
+      
       final HandlerConfiguration<ProtocolHandler> protocolConf = ecp.getProtocol().getHandlerConfiguration();
       if (protocolConf.needsDefaultConfigResolving()) {
         protocolConf.resolveDefaultConfigRef(this.getResolver("protocol",
@@ -204,6 +228,26 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
       conf.setProtocolHandler(protocolFactory.create(protocolConf, bLoader));
 
       // Signature handler
+      //
+      
+      // First chck if we should apply default bean ...
+      if (ecp.getSign() == null) {
+        final List<String> beanNames = bRegistrator.getBeanNames(SignatureHandler.class);
+        if (beanNames.isEmpty()) {
+          throw new IllegalArgumentException("No signature handler given for engine (and no default bean)");
+        }
+        else if (beanNames.size() > 1) {
+          throw new IllegalArgumentException("No signature handler given for engine (and several default beans registered)");
+        }
+        final SignatureHandlerConfigurationProperties props = new SignatureHandlerConfigurationProperties();        
+        final BeanReferenceHandlerConfiguration<SignatureHandler> ext = new BeanReferenceHandlerConfiguration<SignatureHandler>();
+        ext.setBeanName(beanNames.get(0));
+        ext.init();
+        props.setExternal(ext);
+        log.info("No signature handler assigned for engine {} - using default: {}", ecp.getName(), beanNames.get(0));
+        ecp.setSign(props);
+      }
+      
       final HandlerConfiguration<SignatureHandler> sigHandlerConf = ecp.getSign().getHandlerConfiguration();
       if (sigHandlerConf.needsDefaultConfigResolving()) {
         sigHandlerConf.resolveDefaultConfigRef(this.getResolver("sign",
@@ -218,6 +262,27 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
       conf.setSignatureHandler(sigHandlerFactory.create(sigHandlerConf, bLoader));
 
       // Key and certificate handler
+      //
+      
+      // First chck if we should apply default bean ...
+      if (ecp.getCert() == null) {
+        final List<String> beanNames = bRegistrator.getBeanNames(KeyAndCertificateHandler.class);
+        if (beanNames.isEmpty()) {
+          throw new IllegalArgumentException("No key and certificate handler given for engine (and no default bean)");
+        }
+        else if (beanNames.size() > 1) {
+          throw new IllegalArgumentException("No key and certificate given for engine (and several default beans registered)");
+        }
+        final KeyAndCertificateHandlerConfigurationProperties props =
+            new KeyAndCertificateHandlerConfigurationProperties();        
+        final BeanReferenceHandlerConfiguration<KeyAndCertificateHandler> ext = new BeanReferenceHandlerConfiguration<KeyAndCertificateHandler>();
+        ext.setBeanName(beanNames.get(0));
+        ext.init();
+        props.setExternal(ext);
+        log.info("No key and certifucate handler assigned for engine {} - using default: {}", ecp.getName(), beanNames.get(0));
+        ecp.setCert(props);
+      }
+      
       final HandlerConfiguration<KeyAndCertificateHandler> keyAndCertConf = ecp.getCert().getHandlerConfiguration();
       if (keyAndCertConf.needsDefaultConfigResolving()) {
         keyAndCertConf.resolveDefaultConfigRef(this.getResolver("cert",
@@ -430,8 +495,24 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
         commonBeansRegistry.put(beanName, bean);
       }
       else {
+        commonBeansRegistry.put(beanName, bean);
         this.beanRegistrator.registerBean(beanName, type, bean);
       }
+    }
+
+    /**
+     * Gets a list of bean names that have been registered and that holds a bean object of the specified type.
+     * 
+     * @param <T> the type
+     * @param type the type
+     * @return a (possibly empty) list of bean names
+     */
+    @Nonnull
+    public <T> List<String> getBeanNames(@Nonnull final Class<T> type) {
+      return commonBeansRegistry.entrySet().stream()
+          .filter(e -> type.isInstance(e.getValue()))
+          .map(Map.Entry::getKey)
+          .collect(Collectors.toList());
     }
 
   }
