@@ -22,6 +22,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.client.impl.DefaultClientConfiguration;
 import se.swedenconnect.signservice.config.audit.AuditLoggerConfigurationProperties;
 import se.swedenconnect.signservice.config.authn.AuthenticationHandlerConfigurationProperties;
@@ -34,6 +35,7 @@ import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
  * Configuration properties for an engine configuration.
  */
 @Data
+@Slf4j
 public class EngineConfigurationProperties {
 
   /**
@@ -105,16 +107,16 @@ public class EngineConfigurationProperties {
     this.client.init();
 
     if (this.protocol == null) {
-      throw new IllegalArgumentException("protocol must be assigned");
+      log.debug("protocol not assigned - will attempt to use default bean");
     }
     if (this.authn == null) {
       throw new IllegalArgumentException("authn must be assigned");
     }
     if (this.sign == null) {
-      throw new IllegalArgumentException("sign must be assigned");
+      log.debug("sign not assigned - will attempt to use default bean");
     }
     if (this.cert == null) {
-      throw new IllegalArgumentException("cert must be assigned");
+      log.debug("cert not assigned - will attempt to use default bean");
     }
     if (this.audit == null) {
       throw new IllegalArgumentException("audit must be assigned");

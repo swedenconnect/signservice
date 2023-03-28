@@ -53,10 +53,10 @@ In the SignService application above the engine configurations are prefixed usin
 | `client.client-id` | The unique client ID for the SignService client that this engine serves. | Mandatory. No default value. |
 | `client.trusted-certificates[]` | A list of X.509 certificates that the engine "trusts" when it comes to verifying signatures on SignRequest messages from the client. | No default value. Depending on the protocol requirements, i.e., whether the SignService protocol requires requests to be signed or not, the setting may be mandatory. |
 | `client.response-urls[]` | A list of registered URLs on which the client may received SignResponse messages. | No default value. Depending on the protocol requirements, i.e., whether the SignService protocol requires a pre-registered response URL or not, the setting may be mandatory. |
-| `protocol.*` | SignService protocol configuration for this engine. See [Protocol Configuration](#protocol-configuration) below. | Mandatory. No default value. |
+| `protocol.*` | SignService protocol configuration for this engine. See [Protocol Configuration](#protocol-configuration) below. | If not given, and **one** (not several) protocol bean has been configured (see [Common Beans Configuration](#common-beans-configuration) below) this value will be used. |
 | `authn.*` | Authentication configuration for this engine. See [Authentication Configuration](#authentication-configuration) below. | Mandatory. No default value. |
-| `sign.*` | Signature handler configuration for this engine. See [Signature Handler Configuration](#signature-handler-configuration) below. | Mandatory. No default value. |
-| `cert.*` | Configuration for this engine's key and certificate handler, i.e., the handler that generates the signing key and signing certificate. See [Key and Certificate Handler Configuration](#key-and-certificate-handler-configuration) below. | Mandatory. No default value. |
+| `sign.*` | Signature handler configuration for this engine. See [Signature Handler Configuration](#signature-handler-configuration) below. | If not given, and **one** (not several) signature handler bean has been configured (see [Common Beans Configuration](#common-beans-configuration) below) this value will be used. |
+| `cert.*` | Configuration for this engine's key and certificate handler, i.e., the handler that generates the signing key and signing certificate. See [Key and Certificate Handler Configuration](#key-and-certificate-handler-configuration) below. | If not given, and **one** (not several) key and certificate bean has been configured (see [Common Beans Configuration](#common-beans-configuration) below) this value will be used. |
 | `audit.*` | Configuration for the engine (client) audit logger. This audit logger will log events that are specific for the client (for example successful and failed signature operations).<br />See [Audit Logger Configuration](#audit-logger-configuration) below.  | Mandatory. No default value. |
 
 <a name="common-beans-configuration"></a>
@@ -435,9 +435,12 @@ signservice:
       client-id: https://eid2cssp.3xasecurity.com/sign
       trusted-certificates:
       - classpath:clients/signservice-testapp/eid2cssp.3xasecurity.com.crt
+      
+    # Note: protocol does not have to be given since a default bean exists.
     protocol:
       external:
         bean-name: signservice.DssProtocolHandler
+        
     authn:
       saml:        
         default-config-ref: authn.saml
@@ -454,9 +457,13 @@ signservice:
             descriptions:
             - "en-Sweden Connect test application for signature services running on localhost"
             - "sv-Sweden Connect testapplikation för underskriftstjänster (localhost)"
+            
+    # Note: sign does not have to be given since a default bean exists.
     sign:
       external:
         bean-name: signservice.DefaultSignatureHandler
+        
+    # Note: cert does not have to be given since a default bean exists.        
     cert:
       external:
         bean-name: signservice.BuiltInCa
