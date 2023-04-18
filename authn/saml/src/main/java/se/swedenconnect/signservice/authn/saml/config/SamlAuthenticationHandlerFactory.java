@@ -206,6 +206,10 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     if (SamlAuthenticationHandlerConfiguration.SAML_TYPE_SWEDEN_CONNECT.equals(config.getSamlType())) {
       handler = new SwedenConnectSamlAuthenticationHandler(authnRequestGenerator, responseProcessor, metadataProvider,
           entityDescriptorContainer, config.getSpPaths());
+      
+      if (config.getSadRequest() != null) {
+        ((SwedenConnectSamlAuthenticationHandler) handler).setSadRequestRequirement(config.getSadRequest());
+      }
     }
     else {
       handler = new DefaultSamlAuthenticationHandler(authnRequestGenerator, responseProcessor, metadataProvider,

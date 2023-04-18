@@ -29,9 +29,9 @@ import se.swedenconnect.signservice.authn.saml.OpenSamlTestBase;
  */
 public class MetadataProviderConfigurationTest extends OpenSamlTestBase {
 
-  private static final String backupFile = "target/test/saml/foo/backup.xml";
-
-  private static final String backupDir = "target/test2/saml/bar/backups";
+//  private static final String backupFile = "target/test/saml/foo/backup.xml";
+//
+//  private static final String backupDir = "target/test2/saml/bar/backups";
 
   @BeforeAll
   public static void init() throws IOException {
