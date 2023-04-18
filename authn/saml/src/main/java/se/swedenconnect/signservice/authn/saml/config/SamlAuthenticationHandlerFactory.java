@@ -25,8 +25,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang.StringUtils;
-import org.opensaml.core.xml.io.MarshallingException;
-import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.core.NameID;
@@ -40,6 +38,7 @@ import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.security.credential.UsageType;
 
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import se.swedenconnect.opensaml.common.builder.SAMLObjectBuilderRuntimeException;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorContainer;
 import se.swedenconnect.opensaml.saml2.metadata.build.AssertionConsumerServiceBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.build.EntityAttributesBuilder;
@@ -210,6 +209,8 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
       if (config.getSadRequest() != null) {
         ((SwedenConnectSamlAuthenticationHandler) handler).setSadRequestRequirement(config.getSadRequest());
       }
+      ((SwedenConnectSamlAuthenticationHandler) handler).getSADValidator().setAllowedClockSkew(
+          this.getValidationConfig().getAllowedClockSkew());      
     }
     else {
       handler = new DefaultSamlAuthenticationHandler(authnRequestGenerator, responseProcessor, metadataProvider,
@@ -372,7 +373,7 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
 
       return builder.build();
     }
-    catch (final MarshallingException | UnmarshallingException e) {
+    catch (final SAMLObjectBuilderRuntimeException e) {
       throw new IllegalArgumentException("Failed to set up SP metadata", e);
     }
   }
