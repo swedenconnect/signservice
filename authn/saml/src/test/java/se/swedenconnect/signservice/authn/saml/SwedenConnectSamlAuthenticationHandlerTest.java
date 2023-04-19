@@ -65,6 +65,7 @@ import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
 import se.swedenconnect.signservice.authn.AuthenticationResultChoice;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.authn.UserAuthenticationException;
+import se.swedenconnect.signservice.authn.saml.config.SamlAuthenticationHandlerConfiguration.SadRequestRequirement;
 import se.swedenconnect.signservice.authn.saml.config.SpUrlConfiguration;
 import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityAttribute;
@@ -214,9 +215,11 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
   }
 
   @Test
-  public void testAuthenticateWithSadRequest() throws Exception {
+  public void testAuthenticateWithSadRequestDefault() throws Exception {
     final SwedenConnectSamlAuthenticationHandler handler =
         (SwedenConnectSamlAuthenticationHandler) this.createHandler();
+    handler.setSadRequestRequirement(SadRequestRequirement.DEFAULT);
+    
     final AuthnRequirements authnReqs = this.getAuthnRequirements();
     ((DefaultAuthnRequirements) authnReqs).setSignatureActivationRequestData(
         new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 1, true));
@@ -269,6 +272,126 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.RELAY_STATE_KEY), eq("ID"));
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHN_REQS_KEY), eq(authnReqs));
   }
+  
+  @Test
+  public void testAuthenticateWithSadRequestNotRequired() throws Exception {
+    final SwedenConnectSamlAuthenticationHandler handler =
+        (SwedenConnectSamlAuthenticationHandler) this.createHandler();
+    handler.setSadRequestRequirement(SadRequestRequirement.DEFAULT);
+    
+    final AuthnRequirements authnReqs = this.getAuthnRequirements();
+    ((DefaultAuthnRequirements) authnReqs).setSignatureActivationRequestData(
+        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 1, false));
+
+    this.mockEntityCategories(List.of(
+        EntityCategoryConstants.SERVICE_PROPERTY_CATEGORY_SCAL2.getUri(),
+        EntityCategoryConstants.SERVICE_ENTITY_CATEGORY_LOA3_PNR.getUri()));
+
+    final SignMessage signMessage = Mockito.mock(SignMessage.class);
+    Mockito.when(signMessage.getMustShow()).thenReturn(true);
+    Mockito.when(signMessage.getEncoding()).thenReturn(this.getEncodedSignMessage());
+
+    Mockito.when(this.context.get(eq(AbstractSamlAuthenticationHandler.SIGNMESSAGE_KEY), any()))
+      .thenReturn(signMessage);
+
+    @SuppressWarnings("unchecked")
+    final RequestHttpObject<AuthnRequest> requestObject = Mockito.mock(RequestHttpObject.class);
+    Mockito.when(requestObject.getRequest()).thenReturn(this.getAuthnRequest());
+    Mockito.when(requestObject.getMethod()).thenReturn("POST");
+    Mockito.when(requestObject.getSendUrl()).thenReturn(IDP_DESTINATION);
+    Mockito.when(requestObject.getRequestParameters()).thenReturn(new HashMap<>() {
+      private static final long serialVersionUID = 1L;
+
+      {
+        this.put("SAMLRequest", "ENCODED_REQUEST");
+        this.put("RelayState", CONTEXT_ID);
+      }
+    });
+    Mockito.when(this.authnRequestGenerator.generateAuthnRequest(eq(IDP), anyString(), any()))
+        .thenAnswer((a) -> {
+          final AuthnRequestGeneratorContext ctx = a.getArgument(2, AuthnRequestGeneratorContext.class);
+          ctx.getAssertionConsumerServiceResolver();
+          ctx.getRequestedAuthnContextBuilderFunction();
+          final AuthnRequestCustomizer customizer = ctx.getAuthnRequestCustomizer();
+          final AuthnRequest ar = (AuthnRequest) XMLObjectSupport.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
+          customizer.accept(ar);
+          return requestObject;
+        });
+    final AuthenticationResultChoice result = handler.authenticate(authnReqs, signMessage, this.context);
+
+    Assertions.assertNull(result.getAuthenticationResult());
+    Assertions.assertNotNull(result.getResponseAction().getPost());
+    Assertions.assertEquals(IDP_DESTINATION, result.getResponseAction().getPost().getUrl());
+    Assertions.assertNotNull(result.getResponseAction().getPost().getParameters().get("SAMLRequest"));
+
+    Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHNREQUEST_KEY),
+        ArgumentMatchers.notNull());
+    
+    Mockito.verify(this.context, Mockito.times(0)).put(eq(SwedenConnectSamlAuthenticationHandler.SAD_ID_KEY), Mockito.anyString());
+
+    Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.RELAY_STATE_KEY), eq("ID"));
+    Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHN_REQS_KEY), eq(authnReqs));
+  }
+  
+  @Test
+  public void testAuthenticateWithSadRequestNever() throws Exception {
+    final SwedenConnectSamlAuthenticationHandler handler =
+        (SwedenConnectSamlAuthenticationHandler) this.createHandler();
+    handler.setSadRequestRequirement(SadRequestRequirement.NEVER);
+    
+    final AuthnRequirements authnReqs = this.getAuthnRequirements();
+    ((DefaultAuthnRequirements) authnReqs).setSignatureActivationRequestData(
+        new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 1, true));
+
+    this.mockEntityCategories(List.of(
+        EntityCategoryConstants.SERVICE_PROPERTY_CATEGORY_SCAL2.getUri(),
+        EntityCategoryConstants.SERVICE_ENTITY_CATEGORY_LOA3_PNR.getUri()));
+
+    final SignMessage signMessage = Mockito.mock(SignMessage.class);
+    Mockito.when(signMessage.getMustShow()).thenReturn(true);
+    Mockito.when(signMessage.getEncoding()).thenReturn(this.getEncodedSignMessage());
+
+    Mockito.when(this.context.get(eq(AbstractSamlAuthenticationHandler.SIGNMESSAGE_KEY), any()))
+      .thenReturn(signMessage);
+
+    @SuppressWarnings("unchecked")
+    final RequestHttpObject<AuthnRequest> requestObject = Mockito.mock(RequestHttpObject.class);
+    Mockito.when(requestObject.getRequest()).thenReturn(this.getAuthnRequest());
+    Mockito.when(requestObject.getMethod()).thenReturn("POST");
+    Mockito.when(requestObject.getSendUrl()).thenReturn(IDP_DESTINATION);
+    Mockito.when(requestObject.getRequestParameters()).thenReturn(new HashMap<>() {
+      private static final long serialVersionUID = 1L;
+
+      {
+        this.put("SAMLRequest", "ENCODED_REQUEST");
+        this.put("RelayState", CONTEXT_ID);
+      }
+    });
+    Mockito.when(this.authnRequestGenerator.generateAuthnRequest(eq(IDP), anyString(), any()))
+        .thenAnswer((a) -> {
+          final AuthnRequestGeneratorContext ctx = a.getArgument(2, AuthnRequestGeneratorContext.class);
+          ctx.getAssertionConsumerServiceResolver();
+          ctx.getRequestedAuthnContextBuilderFunction();
+          final AuthnRequestCustomizer customizer = ctx.getAuthnRequestCustomizer();
+          final AuthnRequest ar = (AuthnRequest) XMLObjectSupport.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
+          customizer.accept(ar);
+          return requestObject;
+        });
+    final AuthenticationResultChoice result = handler.authenticate(authnReqs, signMessage, this.context);
+
+    Assertions.assertNull(result.getAuthenticationResult());
+    Assertions.assertNotNull(result.getResponseAction().getPost());
+    Assertions.assertEquals(IDP_DESTINATION, result.getResponseAction().getPost().getUrl());
+    Assertions.assertNotNull(result.getResponseAction().getPost().getParameters().get("SAMLRequest"));
+
+    Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHNREQUEST_KEY),
+        ArgumentMatchers.notNull());
+    
+    Mockito.verify(this.context, Mockito.times(0)).put(eq(SwedenConnectSamlAuthenticationHandler.SAD_ID_KEY), Mockito.anyString());
+
+    Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.RELAY_STATE_KEY), eq("ID"));
+    Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHN_REQS_KEY), eq(authnReqs));
+  }  
 
   @Test
   public void testAuthenticateWithSadRequestMissingSignMessage() throws Exception {

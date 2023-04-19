@@ -6,7 +6,7 @@
   <groupId>se.swedenconnect.signservice</groupId>
   <artifactId>signservice-application-bom</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.3</version>
+  <version>1.0.4-SNAPSHOT</version>
 
   <name>Sweden Connect :: SignService :: Application BOM</name>
   <description>BOM for SignService Applications</description>
@@ -147,7 +147,7 @@
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-authn-saml</artifactId>
-        <version>1.0.2</version>
+        <version>1.0.3-SNAPSHOT</version>
       </dependency>    
       
       <dependency>
@@ -189,19 +189,19 @@
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-config</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.4-SNAPSHOT</version>
       </dependency>
       
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-config-spring</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.4-SNAPSHOT</version>
       </dependency>      
       
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-spring-boot-starter</artifactId>
-        <version>1.0.3</version>        
+        <version>1.0.4-SNAPSHOT</version>        
       </dependency>
       
     </dependencies>

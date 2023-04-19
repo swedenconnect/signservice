@@ -59,6 +59,7 @@ import se.swedenconnect.opensaml.sweid.saml2.signservice.SADValidationException;
 import se.swedenconnect.opensaml.sweid.saml2.signservice.sap.SADRequest;
 import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
 import se.swedenconnect.signservice.authn.UserAuthenticationException;
+import se.swedenconnect.signservice.authn.saml.config.SamlAuthenticationHandlerConfiguration.SadRequestRequirement;
 import se.swedenconnect.signservice.authn.saml.config.SpUrlConfiguration;
 import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
@@ -80,6 +81,9 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
 
   /** For validating SAD attributes. */
   private SADValidator sadValidator;
+
+  /** Tells how we should treat SAD requests. */
+  private SadRequestRequirement sadRequestRequirement = SadRequestRequirement.DEFAULT;
 
   /**
    * Constructor.
@@ -123,12 +127,16 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
 
     // Should we send a SAD request?
     //
-    final SADRequest sadRequest = authnRequirements.getSignatureActivationRequestData() != null
+    final boolean includeSadRequest = authnRequirements.getSignatureActivationRequestData() != null
         && signMessage != null
+        && this.sadRequestRequirement != SadRequestRequirement.NEVER
         && this.isSignatureActivationProtocolSupported(idpMetadata)
-            ? (SADRequest) XMLObjectSupport.buildXMLObject(SADRequest.DEFAULT_ELEMENT_NAME)
-            : null;
-    if (sadRequest != null) {
+        && ((this.sadRequestRequirement == SadRequestRequirement.DEFAULT
+            && authnRequirements.getSignatureActivationRequestData().isRequired())
+            || this.sadRequestRequirement == SadRequestRequirement.ALWAYS);
+
+    final SADRequest sadRequest = includeSadRequest ? (SADRequest) XMLObjectSupport.buildXMLObject(SADRequest.DEFAULT_ELEMENT_NAME) : null;    
+    if (sadRequest != null) {      
       sadRequest.setRequesterID(this.authnRequestGenerator.getSpEntityID());
       sadRequest.setSignRequestID(authnRequirements.getSignatureActivationRequestData().getSignRequestId());
       sadRequest.setDocCount(authnRequirements.getSignatureActivationRequestData().getDocumentCount());
@@ -371,13 +379,24 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
   }
 
   /**
-   * Assigns the {@link SADValidator} to be used when validating SAD attributes. If not explicitly assigned
-   * a validator is created using {@link SADParser#getValidator(MetadataProvider)}.
+   * Assigns the {@link SADValidator} to be used when validating SAD attributes. If not explicitly assigned a validator
+   * is created using {@link SADParser#getValidator(MetadataProvider)}.
    *
    * @param sadValidator the SAD validator
    */
   public void setSadValidator(@Nonnull final SADValidator sadValidator) {
     this.sadValidator = sadValidator;
+  }
+
+  /**
+   * Assigns the requirements regarding including the {@link SADRequest} extension.
+   * 
+   * @param sadRequestRequirement requirement
+   */
+  public void setSadRequestRequirement(final SadRequestRequirement sadRequestRequirement) {
+    if (sadRequestRequirement != null) {
+      this.sadRequestRequirement = sadRequestRequirement;
+    }
   }
 
 }

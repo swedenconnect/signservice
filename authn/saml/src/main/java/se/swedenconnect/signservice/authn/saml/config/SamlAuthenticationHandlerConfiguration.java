@@ -25,6 +25,7 @@ import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
+import se.swedenconnect.opensaml.sweid.saml2.signservice.sap.SADRequest;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.core.config.AbstractHandlerConfiguration;
 import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
@@ -147,6 +148,13 @@ public class SamlAuthenticationHandlerConfiguration
   @Setter
   @Getter
   private String preferredBinding;
+  
+  /**
+   * Only relevant for the Sweden Connect SAML type. Tells how the {@link SADRequest} extension should be handled.
+   */
+  @Setter
+  @Getter
+  private SadRequestRequirement sadRequest;
 
   // Internal
   private List<Class<?>> excludeFromRecursiveMergeCache = null;
@@ -168,6 +176,29 @@ public class SamlAuthenticationHandlerConfiguration
       this.excludeFromRecursiveMergeCache = list;
     }
     return this.excludeFromRecursiveMergeCache;
+  }
+
+  /**
+   * Enumeration that tells whether we should include the {@link SADRequest} extension. Applies only to the
+   * Sweden Connect profile.
+   */
+  public static enum SadRequestRequirement {
+
+    /**
+     * Default behaviour - Sends a SADReequest extension if the requested certificate type is QC_SSDD and if not, does
+     * not include the extension.
+     */
+    DEFAULT, 
+    
+    /**
+     * Never send SADRequest.
+     */
+    NEVER, 
+    
+    /**
+     * Always send SADRequest (if supported by the IdP).
+     */
+    ALWAYS;
   }
 
 }
