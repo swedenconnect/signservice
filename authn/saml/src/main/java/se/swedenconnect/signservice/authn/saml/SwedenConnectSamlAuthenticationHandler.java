@@ -135,8 +135,9 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
             && authnRequirements.getSignatureActivationRequestData().isRequired())
             || this.sadRequestRequirement == SadRequestRequirement.ALWAYS);
 
-    final SADRequest sadRequest = includeSadRequest ? (SADRequest) XMLObjectSupport.buildXMLObject(SADRequest.DEFAULT_ELEMENT_NAME) : null;    
-    if (sadRequest != null) {      
+    final SADRequest sadRequest =
+        includeSadRequest ? (SADRequest) XMLObjectSupport.buildXMLObject(SADRequest.DEFAULT_ELEMENT_NAME) : null;
+    if (sadRequest != null) {
       sadRequest.setRequesterID(this.authnRequestGenerator.getSpEntityID());
       sadRequest.setSignRequestID(authnRequirements.getSignatureActivationRequestData().getSignRequestId());
       sadRequest.setDocCount(authnRequirements.getSignatureActivationRequestData().getDocumentCount());
@@ -386,6 +387,15 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
    */
   public void setSadValidator(@Nonnull final SADValidator sadValidator) {
     this.sadValidator = sadValidator;
+  }
+
+  /**
+   * Gets the {@link SADValidator} for further configuration.
+   * 
+   * @return the {@link SADValidator}
+   */
+  public SADValidator getSADValidator() {
+    return this.sadValidator;
   }
 
   /**
