@@ -9,7 +9,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-config-parent</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4-SNAPSHOT</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Configuration :: Base</name>
@@ -92,7 +92,7 @@
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-authn-saml</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.3-SNAPSHOT</version>
     </dependency>    
     
     <dependency>

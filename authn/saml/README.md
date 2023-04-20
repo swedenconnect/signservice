@@ -81,6 +81,7 @@ Below follows a description of [SamlAuthenticationHandlerConfiguration](https://
 | `require-encrypted-assertions` | Boolean telling whether we require SAML assertions to be encrypted. | `true` |
 | `require-signed-assertions` | Boolean telling whether we require SAML assertions to be signed. <br />Note that the response message is generally signed. | `false` |
 | `preferred-binding` | Tells which binding that should be preferred when sending the authentication request. Possible values are `redirect` and `post`. | `redirect` |
+| `sad-request` | (Sweden Connect only) Value that tells under which circumstances a `SADRequest` extension is included in the authentication request. Possible values are: `DEFAULT`, which means that the `SADRequest` is included if this is explicitly requested (certificate type is QC_SSCD), `NEVER` and `ALWAYS` (provided that the IdP has declared support for the extension). | `DEFAULT` |
 
 <a name="saml-sp-url-configuration"></a>
 #### SAML SP URL Configuration
