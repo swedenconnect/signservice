@@ -5,7 +5,7 @@
 
   <artifactId>signservice-spring-boot-starter</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.4-SNAPSHOT</version>
+  <version>1.0.4</version>
 
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
@@ -92,7 +92,7 @@
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-config-spring</artifactId>
-      <version>1.0.4-SNAPSHOT</version>
+      <version>1.0.4</version>
     </dependency>
         
     <dependency>
