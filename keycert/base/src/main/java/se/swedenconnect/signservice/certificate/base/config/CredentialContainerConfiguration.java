@@ -17,10 +17,9 @@ package se.swedenconnect.signservice.certificate.base.config;
 
 import java.security.KeyStoreException;
 
-import javax.annotation.Nonnull;
+import org.apache.commons.lang3.StringUtils;
 
-import org.apache.commons.lang.StringUtils;
-
+import jakarta.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

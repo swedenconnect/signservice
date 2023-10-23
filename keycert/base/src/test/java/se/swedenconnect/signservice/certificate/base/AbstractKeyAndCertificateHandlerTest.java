@@ -35,10 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.xml.security.algorithms.MessageDigestAlgorithm;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -47,6 +44,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
@@ -306,7 +305,7 @@ public class AbstractKeyAndCertificateHandlerTest {
     })
       .isInstanceOf(CertificateException.class)
       .hasMessage("Attribute mapping failed")
-      .getCause()
+      .cause()
       .isInstanceOf(AttributeMappingException.class);
   }
 
@@ -329,7 +328,7 @@ public class AbstractKeyAndCertificateHandlerTest {
       this.handler.generateSigningCredential(signRequestMessage, assertion, new DefaultSignServiceContext("ctx"));
     }).isInstanceOf(CertificateException.class)
         .hasMessage("Attribute mapping failed")
-        .getCause()
+        .cause()
         .isInstanceOf(AttributeMappingException.class);
   }
 

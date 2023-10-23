@@ -15,8 +15,7 @@
  */
 package se.swedenconnect.signservice.certificate.attributemapping;
 
-import javax.annotation.Nonnull;
-
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 
 /**

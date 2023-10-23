@@ -15,8 +15,8 @@
  */
 package se.swedenconnect.signservice.config.common;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 
 /**
  * An interface that is implemented by subclasses of configuration classes that may be instantiated as "common beans",

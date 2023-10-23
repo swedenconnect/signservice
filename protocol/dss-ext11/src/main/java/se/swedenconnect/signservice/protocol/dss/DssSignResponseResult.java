@@ -18,9 +18,8 @@ package se.swedenconnect.signservice.protocol.dss;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.idsec.signservice.dss.DSSStatusCodes;
 import se.swedenconnect.schemas.dss_1_0.InternationalStringType;
 import se.swedenconnect.schemas.dss_1_0.Result;

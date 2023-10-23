@@ -15,8 +15,7 @@
  */
 package se.swedenconnect.signservice.config.common;
 
-import javax.annotation.PostConstruct;
-
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;

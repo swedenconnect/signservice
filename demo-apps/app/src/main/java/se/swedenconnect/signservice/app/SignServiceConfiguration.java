@@ -34,7 +34,7 @@ public class SignServiceConfiguration {
    * @return a ReplayCheckerStorageContainer bean
    */
   @Bean
-  public InMemoryReplayCheckerStorageContainer inMemoryReplayCheckerStorageContainer() {
+  InMemoryReplayCheckerStorageContainer inMemoryReplayCheckerStorageContainer() {
     return new InMemoryReplayCheckerStorageContainer("replay-storage");
   }
 

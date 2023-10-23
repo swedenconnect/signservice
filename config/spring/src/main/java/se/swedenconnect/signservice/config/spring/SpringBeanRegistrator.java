@@ -17,10 +17,9 @@ package se.swedenconnect.signservice.config.spring;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-
 import org.springframework.context.ConfigurableApplicationContext;
 
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.signservice.config.BeanRegistrator;
 
 /**

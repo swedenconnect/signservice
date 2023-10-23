@@ -18,10 +18,9 @@ package se.swedenconnect.signservice.authn.saml.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 
+import jakarta.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
@@ -148,7 +147,7 @@ public class SamlAuthenticationHandlerConfiguration
   @Setter
   @Getter
   private String preferredBinding;
-  
+
   /**
    * Only relevant for the Sweden Connect SAML type. Tells how the {@link SADRequest} extension should be handled.
    */
@@ -188,13 +187,13 @@ public class SamlAuthenticationHandlerConfiguration
      * Default behaviour - Sends a SADReequest extension if the requested certificate type is QC_SSDD and if not, does
      * not include the extension.
      */
-    DEFAULT, 
-    
+    DEFAULT,
+
     /**
      * Never send SADRequest.
      */
-    NEVER, 
-    
+    NEVER,
+
     /**
      * Always send SADRequest (if supported by the IdP).
      */

@@ -33,51 +33,33 @@ public class AttributeMappingData {
   /**
    * The type of certificate attribute (RDN in subject name, Subject Alt Name (SAN) or Subject Directory Attributes
    * (SDA).
-   *
-   * @param certificateAttributeType the cert attribute type
-   * @return the cert attribute type
    */
   private CertificateAttributeType certificateAttributeType;
 
   /**
    * The certificate attribute reference. This is an index of a SAN or the OID string for an attribute.
-   *
-   * @param reference the certificate attribute reference
-   * @return the certificate attribute reference
    */
   private String reference;
 
   /**
    * The attribute ID of the source assertion attribute.
-   *
-   * @param sourceId attribute ID for the source assertion attribute
-   * @return attribute ID for the source assertion attribute
    */
   private String sourceId;
 
   /**
    * The friendly name of the assertion attribute.
-   *
-   * @param sourceFriendlyName friendly name of attribute
-   * @return friendly name of attribute
    */
   private String sourceFriendlyName;
 
   /**
    * Indicates if the source of the value was a default value from SignRequest and not obtained from the
    * assertion from the identity service
-   *
-   * @param defaultValue true if the value was obtained from a default value from SignRequest
-   * @return true if the value was obtained from a default value from SignRequest
    */
   private boolean defaultValue;
 
   /**
    * The attribute value.
-   *
-   * @param value the attribute value
-   * @return the attribute value
    */
-  String value;
+  private String value;
 
 }

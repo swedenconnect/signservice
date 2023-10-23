@@ -19,12 +19,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.lang.reflect.Field;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerException;

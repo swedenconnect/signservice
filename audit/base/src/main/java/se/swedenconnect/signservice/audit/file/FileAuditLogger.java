@@ -20,9 +20,8 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PreDestroy;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PreDestroy;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditLoggerException;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;

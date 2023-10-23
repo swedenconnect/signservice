@@ -17,10 +17,9 @@ package se.swedenconnect.signservice.certificate.cmc.config;
 
 import java.security.cert.X509Certificate;
 
-import javax.annotation.Nonnull;
-
 import org.apache.xml.security.signature.XMLSignature;
 
+import jakarta.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.ca.cmc.api.client.impl.HttpProxyConfiguration;

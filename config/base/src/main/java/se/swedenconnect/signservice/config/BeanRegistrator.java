@@ -15,7 +15,7 @@
  */
 package se.swedenconnect.signservice.config;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * An interface describing a callback that is used by

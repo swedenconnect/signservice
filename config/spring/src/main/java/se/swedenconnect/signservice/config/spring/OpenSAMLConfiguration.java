@@ -38,7 +38,7 @@ public class OpenSAMLConfiguration {
    */
   @ConditionalOnMissingBean
   @Bean("openSAML")
-  public OpenSAMLInitializer openSAML() throws Exception {
+  OpenSAMLInitializer openSAML() throws Exception {
     OpenSAMLInitializer.getInstance()
         .initialize(
             new OpenSAMLSecurityDefaultsConfig(new SwedishEidSecurityConfiguration()),

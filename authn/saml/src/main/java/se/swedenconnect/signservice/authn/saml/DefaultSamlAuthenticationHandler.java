@@ -15,8 +15,7 @@
  */
 package se.swedenconnect.signservice.authn.saml;
 
-import javax.annotation.Nonnull;
-
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorContainer;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 import se.swedenconnect.opensaml.saml2.request.AuthnRequestGenerator;

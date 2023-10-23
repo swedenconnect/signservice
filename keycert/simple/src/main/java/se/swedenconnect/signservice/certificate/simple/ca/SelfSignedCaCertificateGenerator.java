@@ -18,8 +18,7 @@ package se.swedenconnect.signservice.certificate.simple.ca;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import javax.annotation.Nonnull;
-
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.security.credential.PkiCredential;

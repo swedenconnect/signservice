@@ -20,9 +20,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;

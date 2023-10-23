@@ -17,10 +17,9 @@ package se.swedenconnect.signservice.audit.file;
 
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import org.apache.commons.lang3.StringUtils;
 
-import org.apache.commons.lang.StringUtils;
-
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerConfiguration;
 
 /**

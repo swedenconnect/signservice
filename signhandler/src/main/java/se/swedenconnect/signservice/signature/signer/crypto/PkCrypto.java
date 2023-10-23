@@ -15,22 +15,31 @@
  */
 package se.swedenconnect.signservice.signature.signer.crypto;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.signers.ECDSASigner;
-import org.bouncycastle.jcajce.provider.asymmetric.util.ECUtil;
-import se.swedenconnect.security.algorithms.Algorithm;
-import se.swedenconnect.security.algorithms.AlgorithmRegistry;
-import se.swedenconnect.security.algorithms.MessageDigestAlgorithm;
-import se.swedenconnect.security.algorithms.SignatureAlgorithm;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.util.Comparator;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
-import java.security.*;
-import java.util.Comparator;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.signers.ECDSASigner;
+import org.bouncycastle.jcajce.provider.asymmetric.util.ECUtil;
+
+import se.swedenconnect.security.algorithms.Algorithm;
+import se.swedenconnect.security.algorithms.AlgorithmRegistry;
+import se.swedenconnect.security.algorithms.MessageDigestAlgorithm;
+import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 
 /**
  * Public key crypto implementations used to generate signature values

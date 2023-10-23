@@ -26,15 +26,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.credential.PkiCredential;

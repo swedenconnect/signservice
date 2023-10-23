@@ -17,9 +17,8 @@ package se.swedenconnect.signservice.config.audit;
 
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.signservice.audit.AuditLogger;

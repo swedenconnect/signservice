@@ -18,8 +18,7 @@ package se.swedenconnect.signservice.signature.signer;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 
-import javax.annotation.Nonnull;
-
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 
 /**

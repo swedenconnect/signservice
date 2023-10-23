@@ -17,17 +17,15 @@ package se.swedenconnect.signservice.protocol.dss;
 
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.xml.bind.JAXBException;
-
 import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.xml.DOMUtils;
-import se.idsec.signservice.xml.InternalXMLException;
-import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.dss_1_0.SignRequest;
 import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.AbstractSignServiceHandler;
@@ -42,6 +40,7 @@ import se.swedenconnect.signservice.protocol.ProtocolHandler;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.SignResponseMessage;
 import se.swedenconnect.signservice.protocol.SignResponseResult;
+import se.swedenconnect.xml.jaxb.JAXBUnmarshaller;
 
 /**
  * The {@link ProtocolHandler} implementation for sign request and response messages according to <a href=
@@ -137,7 +136,7 @@ public class DssProtocolHandler extends AbstractSignServiceHandler implements Pr
 
       return signRequestMessage;
     }
-    catch (final InternalXMLException | JAXBException | DssProtocolException e) {
+    catch (final DOMException| IllegalArgumentException | JAXBException | DssProtocolException e) {
       final String msg = "Failed to decode/unmarshall SignRequest message - " + e.getMessage();
       log.info(msg, e);
       throw new ProtocolException(msg, e);

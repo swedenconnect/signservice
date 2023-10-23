@@ -9,7 +9,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-protocol-parent</artifactId>
-    <version>1.0.2</version>
+    <version>1.1.0-SNAPSHOT</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Protocol :: DSS Extensions 1.1</name>
@@ -84,49 +84,24 @@
 
     <!-- JAXB -->
     <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
+      <groupId>se.swedenconnect.schemas</groupId>
+      <artifactId>swedenconnect-jaxb</artifactId>
     </dependency>
-
+    
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+    </dependency>      
+          
     <dependency>
       <groupId>org.glassfish.jaxb</groupId>
       <artifactId>jaxb-runtime</artifactId>
+      <scope>provided</scope>
     </dependency>
-
+    
     <dependency>
-      <groupId>javax.activation</groupId>
-      <artifactId>activation</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>se.swedenconnect.schemas</groupId>
-      <artifactId>oasis-dss-jaxb</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.activation</groupId>
-          <artifactId>activation</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <dependency>
-      <groupId>se.swedenconnect.schemas</groupId>
-      <artifactId>saml-jaxb</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>se.swedenconnect.schemas.csig</groupId>
-      <artifactId>dss-ext11-jaxb</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>se.swedenconnect.schemas</groupId>
-      <artifactId>etsi-xades-jaxb</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>se.swedenconnect.schemas</groupId>
-      <artifactId>etsi-xades-ext-jaxb</artifactId>
+      <groupId>jakarta.activation</groupId>
+      <artifactId>jakarta.activation-api</artifactId>
     </dependency>
     
     <!-- Test -->

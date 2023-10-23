@@ -17,11 +17,10 @@ package se.swedenconnect.signservice.certificate.base.config;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.attributemapping.AttributeMapper;

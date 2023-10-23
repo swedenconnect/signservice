@@ -131,42 +131,30 @@
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-commons</artifactId>
         <version>2.0.0</version>
-        <exclusions>
-          <exclusion>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
 
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-xml-commons</artifactId>
         <version>2.0.0</version>
-        <exclusions>
-          <exclusion>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-          </exclusion>
-        </exclusions>        
       </dependency>
       
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-pdf-commons</artifactId>
-        <version>2.0.0</version>
-        <exclusions>
-          <exclusion>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-          </exclusion>
-        </exclusions>        
+        <version>2.0.0</version>        
       </dependency>
       
       <dependency>
         <groupId>org.apache.httpcomponents.client5</groupId>
         <artifactId>httpclient5</artifactId>
         <version>5.2.1</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+        <version>2.15.3</version>
       </dependency>
       
     </dependencies>
@@ -503,12 +491,7 @@
               <sourcepath>target/generated-sources/delombok</sourcepath>
             </configuration>
           </plugin>
-
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-          </plugin>
-
+          
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
@@ -522,14 +505,6 @@
                 </goals>
               </execution>
             </executions>
-          </plugin>
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-deploy-plugin</artifactId>
-            <configuration>
-              <skip>false</skip>
-            </configuration>
           </plugin>
 
         </plugins>

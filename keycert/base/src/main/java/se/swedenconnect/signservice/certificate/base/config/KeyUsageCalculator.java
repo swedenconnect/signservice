@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.signservice.certificate.base.config;
 
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bouncycastle.asn1.x509.KeyUsage;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Utility class that is used to calculate the key usage value based on the key type and {link

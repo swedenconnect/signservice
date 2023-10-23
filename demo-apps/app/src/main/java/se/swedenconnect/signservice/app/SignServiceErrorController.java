@@ -17,8 +17,6 @@ package se.swedenconnect.signservice.app;
 
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -30,6 +28,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.engine.UnrecoverableSignServiceException;

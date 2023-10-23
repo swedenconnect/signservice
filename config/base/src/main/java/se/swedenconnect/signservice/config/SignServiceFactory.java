@@ -15,9 +15,8 @@
  */
 package se.swedenconnect.signservice.config;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.signservice.application.SignServiceEngineManager;
 import se.swedenconnect.signservice.core.config.BeanLoader;
 

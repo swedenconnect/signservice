@@ -15,9 +15,8 @@
  */
 package se.swedenconnect.signservice.audit.callback;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerConfiguration;
 
 /**

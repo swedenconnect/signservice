@@ -17,9 +17,8 @@ package se.swedenconnect.signservice.protocol.dss;
 
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.signservice.core.config.AbstractHandlerFactory;
 import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;

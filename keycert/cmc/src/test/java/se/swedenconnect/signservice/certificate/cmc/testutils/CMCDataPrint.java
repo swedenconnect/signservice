@@ -205,7 +205,7 @@ public class CMCDataPrint {
         case statusInfoV2:
           CMCStatusInfoV2 statusInfoV2 = CMCStatusInfoV2.getInstance(asn1Encodable);
           CMCFailType cmcFailType = getCmcFailType(statusInfoV2);
-          CMCStatusType cmcStatus = CMCStatusType.getCMCStatusType(statusInfoV2.getcMCStatus());
+          CMCStatusType cmcStatus = CMCStatusType.getCMCStatusType(statusInfoV2.getCMCStatus());
           @SuppressWarnings("deprecation")
           DERUTF8String statusString = statusInfoV2.getStatusString();
           b.append("    CMC status: ").append(cmcStatus).append("\n");

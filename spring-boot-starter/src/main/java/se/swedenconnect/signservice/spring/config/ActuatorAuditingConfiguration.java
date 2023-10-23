@@ -43,7 +43,7 @@ public class ActuatorAuditingConfiguration {
    */
   @ConditionalOnMissingBean
   @Bean
-  public AuditEventRepository auditEventRepository() {
+  AuditEventRepository auditEventRepository() {
     log.info("No AuditEventRepository is present - creating " + InMemoryAuditEventRepository.class.getSimpleName());
     return new InMemoryAuditEventRepository();
   }
@@ -58,7 +58,7 @@ public class ActuatorAuditingConfiguration {
   @ConditionalOnBean(AuditEventRepository.class)
   @ConditionalOnMissingBean(name = "signservice.AuditListener")
   @Bean("signservice.AuditListener")
-  public AuditListener auditListener(
+  AuditListener auditListener(
       final AuditEventRepository auditEventRepository) {
     log.info("No \"signservice.AuditListener\" has been defined - creating " + AuditListener.class.getSimpleName());
     return new AuditListener(auditEventRepository);

@@ -15,10 +15,9 @@
  */
 package se.swedenconnect.signservice.config.spring.converters;
 
-import javax.annotation.Nonnull;
-
 import org.springframework.core.convert.converter.Converter;
 
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.opensaml.common.utils.LocalizedString;
 
 /**

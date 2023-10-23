@@ -30,12 +30,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import jakarta.annotation.Nonnull;
 import lombok.Getter;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.application.SignServiceProcessingResult;

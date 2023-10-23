@@ -17,12 +17,11 @@ package se.swedenconnect.signservice.config;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import lombok.Setter;
 import se.swedenconnect.opensaml.saml2.response.replay.MessageReplayChecker;
 import se.swedenconnect.signservice.config.audit.AuditLoggerConfigurationProperties;

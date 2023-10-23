@@ -18,11 +18,10 @@ package se.swedenconnect.signservice.certificate.attributemapping;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 
-import org.apache.commons.lang.StringUtils;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

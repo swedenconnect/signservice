@@ -17,10 +17,9 @@ package se.swedenconnect.signservice.config;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.signservice.client.impl.DefaultClientConfiguration;

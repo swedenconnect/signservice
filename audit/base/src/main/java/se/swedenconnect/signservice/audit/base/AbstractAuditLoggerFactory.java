@@ -18,9 +18,8 @@ package se.swedenconnect.signservice.audit.base;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.base.events.AuditEventFactory;
 import se.swedenconnect.signservice.core.config.AbstractHandlerFactory;

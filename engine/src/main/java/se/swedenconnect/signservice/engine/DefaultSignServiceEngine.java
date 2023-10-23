@@ -25,12 +25,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
+import org.apache.commons.lang3.StringUtils;
 
-import org.apache.commons.lang.StringUtils;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.application.DefaultSignServiceProcessingResult;

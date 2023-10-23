@@ -26,13 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
@@ -103,7 +102,7 @@ public class SimpleKeyAndCertificateHandler extends AbstractCaEngineKeyAndCertif
   @Override
   @Nonnull
   protected List<X509Certificate> issueSigningCertificateChain(
-      @Nonnull final CertificateModel certificateModel, @Nullable final PkiCredential ignored, 
+      @Nonnull final CertificateModel certificateModel, @Nullable final PkiCredential ignored,
       @Nullable final String certificateProfile, @Nonnull final SignServiceContext context)
       throws CertificateException {
 

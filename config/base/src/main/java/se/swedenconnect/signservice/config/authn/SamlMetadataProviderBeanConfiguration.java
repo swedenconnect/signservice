@@ -15,11 +15,10 @@
  */
 package se.swedenconnect.signservice.config.authn;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 import se.swedenconnect.signservice.authn.saml.config.MetadataProviderConfiguration;
 import se.swedenconnect.signservice.config.common.CommonBeanCandidate;

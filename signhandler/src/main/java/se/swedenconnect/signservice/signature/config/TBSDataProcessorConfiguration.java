@@ -17,9 +17,8 @@ package se.swedenconnect.signservice.signature.config;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 

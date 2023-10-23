@@ -15,9 +15,8 @@
  */
 package se.swedenconnect.signservice.signature.signer;
 
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.signservice.signature.SignatureType;
-
-import javax.annotation.Nonnull;
 
 /**
  * Interface for sign service signer provider

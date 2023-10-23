@@ -21,9 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditEventParameter;
 

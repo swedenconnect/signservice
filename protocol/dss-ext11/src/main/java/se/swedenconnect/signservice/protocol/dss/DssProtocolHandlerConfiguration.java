@@ -15,8 +15,7 @@
  */
 package se.swedenconnect.signservice.protocol.dss;
 
-import javax.annotation.Nonnull;
-
+import jakarta.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.signservice.core.config.AbstractHandlerConfiguration;

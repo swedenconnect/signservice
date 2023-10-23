@@ -19,11 +19,10 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.xml.security.signature.XMLSignature;
 
+import jakarta.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.signservice.certificate.base.config.AbstractKeyAndCertificateHandlerConfiguration;

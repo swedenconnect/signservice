@@ -22,8 +22,7 @@ import java.security.cert.CertificateException;
 import java.time.Duration;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;

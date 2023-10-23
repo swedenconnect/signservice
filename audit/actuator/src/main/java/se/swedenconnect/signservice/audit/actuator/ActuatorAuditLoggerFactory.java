@@ -15,11 +15,10 @@
  */
 package se.swedenconnect.signservice.audit.actuator;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.springframework.context.ApplicationEventPublisher;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLogger;
 import se.swedenconnect.signservice.audit.base.AbstractAuditLoggerFactory;

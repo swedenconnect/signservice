@@ -15,8 +15,7 @@
  */
 package se.swedenconnect.signservice.authn.mock;
 
-import javax.annotation.Nonnull;
-
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.core.config.AbstractHandlerConfiguration;
 

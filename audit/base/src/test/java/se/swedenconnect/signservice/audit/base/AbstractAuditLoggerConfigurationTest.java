@@ -17,11 +17,10 @@ package se.swedenconnect.signservice.audit.base;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import javax.annotation.Nonnull;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.signservice.audit.base.events.DefaultAuditEventFactory;
 
 /**

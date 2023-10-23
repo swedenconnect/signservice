@@ -18,8 +18,7 @@ package se.swedenconnect.signservice.signature.tbsdata;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 
-import javax.annotation.Nonnull;
-
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;

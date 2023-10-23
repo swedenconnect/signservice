@@ -19,11 +19,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
 import org.springframework.boot.actuate.audit.listener.AuditApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditEventParameter;
 import se.swedenconnect.signservice.audit.callback.AuditLoggerListener;

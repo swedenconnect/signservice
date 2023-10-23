@@ -25,22 +25,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.TrustManager;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-import net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder;
-import net.shibboleth.utilities.java.support.httpclient.HttpClientSupport;
-import net.shibboleth.utilities.java.support.httpclient.TLSSocketFactoryBuilder;
-import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import net.shibboleth.shared.component.ComponentInitializationException;
+import net.shibboleth.shared.httpclient.HttpClientBuilder;
+import net.shibboleth.shared.httpclient.HttpClientSupport;
+import net.shibboleth.shared.httpclient.TLSSocketFactoryBuilder;
+import net.shibboleth.shared.resolver.ResolverException;
 import se.swedenconnect.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
 import se.swedenconnect.opensaml.saml2.metadata.provider.CompositeMetadataProvider;
 import se.swedenconnect.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;

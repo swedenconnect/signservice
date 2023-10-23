@@ -17,8 +17,7 @@ package se.swedenconnect.signservice.certificate.attributemapping;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 

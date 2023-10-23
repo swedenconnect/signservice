@@ -19,8 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
+import jakarta.annotation.Nonnull;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;

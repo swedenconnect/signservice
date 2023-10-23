@@ -17,11 +17,10 @@ package se.swedenconnect.signservice.audit.callback;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.audit.AuditLoggerException;

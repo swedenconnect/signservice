@@ -18,21 +18,20 @@ package se.swedenconnect.signservice.signature.tbsdata;
 import java.security.SignatureException;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.xml.bind.JAXBException;
-
 import org.apache.xml.security.binding.xmldsig.ObjectType;
 import org.w3c.dom.Element;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
-import se.idsec.signservice.xml.JAXBMarshaller;
-import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.etsi.xades_1_3_2.DigestAlgAndValueType;
 import se.swedenconnect.schemas.etsi.xades_1_3_2.QualifyingProperties;
 import se.swedenconnect.schemas.etsi.xades_1_3_2.SignaturePolicyIdentifier;
 import se.swedenconnect.schemas.etsi.xades_1_3_2.SigningCertificate;
 import se.swedenconnect.schemas.etsi.xades_1_3_2.SigningCertificateV2;
+import se.swedenconnect.xml.jaxb.JAXBMarshaller;
+import se.swedenconnect.xml.jaxb.JAXBUnmarshaller;
 
 /**
  * The XAdES object for XML signatures is a {@code xades:QualifyingProperties} object.

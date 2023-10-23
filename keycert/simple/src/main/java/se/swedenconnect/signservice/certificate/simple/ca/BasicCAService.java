@@ -26,14 +26,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.cert.X509CertificateHolder;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;

@@ -27,7 +27,7 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
-import lombok.NonNull;
+import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.MessageDigestAlgorithm;
 
@@ -59,8 +59,8 @@ public class PKCS1V15Padding {
    * @return padded data to be signed hash
    * @throws IOException illegal input data
    */
-  public static byte[] getRSAPkcs1DigestInfo(@NonNull final MessageDigestAlgorithm digestAlgo,
-    @NonNull final byte[] hashValue) throws IOException {
+  public static byte[] getRSAPkcs1DigestInfo(@Nonnull final MessageDigestAlgorithm digestAlgo,
+    @Nonnull final byte[] hashValue) throws IOException {
     final ASN1EncodableVector digestInfoSeq = new ASN1EncodableVector();
     final AlgorithmIdentifier algoId = digestAlgo.getAlgorithmIdentifier();
     digestInfoSeq.add(algoId);
@@ -79,8 +79,8 @@ public class PKCS1V15Padding {
    * @return true on match otherwise false
    * @throws IOException error in input data
    */
-  public static boolean verifyMessageDigest(@NonNull final byte[] paddedDigest, @NonNull final byte[] digest,
-    @NonNull final MessageDigestAlgorithm messageDigestAlgorithm) throws IOException {
+  public static boolean verifyMessageDigest(@Nonnull final byte[] paddedDigest, @Nonnull final byte[] digest,
+    @Nonnull final MessageDigestAlgorithm messageDigestAlgorithm) throws IOException {
 
     try (final ASN1InputStream asn1InputStream = new ASN1InputStream(paddedDigest)) {
       final ASN1Sequence asn1Sequence = ASN1Sequence.getInstance(asn1InputStream.readObject());
