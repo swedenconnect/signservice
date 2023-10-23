@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@ package se.swedenconnect.signservice.certificate.impl;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 
-import org.apache.commons.lang.StringUtils;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.signservice.certificate.CertificateAttributeIdentifier;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
@@ -33,7 +32,7 @@ import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
 public class DefaultCertificateAttributeIdentifier implements CertificateAttributeIdentifier {
 
   // For serializing
-  private static final long serialVersionUID = 8661321802428610763L;
+  private static final long serialVersionUID = -3389737202407629551L;
 
   // The type of attribute
   private final CertificateAttributeType type;

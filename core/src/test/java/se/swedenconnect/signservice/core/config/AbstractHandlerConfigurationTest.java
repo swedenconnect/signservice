@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import jakarta.annotation.Nonnull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -189,18 +188,18 @@ public class AbstractHandlerConfigurationTest {
     Assertions.assertEquals("2-2", conf.getDummy2().getTwo());
     Assertions.assertEquals(DummyHandlerFactory.class.getName(), conf.getFactoryClass());
   }
-  
+
   @Test
   public void testMergeFactoryClass() throws Exception {
     final DummyHandlerConfiguration shared = new DummyHandlerConfiguration();
     shared.setDummy(new DummyObject());
     shared.getDummy().setOne("1");
     shared.setFactoryClass("se.example.Dummy");
-    
+
     final DummyHandlerConfiguration conf = new DummyHandlerConfiguration();
     conf.setAbc("ABC");
     conf.setDefaultConfig(shared);
-    
+
     // Init merges
     conf.init();
 

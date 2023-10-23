@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,9 @@ package se.swedenconnect.signservice.core.config;
 
 import java.util.function.Function;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import se.swedenconnect.signservice.core.SignServiceHandler;
 
 /**
@@ -39,7 +38,7 @@ import se.swedenconnect.signservice.core.SignServiceHandler;
  * </p>
  * <p>
  * Note: An implementing class must not assign a default value for any property. Non-assigned properties must always
- * return {@code null}. Assignment of default values should be done in the corresponding factory class. 
+ * return {@code null}. Assignment of default values should be done in the corresponding factory class.
  * </p>
  *
  * @param <T> the type of handler the configuration is for

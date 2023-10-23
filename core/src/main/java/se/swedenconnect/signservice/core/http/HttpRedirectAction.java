@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 package se.swedenconnect.signservice.core.http;
 
-import javax.annotation.Nonnull;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Represents a HTTP redirect action where the user's browser is redirected to the given URL.
