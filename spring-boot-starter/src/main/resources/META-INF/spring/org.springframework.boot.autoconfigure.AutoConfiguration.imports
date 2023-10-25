@@ -1,0 +1,2 @@
+se.swedenconnect.signservice.spring.config.ActuatorAuditingConfiguration
+se.swedenconnect.signservice.spring.config.SignServiceConfiguration
