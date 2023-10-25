@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Default implementation of the {@link HttpPostAction} interface.

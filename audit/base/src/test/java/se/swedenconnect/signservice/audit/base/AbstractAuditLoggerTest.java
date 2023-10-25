@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@ package se.swedenconnect.signservice.audit.base;
 
 import java.lang.reflect.Field;
 
-import javax.annotation.Nonnull;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditEventParameter;
 import se.swedenconnect.signservice.audit.AuditLoggerException;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,6 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.xml.DOMUtils;
-import se.idsec.signservice.xml.JAXBMarshaller;
-import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.etsi.xades_1_3_2.CertIDTypeV2;
 import se.swedenconnect.schemas.etsi.xades_1_3_2.QualifyingProperties;
 import se.swedenconnect.schemas.etsi.xades_1_3_2.SignedSignatureProperties;
@@ -60,6 +58,8 @@ import se.swedenconnect.signservice.signature.signer.TestAlgorithms;
 import se.swedenconnect.signservice.signature.signer.TestCredentials;
 import se.swedenconnect.signservice.signature.testutils.TestData;
 import se.swedenconnect.signservice.signature.testutils.TestUtils;
+import se.swedenconnect.xml.jaxb.JAXBMarshaller;
+import se.swedenconnect.xml.jaxb.JAXBUnmarshaller;
 
 /**
  * XML To Be Signed data processor tests

@@ -8,8 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +16,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.signservice.audit.AuditEvent;
 import se.swedenconnect.signservice.audit.AuditLoggerException;
 import se.swedenconnect.signservice.audit.MemoryAppender;

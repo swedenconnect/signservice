@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,11 @@ package se.swedenconnect.signservice.protocol.dss;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.xml.bind.JAXBException;
-
 import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.xml.DOMUtils;
-import se.idsec.signservice.xml.JAXBMarshaller;
-import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
+import se.swedenconnect.xml.jaxb.JAXBMarshaller;
+import se.swedenconnect.xml.jaxb.JAXBUnmarshaller;
 
 /**
  * Representation of a DSS SignMessage.
@@ -53,7 +51,7 @@ class DssSignMessage implements SignMessage {
           try {
             return JAXBMarshaller.marshall(m);
           }
-          catch (final JAXBException e) {
+          catch (final Exception e) {
             log.info("Invalid SignMessage - failed to marshall it", e);
             return null;
           }
@@ -80,7 +78,7 @@ class DssSignMessage implements SignMessage {
           JAXBUnmarshaller.unmarshall(DOMUtils.bytesToDocument(this.encoding),
               se.swedenconnect.schemas.csig.dssext_1_1.SignMessage.class);
       }
-      catch (final JAXBException e) {
+      catch (final Exception e) {
         // Should never happen ...
         log.warn("Failed to unmarshall SignMessage");
         throw new RuntimeException(e);

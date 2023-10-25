@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,20 @@
  */
 package se.swedenconnect.signservice.signature.signer;
 
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
+import java.security.PrivateKey;
+import java.security.SignatureException;
+import java.security.interfaces.RSAKey;
+import java.util.Objects;
+
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.jcajce.provider.util.DigestFactory;
+
+import jakarta.annotation.Nonnull;
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.RSAPSSSignatureAlgorithm;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.signer.crypto.PSSPadding;
 import se.swedenconnect.signservice.signature.signer.crypto.PkCrypto;
-
-import java.security.PrivateKey;
-import java.security.SignatureException;
-import java.security.interfaces.RSAKey;
 
 /**
  * Signer for creating RSA signatures using RSA-PSS (Probabilistic Signature Scheme) according to PKCS#1 v 2.1
@@ -35,13 +37,16 @@ import java.security.interfaces.RSAKey;
 public class SignServiceRSAPSSSigner implements SignServiceSigner {
 
   /** {@inheritDoc} */
-  @Override public byte[] sign(final byte[] toBeSignedBytes, @NonNull final PrivateKey privateKey,
-    @NonNull final SignatureAlgorithm signatureAlgorithm)
-    throws SignatureException {
+  @Override
+  public byte[] sign(@Nonnull final byte[] toBeSignedBytes, @Nonnull final PrivateKey privateKey,
+      @Nonnull final SignatureAlgorithm signatureAlgorithm) throws SignatureException {
 
     if (toBeSignedBytes == null) {
       throw new SignatureException("bytes to be signed must not be null");
     }
+
+    Objects.requireNonNull(privateKey, "privateKey must not be null");
+    Objects.requireNonNull(signatureAlgorithm, "signatureAlgorithm must not be null");
 
     if (!(signatureAlgorithm instanceof RSAPSSSignatureAlgorithm)) {
       throw new SignatureException("The specified algorithm is not an RSA PSS algorithm");
@@ -49,7 +54,7 @@ public class SignServiceRSAPSSSigner implements SignServiceSigner {
 
     try {
       final Digest messageDigestFunction = DigestFactory.getDigest(
-        signatureAlgorithm.getMessageDigestAlgorithm().getJcaName());
+          signatureAlgorithm.getMessageDigestAlgorithm().getJcaName());
       final int modLen = ((RSAKey) privateKey).getModulus().bitLength();
       final PSSPadding pssPadding = new PSSPadding(modLen, messageDigestFunction);
       pssPadding.update(toBeSignedBytes);

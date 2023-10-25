@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.List;
-import javax.annotation.Nonnull;
+
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.MessageConditions;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;

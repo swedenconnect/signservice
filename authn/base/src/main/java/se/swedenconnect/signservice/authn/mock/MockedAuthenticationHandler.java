@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,12 @@ import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.idsec.signservice.xml.DOMUtils;
-import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.signservice.authn.AuthenticationErrorCode;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.authn.AuthenticationResult;
@@ -46,6 +44,7 @@ import se.swedenconnect.signservice.core.attribute.saml.impl.StringSamlIdentityA
 import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
+import se.swedenconnect.xml.jaxb.JAXBUnmarshaller;
 
 /**
  * A mocked authentication handler that may be used in testing scenarios.

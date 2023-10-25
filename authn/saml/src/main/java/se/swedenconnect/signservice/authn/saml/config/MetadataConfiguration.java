@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.opensaml.saml.ext.saml2mdui.Logo;
 import org.opensaml.saml.ext.saml2mdui.UIInfo;
 import org.opensaml.saml.saml2.metadata.AttributeConsumingService;
@@ -30,6 +28,7 @@ import org.opensaml.saml.saml2.metadata.ContactPersonTypeEnumeration;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.Organization;
 
+import jakarta.annotation.Nonnull;
 import lombok.Data;
 import se.swedenconnect.opensaml.common.utils.LocalizedString;
 import se.swedenconnect.opensaml.saml2.metadata.build.AttributeConsumingServiceBuilder;

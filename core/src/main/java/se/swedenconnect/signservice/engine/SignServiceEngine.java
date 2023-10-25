@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,10 +13,9 @@
  */
 package se.swedenconnect.signservice.engine;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import se.swedenconnect.signservice.application.SignServiceEngineManager;
 import se.swedenconnect.signservice.application.SignServiceProcessingResult;
 import se.swedenconnect.signservice.context.SignServiceContext;

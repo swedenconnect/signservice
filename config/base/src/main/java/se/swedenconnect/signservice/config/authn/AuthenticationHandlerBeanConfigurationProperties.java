@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
  */
 package se.swedenconnect.signservice.config.authn;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
+import org.apache.commons.lang3.StringUtils;
 
-import org.springframework.util.Assert;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import se.swedenconnect.signservice.config.common.CommonBeanCandidate;
 
 /**
@@ -49,7 +48,9 @@ public class AuthenticationHandlerBeanConfigurationProperties extends Authentica
   @Override
   @PostConstruct
   public void afterPropertiesSet() throws IllegalArgumentException {
-    Assert.hasText(this.beanName, "Missing bean-name for authentication handler bean configuration");
+    if (StringUtils.isBlank(this.beanName)) {
+      throw new IllegalArgumentException("Missing bean-name for authentication handler bean configuration");
+    }
   }
 
 }

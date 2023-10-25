@@ -25,11 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;

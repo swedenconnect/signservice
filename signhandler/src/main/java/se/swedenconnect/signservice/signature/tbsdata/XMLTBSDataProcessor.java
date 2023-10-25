@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package se.swedenconnect.signservice.signature.tbsdata;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -32,9 +33,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -63,18 +61,19 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.xml.bind.JAXBException;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.xml.DOMUtils;
-import se.idsec.signservice.xml.InternalXMLException;
-import se.idsec.signservice.xml.JAXBMarshaller;
-import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.etsi.xades_1_3_2.CertIDTypeV2;
 import se.swedenconnect.schemas.etsi.xades_1_3_2.DigestAlgAndValueType;
 import se.swedenconnect.schemas.etsi.xades_1_3_2.QualifyingProperties;
@@ -89,6 +88,8 @@ import se.swedenconnect.signservice.signature.AdESType;
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.impl.DefaultAdESObject;
+import se.swedenconnect.xml.jaxb.JAXBMarshaller;
+import se.swedenconnect.xml.jaxb.JAXBUnmarshaller;
 
 /**
  * XML Data to be signed processor.
@@ -213,7 +214,7 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
       }
 
     }
-    catch (final JAXBException | NoSuchAlgorithmException | IOException | InternalXMLException | SignatureException e) {
+    catch (final JAXBException | NoSuchAlgorithmException | IOException | DOMException | SignatureException e) {
       throw new InvalidRequestException(e.getMessage(), e);
     }
   }
@@ -470,8 +471,11 @@ public class XMLTBSDataProcessor extends AbstractTBSDataProcessor {
       xmlFragmentTransformer.transform(new DOMSource(node), new StreamResult(output));
       return output.toByteArray();
     }
-    catch (final TransformerException | IOException e) {
-      throw new InternalXMLException("Failed to transform XML node to bytes", e);
+    catch (final IOException e) {
+      throw new UncheckedIOException("Failed to transform XML node to bytes", e);
+    }
+    catch (final TransformerException e) {
+      throw new DOMException(DOMException.NOT_SUPPORTED_ERR, "Failed to transform XML node to bytes");
     }
   }
 

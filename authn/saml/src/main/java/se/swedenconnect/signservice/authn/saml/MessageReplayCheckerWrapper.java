@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,11 @@ package se.swedenconnect.signservice.authn.saml;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Response;
 
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.opensaml.saml2.response.replay.MessageReplayChecker;
 import se.swedenconnect.opensaml.saml2.response.replay.MessageReplayException;
 

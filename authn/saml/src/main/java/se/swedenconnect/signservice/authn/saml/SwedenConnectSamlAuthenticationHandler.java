@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.core.xml.util.XMLObjectSupport;
@@ -37,7 +34,9 @@ import org.opensaml.saml.saml2.metadata.SSODescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.shibboleth.utilities.java.support.xml.XMLParserException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import net.shibboleth.shared.xml.XMLParserException;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorContainer;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorUtils;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
@@ -391,7 +390,7 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
 
   /**
    * Gets the {@link SADValidator} for further configuration.
-   * 
+   *
    * @return the {@link SADValidator}
    */
   public SADValidator getSADValidator() {
@@ -400,7 +399,7 @@ public class SwedenConnectSamlAuthenticationHandler extends AbstractSamlAuthenti
 
   /**
    * Assigns the requirements regarding including the {@link SADRequest} extension.
-   * 
+   *
    * @param sadRequestRequirement requirement
    */
   public void setSadRequestRequirement(final SadRequestRequirement sadRequestRequirement) {
