@@ -30,7 +30,7 @@ import javax.net.ssl.TrustManager;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
-import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -206,7 +206,7 @@ public class MetadataProviderConfiguration {
   protected HttpClient createHttpClient() {
     try {
       final List<TrustManager> managers = Arrays.asList(HttpClientSupport.buildNoTrustX509TrustManager());
-      final HostnameVerifier hnv = new DefaultHostnameVerifier();
+      final HostnameVerifier hnv = new NoopHostnameVerifier();
 
       HttpClientBuilder builder = new HttpClientBuilder();
       builder.setUseSystemProperties(true);
