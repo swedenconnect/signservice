@@ -91,6 +91,14 @@ public class MetadataProviderConfiguration {
   private Boolean mdq;
 
   /**
+   * Sets whether problems during initialization should cause the provider to fail or go on without metadata. The
+   * assumption being that in most cases a provider will recover at some point in the future. The default is
+   * {@code false}.
+   */
+  @Nullable
+  private Boolean failFast;
+
+  /**
    * If the service is placed behind a HTTP proxy, this setting configures the proxy.
    */
   @Nullable
@@ -163,6 +171,9 @@ public class MetadataProviderConfiguration {
       }
       else {
         throw new IllegalArgumentException("Illegal metadata provider configuration - url or file must be set");
+      }
+      if (this.failFast != null) {
+        provider.setFailFastInitialization(this.failFast.booleanValue());
       }
       provider.setPerformSchemaValidation(false);
       provider.initialize();
