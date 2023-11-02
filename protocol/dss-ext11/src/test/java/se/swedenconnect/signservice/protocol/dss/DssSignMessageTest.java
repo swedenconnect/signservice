@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
 import se.idsec.signservice.xml.DOMUtils;
-import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.csig.dssext_1_1.SignMessage;
+import se.swedenconnect.xml.jaxb.JAXBUnmarshaller;
 
 /**
  * Test cases for DssSignMessage.

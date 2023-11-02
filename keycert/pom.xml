@@ -9,7 +9,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-parent</artifactId>
-    <version>1.0.2</version>
+    <version>1.1.0</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: KeyAndCertificate</name>
@@ -87,7 +87,7 @@
       <dependency>
         <groupId>se.idsec.utils</groupId>
         <artifactId>print-cert</artifactId>
-        <version>1.0.5</version>
+        <version>1.0.6</version>
         <scope>test</scope>
       </dependency>
 
@@ -99,7 +99,7 @@
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-core</artifactId>
-      <version>1.0.2</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -108,5 +108,19 @@
     </dependency>
 
   </dependencies>
+  
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+          </plugin>          
+        </plugins>
+      </build>
+    </profile>
+  </profiles>  
 
 </project>

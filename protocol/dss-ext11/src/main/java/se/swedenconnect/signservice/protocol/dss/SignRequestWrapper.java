@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,20 @@
  */
 package se.swedenconnect.signservice.protocol.dss;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import javax.xml.bind.JAXBException;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
-import se.idsec.signservice.xml.DOMUtils;
-import se.idsec.signservice.xml.InternalXMLException;
-import se.idsec.signservice.xml.JAXBMarshaller;
-import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.csig.dssext_1_1.SignRequestExtension;
 import se.swedenconnect.schemas.csig.dssext_1_1.SignTasks;
 import se.swedenconnect.schemas.dss_1_0.AnyType;
 import se.swedenconnect.schemas.dss_1_0.InputDocuments;
 import se.swedenconnect.schemas.dss_1_0.SignRequest;
 import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
+import se.swedenconnect.xml.jaxb.JAXBSerializable;
+import se.swedenconnect.xml.jaxb.JAXBUnmarshaller;
 
 /**
  * A wrapper for easier access to the DSS extensions.
@@ -44,26 +37,26 @@ import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
 class SignRequestWrapper extends SignRequest implements Serializable {
 
   /** For serialization. */
-  private static final long serialVersionUID = 414996066434815557L;
+  private static final long serialVersionUID = -6155213216857197695L;
 
   /** Object factory for DSS objects. */
   private static se.swedenconnect.schemas.dss_1_0.ObjectFactory dssObjectFactory =
       new se.swedenconnect.schemas.dss_1_0.ObjectFactory();
 
   /** The wrapped SignRequest. */
-  private SignRequest signRequest;
+  private JAXBSerializable<SignRequest> signRequest;
 
   /** The SignRequest extension (stored in OptionalInputs). */
-  private SignRequestExtension signRequestExtension;
+  private transient SignRequestExtension signRequestExtension;
 
   /** The SignTasks element (stored in InputDocuments). */
-  private SignTasks signTasks;
+  private transient SignTasks signTasks;
 
   /**
    * Constructor setting up an empty {@code SignRequest}.
    */
   public SignRequestWrapper() {
-    this.signRequest = dssObjectFactory.createSignRequest();
+    this.signRequest = new JAXBSerializable<>(dssObjectFactory.createSignRequest(), SignRequest.class);
   }
 
   /**
@@ -72,7 +65,7 @@ class SignRequestWrapper extends SignRequest implements Serializable {
    * @param signRequest the request to wrap.
    */
   public SignRequestWrapper(final SignRequest signRequest) {
-    this.signRequest = signRequest;
+    this.signRequest = new JAXBSerializable<>(signRequest, SignRequest.class);
   }
 
   /**
@@ -81,7 +74,7 @@ class SignRequestWrapper extends SignRequest implements Serializable {
    * @return the wrapped SignRequest object
    */
   public SignRequest getWrappedSignRequest() {
-    return this.signRequest;
+    return this.signRequest.get();
   }
 
   /**
@@ -93,10 +86,10 @@ class SignRequestWrapper extends SignRequest implements Serializable {
     if (this.signRequestExtension != null) {
       return this.signRequestExtension;
     }
-    if (!this.signRequest.isSetOptionalInputs()) {
+    if (!this.getWrappedSignRequest().isSetOptionalInputs()) {
       return null;
     }
-    final Element signRequestExtensionElement = this.signRequest.getOptionalInputs()
+    final Element signRequestExtensionElement = this.getWrappedSignRequest().getOptionalInputs()
         .getAnies()
         .stream()
         .filter(e -> "SignRequestExtension".equals(e.getLocalName()))
@@ -120,21 +113,21 @@ class SignRequestWrapper extends SignRequest implements Serializable {
   @Override
   @GeneratedMethod
   public AnyType getOptionalInputs() {
-    return this.signRequest.getOptionalInputs();
+    return this.getWrappedSignRequest().getOptionalInputs();
   }
 
   /** {@inheritDoc} */
   @Override
   @GeneratedMethod
   public boolean isSetOptionalInputs() {
-    return this.signRequest.isSetOptionalInputs();
+    return this.getWrappedSignRequest().isSetOptionalInputs();
   }
 
   /** {@inheritDoc} */
   @Override
   @GeneratedMethod
   public InputDocuments getInputDocuments() {
-    return this.signRequest.getInputDocuments();
+    return this.getWrappedSignRequest().getInputDocuments();
   }
 
   /** {@inheritDoc} */
@@ -143,7 +136,7 @@ class SignRequestWrapper extends SignRequest implements Serializable {
   public void setInputDocuments(final InputDocuments value) {
     // Reset the signTasks variable. It may be set as an any type in the supplied value.
     this.signTasks = null;
-    this.signRequest.setInputDocuments(value);
+    this.getWrappedSignRequest().setInputDocuments(value);
   }
 
   /**
@@ -155,11 +148,11 @@ class SignRequestWrapper extends SignRequest implements Serializable {
     if (this.signTasks != null) {
       return this.signTasks;
     }
-    if (this.signRequest.getInputDocuments() == null
-        || !this.signRequest.getInputDocuments().isSetDocumentsAndTransformedDatasAndDocumentHashes()) {
+    if (this.getWrappedSignRequest().getInputDocuments() == null
+        || !this.getWrappedSignRequest().getInputDocuments().isSetDocumentsAndTransformedDatasAndDocumentHashes()) {
       return null;
     }
-    for (final Object o : this.signRequest.getInputDocuments().getDocumentsAndTransformedDatasAndDocumentHashes()) {
+    for (final Object o : this.getWrappedSignRequest().getInputDocuments().getDocumentsAndTransformedDatasAndDocumentHashes()) {
       if (o instanceof AnyType) {
         final Element signTasksElement = ((AnyType) o).getAnies()
             .stream()
@@ -186,78 +179,43 @@ class SignRequestWrapper extends SignRequest implements Serializable {
   @Override
   @GeneratedMethod
   public boolean isSetInputDocuments() {
-    return this.signRequest.isSetInputDocuments();
+    return this.getWrappedSignRequest().isSetInputDocuments();
   }
 
   /** {@inheritDoc} */
   @Override
   public String getRequestID() {
-    return this.signRequest.getRequestID();
+    return this.getWrappedSignRequest().getRequestID();
   }
 
   /** {@inheritDoc} */
   @Override
   public void setRequestID(final String value) {
-    this.signRequest.setRequestID(value);
+    this.getWrappedSignRequest().setRequestID(value);
   }
 
   /** {@inheritDoc} */
   @Override
   public boolean isSetRequestID() {
-    return this.signRequest.isSetRequestID();
+    return this.getWrappedSignRequest().isSetRequestID();
   }
 
   /** {@inheritDoc} */
   @Override
   public String getProfile() {
-    return this.signRequest.getProfile();
+    return this.getWrappedSignRequest().getProfile();
   }
 
   /** {@inheritDoc} */
   @Override
   public void setProfile(final String value) {
-    this.signRequest.setProfile(value);
+    this.getWrappedSignRequest().setProfile(value);
   }
 
   /** {@inheritDoc} */
   @Override
   public boolean isSetProfile() {
-    return this.signRequest.isSetProfile();
-  }
-
-  /**
-   * For serialization of the object.
-   *
-   * @param out the output stream
-   * @throws IOException for errors
-   */
-  private void writeObject(final ObjectOutputStream out) throws IOException {
-    try {
-      final Document document = JAXBMarshaller.marshall(this.signRequest);
-      final byte[] bytes = DOMUtils.nodeToBytes(document);
-      out.writeObject(bytes);
-    }
-    catch (final JAXBException | InternalXMLException e) {
-      throw new IOException("Could not marshall SignRequest", e);
-    }
-  }
-
-  /**
-   * For deserialization of the object
-   *
-   * @param in the input stream
-   * @throws IOException for errors
-   * @throws ClassNotFoundException not thrown by this method
-   */
-  private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
-    try {
-      final byte[] bytes = (byte[]) in.readObject();
-      final Document document = DOMUtils.bytesToDocument(bytes);
-      this.signRequest = JAXBUnmarshaller.unmarshall(document, SignRequest.class);
-    }
-    catch (final JAXBException | InternalXMLException e) {
-      throw new IOException("Could not restore SignRequest", e);
-    }
+    return this.getWrappedSignRequest().isSetProfile();
   }
 
 }

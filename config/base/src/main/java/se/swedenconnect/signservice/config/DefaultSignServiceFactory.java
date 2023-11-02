@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 
-import org.springframework.util.StringUtils;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 import se.swedenconnect.security.credential.PkiCredential;
@@ -171,10 +170,10 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
       final DefaultEngineConfiguration conf = new DefaultEngineConfiguration();
       conf.setName(ecp.getName());
 
-      if (StringUtils.hasText(ecp.getSignServiceId())) {
+      if (!StringUtils.isBlank(ecp.getSignServiceId())) {
         conf.setSignServiceId(ecp.getSignServiceId());
       }
-      else if (StringUtils.hasText(configuration.getDefaultSignServiceId())) {
+      else if (!StringUtils.isBlank(configuration.getDefaultSignServiceId())) {
         conf.setSignServiceId(configuration.getDefaultSignServiceId());
       }
       else {
@@ -195,7 +194,7 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
 
       // Protocol handler
       //
-      
+
       // First check if we should apply default bean ...
       if (ecp.getProtocol() == null) {
         final List<String> beanNames = bRegistrator.getBeanNames(ProtocolHandler.class);
@@ -204,7 +203,7 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
         }
         else if (beanNames.size() > 1) {
           throw new IllegalArgumentException("No protocol given for engine (and several default beans registered)");
-        }        
+        }
         final ProtocolHandlerConfigurationProperties props = new ProtocolHandlerConfigurationProperties();
         final BeanReferenceHandlerConfiguration<ProtocolHandler> ext = new BeanReferenceHandlerConfiguration<ProtocolHandler>();
         ext.setBeanName(beanNames.get(0));
@@ -213,7 +212,7 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
         log.info("No protocol assigned for engine {} - using default: {}", ecp.getName(), beanNames.get(0));
         ecp.setProtocol(props);
       }
-      
+
       final HandlerConfiguration<ProtocolHandler> protocolConf = ecp.getProtocol().getHandlerConfiguration();
       if (protocolConf.needsDefaultConfigResolving()) {
         protocolConf.resolveDefaultConfigRef(this.getResolver("protocol",
@@ -229,7 +228,7 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
 
       // Signature handler
       //
-      
+
       // First chck if we should apply default bean ...
       if (ecp.getSign() == null) {
         final List<String> beanNames = bRegistrator.getBeanNames(SignatureHandler.class);
@@ -239,7 +238,7 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
         else if (beanNames.size() > 1) {
           throw new IllegalArgumentException("No signature handler given for engine (and several default beans registered)");
         }
-        final SignatureHandlerConfigurationProperties props = new SignatureHandlerConfigurationProperties();        
+        final SignatureHandlerConfigurationProperties props = new SignatureHandlerConfigurationProperties();
         final BeanReferenceHandlerConfiguration<SignatureHandler> ext = new BeanReferenceHandlerConfiguration<SignatureHandler>();
         ext.setBeanName(beanNames.get(0));
         ext.init();
@@ -247,7 +246,7 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
         log.info("No signature handler assigned for engine {} - using default: {}", ecp.getName(), beanNames.get(0));
         ecp.setSign(props);
       }
-      
+
       final HandlerConfiguration<SignatureHandler> sigHandlerConf = ecp.getSign().getHandlerConfiguration();
       if (sigHandlerConf.needsDefaultConfigResolving()) {
         sigHandlerConf.resolveDefaultConfigRef(this.getResolver("sign",
@@ -263,7 +262,7 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
 
       // Key and certificate handler
       //
-      
+
       // First chck if we should apply default bean ...
       if (ecp.getCert() == null) {
         final List<String> beanNames = bRegistrator.getBeanNames(KeyAndCertificateHandler.class);
@@ -274,7 +273,7 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
           throw new IllegalArgumentException("No key and certificate given for engine (and several default beans registered)");
         }
         final KeyAndCertificateHandlerConfigurationProperties props =
-            new KeyAndCertificateHandlerConfigurationProperties();        
+            new KeyAndCertificateHandlerConfigurationProperties();
         final BeanReferenceHandlerConfiguration<KeyAndCertificateHandler> ext = new BeanReferenceHandlerConfiguration<KeyAndCertificateHandler>();
         ext.setBeanName(beanNames.get(0));
         ext.init();
@@ -282,7 +281,7 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
         log.info("No key and certifucate handler assigned for engine {} - using default: {}", ecp.getName(), beanNames.get(0));
         ecp.setCert(props);
       }
-      
+
       final HandlerConfiguration<KeyAndCertificateHandler> keyAndCertConf = ecp.getCert().getHandlerConfiguration();
       if (keyAndCertConf.needsDefaultConfigResolving()) {
         keyAndCertConf.resolveDefaultConfigRef(this.getResolver("cert",
@@ -502,7 +501,7 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
 
     /**
      * Gets a list of bean names that have been registered and that holds a bean object of the specified type.
-     * 
+     *
      * @param <T> the type
      * @param type the type
      * @return a (possibly empty) list of bean names

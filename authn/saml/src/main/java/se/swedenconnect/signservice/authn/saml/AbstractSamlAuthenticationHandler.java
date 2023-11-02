@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.io.Unmarshaller;
@@ -46,11 +43,12 @@ import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.w3c.dom.Element;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
-import net.shibboleth.utilities.java.support.resolver.ResolverException;
-import net.shibboleth.utilities.java.support.xml.SerializeSupport;
+import net.shibboleth.shared.resolver.ResolverException;
+import net.shibboleth.shared.xml.SerializeSupport;
 import se.idsec.signservice.xml.DOMUtils;
-import se.idsec.signservice.xml.InternalXMLException;
 import se.swedenconnect.opensaml.saml2.core.build.RequestedAuthnContextBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorContainer;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorUtils;
@@ -852,7 +850,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
     try {
       assertion.setEncodedAssertion(DOMUtils.nodeToBytes(XMLObjectSupport.marshall(samlAssertion)));
     }
-    catch (final MarshallingException | InternalXMLException e) {
+    catch (final Exception e) {
       final String msg = "Failed to unmarshall Assertion";
       log.info("{}: {} - {}", context.getId(), msg, e.getMessage());
       throw new UserAuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHN_ERROR, msg, e);
@@ -892,7 +890,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
       // We do that by marshalling it to a DOM object and to get the bytes ...
       context.put(AUTHNREQUEST_KEY, DOMUtils.nodeToBytes(XMLObjectSupport.marshall(authnRequest)));
     }
-    catch (final MarshallingException | InternalXMLException e) {
+    catch (final Exception e) {
       final String msg = "Failed to marshall AuthnRequest object";
       log.info("{}: {} - {}", context.getId(), msg, e.getMessage());
       throw new UserAuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHN_ERROR, msg, e);
@@ -919,7 +917,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
           .orElseThrow(() -> new UnmarshallingException("No unmarshaller for AuthnRequest available"));
       return AuthnRequest.class.cast(unmarshaller.unmarshall(xml));
     }
-    catch (final UnmarshallingException | InternalXMLException e) {
+    catch (final Exception e) {
       final String msg = "Failed to unmarshall AuthnRequest object";
       log.info("{}: {} - {}", context.getId(), msg, e.getMessage());
       throw new UserAuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHN_ERROR, msg, e);

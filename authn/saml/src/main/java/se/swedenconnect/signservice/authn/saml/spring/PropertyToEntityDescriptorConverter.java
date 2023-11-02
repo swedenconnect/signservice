@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package se.swedenconnect.signservice.authn.saml.spring;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.annotation.Nonnull;
-
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.core.xml.util.XMLObjectSupport;
@@ -32,7 +30,8 @@ import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.io.Resource;
 import org.w3c.dom.Element;
 
-import net.shibboleth.utilities.java.support.xml.XMLParserException;
+import jakarta.annotation.Nonnull;
+import net.shibboleth.shared.xml.XMLParserException;
 
 /**
  * A {@link Converter} that gets the property value (e.g., {@code classpath:metadata.xml}) and instantiates an

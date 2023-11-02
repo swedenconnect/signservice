@@ -22,13 +22,12 @@ import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.operator.OperatorCreationException;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.cmc.api.client.impl.ProxyCMCClientHttpConnector;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;

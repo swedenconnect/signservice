@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.SignatureException;
+import java.util.Objects;
 
-import lombok.NonNull;
+import jakarta.annotation.Nonnull;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.signer.crypto.EcdsaSigValue;
@@ -46,13 +47,16 @@ public class SignServiceECSigner implements SignServiceSigner {
   }
 
   /** {@inheritDoc} */
-  @Override public byte[] sign(final byte[] toBeSignedBytes, @NonNull final PrivateKey privateKey,
-    @NonNull final SignatureAlgorithm signatureAlgorithm)
-    throws SignatureException {
+  @Override
+  public byte[] sign(@Nonnull final byte[] toBeSignedBytes, @Nonnull final PrivateKey privateKey,
+      @Nonnull final SignatureAlgorithm signatureAlgorithm)
+      throws SignatureException {
 
     if (toBeSignedBytes == null) {
       throw new SignatureException("bytes to be signed must not be null");
     }
+    Objects.requireNonNull(privateKey, "privateKey must not be null");
+    Objects.requireNonNull(signatureAlgorithm, "signatureAlgorithm must not be null");
 
     try {
       final EcdsaSigValue ecdsaSigVal = PkCrypto.ecdsaSignData(toBeSignedBytes, privateKey, signatureAlgorithm);

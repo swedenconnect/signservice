@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class SignServiceConfiguration {
    * @return a HandlerFactoryRegistry bean
    */
   @Bean
-  public HandlerFactoryRegistry handlerFactoryRegistry() {
+  HandlerFactoryRegistry handlerFactoryRegistry() {
     final ActuatorAuditLoggerFactory actuatorFactory = new ActuatorAuditLoggerFactory();
     actuatorFactory.setPublisher(this.applicationEventPublisher);
     final HandlerFactoryRegistry factoryRegistry = new HandlerFactoryRegistry();
@@ -87,7 +87,7 @@ public class SignServiceConfiguration {
    */
   @ConditionalOnMissingBean
   @Bean
-  public SignServiceFactory signServiceFactory(final HandlerFactoryRegistry handlerFactoryRegistry) {
+  SignServiceFactory signServiceFactory(final HandlerFactoryRegistry handlerFactoryRegistry) {
     return new DefaultSignServiceFactory(handlerFactoryRegistry);
   }
 
@@ -98,7 +98,7 @@ public class SignServiceConfiguration {
    */
   @ConditionalOnMissingBean
   @Bean
-  public BeanLoader beanLoader() {
+  BeanLoader beanLoader() {
     return new SpringBeanLoader(this.applicationContext);
   }
 
@@ -108,7 +108,7 @@ public class SignServiceConfiguration {
    * @return a BeanRegistrator bean
    */
   @Bean
-  public BeanRegistrator beanRegistrator() {
+  BeanRegistrator beanRegistrator() {
     return new SpringBeanRegistrator(this.applicationContext);
   }
 
@@ -121,7 +121,7 @@ public class SignServiceConfiguration {
    */
   @ConditionalOnMissingBean
   @Bean("signservice.SignServiceEngineManager")
-  public SignServiceEngineManager signServiceEngineManager(
+  SignServiceEngineManager signServiceEngineManager(
       final SignServiceFactory signServiceFactory) throws Exception {
 
     return signServiceFactory.createSignServiceEngineManager(this.properties, this.beanLoader(),

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,12 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 
-import javax.xml.bind.JAXBException;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
+import jakarta.xml.bind.JAXBException;
 import se.idsec.signservice.xml.DOMUtils;
-import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.dss_1_0.SignRequest;
 import se.swedenconnect.security.credential.utils.X509Utils;
 import se.swedenconnect.signservice.authn.impl.DefaultIdentityAssertion;
@@ -40,6 +38,7 @@ import se.swedenconnect.signservice.signature.AdESType;
 import se.swedenconnect.signservice.signature.SignatureType;
 import se.swedenconnect.signservice.signature.impl.DefaultAdESObject;
 import se.swedenconnect.signservice.signature.impl.DefaultCompletedSignatureTask;
+import se.swedenconnect.xml.jaxb.JAXBUnmarshaller;
 
 /**
  * Test cases for DssSignResponseMessage.

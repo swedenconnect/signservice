@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,12 @@
  */
 package se.swedenconnect.signservice.protocol.dss;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import javax.xml.bind.JAXBException;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
-import se.idsec.signservice.xml.DOMUtils;
-import se.idsec.signservice.xml.InternalXMLException;
-import se.idsec.signservice.xml.JAXBMarshaller;
-import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.csig.dssext_1_1.SignResponseExtension;
 import se.swedenconnect.schemas.csig.dssext_1_1.SignTasks;
 import se.swedenconnect.schemas.dss_1_0.AnyType;
@@ -37,6 +28,9 @@ import se.swedenconnect.schemas.dss_1_0.Result;
 import se.swedenconnect.schemas.dss_1_0.SignResponse;
 import se.swedenconnect.schemas.dss_1_0.SignatureObject;
 import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
+import se.swedenconnect.xml.jaxb.JAXBMarshaller;
+import se.swedenconnect.xml.jaxb.JAXBSerializable;
+import se.swedenconnect.xml.jaxb.JAXBUnmarshaller;
 
 /**
  * A wrapper for a {@link SignResponse} object where we introduce utility methods for access of extension elements.
@@ -52,7 +46,7 @@ class SignResponseWrapper extends SignResponse implements Serializable {
       new se.swedenconnect.schemas.dss_1_0.ObjectFactory();
 
   /** The wrapped SignResponse. */
-  private SignResponse signResponse;
+  private final JAXBSerializable<SignResponse> signResponse;
 
   /** The SignResponseExtension (stored in OptionalOutputs). */
   private transient SignResponseExtension signResponseExtension;
@@ -61,7 +55,7 @@ class SignResponseWrapper extends SignResponse implements Serializable {
    * Constructor setting up an empty {@code SignResponse}.
    */
   public SignResponseWrapper() {
-    this.signResponse = dssObjectFactory.createSignResponse();
+    this.signResponse = new JAXBSerializable<>(dssObjectFactory.createSignResponse(), SignResponse.class);
   }
 
   /**
@@ -73,28 +67,28 @@ class SignResponseWrapper extends SignResponse implements Serializable {
     if (this.signResponseExtension != null) {
       this.setSignResponseExtension(this.signResponseExtension);
     }
-    return this.signResponse;
+    return this.signResponse.get();
   }
 
   /** {@inheritDoc} */
   @Override
   @GeneratedMethod
   public SignatureObject getSignatureObject() {
-    return this.signResponse.getSignatureObject();
+    return this.signResponse.get().getSignatureObject();
   }
 
   /** {@inheritDoc} */
   @Override
   @GeneratedMethod
   public void setSignatureObject(final SignatureObject value) {
-    this.signResponse.setSignatureObject(value);
+    this.signResponse.get().setSignatureObject(value);
   }
 
   /** {@inheritDoc} */
   @Override
   @GeneratedMethod
   public boolean isSetSignatureObject() {
-    return this.signResponse.isSetSignatureObject();
+    return this.signResponse.get().isSetSignatureObject();
   }
 
   /**
@@ -104,10 +98,10 @@ class SignResponseWrapper extends SignResponse implements Serializable {
    * @throws DssProtocolException for unmarshalling errors
    */
   public SignTasks getSignTasks() throws DssProtocolException {
-    if (this.signResponse.getSignatureObject() == null || this.signResponse.getSignatureObject().getOther() == null) {
+    if (this.signResponse.get().getSignatureObject() == null || this.signResponse.get().getSignatureObject().getOther() == null) {
       return null;
     }
-    final Element signTasksElement = this.signResponse.getSignatureObject()
+    final Element signTasksElement = this.signResponse.get().getSignatureObject()
         .getOther()
         .getAnies()
         .stream()
@@ -139,15 +133,15 @@ class SignResponseWrapper extends SignResponse implements Serializable {
   public void setSignTasks(final SignTasks signTasks) throws DssProtocolException {
     if (signTasks == null) {
       // We don't store anything else than SignTasks so ... remove everything
-      this.signResponse.setSignatureObject(null);
+      this.signResponse.get().setSignatureObject(null);
       return;
     }
 
-    if (this.signResponse.getSignatureObject() == null) {
-      this.signResponse.setSignatureObject(dssObjectFactory.createSignatureObject());
+    if (this.signResponse.get().getSignatureObject() == null) {
+      this.signResponse.get().setSignatureObject(dssObjectFactory.createSignatureObject());
     }
-    if (this.signResponse.getSignatureObject().getOther() == null) {
-      this.signResponse.getSignatureObject().setOther(dssObjectFactory.createAnyType());
+    if (this.signResponse.get().getSignatureObject().getOther() == null) {
+      this.signResponse.get().getSignatureObject().setOther(dssObjectFactory.createAnyType());
     }
 
     Element signTasksElement;
@@ -158,42 +152,42 @@ class SignResponseWrapper extends SignResponse implements Serializable {
       log.error("Failed to marshall SignTasks - {}", e.getMessage(), e);
       throw new DssProtocolException("Failed to marshall SignTasks", e);
     }
-    for (int i = 0; i < this.signResponse.getSignatureObject().getOther().getAnies().size(); i++) {
-      final Element elm = this.signResponse.getSignatureObject().getOther().getAnies().get(i);
+    for (int i = 0; i < this.signResponse.get().getSignatureObject().getOther().getAnies().size(); i++) {
+      final Element elm = this.signResponse.get().getSignatureObject().getOther().getAnies().get(i);
       if (elm.getLocalName().equals("SignTasks")) {
         // Overwrite this ...
-        this.signResponse.getSignatureObject().getOther().getAnies().set(i, signTasksElement);
+        this.signResponse.get().getSignatureObject().getOther().getAnies().set(i, signTasksElement);
         return;
       }
     }
     // We didn't have to overwrite. Add it.
-    this.signResponse.getSignatureObject().getOther().getAnies().add(signTasksElement);
+    this.signResponse.get().getSignatureObject().getOther().getAnies().add(signTasksElement);
   }
 
   /** {@inheritDoc} */
   @Override
   public Result getResult() {
-    return this.signResponse.getResult();
+    return this.signResponse.get().getResult();
   }
 
   /** {@inheritDoc} */
   @Override
   public void setResult(final Result value) {
-    this.signResponse.setResult(value);
+    this.signResponse.get().setResult(value);
   }
 
   /** {@inheritDoc} */
   @Override
   @GeneratedMethod
   public boolean isSetResult() {
-    return this.signResponse.isSetResult();
+    return this.signResponse.get().isSetResult();
   }
 
   /** {@inheritDoc} */
   @Override
   @GeneratedMethod
   public AnyType getOptionalOutputs() {
-    return this.signResponse.getOptionalOutputs();
+    return this.signResponse.get().getOptionalOutputs();
   }
 
   /** {@inheritDoc} */
@@ -202,14 +196,14 @@ class SignResponseWrapper extends SignResponse implements Serializable {
   public void setOptionalOutputs(final AnyType value) {
     // Reset our cache for signResponseExtension.
     this.signResponseExtension = null;
-    this.signResponse.setOptionalOutputs(value);
+    this.signResponse.get().setOptionalOutputs(value);
   }
 
   /** {@inheritDoc} */
   @Override
   @GeneratedMethod
   public boolean isSetOptionalOutputs() {
-    return this.signResponse.isSetOptionalOutputs();
+    return this.signResponse.get().isSetOptionalOutputs();
   }
 
   /**
@@ -222,10 +216,10 @@ class SignResponseWrapper extends SignResponse implements Serializable {
     if (this.signResponseExtension != null) {
       return this.signResponseExtension;
     }
-    if (this.signResponse.getOptionalOutputs() == null || !this.signResponse.getOptionalOutputs().isSetAnies()) {
+    if (this.signResponse.get().getOptionalOutputs() == null || !this.signResponse.get().getOptionalOutputs().isSetAnies()) {
       return null;
     }
-    final Element signResponseExtensionElement = this.signResponse.getOptionalOutputs()
+    final Element signResponseExtensionElement = this.signResponse.get().getOptionalOutputs()
         .getAnies()
         .stream()
         .filter(e -> "SignResponseExtension".equals(e.getLocalName()))
@@ -256,7 +250,7 @@ class SignResponseWrapper extends SignResponse implements Serializable {
    */
   public void setSignResponseExtension(final SignResponseExtension signResponseExtension) throws DssProtocolException {
     if (signResponseExtension == null) {
-      this.signResponse.setOptionalOutputs(null);
+      this.signResponse.get().setOptionalOutputs(null);
       this.signResponseExtension = null;
       return;
     }
@@ -264,7 +258,7 @@ class SignResponseWrapper extends SignResponse implements Serializable {
     try {
       final AnyType optionalOutputs = dssObjectFactory.createAnyType();
       optionalOutputs.getAnies().add(JAXBMarshaller.marshall(signResponseExtension).getDocumentElement());
-      this.signResponse.setOptionalOutputs(optionalOutputs);
+      this.signResponse.get().setOptionalOutputs(optionalOutputs);
       this.signResponseExtension = signResponseExtension;
     }
     catch (final JAXBException e) {
@@ -276,74 +270,39 @@ class SignResponseWrapper extends SignResponse implements Serializable {
   /** {@inheritDoc} */
   @Override
   public String getRequestID() {
-    return this.signResponse.getRequestID();
+    return this.signResponse.get().getRequestID();
   }
 
   /** {@inheritDoc} */
   @Override
   public void setRequestID(final String value) {
-    this.signResponse.setRequestID(value);
+    this.signResponse.get().setRequestID(value);
   }
 
   /** {@inheritDoc} */
   @Override
   @GeneratedMethod
   public boolean isSetRequestID() {
-    return this.signResponse.isSetRequestID();
+    return this.signResponse.get().isSetRequestID();
   }
 
   /** {@inheritDoc} */
   @Override
   public String getProfile() {
-    return this.signResponse.getProfile();
+    return this.signResponse.get().getProfile();
   }
 
   /** {@inheritDoc} */
   @Override
   public void setProfile(final String value) {
-    this.signResponse.setProfile(value);
+    this.signResponse.get().setProfile(value);
   }
 
   /** {@inheritDoc} */
   @Override
   @GeneratedMethod
   public boolean isSetProfile() {
-    return this.signResponse.isSetProfile();
-  }
-
-  /**
-   * For serialization of the object.
-   *
-   * @param out the output stream
-   * @throws IOException for errors
-   */
-  private void writeObject(final ObjectOutputStream out) throws IOException {
-    try {
-      final Document document = JAXBMarshaller.marshall(this.getWrappedSignResponse());
-      final byte[] bytes = DOMUtils.nodeToBytes(document);
-      out.writeObject(bytes);
-    }
-    catch (final JAXBException | InternalXMLException e) {
-      throw new IOException("Could not marshall SignResponse", e);
-    }
-  }
-
-  /**
-   * For deserialization of the object
-   *
-   * @param in the input stream
-   * @throws IOException for errors
-   * @throws ClassNotFoundException not thrown by this method
-   */
-  private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
-    try {
-      final byte[] bytes = (byte[]) in.readObject();
-      final Document document = DOMUtils.bytesToDocument(bytes);
-      this.signResponse = JAXBUnmarshaller.unmarshall(document, SignResponse.class);
-    }
-    catch (final JAXBException | InternalXMLException e) {
-      throw new IOException("Could not restore SignResponse", e);
-    }
+    return this.signResponse.get().isSetProfile();
   }
 
 }

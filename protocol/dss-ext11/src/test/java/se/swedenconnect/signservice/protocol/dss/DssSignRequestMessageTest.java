@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ import org.w3c.dom.Element;
 
 import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.idsec.signservice.xml.DOMUtils;
-import se.idsec.signservice.xml.JAXBUnmarshaller;
 import se.swedenconnect.schemas.dss_1_0.SignRequest;
 import se.swedenconnect.signservice.protocol.ProtocolException;
 import se.swedenconnect.signservice.protocol.ProtocolProcessingRequirements.SignatureRequirement;
+import se.swedenconnect.xml.jaxb.JAXBUnmarshaller;
 
 /**
  * Test cases for DssSignRequestMessage.

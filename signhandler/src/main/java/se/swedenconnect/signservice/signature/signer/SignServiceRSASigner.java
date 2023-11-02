@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,17 @@
  */
 package se.swedenconnect.signservice.signature.signer;
 
-import lombok.NonNull;
+import java.security.MessageDigest;
+import java.security.PrivateKey;
+import java.security.SignatureException;
+import java.util.Objects;
+
+import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.RSAPSSSignatureAlgorithm;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.signservice.signature.signer.crypto.PKCS1V15Padding;
 import se.swedenconnect.signservice.signature.signer.crypto.PkCrypto;
-
-import java.security.MessageDigest;
-import java.security.PrivateKey;
-import java.security.SignatureException;
 
 /**
  * Signer for creating RSA signatures using PKCS#1 version 1.5
@@ -33,13 +34,15 @@ import java.security.SignatureException;
 public class SignServiceRSASigner implements SignServiceSigner {
 
   /** {@inheritDoc} */
-  @Override public byte[] sign(final byte[] toBeSignedBytes, @NonNull final PrivateKey privateKey,
-    @NonNull final SignatureAlgorithm signatureAlgorithm)
-    throws SignatureException {
+  @Override public byte[] sign(@Nonnull final byte[] toBeSignedBytes, @Nonnull final PrivateKey privateKey,
+    @Nonnull final SignatureAlgorithm signatureAlgorithm) throws SignatureException {
 
     if (toBeSignedBytes == null) {
       throw new SignatureException("bytes to be signed must not be null");
     }
+
+    Objects.requireNonNull(privateKey, "privateKey must not be null");
+    Objects.requireNonNull(signatureAlgorithm, "signatureAlgorithm must not be null");
 
     if (!signatureAlgorithm.getKeyType().equalsIgnoreCase("RSA")) {
       throw new SignatureException("The algorithm is not an RSA algorithm");

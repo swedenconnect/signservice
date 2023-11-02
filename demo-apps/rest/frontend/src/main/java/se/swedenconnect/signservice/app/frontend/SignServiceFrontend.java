@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,18 @@ package se.swedenconnect.signservice.app.frontend;
 import java.io.IOException;
 
 import javax.net.ssl.SSLContext;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.conn.ssl.TrustAllStrategy;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.config.Registry;
+import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.ssl.TrustStrategy;
 import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.apache.tomcat.util.http.SameSiteCookies;
 import org.springframework.boot.SpringApplication;
@@ -37,11 +37,19 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.embedded.tomcat.TomcatContextCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * SignService application front-end main class.
@@ -64,19 +72,31 @@ public class SignServiceFrontend {
    * @return a RestTemplate
    */
   @Bean
-  public RestTemplate restTemplate() {
+  RestTemplate restTemplate() {
     try {
       // For this example we trust all SSL/TLS certs. DO NOT COPY AND USE IN PRODUCTION!
       //
-      final SSLContext sslContext = SSLContextBuilder.create()
-          .loadTrustMaterial(new TrustAllStrategy())
+      final TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
+      final SSLContext sslContext = SSLContexts.custom()
+          .loadTrustMaterial(null, acceptingTrustStrategy)
+          .build();
+      final SSLConnectionSocketFactory sslsf =
+          new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+      final Registry<ConnectionSocketFactory> socketFactoryRegistry =
+          RegistryBuilder.<ConnectionSocketFactory> create()
+              .register("https", sslsf)
+              .register("http", new PlainConnectionSocketFactory())
+              .build();
+
+      final BasicHttpClientConnectionManager connectionManager =
+          new BasicHttpClientConnectionManager(socketFactoryRegistry);
+      final CloseableHttpClient httpClient = HttpClients.custom()
+          .setConnectionManager(connectionManager)
+          .disableRedirectHandling()
           .build();
 
-      final ClientHttpRequestFactory requestFactory =
-          new HttpComponentsClientHttpRequestFactory(
-              HttpClientBuilder.create()
-                  .setSSLContext(sslContext)
-                  .build());
+      final HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+      requestFactory.setHttpClient(httpClient);
 
       final RestTemplate restTemplate = new RestTemplate(requestFactory);
       return restTemplate;
@@ -93,7 +113,7 @@ public class SignServiceFrontend {
   public static class WebMvcConfig implements WebMvcConfigurer {
 
     @Bean
-    public TomcatContextCustomizer sameSiteCookiesConfig() {
+    TomcatContextCustomizer sameSiteCookiesConfig() {
       return context -> {
         final Rfc6265CookieProcessor cookieProcessor = new Rfc6265CookieProcessor();
         cookieProcessor.setSameSiteCookies(SameSiteCookies.NONE.getValue());
@@ -108,7 +128,7 @@ public class SignServiceFrontend {
    * @return a CommonsRequestLoggingFilter
    */
   @Bean
-  public CommonsRequestLoggingFilter requestLoggingFilter() {
+  CommonsRequestLoggingFilter requestLoggingFilter() {
     final CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter();
     loggingFilter.setIncludeClientInfo(true);
     loggingFilter.setIncludeQueryString(true);

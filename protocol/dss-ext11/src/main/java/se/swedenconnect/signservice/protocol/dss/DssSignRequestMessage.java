@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.xml.bind.JAXBException;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.xpath.XPathExpressionException;
 
@@ -36,6 +34,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.xml.security.Init;
 import org.w3c.dom.Document;
 
+import jakarta.annotation.Nonnull;
+import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.security.sign.xml.XMLMessageSignatureValidator;
 import se.idsec.signservice.security.sign.xml.XMLSignatureLocation;
@@ -43,7 +43,6 @@ import se.idsec.signservice.security.sign.xml.XMLSignatureLocation.ChildPosition
 import se.idsec.signservice.security.sign.xml.impl.DefaultXMLMessageSignatureValidator;
 import se.idsec.signservice.utils.ProtocolVersion;
 import se.idsec.signservice.xml.DOMUtils;
-import se.idsec.signservice.xml.JAXBMarshaller;
 import se.swedenconnect.schemas.csig.dssext_1_1.CertRequestProperties;
 import se.swedenconnect.schemas.csig.dssext_1_1.MappedAttributeType;
 import se.swedenconnect.schemas.csig.dssext_1_1.PreferredSAMLAttributeNameType;
@@ -83,6 +82,7 @@ import se.swedenconnect.signservice.protocol.msg.impl.DefaultSigningCertificateR
 import se.swedenconnect.signservice.signature.RequestedSignatureTask;
 import se.swedenconnect.signservice.signature.impl.DefaultAdESObject;
 import se.swedenconnect.signservice.signature.impl.DefaultRequestedSignatureTask;
+import se.swedenconnect.xml.jaxb.JAXBMarshaller;
 
 /**
  * An implementation of the {@link SignRequestMessage} interface for sign request messages according to <a href=

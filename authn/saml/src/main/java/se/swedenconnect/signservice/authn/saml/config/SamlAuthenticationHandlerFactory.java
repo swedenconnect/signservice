@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.core.NameID;
@@ -37,7 +34,9 @@ import org.opensaml.saml.saml2.metadata.NameIDFormat;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.security.credential.UsageType;
 
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import net.shibboleth.shared.component.ComponentInitializationException;
 import se.swedenconnect.opensaml.common.builder.SAMLObjectBuilderRuntimeException;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorContainer;
 import se.swedenconnect.opensaml.saml2.metadata.build.AssertionConsumerServiceBuilder;
@@ -90,11 +89,11 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     }
     final SamlAuthenticationHandlerConfiguration conf =
         SamlAuthenticationHandlerConfiguration.class.cast(configuration);
-        
+
     // Assert that required settings are there in the configuration object.
     //
     this.assertSamlType(conf.getSamlType());
-    
+
     if (StringUtils.isBlank(conf.getEntityId())) {
       throw new IllegalArgumentException("Missing entityId from configuration object");
     }
@@ -168,7 +167,7 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
 
   /**
    * Asserts that a valid SAML type has been provided.
-   * 
+   *
    * @param type the SAML type (if null, the default is assumed)
    * @throws IllegalArgumentException for invalid types
    */
@@ -205,12 +204,12 @@ public class SamlAuthenticationHandlerFactory extends AbstractHandlerFactory<Aut
     if (SamlAuthenticationHandlerConfiguration.SAML_TYPE_SWEDEN_CONNECT.equals(config.getSamlType())) {
       handler = new SwedenConnectSamlAuthenticationHandler(authnRequestGenerator, responseProcessor, metadataProvider,
           entityDescriptorContainer, config.getSpPaths());
-      
+
       if (config.getSadRequest() != null) {
         ((SwedenConnectSamlAuthenticationHandler) handler).setSadRequestRequirement(config.getSadRequest());
       }
       ((SwedenConnectSamlAuthenticationHandler) handler).getSADValidator().setAllowedClockSkew(
-          this.getValidationConfig().getAllowedClockSkew());      
+          this.getValidationConfig().getAllowedClockSkew());
     }
     else {
       handler = new DefaultSamlAuthenticationHandler(authnRequestGenerator, responseProcessor, metadataProvider,

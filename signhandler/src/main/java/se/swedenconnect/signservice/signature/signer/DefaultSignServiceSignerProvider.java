@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@
  */
 package se.swedenconnect.signservice.signature.signer;
 
-import lombok.NonNull;
+import java.util.Objects;
+
+import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
@@ -42,8 +44,11 @@ public class DefaultSignServiceSignerProvider implements SignServiceSignerProvid
   }
 
   /** {@inheritDoc} */
-  @Override public SignServiceSigner getSigner(@NonNull final String signatureAlgorithm,
-    @NonNull final SignatureType signatureType) {
+  @Override public SignServiceSigner getSigner(@Nonnull final String signatureAlgorithm,
+    @Nonnull final SignatureType signatureType) {
+
+    Objects.requireNonNull(signatureAlgorithm, "signatureAlgorithm must not be null");
+    Objects.requireNonNull(signatureType, "signatureType must not be null");
 
     final Algorithm algorithm = algorithmRegistry.getAlgorithm(signatureAlgorithm);
     if (algorithm == null) {

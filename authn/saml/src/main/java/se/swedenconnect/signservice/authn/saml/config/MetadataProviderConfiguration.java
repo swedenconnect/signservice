@@ -25,22 +25,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.TrustManager;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-import net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder;
-import net.shibboleth.utilities.java.support.httpclient.HttpClientSupport;
-import net.shibboleth.utilities.java.support.httpclient.TLSSocketFactoryBuilder;
-import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import net.shibboleth.shared.component.ComponentInitializationException;
+import net.shibboleth.shared.httpclient.HttpClientBuilder;
+import net.shibboleth.shared.httpclient.HttpClientSupport;
+import net.shibboleth.shared.httpclient.TLSSocketFactoryBuilder;
+import net.shibboleth.shared.resolver.ResolverException;
 import se.swedenconnect.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
 import se.swedenconnect.opensaml.saml2.metadata.provider.CompositeMetadataProvider;
 import se.swedenconnect.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
@@ -89,6 +89,14 @@ public class MetadataProviderConfiguration {
    */
   @Nullable
   private Boolean mdq;
+
+  /**
+   * Sets whether problems during initialization should cause the provider to fail or go on without metadata. The
+   * assumption being that in most cases a provider will recover at some point in the future. The default is
+   * {@code false}.
+   */
+  @Nullable
+  private Boolean failFast;
 
   /**
    * If the service is placed behind a HTTP proxy, this setting configures the proxy.
@@ -164,6 +172,9 @@ public class MetadataProviderConfiguration {
       else {
         throw new IllegalArgumentException("Illegal metadata provider configuration - url or file must be set");
       }
+      if (this.failFast != null) {
+        provider.setFailFastInitialization(this.failFast.booleanValue());
+      }
       provider.setPerformSchemaValidation(false);
       provider.initialize();
 
@@ -195,7 +206,7 @@ public class MetadataProviderConfiguration {
   protected HttpClient createHttpClient() {
     try {
       final List<TrustManager> managers = Arrays.asList(HttpClientSupport.buildNoTrustX509TrustManager());
-      final HostnameVerifier hnv = new DefaultHostnameVerifier();
+      final HostnameVerifier hnv = new NoopHostnameVerifier();
 
       HttpClientBuilder builder = new HttpClientBuilder();
       builder.setUseSystemProperties(true);

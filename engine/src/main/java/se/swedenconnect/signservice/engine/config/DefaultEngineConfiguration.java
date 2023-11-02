@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
+import org.apache.commons.lang3.StringUtils;
 
-import org.apache.commons.lang.StringUtils;
-
-import lombok.Setter;
+import jakarta.annotation.PostConstruct;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
@@ -38,84 +36,34 @@ import se.swedenconnect.signservice.signature.SignatureHandler;
  */
 public class DefaultEngineConfiguration implements EngineConfiguration {
 
-  /**
-   * The engine name.
-   *
-   * @param name the name of the engine
-   */
-  @Setter
+  /** The engine name. */
   private String name;
 
-  /**
-   * The unique SignService ID.
-   *
-   * @param signServiceId the SignService ID
-   */
-  @Setter
+  /** The unique SignService ID. */
   private String signServiceId;
 
-  /**
-   * This engine's SignService credentials.
-   *
-   * @param signServiceCredential the engine credentials
-   */
-  @Setter
+  /** This engine's SignService credentials. */
   private PkiCredential signServiceCredential;
 
-  /**
-   * The processing paths (relative to the application's context path).
-   *
-   * @param processingPaths the processing paths
-   */
-  @Setter
+  /** The processing paths (relative to the application's context path). */
   private List<String> processingPaths;
 
-  /**
-   * The protocol handler this engine uses.
-   *
-   * @param protocolHandler the protocol handler
-   */
-  @Setter
+  /** The protocol handler this engine uses. */
   private ProtocolHandler protocolHandler;
 
-  /**
-   * The authentication handler this engine uses.
-   *
-   * @param authenticationHandler the authentication handler
-   */
-  @Setter
+  /** The authentication handler this engine uses. */
   private AuthenticationHandler authenticationHandler;
 
-  /**
-   * The key and certificate hander.
-   *
-   * @param keyAndCertificateHandler key-and-certificate handler
-   */
-  @Setter
+  /** The key and certificate hander. */
   private KeyAndCertificateHandler keyAndCertificateHandler;
 
-  /**
-   * The signature handler.
-   *
-   * @param signatureHandler the signature handler
-   */
-  @Setter
+  /** The signature handler. */
   private SignatureHandler signatureHandler;
 
-  /**
-   * The client configuration.
-   *
-   * @param clientConfiguration the client configuration
-   */
-  @Setter
+  /** The client configuration. */
   private ClientConfiguration clientConfiguration;
 
-  /**
-   * The engine audit logger.
-   *
-   * @param auditLogger the engine audit logger
-   */
-  @Setter
+  /** The engine audit logger. */
   private AuditLogger auditLogger;
 
   /**
@@ -169,16 +117,45 @@ public class DefaultEngineConfiguration implements EngineConfiguration {
     return this.name;
   }
 
+  /**
+   * Assigns the engine name.
+   *
+   * @param name the name of the engine
+   */
+  public void setName(final String name) {
+    this.name = name;
+  }
+
+
   /** {@inheritDoc} */
   @Override
   public String getSignServiceId() {
     return this.signServiceId;
   }
 
+  /**
+   * Assigns the unique SignService ID.
+   *
+   * @param signServiceId the SignService ID
+   */
+  public void setSignServiceId(final String signServiceId) {
+    this.signServiceId = signServiceId;
+  }
+
+
   /** {@inheritDoc} */
   @Override
   public PkiCredential getSignServiceCredential() {
     return this.signServiceCredential;
+  }
+
+  /**
+   * Assigns this engine's SignService credentials.
+   *
+   * @param signServiceCredential the engine credentials
+   */
+  public void setSignServiceCredential(final PkiCredential signServiceCredential) {
+    this.signServiceCredential = signServiceCredential;
   }
 
   /** {@inheritDoc} */
@@ -187,10 +164,28 @@ public class DefaultEngineConfiguration implements EngineConfiguration {
     return this.processingPaths != null ? Collections.unmodifiableList(this.processingPaths) : null;
   }
 
+  /**
+   * Assigns the processing paths (relative to the application's context path).
+   *
+   * @param processingPaths the processing paths
+   */
+  public void setProcessingPaths(final List<String> processingPaths) {
+    this.processingPaths = processingPaths;
+  }
+
   /** {@inheritDoc} */
   @Override
   public ProtocolHandler getProtocolHandler() {
     return this.protocolHandler;
+  }
+
+  /**
+   * Assigns the protocol handler this engine uses.
+   *
+   * @param protocolHandler the protocol handler
+   */
+  public void setProtocolHandler(final ProtocolHandler protocolHandler) {
+    this.protocolHandler = protocolHandler;
   }
 
   /** {@inheritDoc} */
@@ -199,10 +194,28 @@ public class DefaultEngineConfiguration implements EngineConfiguration {
     return this.authenticationHandler;
   }
 
+  /**
+   * Assigns the authentication handler this engine uses.
+   *
+   * @param authenticationHandler the authentication handler
+   */
+  public void setAuthenticationHandler(final AuthenticationHandler authenticationHandler) {
+    this.authenticationHandler = authenticationHandler;
+  }
+
   /** {@inheritDoc} */
   @Override
   public KeyAndCertificateHandler getKeyAndCertificateHandler() {
     return this.keyAndCertificateHandler;
+  }
+
+  /**
+   * Assigns the key and certificate hander.
+   *
+   * @param keyAndCertificateHandler key-and-certificate handler
+   */
+  public void setKeyAndCertificateHandler(final KeyAndCertificateHandler keyAndCertificateHandler) {
+    this.keyAndCertificateHandler = keyAndCertificateHandler;
   }
 
   /** {@inheritDoc} */
@@ -211,16 +224,43 @@ public class DefaultEngineConfiguration implements EngineConfiguration {
     return this.signatureHandler;
   }
 
+  /**
+   * Assigns the signature handler.
+   *
+   * @param signatureHandler the signature handler
+   */
+  public void setSignatureHandler(final SignatureHandler signatureHandler) {
+    this.signatureHandler = signatureHandler;
+  }
+
   /** {@inheritDoc} */
   @Override
   public ClientConfiguration getClientConfiguration() {
     return this.clientConfiguration;
   }
 
+  /**
+   * Assigns the client configuration.
+   *
+   * @param clientConfiguration the client configuration
+   */
+  public void setClientConfiguration(final ClientConfiguration clientConfiguration) {
+    this.clientConfiguration = clientConfiguration;
+  }
+
   /** {@inheritDoc} */
   @Override
   public AuditLogger getAuditLogger() {
     return this.auditLogger;
+  }
+
+  /**
+   * Assigns the engine audit logger.
+   *
+   * @param auditLogger the engine audit logger
+   */
+  public void setAuditLogger(final AuditLogger auditLogger) {
+    this.auditLogger = auditLogger;
   }
 
   /** {@inheritDoc} */

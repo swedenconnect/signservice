@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Sweden Connect
+ * Copyright 2022-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.opensaml.saml.ext.saml2mdui.Logo;
 import org.opensaml.saml.ext.saml2mdui.UIInfo;
 import org.opensaml.saml.saml2.metadata.AttributeConsumingService;
@@ -30,6 +28,7 @@ import org.opensaml.saml.saml2.metadata.ContactPersonTypeEnumeration;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.Organization;
 
+import jakarta.annotation.Nonnull;
 import lombok.Data;
 import se.swedenconnect.opensaml.common.utils.LocalizedString;
 import se.swedenconnect.opensaml.saml2.metadata.build.AttributeConsumingServiceBuilder;
@@ -96,9 +95,9 @@ public class MetadataConfiguration {
 
     if (this.requestedAttributes != null) {
       builder.requestedAttributes(this.requestedAttributes.stream()
-        .filter(ra -> ra.getName() != null)
-        .map(ra -> RequestedAttributeBuilder.builder(ra.getName()).isRequired(ra.isRequired()).build())
-        .collect(Collectors.toList()));
+          .filter(ra -> ra.getName() != null)
+          .map(ra -> RequestedAttributeBuilder.builder(ra.getName()).isRequired(ra.isRequired()).build())
+          .collect(Collectors.toList()));
     }
 
     return builder.build();
@@ -143,7 +142,11 @@ public class MetadataConfiguration {
     public UIInfo toElement(final String baseUrl) {
       final List<Logo> logos = this.getLogos() != null
           ? this.getLogos().stream()
-              .map(logo -> LogoBuilder.logo(String.format("%s%s", baseUrl, logo.getPath()),
+              .filter(logo -> StringUtils.isNotBlank(logo.getPath()) || StringUtils.isNoneBlank(logo.getUrl()))
+              .map(logo -> LogoBuilder.logo(
+                  StringUtils.isNotBlank(logo.getUrl())
+                      ? logo.getUrl()
+                      : String.format("%s%s", baseUrl, logo.getPath()),
                   StringUtils.isNotBlank(logo.getLang()) ? logo.getLang() : "sv",
                   logo.getHeight(), logo.getWidth()))
               .collect(Collectors.toList())
@@ -165,9 +168,14 @@ public class MetadataConfiguration {
     public static class UIInfoLogo {
 
       /**
-       * The logotype path (minus baseUri but including the context path).
+       * The logotype path (minus baseUri but including the context path). Mutually exclusive with {@code url}.
        */
       private String path;
+
+      /**
+       * The logotype URL. Mutually exclusive with {@code path}.
+       */
+      private String url;
 
       /**
        * The logotype height (in pixels).

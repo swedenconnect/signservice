@@ -107,6 +107,7 @@ The [MetadataProviderConfiguration](https://github.com/swedenconnect/signservice
 | `file` | A full path to locally stored metadata. Mutually exclusive with `url` above. | - |
 | `backup-location` | Optional property. If `url` is assigned, this setting points to a backup file where the downloaded data should be saved. If the `mdq` flag has been set, this property should point to a directory and not a file. | - |
 | `mdq` | Optional property. If a metadata URL has been configured, setting this flag means that the metadata [MDQ protocol](https://www.ietf.org/id/draft-young-md-query-17.html) is used. | `false` |
+| `fail-fast` | Optional property. Sets whether problems during initialization should cause the provider to fail or go on without metadata. The assumption being that in most cases a provider will recover at some point in the future. | `false` |
 | `http-proxy.*` | An optional HTTP proxy configuration. Should be assigned if the service is deployed behind a HTTP proxy. For settings see below. | . 
 | `additional[]` | A list of additional metadata providers. Using this feature a chained metadata provider will be created where several sources of metadata will be used. | An empty list. |
 

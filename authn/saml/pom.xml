@@ -4,13 +4,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>signservice-authn-saml</artifactId>
-  <packaging>jar</packaging>
-  <version>1.0.3</version>  
+  <packaging>jar</packaging>  
 
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-authn-parent</artifactId>
-    <version>1.0.2</version>
+    <version>1.1.0</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Authentication :: SAML</name>
@@ -89,25 +88,6 @@
   <dependencyManagement>
   
     <dependencies>
-
-      <dependency>
-        <groupId>se.swedenconnect.opensaml</groupId>
-        <artifactId>opensaml-addons</artifactId>
-        <version>1.2.6</version>
-      </dependency>
-
-      <dependency>
-        <groupId>se.swedenconnect.opensaml</groupId>
-        <artifactId>opensaml-swedish-eid</artifactId>
-        <version>1.2.5</version>
-        <exclusions>
-          <exclusion>
-            <groupId>com.nimbusds</groupId>
-            <artifactId>nimbus-jose-jwt</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-            
     </dependencies>
     
   </dependencyManagement>  
@@ -117,7 +97,7 @@
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-authn-base</artifactId>
-      <version>1.0.2</version>
+      <version>${project.version}</version>
     </dependency>
         
     <dependency>
@@ -133,12 +113,6 @@
     <dependency>
       <groupId>se.swedenconnect.opensaml</groupId>
       <artifactId>opensaml-swedish-eid</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>se.swedenconnect.opensaml</groupId>
-          <artifactId>opensaml-addons</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     
 

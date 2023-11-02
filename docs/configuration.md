@@ -288,6 +288,7 @@ signservice:
         url: https://eid.svelegtest.se/metadata/mdx/role/idp.xml
         backup-location: ${SIGNSERVICE_HOME}/sandbox-metadata.xml
         validation-certificate: classpath:sandbox/sandbox-metadata.crt
+        fail-fast: true
 
   #
   # Both engines use SAML as the authentication handler, and even though each engine
