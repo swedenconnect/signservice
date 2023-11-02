@@ -85,7 +85,56 @@ public class MetadataConfigurationTest extends OpenSamlTestBase {
     final UIInfo uiInfo = ui.toElement("https://www.example.com");
     Assertions.assertTrue(uiInfo.getLogos().size() == 2);
     Assertions.assertEquals("sv", uiInfo.getLogos().get(0).getXMLLang());
+    Assertions.assertEquals("https://www.example.com/images/sv-pic.jpg", uiInfo.getLogos().get(0).getURI());
     Assertions.assertEquals("en", uiInfo.getLogos().get(1).getXMLLang());
+    Assertions.assertEquals("https://www.example.com/images/en-pic.jpg", uiInfo.getLogos().get(1).getURI());
+  }
+
+  @Test
+  public void testLogoMissingPathAndUrl() {
+    final UIInfoConfig ui = new UIInfoConfig();
+    ui.setDescriptions(List.of(new LocalizedString("sv-Beskrivning"), new LocalizedString("en-Description")));
+    ui.setDisplayNames(List.of(new LocalizedString("sv-Visningsnamn"), new LocalizedString("en-Display Name")));
+    final UIInfoLogo logo1 = new UIInfoLogo();
+    logo1.setHeight(50);
+    logo1.setWidth(50);
+    final UIInfoLogo logo2 = new UIInfoLogo();
+    logo2.setPath("/images/en-pic.jpg");
+    logo2.setLang("en");
+    logo2.setHeight(50);
+    logo2.setWidth(50);
+    ui.setLogos(List.of(logo1, logo2));
+
+    final UIInfo uiInfo = ui.toElement("https://www.example.com");
+    Assertions.assertTrue(uiInfo.getLogos().size() == 1);
+    Assertions.assertEquals("en", uiInfo.getLogos().get(0).getXMLLang());
+    Assertions.assertEquals("https://www.example.com/images/en-pic.jpg", uiInfo.getLogos().get(0).getURI());
+  }
+
+  @Test
+  public void testLogoUrl() {
+    final UIInfoConfig ui = new UIInfoConfig();
+    ui.setDescriptions(List.of(new LocalizedString("sv-Beskrivning"), new LocalizedString("en-Description")));
+    ui.setDisplayNames(List.of(new LocalizedString("sv-Visningsnamn"), new LocalizedString("en-Display Name")));
+    final UIInfoLogo logo1 = new UIInfoLogo();
+    logo1.setUrl("https://www.other-example.com/images/sv-pic.jpg");
+    logo1.setHeight(50);
+    logo1.setWidth(50);
+    final UIInfoLogo logo2 = new UIInfoLogo();
+    logo2.setUrl("https://www.other-example.com/images/en-pic.jpg");
+    // Url has precedence ...
+    logo2.setPath("/images/en-pic.jpg");
+    logo2.setLang("en");
+    logo2.setHeight(50);
+    logo2.setWidth(50);
+    ui.setLogos(List.of(logo1, logo2));
+
+    final UIInfo uiInfo = ui.toElement("https://www.example.com");
+    Assertions.assertTrue(uiInfo.getLogos().size() == 2);
+    Assertions.assertEquals("sv", uiInfo.getLogos().get(0).getXMLLang());
+    Assertions.assertEquals("https://www.other-example.com/images/sv-pic.jpg", uiInfo.getLogos().get(0).getURI());
+    Assertions.assertEquals("en", uiInfo.getLogos().get(1).getXMLLang());
+    Assertions.assertEquals("https://www.other-example.com/images/en-pic.jpg", uiInfo.getLogos().get(1).getURI());
   }
 
 }
