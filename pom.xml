@@ -6,7 +6,7 @@
   <groupId>se.swedenconnect.signservice</groupId>
   <artifactId>signservice-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
 
   <name>Sweden Connect :: SignService :: Parent POM</name>
   <description>Parent POM for SignService libraries</description>
@@ -104,7 +104,6 @@
     <module>config</module>
     <module>spring-boot-starter</module>
     <module>bom</module>
-    <module>demo-apps</module>
   </modules>
 
   <dependencyManagement>
@@ -329,12 +328,13 @@
           <configuration>
             <serverId>ossrh</serverId>
             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+            <autoReleaseAfterClose>true</autoReleaseAfterClose>
             <!-- 
               Allows manual inspection of the staging repo before deploying it to the central repo. 
               Use 'mvn nexus-staging:release -Prelease' to release and 'mvn nexus-staging:drop' to abort. 
             -->
           </configuration>
+
         </plugin>        
 
       </plugins>
@@ -493,6 +493,11 @@
           </plugin>
           
           <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+          </plugin>          
+          
+          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>3.1.0</version>
@@ -551,7 +556,7 @@
         </plugins>
       </build>
 
-    </profile>    
+    </profile>
     
   </profiles>
 
