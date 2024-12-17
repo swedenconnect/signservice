@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Sweden Connect
+ * Copyright 2022-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,7 +219,7 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
     final SwedenConnectSamlAuthenticationHandler handler =
         (SwedenConnectSamlAuthenticationHandler) this.createHandler();
     handler.setSadRequestRequirement(SadRequestRequirement.DEFAULT);
-    
+
     final AuthnRequirements authnReqs = this.getAuthnRequirements();
     ((DefaultAuthnRequirements) authnReqs).setSignatureActivationRequestData(
         new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 1, true));
@@ -272,13 +272,13 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.RELAY_STATE_KEY), eq("ID"));
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHN_REQS_KEY), eq(authnReqs));
   }
-  
+
   @Test
   public void testAuthenticateWithSadRequestNotRequired() throws Exception {
     final SwedenConnectSamlAuthenticationHandler handler =
         (SwedenConnectSamlAuthenticationHandler) this.createHandler();
     handler.setSadRequestRequirement(SadRequestRequirement.DEFAULT);
-    
+
     final AuthnRequirements authnReqs = this.getAuthnRequirements();
     ((DefaultAuthnRequirements) authnReqs).setSignatureActivationRequestData(
         new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 1, false));
@@ -326,19 +326,19 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
 
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHNREQUEST_KEY),
         ArgumentMatchers.notNull());
-    
+
     Mockito.verify(this.context, Mockito.times(0)).put(eq(SwedenConnectSamlAuthenticationHandler.SAD_ID_KEY), Mockito.anyString());
 
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.RELAY_STATE_KEY), eq("ID"));
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHN_REQS_KEY), eq(authnReqs));
   }
-  
+
   @Test
   public void testAuthenticateWithSadRequestNever() throws Exception {
     final SwedenConnectSamlAuthenticationHandler handler =
         (SwedenConnectSamlAuthenticationHandler) this.createHandler();
     handler.setSadRequestRequirement(SadRequestRequirement.NEVER);
-    
+
     final AuthnRequirements authnReqs = this.getAuthnRequirements();
     ((DefaultAuthnRequirements) authnReqs).setSignatureActivationRequestData(
         new DefaultSignatureActivationRequestData(SIGNREQUEST_ID, 1, true));
@@ -386,12 +386,12 @@ public class SwedenConnectSamlAuthenticationHandlerTest extends DefaultSamlAuthe
 
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHNREQUEST_KEY),
         ArgumentMatchers.notNull());
-    
+
     Mockito.verify(this.context, Mockito.times(0)).put(eq(SwedenConnectSamlAuthenticationHandler.SAD_ID_KEY), Mockito.anyString());
 
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.RELAY_STATE_KEY), eq("ID"));
     Mockito.verify(this.context).put(eq(AbstractSamlAuthenticationHandler.AUTHN_REQS_KEY), eq(authnReqs));
-  }  
+  }
 
   @Test
   public void testAuthenticateWithSadRequestMissingSignMessage() throws Exception {
