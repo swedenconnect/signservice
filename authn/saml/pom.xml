@@ -4,12 +4,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>signservice-authn-saml</artifactId>
-  <packaging>jar</packaging>  
+  <packaging>jar</packaging>
 
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-authn-parent</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2-SNAPSHOT</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Authentication :: SAML</name>
@@ -19,7 +19,7 @@
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -27,7 +27,7 @@
   <scm>
     <connection>scm:git:https://github.com/swedenconnect/signservice.git</connection>
     <developerConnection>scm:git:https://github.com/swedenconnect/signservice.git</developerConnection>
-    <url>https://github.com/idsec/signservice/tree/master</url>
+    <url>https://github.com/idsec/signservice/tree/main</url>
   </scm>
 
   <organization>
@@ -65,7 +65,7 @@
     </developer>
 
   </developers>
-  
+
   <repositories>
 
     <repository>
@@ -80,17 +80,17 @@
       <url>https://build.shibboleth.net/nexus/content/repositories/releases</url>
     </repository>
 
-  </repositories>  
+  </repositories>
 
   <properties>
   </properties>
-  
+
   <dependencyManagement>
-  
+
     <dependencies>
     </dependencies>
-    
-  </dependencyManagement>  
+
+  </dependencyManagement>
 
   <dependencies>
 
@@ -99,12 +99,12 @@
       <artifactId>signservice-authn-base</artifactId>
       <version>${project.version}</version>
     </dependency>
-        
+
     <dependency>
       <groupId>se.swedenconnect.opensaml</groupId>
       <artifactId>opensaml-security-ext</artifactId>
-    </dependency>    
-        
+    </dependency>
+
     <dependency>
       <groupId>se.swedenconnect.opensaml</groupId>
       <artifactId>opensaml-addons</artifactId>
@@ -114,7 +114,6 @@
       <groupId>se.swedenconnect.opensaml</groupId>
       <artifactId>opensaml-swedish-eid</artifactId>
     </dependency>
-    
 
     <!-- Test -->
     <dependency>
@@ -134,14 +133,14 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
           <doctitle>SignService SAML Authentication Handler - ${project.version}</doctitle>
-          <windowtitle>SignService SAML Authentication Handler - ${project.version}</windowtitle>             
+          <windowtitle>SignService SAML Authentication Handler - ${project.version}</windowtitle>
           <links>
             <link>https://build.shibboleth.net/nexus/content/sites/site/java-opensaml/4.2.0/apidocs/</link>
             <link>https://build.shibboleth.net/nexus/content/sites/site/java-support/8.2.1/apidocs/</link>
             <link>https://docs.swedenconnect.se/opensaml-security-ext/javadoc/latest/</link>
             <link>https://docs.swedenconnect.se/opensaml-addons/apidoc/</link>
-            <link>https://docs.swedenconnect.se/opensaml-swedish-eid/apidoc/</link>            
-          </links>          
+            <link>https://docs.swedenconnect.se/opensaml-swedish-eid/apidoc/</link>
+          </links>
         </configuration>
       </plugin>
 

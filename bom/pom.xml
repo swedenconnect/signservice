@@ -6,7 +6,7 @@
   <groupId>se.swedenconnect.signservice</groupId>
   <artifactId>signservice-application-bom</artifactId>
   <packaging>pom</packaging>
-  <version>1.1.1</version>
+  <version>1.1.2-SNAPSHOT</version>
 
   <name>Sweden Connect :: SignService :: Application BOM</name>
   <description>BOM for SignService Applications</description>
@@ -15,7 +15,7 @@
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -23,7 +23,7 @@
   <scm>
     <connection>scm:git:https://github.com/swedenconnect/signservice.git</connection>
     <developerConnection>scm:git:https://github.com/swedenconnect/signservice.git</developerConnection>
-    <url>https://github.com/idsec/signservice/tree/master</url>
+    <url>https://github.com/idsec/signservice/tree/main</url>
   </scm>
 
   <organization>
@@ -77,7 +77,7 @@
       <id>shibboleth</id>
       <name>Shibboleth Maven Repo</name>
       <url>https://build.shibboleth.net/nexus/content/repositories/releases</url>
-    </repository>    
+    </repository>
   </repositories>
 
   <distributionManagement>
@@ -99,103 +99,103 @@
         <groupId>org.springframework</groupId>
         <artifactId>spring-framework-bom</artifactId>
         <type>pom</type>
-        <version>6.0.13</version>
+        <version>6.2.0</version>
         <scope>import</scope>
       </dependency>
-      
-      
+
+
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-bom</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-            
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-core</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
       </dependency>
-      
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-engine</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
       </dependency>
-      
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-protocol-dssext11</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
       </dependency>
-      
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-authn-base</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
       </dependency>
-      
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-authn-saml</artifactId>
-        <version>1.1.1</version>
-      </dependency>    
-      
+        <version>1.1.2-SNAPSHOT</version>
+      </dependency>
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-audit-base</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
       </dependency>
-  
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-audit-actuator</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
       </dependency>
-      
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-signhandler</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
       </dependency>
-  
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-keycert-base</artifactId>
-        <version>1.1.1</version>
-      </dependency>  
-  
+        <version>1.1.2-SNAPSHOT</version>
+      </dependency>
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-keycert-simple</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
       </dependency>
-  
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-keycert-cmc</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
       </dependency>
-      
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-config</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
       </dependency>
-      
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-config-spring</artifactId>
-        <version>1.1.1</version>
-      </dependency>      
-      
+        <version>1.1.2-SNAPSHOT</version>
+      </dependency>
+
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-spring-boot-starter</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
       </dependency>
-      
+
     </dependencies>
 
   </dependencyManagement>
@@ -210,23 +210,19 @@
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.13</version>
+            <version>1.7.0</version>
             <extensions>true</extensions>
             <configuration>
               <serverId>ossrh</serverId>
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
-              <!--
-                Allows manual inspection of the staging repo before deploying it to the central repo.
-                Use 'mvn nexus-staging:release -Prelease' to release and 'mvn nexus-staging:drop' to abort.
-                -->
             </configuration>
           </plugin>
 
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.1.0</version>
+            <version>3.2.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>

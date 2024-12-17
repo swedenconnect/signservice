@@ -5,7 +5,7 @@
 
   <groupId>se.swedenconnect.signservice.demo</groupId>
   <artifactId>signservice-demo-parent</artifactId>
-  <version>1.1.1</version>
+  <version>1.1.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Sweden Connect :: SignService :: Demo</name>
@@ -15,7 +15,7 @@
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -23,7 +23,7 @@
   <scm>
     <connection>scm:git:https://github.com/swedenconnect/signservice.git</connection>
     <developerConnection>scm:git:https://github.com/swedenconnect/signservice.git</developerConnection>
-    <url>https://github.com/idsec/signservice/tree/master</url>
+    <url>https://github.com/idsec/signservice/tree/main</url>
   </scm>
 
   <organization>
@@ -67,9 +67,9 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>17</java.version>
 
-    <spring.boot.version>3.1.5</spring.boot.version>
-    
-    <maven.javadoc.skip>true</maven.javadoc.skip>    
+    <spring.boot.version>3.4.0</spring.boot.version>
+
+    <maven.javadoc.skip>true</maven.javadoc.skip>
   </properties>
 
   <repositories>
@@ -92,7 +92,7 @@
       <dependency>
         <groupId>se.swedenconnect.signservice</groupId>
         <artifactId>signservice-application-bom</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -130,7 +130,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
+        <version>3.13.0</version>
         <configuration>
           <release>${java.version}</release>
         </configuration>
@@ -154,11 +154,11 @@
           </execution>
         </executions>
       </plugin>
-      
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.4.1</version>
+        <version>3.5.0</version>
         <executions>
           <execution>
             <id>enforce</id>
@@ -172,18 +172,18 @@
             </goals>
           </execution>
         </executions>
-      </plugin>      
+      </plugin>
 
       <!-- Don't deploy the demo apps -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.3</version>
         <configuration>
           <skip>true</skip>
         </configuration>
       </plugin>
-            
+
     </plugins>
 
   </build>

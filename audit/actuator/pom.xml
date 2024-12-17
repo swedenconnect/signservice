@@ -9,7 +9,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-audit-parent</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2-SNAPSHOT</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Auditing :: Actuator</name>
@@ -19,7 +19,7 @@
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -27,7 +27,7 @@
   <scm>
     <connection>scm:git:https://github.com/swedenconnect/signservice.git</connection>
     <developerConnection>scm:git:https://github.com/swedenconnect/signservice.git</developerConnection>
-    <url>https://github.com/idsec/signservice/tree/master</url>
+    <url>https://github.com/idsec/signservice/tree/main</url>
   </scm>
 
   <organization>
@@ -72,14 +72,14 @@
   <dependencyManagement>
 
     <dependencies>
-    
+
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring.boot.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>      
+      </dependency>
 
     </dependencies>
 
@@ -97,11 +97,11 @@
       <artifactId>signservice-audit-base</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
-      <version>1.14.9</version><!--$NO-MVN-MAN-VER$-->
+      <version>1.15.11</version><!--$NO-MVN-MAN-VER$-->
       <scope>test</scope>
     </dependency>
 
@@ -120,10 +120,10 @@
           <links>
             <link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
             <link>https://docs.spring.io/spring-boot/docs/current/api/</link>
-          </links>          
+          </links>
         </configuration>
       </plugin>
-      
+
     </plugins>
 
   </build>

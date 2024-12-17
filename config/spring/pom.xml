@@ -9,7 +9,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-config-parent</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2-SNAPSHOT</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Configuration :: Spring</name>
@@ -19,7 +19,7 @@
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -27,7 +27,7 @@
   <scm>
     <connection>scm:git:https://github.com/swedenconnect/signservice.git</connection>
     <developerConnection>scm:git:https://github.com/swedenconnect/signservice.git</developerConnection>
-    <url>https://github.com/idsec/signservice/tree/master</url>
+    <url>https://github.com/idsec/signservice/tree/main</url>
   </scm>
 
   <organization>
@@ -66,7 +66,7 @@
 
   </developers>
 
-  <properties>  
+  <properties>
   </properties>
 
   <dependencies>
@@ -76,7 +76,7 @@
       <artifactId>signservice-config</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
       <artifactId>signservice-audit-actuator</artifactId>
@@ -104,12 +104,10 @@
           <links>
             <link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
             <link>https://docs.spring.io/spring-boot/docs/current/api/</link>
-            <link>https://build.shibboleth.net/nexus/content/sites/site/java-opensaml/4.2.0/apidocs/</link>
-            <link>https://build.shibboleth.net/nexus/content/sites/site/java-support/8.2.1/apidocs/</link>
             <link>https://docs.swedenconnect.se/opensaml-security-ext/javadoc/latest/</link>
             <link>https://docs.swedenconnect.se/opensaml-addons/apidoc/</link>
-            <link>https://docs.swedenconnect.se/opensaml-swedish-eid/apidoc/</link>            
-          </links>          
+            <link>https://docs.swedenconnect.se/opensaml-swedish-eid/apidoc/</link>
+          </links>
         </configuration>
       </plugin>
 
