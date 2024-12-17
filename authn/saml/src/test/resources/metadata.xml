@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2022-2024 Sweden Connect
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
 <md:EntityDescriptor ID="MeQAM1p2tE9bi6bRth5z"
     cacheDuration="P0Y0M0DT1H0M0.000S"
     entityID="https://eid.litsec.se/sp/2"
@@ -56,7 +71,7 @@ QecKboXf52c8aGBt0CVkbx19HNM8CFHDuG5OoApBaOaeUF8fc9nHLzvlRV2cdhhGXGClUVRn6A==</ds
                     xsi:type="xs:string">http://id.swedenconnect.se/ec/1.0/loa3-name</saml2:AttributeValue>
             <saml2:AttributeValue
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:type="xs:string">http://id.swedenconnect.se/ec/1.0/loa3-orgid</saml2:AttributeValue>                                  
+                    xsi:type="xs:string">http://id.swedenconnect.se/ec/1.0/loa3-orgid</saml2:AttributeValue>
             <saml2:AttributeValue
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                     xsi:type="xs:string">http://id.elegnamnden.se/sprop/1.0/mobile-auth</saml2:AttributeValue>
