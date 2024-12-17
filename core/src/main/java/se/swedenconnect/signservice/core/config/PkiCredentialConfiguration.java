@@ -15,17 +15,17 @@
  */
 package se.swedenconnect.signservice.core.config;
 
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationProperties;
 import se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A configuration object for configuring {@link PkiCredential} objects.
@@ -110,9 +110,8 @@ public class PkiCredentialConfiguration {
   }
 
   /**
-   * Helper class for resolving a {@link PkiCredential} given a {@link PkiCredentialConfigurationProperties}
-   * object. The logic handles changes made to the configuration properties object during the lifetime
-   * of the configuration object.
+   * Helper class for resolving a {@link PkiCredential} given a {@link PkiCredentialConfigurationProperties} object. The
+   * logic handles changes made to the configuration properties object during the lifetime of the configuration object.
    */
   private class Resolver {
 
@@ -123,20 +122,21 @@ public class PkiCredentialConfiguration {
     private int credentialPropsHash;
 
     /**
-     * Gets the credential property by first checking the PkiCredentialConfigurationProperties and if that is set, load a
-     * credential, and otherwise use the PkiCredential property.
+     * Gets the credential property by first checking the PkiCredentialConfigurationProperties and if that is set, load
+     * a credential, and otherwise use the PkiCredential property.
      *
      * @return the credential or null
      */
     @Nullable
     public PkiCredential getCredential() {
-      if (props != null) {
+      if (PkiCredentialConfiguration.this.props != null) {
         try {
-          if (this.credentialFactory == null || this.credentialPropsHash != props.hashCode()) {
-            this.credentialFactory = new PkiCredentialFactoryBean(props);
+          if (this.credentialFactory == null
+              || this.credentialPropsHash != this.calculateHash()) {
+            this.credentialFactory = new PkiCredentialFactoryBean(PkiCredentialConfiguration.this.props);
             this.credentialFactory.setSingleton(true);
             this.credentialFactory.afterPropertiesSet();
-            this.credentialPropsHash = props.hashCode();
+            this.credentialPropsHash = this.calculateHash();
           }
           return this.credentialFactory.getObject();
         }
@@ -144,7 +144,14 @@ public class PkiCredentialConfiguration {
           throw new IllegalArgumentException("Failed to initialize credential - " + e.getMessage(), e);
         }
       }
-      return cred;
+      return PkiCredentialConfiguration.this.cred;
+    }
+
+    private int calculateHash() {
+      final PkiCredentialConfigurationProperties p = PkiCredentialConfiguration.this.props;
+      return Objects.hash(p.getAlias(), p.getName(), Arrays.hashCode(p.getKeyPassword()),
+          Arrays.hashCode(p.getPassword()), p.getCertificate(), p.getPkcs11Configuration(),
+          p.getProvider(), p.getType(), p.getPrivateKey());
     }
   }
 

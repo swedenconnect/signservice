@@ -84,6 +84,20 @@
   <properties>
   </properties>
 
+  <dependencyManagement>
+
+    <dependencies>
+
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-observation</artifactId>
+        <version>1.14.1</version>
+      </dependency>
+
+    </dependencies>
+
+  </dependencyManagement>
+
   <dependencies>
 
     <dependency>
