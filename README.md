@@ -16,6 +16,8 @@ Go to https://docs.swedenconnect.se/signservice for documentation of how to unde
 
 Java API documentation: https://docs.swedenconnect.se/signservice/apidocs
 
+Release notes: https://docs.swedenconnect.se/signservice/release-notes.html
+
 ## Modules
 
 This repository comprises of the following modules:
