@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Sweden Connect
+ * Copyright 2022-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.signservice.protocol.dss;
 
+import java.io.Serial;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -33,6 +34,7 @@ import se.swedenconnect.signservice.protocol.SignResponseResult;
 class DssSignResponseResult implements SignResponseResult {
 
   /** For serialization. */
+  @Serial
   private static final long serialVersionUID = -1342465930360409621L;
 
   /** Corresponds to the dss:ResultMajor element. */
@@ -62,8 +64,11 @@ class DssSignResponseResult implements SignResponseResult {
     switch (error.getErrorCode()) {
     case AUTHN_FAILURE:
       this.resultMajor = DSSStatusCodes.DSS_RESPONDER_ERROR;
-      // The DSS extension lacks an error code for a general user authentication error ...
-      this.resultMinor = DSSStatusCodes.DSS_MINOR_REQUESTER_ERROR_USER_MISMATCH;
+      this.resultMinor = DSSStatusCodes.DSS_MINOR_AUTHN_FAILED;
+      break;
+    case SECURITY_VIOLATION:
+      this.resultMajor = DSSStatusCodes.DSS_RESPONDER_ERROR;
+      this.resultMinor = DSSStatusCodes.DSS_MINOR_SECURITY_VIOLATION;
       break;
     case AUTHN_SIGNMESSAGE_NOT_DISPLAYED:
       this.resultMajor = DSSStatusCodes.DSS_RESPONDER_ERROR;
@@ -167,10 +172,9 @@ class DssSignResponseResult implements SignResponseResult {
     if (this == obj) {
       return true;
     }
-    if (!(obj instanceof SignResponseResult)) {
+    if (!(obj instanceof final SignResponseResult other)) {
       return false;
     }
-    final SignResponseResult other = (SignResponseResult) obj;
     return Objects.equals(this.resultMajor, other.getErrorCode())
         && Objects.equals(this.resultMinor, other.getMinorErrorCode())
         && Objects.equals(this.resultMessage, other.getMessage());
@@ -179,7 +183,7 @@ class DssSignResponseResult implements SignResponseResult {
   /** {@inheritDoc} */
   @Override
   public String toString() {
-    final StringBuffer sb = new StringBuffer("result-major='").append(this.resultMajor).append("'");
+    final StringBuilder sb = new StringBuilder("result-major='").append(this.resultMajor).append("'");
     if (this.resultMinor != null) {
       sb.append(", result-minor='").append(this.resultMinor).append("'");
     }

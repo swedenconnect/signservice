@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Sweden Connect
+ * Copyright 2022-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ public enum AuthenticationErrorCode {
 
   /** The user failed to authenticate - general authentication error. */
   FAILED_AUTHN,
+
+  /** Possible security violation. */
+  SECURITY_VIOLATION,
 
   /** General error for bad authentication setup. For example, the IdP does not recognize the SP. */
   INTERNAL_AUTHN_ERROR;

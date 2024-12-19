@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Sweden Connect
+ * Copyright 2022-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,11 @@
  */
 package se.swedenconnect.signservice.authn.saml;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.cert.X509Certificate;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import lombok.extern.slf4j.Slf4j;
+import net.shibboleth.shared.resolver.ResolverException;
+import net.shibboleth.shared.xml.SerializeSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.io.Unmarshaller;
@@ -42,12 +37,6 @@ import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.w3c.dom.Element;
-
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-import lombok.extern.slf4j.Slf4j;
-import net.shibboleth.shared.resolver.ResolverException;
-import net.shibboleth.shared.xml.SerializeSupport;
 import se.idsec.signservice.xml.DOMUtils;
 import se.swedenconnect.opensaml.saml2.core.build.RequestedAuthnContextBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.EntityDescriptorContainer;
@@ -87,6 +76,17 @@ import se.swedenconnect.signservice.core.http.HttpResponseAction;
 import se.swedenconnect.signservice.core.http.HttpUserRequest;
 import se.swedenconnect.signservice.protocol.msg.AuthnRequirements;
 import se.swedenconnect.signservice.protocol.msg.SignMessage;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.Serial;
+import java.security.cert.X509Certificate;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Abstract base class for SAML authentication handlers.
@@ -272,7 +272,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
       }
       final String sentRelayState = context.get(RELAY_STATE_KEY, String.class);
 
-      // Setup the response processing input object ...
+      // Set up the response processing input object ...
       //
       final ResponseProcessingInput input =
           this.createResponseProcessingInput(authnRequest, sentRelayState, httpRequest, context);
@@ -314,6 +314,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
       return new AuthenticationResultChoice(
           new AuthenticationResult() {
 
+            @Serial
             private static final long serialVersionUID = 3481951951577173265L;
 
             @Override
@@ -344,6 +345,11 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
         // If we are communicating with a Proxy IdP.
         throw new UserAuthenticationException(AuthenticationErrorCode.UNKNOWN_AUTHENTICATION_SERVICE,
             status.getStatusMessage("Requested IdP is not available"), e);
+      }
+      else if (SamlStatus.FRAUD_STATUS_CODE.equals(status.getMinorStatusCode())
+          || SamlStatus.POSSIBLE_FRAUD_STATUS_CODE.equals(status.getMinorStatusCode())) {
+        throw new UserAuthenticationException(AuthenticationErrorCode.SECURITY_VIOLATION,
+            status.getStatusMessage("Possible fraud detected"), e);
       }
       else {
         throw new UserAuthenticationException(AuthenticationErrorCode.FAILED_AUTHN,
@@ -384,9 +390,9 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
     final String requestPath = httpRequest.getServerServletPath();
     if (!(requestPath.equalsIgnoreCase(this.urlConfiguration.getAssertionConsumerPath())
         || (this.urlConfiguration.getAdditionalAssertionConsumerPath() != null
-            && requestPath.equalsIgnoreCase(this.urlConfiguration.getAdditionalAssertionConsumerPath())))) {
+        && requestPath.equalsIgnoreCase(this.urlConfiguration.getAdditionalAssertionConsumerPath())))) {
       log.info("{}: Path {} is not supported by handler '{}'",
-          Optional.ofNullable(context).map(SignServiceContext::getId).orElseGet(() -> ""), requestPath, this.getName());
+          Optional.ofNullable(context).map(SignServiceContext::getId).orElse(""), requestPath, this.getName());
       return false;
     }
 
@@ -525,8 +531,8 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
         && !authnRequirements.getAuthnContextIdentifiers().isEmpty()) {
       final List<String> supportedUris = EntityDescriptorUtils.getAssuranceCertificationUris(idpMetadata);
       final boolean match = authnRequirements.getAuthnContextIdentifiers().stream()
-        .map(AuthnContextIdentifier::getIdentifier)
-        .anyMatch(a -> supportedUris.contains(a));
+          .map(AuthnContextIdentifier::getIdentifier)
+          .anyMatch(supportedUris::contains);
       if (!match) {
         final String msg = "None of the requested authn context URIs are supported by the IdP";
         log.info("{}: {}", context.getId(), msg);
@@ -539,7 +545,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
       @Override
       @Nonnull
       public String getPreferredBinding() {
-        return getPreferredBindingUri();
+        return AbstractSamlAuthenticationHandler.this.getPreferredBindingUri();
       }
 
       @Override
@@ -558,7 +564,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
           //
           final List<String> uris = authnRequirements.getAuthnContextIdentifiers().stream()
               .map(AuthnContextIdentifier::getIdentifier)
-              .filter(i -> list.contains(i))
+              .filter(list::contains)
               .collect(Collectors.toList());
 
           if (uris.isEmpty()) {
@@ -585,7 +591,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
    */
   @Nonnull
   protected ResponseProcessingInput createResponseProcessingInput(
-      @Nonnull AuthnRequest authnRequest, @Nullable String sentRelayState,
+      @Nonnull final AuthnRequest authnRequest, @Nullable final String sentRelayState,
       @Nonnull final HttpUserRequest httpRequest, @Nonnull final SignServiceContext context) {
 
     final Instant received = Instant.now();
@@ -617,7 +623,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
 
       @Override
       public String getClientIpAddress() {
-        // We don't check IP addresses - it's too error prone.
+        // We don't check IP addresses - it's too error-prone.
         return null;
       }
 
@@ -731,12 +737,12 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
         throw new UserAuthenticationException(AuthenticationErrorCode.MISMATCHING_IDENTITY_ATTRIBUTES, msg);
       }
       // OK, the attribute is provided. Let's check its value.
-      // Since we support multi-valued attributes, we have a match if at least one of the values
+      // Since we support multivalued attributes, we have a match if at least one of the values
       // from the requested attribute is found in the issued attribute.
       //
       boolean match = false;
       for (final Object value : requestedAttribute.getValues()) {
-        if (issuedAttribute.getValues().stream().filter(v -> Objects.equals(v, value)).findAny().isPresent()) {
+        if (issuedAttribute.getValues().stream().anyMatch(v -> Objects.equals(v, value))) {
           match = true;
           break;
         }
@@ -771,7 +777,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
     final List<String> requestedContexts = authnRequest.getRequestedAuthnContext().getAuthnContextClassRefs()
         .stream()
         .map(AuthnContextClassRef::getURI)
-        .collect(Collectors.toList());
+        .toList();
 
     if (requestedContexts.isEmpty()) {
       return;
@@ -798,7 +804,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
    * @param signMessage the sign message that was requsted (may be null)
    * @param attributes the received attributes
    * @param result the processing result
-   * @param authnRequest the sent authentication request
+   * @param authnRequest the authentication request
    * @param context the SignService context
    * @throws UserAuthenticationException for errors asserting the sign message
    */
@@ -810,7 +816,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
   }
 
   /**
-   * A method that enables sub-classes to extend the verification of the received assertion. The default implementation
+   * A method that enables subclasses to extend the verification of the received assertion. The default implementation
    * does nothing.
    *
    * @param authnRequirements the authentication requirements
@@ -820,7 +826,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
    * @throws UserAuthenticationException for verification errors
    */
   protected void extendedAssertionVerification(@Nonnull final AuthnRequirements authnRequirements,
-      @Nonnull final AuthnRequest authnRequest, @Nonnull ResponseProcessingResult result,
+      @Nonnull final AuthnRequest authnRequest, @Nonnull final ResponseProcessingResult result,
       @Nonnull final SignServiceContext context) throws UserAuthenticationException {
   }
 
@@ -868,10 +874,11 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
    * @param authnRequest the authentication request
    * @param context the SignService context
    * @return a flag indicating whether the sign message was displayed or not
-   * @throws UserAuthenticationException for processing errors, i.e., the proof for a displayed sign message is illegal
+   * @throws UserAuthenticationException for processing errors, i.e., the proof for a displayed sign message is
+   *     illegal
    */
   protected boolean wasSignMessageDisplayed(@Nonnull final ResponseProcessingResult result,
-      @Nonnull List<IdentityAttribute<?>> attributes, @Nonnull final AuthnRequest authnRequest,
+      @Nonnull final List<IdentityAttribute<?>> attributes, @Nonnull final AuthnRequest authnRequest,
       @Nonnull final SignServiceContext context) throws UserAuthenticationException {
     return false;
   }
@@ -915,7 +922,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
       final Element xml = DOMUtils.bytesToDocument(encodedAuthnRequest).getDocumentElement();
       final Unmarshaller unmarshaller = Optional.ofNullable(XMLObjectSupport.getUnmarshaller(xml))
           .orElseThrow(() -> new UnmarshallingException("No unmarshaller for AuthnRequest available"));
-      return AuthnRequest.class.cast(unmarshaller.unmarshall(xml));
+      return (AuthnRequest) unmarshaller.unmarshall(xml);
     }
     catch (final Exception e) {
       final String msg = "Failed to unmarshall AuthnRequest object";
@@ -931,7 +938,7 @@ public abstract class AbstractSamlAuthenticationHandler extends AbstractSignServ
    */
   @Nonnull
   protected String getPreferredBindingUri() {
-    return Optional.ofNullable(this.preferredBindingUri).orElseGet(() -> SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+    return Optional.ofNullable(this.preferredBindingUri).orElse(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
   }
 
   /**

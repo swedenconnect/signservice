@@ -186,7 +186,7 @@ same way. One, and only one, of the following properties must be set to configur
 object. This setting is used when the application code creates the credential object outside of the SignService
 configuration.
 
-`props.*` - Configuration of the `PkiCredential` object using property values. See [3.3.2](https://github.com/swedenconnect/credentials-support#generic-pkicredentialfactorybean-for-springboot-users) for the [credentials-support](https://github.com/swedenconnect/credentials-support) repository.
+`props.*` - Configuration of the `PkiCredential` object using property values. See [3.3.2](https://docs.swedenconnect.se/credentials-support/old-readme.html#generic-pkicredentialfactorybean-for-springboot-users) for the [credentials-support](https://github.com/swedenconnect/credentials-support) repository.
 
 `cred` - Assignment of an already instantiated `PkiCredential`. This setting is not possible to use when 
 configuring the application using properties files, only when a programmatic setup is made.
@@ -477,5 +477,5 @@ signservice:
 
 -----
 
-Copyright &copy; 2022-2023, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
+Copyright &copy; 2022-2024, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
 

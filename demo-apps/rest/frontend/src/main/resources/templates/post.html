@@ -1,5 +1,20 @@
+<!--
+  ~ Copyright 2022-2024 Sweden Connect
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"> 
+<html xmlns:th="http://www.thymeleaf.org">
 <head th:include="fragments/base :: headerFragment">
   <title id="pageTitle" th:inline="text">[[#{signservice.msg.title}]]</title>
 </head>
@@ -8,14 +23,14 @@
 
     <div th:each="par : ${parameters}">
       <input type="hidden" th:name="${par.key}" th:value="${par.value}" />
-    </div>    
-    
+    </div>
+
     <noscript>
-    
+
       <div th:replace="fragments/header :: logotype"></div>
-  
+
       <div class="container main">
-    
+
         <div class="row" id="mainDiv">
           <div class="col-sm-12 content-container">
 
@@ -27,24 +42,24 @@
                 <p class="info" th:text="#{signservice.msg.nojs}">No Javascript</p>
               </div>
             </div>
-            
+
             <hr class="full-width">
-            
+
             <div class="col-sm-12 section">
               <button id="submitButton" type="submit" class="btn btn-primary">
                 <span th:text="#{signservice.msg.continue-button}">Test</span>
               </button>
-            </div>            
-            
+            </div>
+
           </div>
-          
+
           <div th:replace="fragments/footer :: copyright"></div>
-          
+
         </div>
       </div>
-    
+
     </noscript>
-    
+
   </form>
 </body>
 </html>

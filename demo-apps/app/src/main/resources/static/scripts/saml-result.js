@@ -1,29 +1,44 @@
 
+/*
+ * Copyright 2022-2024 Sweden Connect
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 jQuery(function($) {
-  
+
   $(document).ready(function() {
-    
+
     $('.drop-down > p').click(function() {
       $(this).parent('.drop-down').toggleClass('open');
     });
-        
+
     // Init popovers
     $('body').popover({ selector: '[data-toggle=popover]'});
-    
+
     $('.drop-down-container').show();
-    
+
     // Advanced attributes
     if ($('#advancedAttributes').length > 0) {
       $('#more-attributes-div2').show();
-      $('#more-attributes-div').show();      
+      $('#more-attributes-div').show();
       $('#advancedAttributes').hide();
     }
-    
+
     $('#more-attributes-div').click(function() {
-      $('#more-attributes-div').hide();      
+      $('#more-attributes-div').hide();
       $('#advancedAttributes').show();
-    });    
-    
+    });
+
   });
-  
+
 });

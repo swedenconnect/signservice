@@ -1,4 +1,19 @@
 <?xml version='1.0' encoding='UTF-8'?>
+<!--
+  ~ Copyright 2022-2024 Sweden Connect
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
 <md:EntitiesDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui" xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute" xmlns:mdrpi="urn:oasis:names:tc:SAML:metadata:rpi" xmlns:shibmd="urn:mace:shibboleth:metadata:1.0" xmlns:xrd="http://docs.oasis-open.org/ns/xri/xrd-1.0" xmlns:pyff="http://pyff.io/NS" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ser="http://eidas.europa.eu/metadata/servicelist" xmlns:eidas="http://eidas.europa.eu/saml-extensions" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" Name="https://md.swedenconnect.se/role/idp.xml" ID="_20220816T144642Z" validUntil="2042-08-26T14:46:42Z" cacheDuration="PT5H"><ds:Signature><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference URI="#_20220816T144642Z"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>MLwFad8dXwmCE4v8uRSXgvmonMSpu6Gt3MVVHNjJl9o=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>PJucy1Bg73mF30rBKlkxArLHb5cquEYEFD3zRfeA5RjkxjjA/lz+oyeYKXn8lZ2Ms0denXfSe4NQ9KsrJzIAAbVLDdYPpf4yqJEhMW13LqQkaSVKMxxby0aRtNokdbtMvfwXXcmE/gSwwYXdgda7nCRdIQgm+F8m1BDIxA3FFKj0cutYw7ZqxhR4JckKtPrBpMxdMq31vfZrll1HyP3SgMiPvwEIcWvY/8iwD98DztXyDfUjsarkXdD6hBP5t/k9oSX0OEp1wZ2I+MIE9j6PibrwO9xP4IbBDRYBoDatqpxgC0M8G+qOWNKaIOxfd1t9/b5al739ZvuqyEQ13Vucr0Ict4XK6fOgDQ7SQx5vgNw9vkhTeBJP551ylzW2/dUVZoLKjUW69yKNRs/CU5o4O8kiKzNgqbfkPYphfV0X1z0zlcSTdYp9Oq247ISmiCWmLF+JXHt7S54vgHSVDr6JVtyKl7x7yS1K8VZpSZkTyioZI14deEoveoXiCspZhWw9PNeDMYAsaPiqbj00juJIR5Shw57z9Kd180bwhS9fATXKv0Qadb9Lg9xATAb/mGY1msZkCcgcKr1WV346u8itcqEWTM/VjH6/Qxfj+HglZhbbqOvxQ0HVw27VDLtI/jEoFwbGBm/Z0QS4eTDdOOzdyRhLniLZ2UwPQzFSjBDCvFc=</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIGFTCCA/2gAwIBAgIJAMRMtpYesnyPMA0GCSqGSIb3DQEBCwUAMIGgMQswCQYD
 VQQGEwJTRTESMBAGA1UECAwJU3RvY2tob2xtMRIwEAYDVQQHDAlTdG9ja2hvbG0x
 IjAgBgNVBAoMGUUtTGVnaXRpbWF0aW9uc27Dg8KkbW5kZW4xFzAVBgNVBAsMDlN3

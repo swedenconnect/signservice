@@ -1,3 +1,18 @@
+<!--
+  ~ Copyright 2022-2024 Sweden Connect
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:include="fragments/base :: headerFragment">
@@ -6,14 +21,14 @@
 <body>
 
   <div th:replace="fragments/header :: logotype"></div>
-  
+
   <div class="container main">
-  
-    <div th:replace="fragments/header :: language(languages = ${languages}, path='/result')"></div>  
-    
+
+    <div th:replace="fragments/header :: language(languages = ${languages}, path='/result')"></div>
+
     <div class="row" id="mainDiv">
       <div class="col-sm-12 content-container">
-      
+
         <div class="error">
 
           <div class="row">
@@ -22,7 +37,7 @@
             </div>
             <div class="col-sm-12">
               <p th:text="#{sp.msg.saml-error-intro}">Msg</p>
-            </div>       
+            </div>
             <div class="col-sm-12" th:if="${status.subErrorCode != null && status.errorMessage != null}">
               <p th:text="#{sp.msg.saml-error-code-with-message(${status.subErrorCode}, ${status.errorMessage})}">Msg</p>
             </div>
@@ -31,26 +46,26 @@
             </div>
             <div class="col-sm-12" th:if="${status.subErrorCode == null && status.errorMessage != null}">
               <p th:text="#{sp.msg.saml-error-only-message(${status.errorMessage})}">Msg</p>
-            </div>                        
+            </div>
           </div>
         </div>
 
       </div> <!-- /.col-sm-12 content-container -->
-      
+
       <div class="row section" id="backDiv">
         <div class="col-sm-12 return">
           <a href="#" th:href="@{/}"><span th:text="#{sp.msg.tryagain-button}">Try again</span></a>
         </div>
-      </div> <!-- /#backDiv -->      
-      
-      <div th:replace="fragments/footer :: copyright"></div>      
-      
+      </div> <!-- /#backDiv -->
+
+      <div th:replace="fragments/footer :: copyright"></div>
+
     </div> <!-- /#mainDiv -->
 
   </div> <!-- /.container main -->
 
 
   <th:block th:include="fragments/base :: scriptFragment"></th:block>
-  
+
 </body>
 </html>

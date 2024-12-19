@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Sweden Connect
+ * Copyright 2022-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 package se.swedenconnect.signservice.protocol.msg;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -28,6 +31,7 @@ public interface MessageConditions extends Serializable {
    *
    * @return not before instant
    */
+  @Nullable
   Instant getNotBefore();
 
   /**
@@ -35,6 +39,7 @@ public interface MessageConditions extends Serializable {
    *
    * @return not after instant
    */
+  @Nullable
   Instant getNotAfter();
 
   /**
@@ -46,6 +51,6 @@ public interface MessageConditions extends Serializable {
    * @param instant the instant to test
    * @return true if the supplied instant meets the criteria and false otherwise
    */
-  boolean isWithinRange(final Instant instant);
+  boolean isWithinRange(@Nonnull final Instant instant);
 
 }

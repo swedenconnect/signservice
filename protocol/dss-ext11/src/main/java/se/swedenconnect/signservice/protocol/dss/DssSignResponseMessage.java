@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Sweden Connect
+ * Copyright 2022-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.signservice.protocol.dss;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
@@ -38,6 +39,7 @@ import org.w3c.dom.Document;
 
 import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
+import se.idsec.signservice.dss.DSSStatusCodes;
 import se.idsec.signservice.security.sign.xml.XMLSignatureLocation;
 import se.idsec.signservice.security.sign.xml.XMLSignatureLocation.ChildPosition;
 import se.idsec.signservice.security.sign.xml.XMLSignerResult;
@@ -88,28 +90,29 @@ import se.swedenconnect.xml.jaxb.JAXBMarshaller;
 class DssSignResponseMessage implements SignResponseMessage {
 
   /** For serializing. */
+  @Serial
   private static final long serialVersionUID = -3890374307064822991L;
 
   /** 1.1 version. */
-  private static ProtocolVersion VERSION_1_1 = ProtocolVersion.valueOf("1.1");
+  private static final ProtocolVersion VERSION_1_1 = ProtocolVersion.valueOf("1.1");
 
   /** Processing requirements. */
   private static final ProtocolProcessingRequirements processingRequirements = new DssProtocolProcessingRequirements();
 
   /** For creating JAXB/XML objects. */
-  private static DatatypeFactory datatypeFactory;
+  private static final DatatypeFactory datatypeFactory;
 
   /** The attribute converter that converts between JAXB and the generic attribute representation. */
-  private static JaxbAttributeConverter attributeConverter = new JaxbAttributeConverter();
+  private static final JaxbAttributeConverter attributeConverter = new JaxbAttributeConverter();
 
   /** Where to insert the XML signature. */
-  private static XMLSignatureLocation xmlSignatureLocation;
+  private static final XMLSignatureLocation xmlSignatureLocation;
 
   /** Configuration object used when building a response. */
-  private ResponseConfiguration configuration;
+  private final ResponseConfiguration configuration;
 
   /** The JAXB representation of the SignResponse. */
-  private SignResponseWrapper signResponse;
+  private final SignResponseWrapper signResponse;
 
   /**
    * The destination URL is not represented in a SignResponse, but we need the information when sending the response.
@@ -147,7 +150,7 @@ class DssSignResponseMessage implements SignResponseMessage {
    * @param signRequest the corresponding SignRequest
    */
   public DssSignResponseMessage(final ResponseConfiguration configuration, final DssSignRequestMessage signRequest) {
-    this.configuration = Optional.ofNullable(configuration).orElseGet(() -> new ResponseConfiguration());
+    this.configuration = Optional.ofNullable(configuration).orElseGet(ResponseConfiguration::new);
     Objects.requireNonNull(signRequest, "signRequest must not be null");
 
     final ProtocolVersion version = signRequest.getVersion();
@@ -185,7 +188,7 @@ class DssSignResponseMessage implements SignResponseMessage {
       throw new DssProtocolException("No SignResponseResult has been assigned");
     }
 
-    // If it still haven't been assigned, set the "issued at" to the current time.
+    // If issued-at still hasn't been assigned, set the "issued at" to the current time.
     if (this.getIssuedAt() == null) {
       this.setIssuedAt(Instant.now());
     }
@@ -321,7 +324,7 @@ class DssSignResponseMessage implements SignResponseMessage {
   @Override
   public SignResponseResult getSignResponseResult() {
     return Optional.ofNullable(this.signResponse.getResult())
-        .map(r -> new DssSignResponseResult(r))
+        .map(DssSignResponseResult::new)
         .orElse(null);
   }
 
@@ -335,6 +338,18 @@ class DssSignResponseMessage implements SignResponseMessage {
     final Result result = new Result();
     result.setResultMajor(signResponseResult.getErrorCode());
     result.setResultMinor(signResponseResult.getMinorErrorCode());
+
+    final ProtocolVersion version = ProtocolVersion.valueOf(this.signResponse.getSignResponseExtension().getVersion());
+    if (version.compareTo(ProtocolVersion.valueOf("1.5")) < 0) {
+      // Avoid sending back error codes introduced in 1.5 ...
+      if (DSSStatusCodes.DSS_MINOR_AUTHN_FAILED.equals(signResponseResult.getMinorErrorCode())) {
+        result.setResultMinor(DSSStatusCodes.DSS_MINOR_REQUESTER_ERROR_USER_MISMATCH);
+      }
+      else if (DSSStatusCodes.DSS_MINOR_SECURITY_VIOLATION.equals(signResponseResult.getMinorErrorCode())) {
+        result.setResultMinor(DSSStatusCodes.DSS_MINOR_RESPONDER_ERROR_GENERAL_ERROR);
+      }
+    }
+
     if (signResponseResult.getMessage() != null) {
       final InternationalStringType msg = new InternationalStringType();
       msg.setLang("en");
@@ -354,9 +369,7 @@ class DssSignResponseMessage implements SignResponseMessage {
   /** {@inheritDoc} */
   @Override
   public SignerAuthnInfo getSignerAuthnInfo() {
-    final SignerAssertionInfo sai =
-        Optional.ofNullable(this.signResponse.getSignResponseExtension().getSignerAssertionInfo())
-            .orElse(null);
+    final SignerAssertionInfo sai = this.signResponse.getSignResponseExtension().getSignerAssertionInfo();
     final ContextInfo ci = Optional.ofNullable(sai)
         .map(SignerAssertionInfo::getContextInfo)
         .orElse(null);
@@ -370,7 +383,7 @@ class DssSignResponseMessage implements SignResponseMessage {
         .map(NameIDType::getValue)
         .orElse(null));
     identityAssertion.setAuthnContext(Optional.ofNullable(ci.getAuthnContextClassRef())
-        .map(a -> new SimpleAuthnContextIdentifier(a))
+        .map(SimpleAuthnContextIdentifier::new)
         .orElse(null));
     identityAssertion.setAuthnInstant(Optional.ofNullable(ci.getAuthenticationInstant())
         .map(XMLGregorianCalendar::toGregorianCalendar)
@@ -386,9 +399,9 @@ class DssSignResponseMessage implements SignResponseMessage {
     if (sai.isSetAttributeStatement() && sai.getAttributeStatement().isSetAttributesAndEncryptedAttributes()) {
       final List<IdentityAttribute<?>> attributes = new ArrayList<>();
       for (final Object object : sai.getAttributeStatement().getAttributesAndEncryptedAttributes()) {
-        if (Attribute.class.isInstance(object)) {
+        if (object instanceof final Attribute attribute) {
           try {
-            attributes.add(attributeConverter.convert(Attribute.class.cast(object)));
+            attributes.add(attributeConverter.convert(attribute));
           }
           catch (final AttributeException e) {
             throw new DssProtocolException("Attribute conversion error", e);
@@ -397,7 +410,7 @@ class DssSignResponseMessage implements SignResponseMessage {
       }
       identityAssertion.setIdentityAttributes(attributes);
     }
-    identityAssertion.setScheme(Optional.ofNullable(ci.getAuthType()).orElseGet(() -> "SAML"));
+    identityAssertion.setScheme(Optional.ofNullable(ci.getAuthType()).orElse("SAML"));
 
     return new DefaultSignerAuthnInfo(identityAssertion);
   }
@@ -616,6 +629,7 @@ class DssSignResponseMessage implements SignResponseMessage {
    */
   static class ResponseConfiguration implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 288455638407072741L;
 
     /** Setting that tells whether SAML assertions should be included in the response messages. */

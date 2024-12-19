@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Sweden Connect
+ * Copyright 2022-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,12 @@
  */
 package se.swedenconnect.signservice.protocol.dss;
 
-import java.security.SignatureException;
-import java.security.cert.X509Certificate;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.xml.security.Init;
-import org.w3c.dom.Document;
-
 import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.xml.security.Init;
+import org.w3c.dom.Document;
 import se.idsec.signservice.security.sign.xml.XMLMessageSignatureValidator;
 import se.idsec.signservice.security.sign.xml.XMLSignatureLocation;
 import se.idsec.signservice.security.sign.xml.XMLSignatureLocation.ChildPosition;
@@ -84,6 +68,21 @@ import se.swedenconnect.signservice.signature.impl.DefaultAdESObject;
 import se.swedenconnect.signservice.signature.impl.DefaultRequestedSignatureTask;
 import se.swedenconnect.xml.jaxb.JAXBMarshaller;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.xpath.XPathExpressionException;
+import java.io.Serial;
+import java.security.SignatureException;
+import java.security.cert.X509Certificate;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 /**
  * An implementation of the {@link SignRequestMessage} interface for sign request messages according to <a href=
  * "https://docs.swedenconnect.se/technical-framework/latest/09_-_DSS_Extension_for_Federated_Signing_Services.html">DSS
@@ -93,25 +92,26 @@ import se.swedenconnect.xml.jaxb.JAXBMarshaller;
 class DssSignRequestMessage implements SignRequestMessage {
 
   /** For serializing. */
+  @Serial
   private static final long serialVersionUID = -5875475186053392826L;
 
   /** Processing requirements. */
   private static final ProtocolProcessingRequirements processingRequirements = new DssProtocolProcessingRequirements();
 
   /** Where to find the XML signatures. */
-  private static XMLSignatureLocation xmlSignatureLocation;
+  private static final XMLSignatureLocation xmlSignatureLocation;
 
   /** For validating signatures on SignResponse messages. */
   private static final XMLMessageSignatureValidator signatureValidator = new DefaultXMLMessageSignatureValidator();
 
   /** Maximum supported version. */
-  private static ProtocolVersion MAX_VERSION = ProtocolVersion.valueOf("1.4");
+  private static final ProtocolVersion MAX_VERSION = ProtocolVersion.valueOf("1.5");
 
   /** Minimum supported version. */
-  private static ProtocolVersion MIN_VERSION = ProtocolVersion.valueOf("1.1");
+  private static final ProtocolVersion MIN_VERSION = ProtocolVersion.valueOf("1.1");
 
   /** The attribute converter that converts between JAXB and the generic attribute representation. */
-  private static JaxbAttributeConverter attributeConverter = new JaxbAttributeConverter();
+  private static final JaxbAttributeConverter attributeConverter = new JaxbAttributeConverter();
 
   static {
     try {
@@ -273,22 +273,6 @@ class DssSignRequestMessage implements SignRequestMessage {
 
     // Conditions
     //
-    final MessageConditions conditions = this.getConditions();
-    if (conditions == null) {
-      final String msg = "Conditions is missing - this element is required";
-      log.info("{} [request-id: '{}']", msg, this.signRequest.getRequestID());
-      throw new ProtocolException(msg);
-    }
-    else if (conditions.getNotBefore() == null) {
-      final String msg = "Conditions.notBefore is missing - this field is required";
-      log.info("{} [request-id: '{}']", msg, this.signRequest.getRequestID());
-      throw new ProtocolException(msg);
-    }
-    else if (conditions.getNotAfter() == null) {
-      final String msg = "Conditions.notOnOrAfter is missing - this field is required";
-      log.info("{} [request-id: '{}']", msg, this.signRequest.getRequestID());
-      throw new ProtocolException(msg);
-    }
     if (this.getResponseUrl() == null) {
       final String msg = "Conditions.AudienceRestriction is missing - the response URL must be given here";
       log.info("{} [request-id: '{}']", msg, this.signRequest.getRequestID());
@@ -300,14 +284,14 @@ class DssSignRequestMessage implements SignRequestMessage {
     final AttributeStatement signer = extension.getSigner();
     if (signer != null && signer.isSetAttributesAndEncryptedAttributes()) {
       for (final Object object : signer.getAttributesAndEncryptedAttributes()) {
-        if (Attribute.class.isInstance(object)) {
+        if (object instanceof final Attribute attribute) {
           try {
             // By converting, we check if the attributes given are correct ...
-            attributeConverter.convert(Attribute.class.cast(object));
+            attributeConverter.convert(attribute);
           }
           catch (final AttributeException e) {
             final String msg = String.format("Invalid attribute (%s) under Signer - %s",
-                Attribute.class.cast(object).getName(), e.getMessage());
+                attribute.getName(), e.getMessage());
             log.info("{} [request-id: '{}']", msg, this.signRequest.getRequestID());
             throw new ProtocolException(msg, e);
           }
@@ -330,7 +314,7 @@ class DssSignRequestMessage implements SignRequestMessage {
       // The profile states: "If this element is set, the Version attribute of the SignRequestExtension element MUST be
       // set to "1.4" or higher. Implementations prior to version 1.4 of this specification do not support the element."
       //
-      // But it really doesn't matter so we just issue a log entry noting this...
+      // But it really doesn't matter, so we just issue a log entry noting this...
       //
       if (this.getVersion().compareTo(ProtocolVersion.valueOf("1.4")) < 0) {
         log.info("Invalid use of AuthnProfile - requires version 1.4 higher, but version is {} [request-id: '{}']",
@@ -503,7 +487,7 @@ class DssSignRequestMessage implements SignRequestMessage {
     if (certRequestProperties != null && certRequestProperties.isSetAuthnContextClassRefs()) {
       authnRequirements.setAuthnContextIdentifiers(certRequestProperties.getAuthnContextClassRefs()
           .stream()
-          .map(s -> new SimpleAuthnContextIdentifier(s))
+          .map(SimpleAuthnContextIdentifier::new)
           .collect(Collectors.toList()));
     }
 
@@ -511,9 +495,9 @@ class DssSignRequestMessage implements SignRequestMessage {
     if (signer != null && signer.isSetAttributesAndEncryptedAttributes()) {
       final List<IdentityAttribute<?>> attributes = new ArrayList<>();
       for (final Object object : signer.getAttributesAndEncryptedAttributes()) {
-        if (Attribute.class.isInstance(object)) {
+        if (object instanceof final Attribute attribute) {
           try {
-            attributes.add(attributeConverter.convert(Attribute.class.cast(object)));
+            attributes.add(attributeConverter.convert(attribute));
           }
           catch (final AttributeException e) {
             // Already checked in assertCorrectMessage
@@ -527,7 +511,7 @@ class DssSignRequestMessage implements SignRequestMessage {
         .map(SignRequestExtension::getCertRequestProperties)
         .map(CertRequestProperties::getCertType)
         .map(CertificateType::fromType)
-        .orElseGet(() -> CertificateType.PKC);
+        .orElse(CertificateType.PKC);
     final int docCount = Optional.ofNullable(this.signRequest.getSignTasks())
         .filter(t -> t.getSignTaskDatas() != null)
         .map(t -> t.getSignTaskDatas().size())
@@ -545,7 +529,7 @@ class DssSignRequestMessage implements SignRequestMessage {
   public SignMessage getSignMessage() {
     return Optional.ofNullable(this.signRequest.getSignRequestExtension())
         .map(SignRequestExtension::getSignMessage)
-        .map(m -> new DssSignMessage(m))
+        .map(DssSignMessage::new)
         .orElse(null);
   }
 
@@ -556,7 +540,7 @@ class DssSignRequestMessage implements SignRequestMessage {
     return Optional.ofNullable(this.signRequest.getSignRequestExtension())
         .map(SignRequestExtension::getRequestedSignatureAlgorithm)
         .filter(StringUtils::isNotBlank)
-        .map(a -> new DefaultSignatureRequirements(a))
+        .map(DefaultSignatureRequirements::new)
         .orElseThrow(() -> new DssProtocolException("RequestedSignatureAlgorithm is missing - this field is required"));
   }
 
@@ -593,7 +577,7 @@ class DssSignRequestMessage implements SignRequestMessage {
           for (final PreferredSAMLAttributeNameType samlAttr : a.getSamlAttributeNames()) {
             final DefaultIdentityAttributeIdentifier sa =
                 new DefaultIdentityAttributeIdentifier("SAML", samlAttr.getValue(), null);
-            sources.put(Integer.valueOf(samlAttr.getOrder()), sa);
+            sources.put(samlAttr.getOrder(), sa);
           }
           cam.setSources(sources.entrySet()
               .stream()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Sweden Connect
+ * Copyright 2022-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,9 @@ public enum SignServiceErrorCode {
 
   /** General authentication error. */
   AUTHN_FAILURE("The user failed to authenticate"),
+
+  /** Security violation. */
+  SECURITY_VIOLATION("A security violation was detected"),
 
   /** Error generating the signing key. */
   KEY_GENERATION_FAILED("The generation of the signature key failed"),

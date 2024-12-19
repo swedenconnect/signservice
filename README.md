@@ -16,6 +16,8 @@ Go to https://docs.swedenconnect.se/signservice for documentation of how to unde
 
 Java API documentation: https://docs.swedenconnect.se/signservice/apidocs
 
+Release notes: https://docs.swedenconnect.se/signservice/release-notes.html
+
 ## Modules
 
 This repository comprises of the following modules:
@@ -46,4 +48,4 @@ This repository comprises of the following modules:
 
 -----
 
-Copyright &copy; 2022-2023, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
+Copyright &copy; 2022-2024, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
