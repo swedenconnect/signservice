@@ -45,6 +45,9 @@ public enum SignServiceErrorCode {
   /** General authentication error. */
   AUTHN_FAILURE("The user failed to authenticate"),
 
+  /** Security violation. */
+  SECURITY_VIOLATION("A security violation was detected"),
+
   /** Error generating the signing key. */
   KEY_GENERATION_FAILED("The generation of the signature key failed"),
 
