@@ -4,6 +4,8 @@
 
 ## 1.1.2
 
+**Date:** 2024-12-19
+
 ### Upgrades according to newest versions of Specifications
 
 The new [Sweden Connect Technical Specifications](https://docs.swedenconnect.se/technical-framework/december-2024/index.html) are now supported. The following changes were made:
@@ -11,6 +13,10 @@ The new [Sweden Connect Technical Specifications](https://docs.swedenconnect.se/
 - In section 3.1., "Element SignRequestExtension", of [DSS Extension for Federated Central Signing Services](https://docs.swedenconnect.se/technical-framework/latest/09_-_DSS_Extension_for_Federated_Signing_Services.html), version 1.5, the requirements for `NotBefore` and `NotOnOrAfter` to be present under the <saml:Conditions> element was removed. The reason for this is that it will always be the SignService itself that determines whether a message has expired or not. This has been implemented.
 
 - Section 2.2.2, "Sign Response Status Information", of [Implementation Profile for using OASIS DSS in Central Signing Services](https://docs.swedenconnect.se/technical-framework/latest/07_-_Implementation_Profile_for_using_DSS_in_Central_Signing_Services.html), version 1.6, defines two new DSS status codes; `http://id.swedenconnect.se/sig-status/1.1/authn-failed` and `http://id.swedenconnect.se/sig-status/1.1/security-violation`. Support for these codes have been added.
+
+### Updated dependencies
+
+All underlying dependencies were updated to their latest versions.
 
 -----
 
