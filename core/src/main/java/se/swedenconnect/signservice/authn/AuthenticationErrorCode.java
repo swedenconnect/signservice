@@ -35,6 +35,9 @@ public enum AuthenticationErrorCode {
   /** The user failed to authenticate - general authentication error. */
   FAILED_AUTHN,
 
+  /** Possible security violation. */
+  SECURITY_VIOLATION,
+
   /** General error for bad authentication setup. For example, the IdP does not recognize the SP. */
   INTERNAL_AUTHN_ERROR;
 

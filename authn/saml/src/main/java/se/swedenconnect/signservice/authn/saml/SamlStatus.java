@@ -15,15 +15,14 @@
  */
 package se.swedenconnect.signservice.authn.saml;
 
-import java.util.Objects;
-import java.util.Optional;
-
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.opensaml.saml.saml2.core.Status;
 import org.opensaml.saml.saml2.core.StatusCode;
 import org.opensaml.saml.saml2.core.StatusMessage;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A utility class for working with SAML {@link Status} objects.
@@ -33,8 +32,13 @@ public class SamlStatus {
   /** The status code for cancel (defined by the Swedish eID framework). */
   public static final String CANCEL_STATUS_CODE = "http://id.elegnamnden.se/status/1.0/cancel";
 
+  /** Status code for fraud detection. */
+  public static final String FRAUD_STATUS_CODE = "http://id.elegnamnden.se/status/1.0/fraud";
+
+  /** Status code for possible fraud detection. */
+  public static final String POSSIBLE_FRAUD_STATUS_CODE = "http://id.elegnamnden.se/status/1.0/possibleFraud";
+
   /** The status object. */
-  @Nonnull
   private final Status status;
 
   /**
@@ -108,7 +112,7 @@ public class SamlStatus {
   /** {@inheritDoc} */
   @Override
   public String toString() {
-    final StringBuffer sb = new StringBuffer("code='");
+    final StringBuilder sb = new StringBuilder("code='");
     sb.append(this.getMinorStatusCode()).append("'");
     final String minor = this.getMinorStatusCode();
     if (minor != null) {
