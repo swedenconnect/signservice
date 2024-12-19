@@ -15,24 +15,23 @@
  */
 package se.swedenconnect.signservice.protocol.dss;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.idsec.signservice.xml.DOMUtils;
 import se.swedenconnect.schemas.dss_1_0.SignRequest;
 import se.swedenconnect.signservice.protocol.ProtocolException;
 import se.swedenconnect.signservice.protocol.ProtocolProcessingRequirements.SignatureRequirement;
 import se.swedenconnect.xml.jaxb.JAXBUnmarshaller;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.cert.X509Certificate;
+import java.util.Collections;
 
 /**
  * Test cases for DssSignRequestMessage.
@@ -62,7 +61,7 @@ public class DssSignRequestMessageTest {
 
     // Verify the signature
     final X509Certificate cert = CertificateUtils.decodeCertificate(this.getClass().getResourceAsStream("/cert1.crt"));
-    request.verifySignature(Arrays.asList(cert));
+    request.verifySignature(Collections.singletonList(cert));
 
     // Assert reqs
     Assertions.assertEquals(SignatureRequirement.REQUIRED,
@@ -80,9 +79,7 @@ public class DssSignRequestMessageTest {
 
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage);
   }
 
   @Test
@@ -101,9 +98,7 @@ public class DssSignRequestMessageTest {
 
     final DssSignRequestMessage request2 = new DssSignRequestMessage(signRequest2, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request2.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request2::assertCorrectMessage);
   }
 
   @Test
@@ -116,33 +111,25 @@ public class DssSignRequestMessageTest {
     e.setAttribute("Version", "1.0");
     final SignRequest signRequest = JAXBUnmarshaller.unmarshall(doc, SignRequest.class);
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage);
 
     // Too high version
     e.setAttribute("Version", "2.0");
     final SignRequest signRequest2 = JAXBUnmarshaller.unmarshall(doc, SignRequest.class);
     final DssSignRequestMessage request2 = new DssSignRequestMessage(signRequest2, doc);
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request2.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request2::assertCorrectMessage);
 
     // Missing version - should be ok
     e.removeAttribute("Version");
     final SignRequest signRequest3 = JAXBUnmarshaller.unmarshall(doc, SignRequest.class);
     final DssSignRequestMessage request3 = new DssSignRequestMessage(signRequest3, doc);
-    Assertions.assertDoesNotThrow(() -> {
-      request3.assertCorrectMessage();
-    });
+    Assertions.assertDoesNotThrow(request3::assertCorrectMessage);
 
     // Invalid version
     e.setAttribute("Version", "foobar");
     final SignRequest signRequest4 = JAXBUnmarshaller.unmarshall(doc, SignRequest.class);
     final DssSignRequestMessage request4 = new DssSignRequestMessage(signRequest4, doc);
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request4.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request4::assertCorrectMessage);
   }
 
   @Test
@@ -157,9 +144,7 @@ public class DssSignRequestMessageTest {
 
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage);
   }
 
   @Test
@@ -171,9 +156,7 @@ public class DssSignRequestMessageTest {
 
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage);
   }
 
   @Test
@@ -185,10 +168,8 @@ public class DssSignRequestMessageTest {
 
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    // If the SignTaskID is missing and we only have one task it is ok
-    Assertions.assertDoesNotThrow(() -> {
-      request.assertCorrectMessage();
-    });
+    // If the SignTaskID is missing, and we only have one task it is ok
+    Assertions.assertDoesNotThrow(request::assertCorrectMessage);
   }
 
   @Test
@@ -200,9 +181,7 @@ public class DssSignRequestMessageTest {
 
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage);
   }
 
   @Test
@@ -214,9 +193,7 @@ public class DssSignRequestMessageTest {
 
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage);
   }
 
   @Test
@@ -228,9 +205,7 @@ public class DssSignRequestMessageTest {
 
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage);
   }
 
   @Test
@@ -243,9 +218,7 @@ public class DssSignRequestMessageTest {
     final SignRequest signRequest = JAXBUnmarshaller.unmarshall(doc, SignRequest.class);
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage);
   }
 
   @Test
@@ -260,9 +233,7 @@ public class DssSignRequestMessageTest {
       e.removeAttribute("NotBefore");
       final DssSignRequestMessage request =
           new DssSignRequestMessage(JAXBUnmarshaller.unmarshall(doc, SignRequest.class), doc);
-      Assertions.assertThrows(ProtocolException.class, () -> {
-        request.assertCorrectMessage();
-      }, "Conditions.notBefore is missing - this field is required");
+      Assertions.assertDoesNotThrow(request::assertCorrectMessage);
       e.setAttribute("NotBefore", notBefore);
     }
 
@@ -272,9 +243,7 @@ public class DssSignRequestMessageTest {
       e.removeAttribute("NotOnOrAfter");
       final DssSignRequestMessage request =
           new DssSignRequestMessage(JAXBUnmarshaller.unmarshall(doc, SignRequest.class), doc);
-      Assertions.assertThrows(ProtocolException.class, () -> {
-        request.assertCorrectMessage();
-      }, "Conditions.notOnOrAfter is missing - this field is required");
+      Assertions.assertDoesNotThrow(request::assertCorrectMessage);
       e.setAttribute("NotOnOrAfter", notOnOrAfter);
     }
 
@@ -283,19 +252,8 @@ public class DssSignRequestMessageTest {
       e.removeChild(e.getElementsByTagName("saml2:AudienceRestriction").item(0));
       final DssSignRequestMessage request =
           new DssSignRequestMessage(JAXBUnmarshaller.unmarshall(doc, SignRequest.class), doc);
-      Assertions.assertThrows(ProtocolException.class, () -> {
-        request.assertCorrectMessage();
-      }, "Conditions.AudienceRestriction is missing - the response URL must be given here");
-    }
-
-    // Missing Conditions
-    {
-      e.getParentNode().removeChild(e);
-      final DssSignRequestMessage request =
-          new DssSignRequestMessage(JAXBUnmarshaller.unmarshall(doc, SignRequest.class), doc);
-      Assertions.assertThrows(ProtocolException.class, () -> {
-        request.assertCorrectMessage();
-      }, "Conditions is missing - this element is required");
+      Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage,
+          "Conditions.AudienceRestriction is missing - the response URL must be given here");
     }
   }
 
@@ -321,9 +279,7 @@ public class DssSignRequestMessageTest {
 
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage);
   }
 
   @Test
@@ -336,9 +292,8 @@ public class DssSignRequestMessageTest {
     final SignRequest signRequest = JAXBUnmarshaller.unmarshall(doc, SignRequest.class);
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    }, "IdentityProvider is missing - this field is required");
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage,
+        "IdentityProvider is missing - this field is required");
   }
 
   @Test
@@ -351,9 +306,8 @@ public class DssSignRequestMessageTest {
     final SignRequest signRequest = JAXBUnmarshaller.unmarshall(doc, SignRequest.class);
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    }, "SignRequester is missing - this field is required");
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage,
+        "SignRequester is missing - this field is required");
   }
 
   @Test
@@ -366,9 +320,8 @@ public class DssSignRequestMessageTest {
     final SignRequest signRequest = JAXBUnmarshaller.unmarshall(doc, SignRequest.class);
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    }, "SignService is missing - this field is required");
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage,
+        "SignService is missing - this field is required");
   }
 
   @Test
@@ -382,9 +335,8 @@ public class DssSignRequestMessageTest {
     final SignRequest signRequest = JAXBUnmarshaller.unmarshall(doc, SignRequest.class);
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    }, "RequestedSignatureAlgorithm is missing - this field is required");
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage,
+        "RequestedSignatureAlgorithm is missing - this field is required");
   }
 
   @Test
@@ -411,9 +363,8 @@ public class DssSignRequestMessageTest {
     final SignRequest signRequest = JAXBUnmarshaller.unmarshall(doc, SignRequest.class);
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    }, "Bad SignMessage provided - either Message or EncryptedMessage must be assigned");
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage,
+        "Bad SignMessage provided - either Message or EncryptedMessage must be assigned");
   }
 
   @Test
@@ -462,9 +413,7 @@ public class DssSignRequestMessageTest {
 
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
-    Assertions.assertThrows(ProtocolException.class, () -> {
-      request.assertCorrectMessage();
-    });
+    Assertions.assertThrows(ProtocolException.class, request::assertCorrectMessage);
   }
 
   @Test
@@ -475,15 +424,15 @@ public class DssSignRequestMessageTest {
     final DssSignRequestMessage request = new DssSignRequestMessage(signRequest, doc);
 
     // Serialize
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    ObjectOutputStream out = new ObjectOutputStream(bos);
+    final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    final ObjectOutputStream out = new ObjectOutputStream(bos);
     out.writeObject(request);
-    byte[] serialization = bos.toByteArray();
+    final byte[] serialization = bos.toByteArray();
     Assertions.assertNotNull(serialization);
 
     // Deserialize
-    ByteArrayInputStream bis = new ByteArrayInputStream(serialization);
-    ObjectInputStream in = new ObjectInputStream(bis);
+    final ByteArrayInputStream bis = new ByteArrayInputStream(serialization);
+    final ObjectInputStream in = new ObjectInputStream(bis);
     final DssSignRequestMessage request2 = (DssSignRequestMessage) in.readObject();
     Assertions.assertNotNull(request2);
     Assertions.assertEquals(request.getRequestId(), request2.getRequestId());
@@ -491,7 +440,7 @@ public class DssSignRequestMessageTest {
     request2.assertCorrectMessage();
 
     final X509Certificate cert = CertificateUtils.decodeCertificate(this.getClass().getResourceAsStream("/cert1.crt"));
-    request2.verifySignature(Arrays.asList(cert));
+    request2.verifySignature(Collections.singletonList(cert));
   }
 
   // TODO: Many more test cases ...

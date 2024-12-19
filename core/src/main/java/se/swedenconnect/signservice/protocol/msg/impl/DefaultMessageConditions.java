@@ -15,9 +15,12 @@
  */
 package se.swedenconnect.signservice.protocol.msg.impl;
 
+import java.io.Serial;
 import java.time.Instant;
 import java.util.Objects;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.signservice.core.annotations.GeneratedMethod;
 import se.swedenconnect.signservice.protocol.msg.MessageConditions;
 
@@ -27,6 +30,7 @@ import se.swedenconnect.signservice.protocol.msg.MessageConditions;
 public class DefaultMessageConditions implements MessageConditions {
 
   /** For serializing. */
+  @Serial
   private static final long serialVersionUID = -1228444313739138273L;
 
   /** Not before condition. */
@@ -38,10 +42,10 @@ public class DefaultMessageConditions implements MessageConditions {
   /**
    * Constructor.
    *
-   * @param notBefore the not before condition
-   * @param notAfter the not after condition
+   * @param notBefore the not-before condition
+   * @param notAfter the not-after condition
    */
-  public DefaultMessageConditions(final Instant notBefore, final Instant notAfter) {
+  public DefaultMessageConditions(@Nullable final Instant notBefore, @Nullable final Instant notAfter) {
     this.notBefore = notBefore;
     this.notAfter = notAfter;
 
@@ -52,19 +56,21 @@ public class DefaultMessageConditions implements MessageConditions {
 
   /** {@inheritDoc} */
   @Override
+  @Nullable
   public Instant getNotBefore() {
     return this.notBefore;
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nullable
   public Instant getNotAfter() {
     return this.notAfter;
   }
 
   /** {@inheritDoc} */
   @Override
-  public boolean isWithinRange(final Instant instant) {
+  public boolean isWithinRange(@Nonnull final Instant instant) {
     if (instant == null) {
       return false;
     }
@@ -91,10 +97,9 @@ public class DefaultMessageConditions implements MessageConditions {
     if (this == obj) {
       return true;
     }
-    if (!(obj instanceof DefaultMessageConditions)) {
+    if (!(obj instanceof final DefaultMessageConditions other)) {
       return false;
     }
-    final DefaultMessageConditions other = (DefaultMessageConditions) obj;
     return Objects.equals(this.notAfter, other.notAfter) && Objects.equals(this.notBefore, other.notBefore);
   }
 
