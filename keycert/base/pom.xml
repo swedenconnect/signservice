@@ -24,7 +24,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-keycert-parent</artifactId>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.1.2</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: KeyAndCertificate :: Base</name>

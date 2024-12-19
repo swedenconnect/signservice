@@ -21,7 +21,7 @@
   <groupId>se.swedenconnect.signservice</groupId>
   <artifactId>signservice-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.1.2-SNAPSHOT</version>
+  <version>1.1.2</version>
 
   <name>Sweden Connect :: SignService :: Parent POM</name>
   <description>Parent POM for SignService libraries</description>
@@ -273,12 +273,6 @@
         </plugin>
 
         <plugin>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok-maven-plugin</artifactId>
-          <version>1.18.20.0</version>
-        </plugin>
-
-        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
           <version>3.20.0</version>
@@ -393,15 +387,6 @@
       </plugin>
 
       <plugin>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok-maven-plugin</artifactId>
-        <configuration>
-          <addOutputDirectory>false</addOutputDirectory>
-          <sourceDirectory>src/main/java</sourceDirectory>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
       </plugin>
@@ -409,14 +394,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
       </plugin>
 
       <!-- run mvn jacoco:report -->
@@ -445,19 +422,6 @@
 
       <build>
         <plugins>
-
-          <plugin>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <phase>generate-sources</phase>
-                <goals>
-                  <goal>delombok</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
 
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -497,9 +461,6 @@
                 </goals>
               </execution>
             </executions>
-            <configuration>
-              <sourcepath>target/generated-sources/delombok</sourcepath>
-            </configuration>
           </plugin>
 
           <plugin>
@@ -532,19 +493,6 @@
 
       <build>
         <plugins>
-
-          <plugin>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <phase>generate-sources</phase>
-                <goals>
-                  <goal>delombok</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
 
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>

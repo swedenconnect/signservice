@@ -24,7 +24,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice</groupId>
     <artifactId>signservice-authn-parent</artifactId>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.1.2</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Authentication :: SAML</name>
@@ -150,9 +150,9 @@
           <doctitle>SignService SAML Authentication Handler - ${project.version}</doctitle>
           <windowtitle>SignService SAML Authentication Handler - ${project.version}</windowtitle>
           <links>
-            <link>https://build.shibboleth.net/nexus/content/sites/site/java-opensaml/4.2.0/apidocs/</link>
-            <link>https://build.shibboleth.net/nexus/content/sites/site/java-support/8.2.1/apidocs/</link>
-            <link>https://docs.swedenconnect.se/opensaml-security-ext/javadoc/latest/</link>
+            <link>https://shibboleth.net/api/java-opensaml/5.1.2/</link>
+            <link>https://shibboleth.net/api/java-support/8.4.0/</link>
+            <link>https://docs.swedenconnect.se/opensaml-security-ext/javadoc/</link>
             <link>https://docs.swedenconnect.se/opensaml-addons/apidoc/</link>
             <link>https://docs.swedenconnect.se/opensaml-swedish-eid/apidoc/</link>
           </links>

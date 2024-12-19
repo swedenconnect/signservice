@@ -4,15 +4,17 @@
 
 This is the starting point for the open source Signature Service components published at the GitHub repository https://github.com/swedenconnect/signservice.
 
-* [What is a Signature Service?](what-is.md) - An introduction to the concept of a Signature Service.
+* [Release Notes](release-notes.html) - Release notes for the SignService libraries.
 
-* [Signature Service Architectural Overview](architechture.md) - Architectural overview and an explanation of key concepts and the logical flow.
+* [What is a Signature Service?](what-is.html) - An introduction to the concept of a Signature Service.
 
-* [SignService Configuration](configuration.md) - How to configure the different modules of a Signature Service application.
+* [Signature Service Architectural Overview](architechture.html) - Architectural overview and an explanation of key concepts and the logical flow.
 
-* [Setting up a Signature Service Application](application.md) - How to set up, and run, a Signature Service Application.
+* [SignService Configuration](configuration.html) - How to configure the different modules of a Signature Service application.
 
-* [Auditing](audit.md) - Which events and data are being logged by the Signature Service?
+* [Setting up a Signature Service Application](application.html) - How to set up, and run, a Signature Service Application.
+
+* [Auditing](audit.html) - Which events and data are being logged by the Signature Service?
 
 * [API Documentation](https://docs.swedenconnect.se/signservice/apidocs) - Java API documentation.
 
