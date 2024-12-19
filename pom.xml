@@ -344,10 +344,6 @@
             <serverId>ossrh</serverId>
             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
             <autoReleaseAfterClose>true</autoReleaseAfterClose>
-            <!--
-              Allows manual inspection of the staging repo before deploying it to the central repo.
-              Use 'mvn nexus-staging:release -Prelease' to release and 'mvn nexus-staging:drop' to abort.
-            -->
           </configuration>
         </plugin>
 
