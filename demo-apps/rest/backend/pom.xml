@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2022-2024 Sweden Connect
+  ~ Copyright 2022-2025 Sweden Connect
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>signservice-demo-rest-backend</artifactId>
@@ -24,7 +24,7 @@
   <parent>
     <groupId>se.swedenconnect.signservice.demo</groupId>
     <artifactId>signservice-demo-rest-parent</artifactId>
-    <version>1.1.2</version>
+    <version>1.1.3</version>
   </parent>
 
   <name>Sweden Connect :: SignService :: Demo :: REST :: Backend</name>
@@ -42,7 +42,7 @@
   <scm>
     <connection>scm:git:https://github.com/swedenconnect/signservice.git</connection>
     <developerConnection>scm:git:https://github.com/swedenconnect/signservice.git</developerConnection>
-    <url>https://github.com/idsec/signservice/tree/main</url>
+    <url>https://github.com/swedenconnect/signservice/tree/main</url>
   </scm>
 
   <organization>
@@ -99,13 +99,13 @@
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
-<!--
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-devtools</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    -->
+    <!--
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-devtools</artifactId>
+          <scope>runtime</scope>
+        </dependency>
+        -->
 
     <dependency>
       <groupId>se.swedenconnect.signservice</groupId>
