@@ -15,16 +15,9 @@
  */
 package se.swedenconnect.signservice.signature.config;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.signservice.core.config.AbstractHandlerFactory;
@@ -39,6 +32,11 @@ import se.swedenconnect.signservice.signature.tbsdata.PDFTBSDataProcessor;
 import se.swedenconnect.signservice.signature.tbsdata.TBSDataProcessor;
 import se.swedenconnect.signservice.signature.tbsdata.XMLTBSDataProcessor;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 /**
  * Factory for creating {@link DefaultSignatureHandler} handlers.
  */
@@ -46,28 +44,28 @@ public class DefaultSignatureHandlerFactory extends AbstractHandlerFactory<Signa
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   protected SignatureHandler createHandler(
       @Nullable final HandlerConfiguration<SignatureHandler> configuration, @Nullable final BeanLoader beanLoader)
       throws IllegalArgumentException {
 
     if (configuration == null) {
       return new DefaultSignatureHandler(List.of(
-        this.createTbsDataProcessor(TBSDataProcessorConfiguration.XML_TYPE, null),
-        this.createTbsDataProcessor(TBSDataProcessorConfiguration.PDF_TYPE, null)));
+          this.createTbsDataProcessor(TBSDataProcessorConfiguration.XML_TYPE, null),
+          this.createTbsDataProcessor(TBSDataProcessorConfiguration.PDF_TYPE, null)));
     }
     else {
-      if (!DefaultSignatureHandlerConfiguration.class.isInstance(configuration)) {
+      if (!(configuration instanceof final DefaultSignatureHandlerConfiguration conf)) {
         throw new IllegalArgumentException(
             "Unknown configuration object supplied - " + configuration.getClass().getSimpleName());
       }
-      final DefaultSignatureHandlerConfiguration conf = DefaultSignatureHandlerConfiguration.class.cast(configuration);
       final AlgorithmRegistry algorithmRegistry = Optional.ofNullable(conf.getAlgorithmRegistry())
           .orElseGet(AlgorithmRegistrySingleton::getInstance);
       final SignServiceSignerProvider signerProvider = Optional.ofNullable(conf.getSignerProvider())
           .orElseGet(() -> new DefaultSignServiceSignerProvider(algorithmRegistry));
 
       final List<TBSDataProcessor> processors = new ArrayList<>();
-      if (CollectionUtils.isEmpty(conf.getTbsProcessors())) {
+      if (conf.getTbsProcessors() == null || conf.getTbsProcessors().isEmpty()) {
         processors.add(this.createTbsDataProcessor(TBSDataProcessorConfiguration.XML_TYPE, null));
         processors.add(this.createTbsDataProcessor(TBSDataProcessorConfiguration.PDF_TYPE, null));
       }
@@ -77,15 +75,18 @@ public class DefaultSignatureHandlerFactory extends AbstractHandlerFactory<Signa
             throw new IllegalArgumentException("Missing type parameter");
           }
 
-          AbstractTBSDataProcessor processor = null;
+          final AbstractTBSDataProcessor processor;
           if (TBSDataProcessorConfiguration.XML_TYPE.equalsIgnoreCase(c.getType())) {
-            processor = this.createTbsDataProcessor(TBSDataProcessorConfiguration.XML_TYPE ,c.getSupportedProcessingRules());
+            processor =
+                this.createTbsDataProcessor(TBSDataProcessorConfiguration.XML_TYPE, c.getSupportedProcessingRules());
             if (StringUtils.isNotBlank(c.getDefaultCanonicalizationAlgorithm())) {
-              ((XMLTBSDataProcessor) processor).setDefaultCanonicalizationAlgorithm(c.getDefaultCanonicalizationAlgorithm());
+              ((XMLTBSDataProcessor) processor).setDefaultCanonicalizationAlgorithm(
+                  c.getDefaultCanonicalizationAlgorithm());
             }
           }
           else if (TBSDataProcessorConfiguration.PDF_TYPE.equalsIgnoreCase(c.getType())) {
-            processor = this.createTbsDataProcessor(TBSDataProcessorConfiguration.PDF_TYPE, c.getSupportedProcessingRules());
+            processor =
+                this.createTbsDataProcessor(TBSDataProcessorConfiguration.PDF_TYPE, c.getSupportedProcessingRules());
           }
           else {
             throw new IllegalArgumentException("Unsupported type: " + c.getType());
@@ -113,19 +114,20 @@ public class DefaultSignatureHandlerFactory extends AbstractHandlerFactory<Signa
    * @param supportedProcessingRules supported processing rules if present or null for no processing rules
    * @return {@link AbstractTBSDataProcessor} with global configuration settings
    */
-  private AbstractTBSDataProcessor createTbsDataProcessor(@Nonnull final String type, @Nullable final List<String> supportedProcessingRules) {
+  private AbstractTBSDataProcessor createTbsDataProcessor(@Nonnull final String type,
+      @Nullable final List<String> supportedProcessingRules) {
     Objects.requireNonNull(type, "Type must not be null");
     final AbstractTBSDataProcessor tbsDataProcessor;
     switch (type) {
     case TBSDataProcessorConfiguration.XML_TYPE:
       tbsDataProcessor = supportedProcessingRules == null
-       ? new XMLTBSDataProcessor()
-       : new XMLTBSDataProcessor(supportedProcessingRules);
+          ? new XMLTBSDataProcessor()
+          : new XMLTBSDataProcessor(supportedProcessingRules);
       break;
     case TBSDataProcessorConfiguration.PDF_TYPE:
       tbsDataProcessor = supportedProcessingRules == null
-        ? new PDFTBSDataProcessor()
-        : new PDFTBSDataProcessor(supportedProcessingRules);
+          ? new PDFTBSDataProcessor()
+          : new PDFTBSDataProcessor(supportedProcessingRules);
       break;
     default:
       throw new IllegalArgumentException("Unsupported TBS data processor type");

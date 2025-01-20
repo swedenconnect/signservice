@@ -15,25 +15,11 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.cert.CRLException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.apache.commons.collections.CollectionUtils;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.cert.X509CertificateHolder;
-
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.issuer.impl.AbstractCAService;
@@ -52,6 +38,17 @@ import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.KeyUsageCalculator;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.cert.CRLException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Basic CA service implementation equipped to issue certificates to signers.
@@ -102,7 +99,8 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
     this.certificateIssuer = new BasicCertificateIssuer(issuerModel, caCredential);
     this.crlDistributionPoints = new ArrayList<>();
     if (crlIssuerModel != null) {
-      this.crlIssuer = new SynchronizedCRLIssuer(crlIssuerModel, caRepository.getCRLRevocationDataProvider(), caCredential);
+      this.crlIssuer =
+          new SynchronizedCRLIssuer(crlIssuerModel, caRepository.getCRLRevocationDataProvider(), caCredential);
       this.crlDistributionPoints = List.of(crlIssuerModel.getDistributionPointUrl());
       try {
         this.publishNewCrl();
@@ -184,7 +182,7 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
   protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(
       @Nonnull final CertNameModel<?> subject, @Nonnull final PublicKey subjectPublicKey,
       @Nullable final X509CertificateHolder issuerCertificate,
-      @Nonnull final CertificateIssuerModel certificateIssuerModel) throws CertificateIssuanceException {
+      @Nonnull final CertificateIssuerModel certificateIssuerModel) {
 
     final DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(
         subjectPublicKey,
@@ -201,14 +199,14 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
     // Apply certificate profile
     //
     final CertificateProfileConfiguration conf =
-        Optional.ofNullable(this.profileConfiguration).orElseGet(() -> new CertificateProfileConfiguration());
+        Optional.ofNullable(this.profileConfiguration).orElseGet(CertificateProfileConfiguration::new);
 
-    if (CollectionUtils.isNotEmpty(conf.getExtendedKeyUsages())) {
+    if (conf.getExtendedKeyUsages() != null && !conf.getExtendedKeyUsages().isEmpty()) {
       certModelBuilder.extendedKeyUsage(new ExtendedKeyUsageModel(conf.isExtendedKeyUsageCritical(),
           conf.getExtendedKeyUsages().stream().map(s -> KeyPurposeId.getInstance(new ASN1ObjectIdentifier(s)))
               .toArray(KeyPurposeId[]::new)));
     }
-    if (CollectionUtils.isNotEmpty(conf.getPolicies())) {
+    if (conf.getPolicies() != null && !conf.getPolicies().isEmpty()) {
       certModelBuilder.certificatePolicy(new CertificatePolicyModel(conf.isPoliciesCritical(),
           conf.getPolicies().stream().map(ASN1ObjectIdentifier::new).toArray(ASN1ObjectIdentifier[]::new)));
     }

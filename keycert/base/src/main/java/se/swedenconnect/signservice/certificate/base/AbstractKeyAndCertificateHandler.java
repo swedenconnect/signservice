@@ -15,21 +15,10 @@
  */
 package se.swedenconnect.signservice.certificate.base;
 
-import java.security.KeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import se.swedenconnect.security.algorithms.Algorithm;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
@@ -50,6 +39,15 @@ import se.swedenconnect.signservice.core.types.InvalidRequestException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.msg.SignatureRequirements;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
+
+import java.security.KeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Abstract base class for the {@link KeyAndCertificateHandler} interface.
@@ -139,7 +137,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
     log.debug("Key type checks passed for {}", algorithmType);
 
     final SigningCertificateRequirements certificateRequirements = Optional.ofNullable(
-        signRequest.getSigningCertificateRequirements())
+            signRequest.getSigningCertificateRequirements())
         .orElseThrow(() -> new InvalidRequestException("Missing certificate requirements"));
 
     // Check certificate type.
@@ -147,7 +145,8 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
 
     // Attribute mappings ...
     // TODO: Later we may want to apply a default mapping if none is passed ...
-    if (CollectionUtils.isEmpty(certificateRequirements.getAttributeMappings())) {
+    if (certificateRequirements.getAttributeMappings() == null || certificateRequirements.getAttributeMappings()
+        .isEmpty()) {
       throw new InvalidRequestException("Missing attribute mappings in sign request");
     }
 

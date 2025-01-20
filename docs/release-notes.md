@@ -2,6 +2,14 @@
 
 # Signature Service - Release Notes
 
+## 1.1.3
+
+**Date:** 2025-01-20
+
+### Updated dependencies
+
+All underlying dependencies were updated to their latest versions.
+
 ## 1.1.2
 
 **Date:** 2024-12-19
@@ -20,4 +28,4 @@ All underlying dependencies were updated to their latest versions.
 
 -----
 
-Copyright &copy; 2022-2024, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
+Copyright &copy; 2022-2025, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).

@@ -15,22 +15,13 @@
  */
 package se.swedenconnect.signservice.certificate.cmc;
 
-import java.net.MalformedURLException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.Optional;
-
-import org.apache.commons.collections.CollectionUtils;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.operator.OperatorCreationException;
-
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import se.swedenconnect.ca.cmc.CMCException;
 import se.swedenconnect.ca.cmc.api.CMCCertificateModelBuilder;
 import se.swedenconnect.ca.cmc.api.CMCMessageException;
@@ -44,6 +35,13 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageM
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.KeyUsageCalculator;
+
+import java.net.MalformedURLException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Optional;
 
 /**
  * CMC Client for certificate services
@@ -100,21 +98,21 @@ public class SignServiceCMCClient extends PreConfiguredCMCClient {
           subjectPublicKey, caIssuerCert, caInformation.getCaAlgorithm());
 
       certModelBuilder
-        .subject(subject)
-        .includeAki(true)
-        .includeSki(true);
+          .subject(subject)
+          .includeAki(true)
+          .includeSki(true);
 
       // Apply certificate profile
       //
       final CertificateProfileConfiguration conf =
-          Optional.ofNullable(this.profileConfiguration).orElseGet(() -> new CertificateProfileConfiguration());
+          Optional.ofNullable(this.profileConfiguration).orElseGet(CertificateProfileConfiguration::new);
 
-      if (CollectionUtils.isNotEmpty(conf.getExtendedKeyUsages())) {
+      if (conf.getExtendedKeyUsages() != null && !conf.getExtendedKeyUsages().isEmpty()) {
         certModelBuilder.extendedKeyUsage(new ExtendedKeyUsageModel(conf.isExtendedKeyUsageCritical(),
             conf.getExtendedKeyUsages().stream().map(s -> KeyPurposeId.getInstance(new ASN1ObjectIdentifier(s)))
                 .toArray(KeyPurposeId[]::new)));
       }
-      if (CollectionUtils.isNotEmpty(conf.getPolicies())) {
+      if (conf.getPolicies() != null && !conf.getPolicies().isEmpty()) {
         certModelBuilder.certificatePolicy(new CertificatePolicyModel(conf.isPoliciesCritical(),
             conf.getPolicies().stream().map(ASN1ObjectIdentifier::new).toArray(ASN1ObjectIdentifier[]::new)));
       }
