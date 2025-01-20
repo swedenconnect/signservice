@@ -15,17 +15,11 @@
  */
 package se.swedenconnect.signservice.certificate.attributemapping;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
@@ -33,6 +27,11 @@ import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.msg.CertificateAttributeMapping;
 import se.swedenconnect.signservice.protocol.msg.RequestedCertificateAttribute;
 import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Default implementation for an attribute mapper based on an authentication.
@@ -59,11 +58,11 @@ public class DefaultAttributeMapper implements AttributeMapper {
       @Nonnull final IdentityAssertion assertion) throws AttributeMappingException {
 
     final SigningCertificateRequirements certificateRequirements = Optional.ofNullable(
-        signRequest.getSigningCertificateRequirements())
+            signRequest.getSigningCertificateRequirements())
         .orElseThrow(() -> new AttributeMappingException("No certificate requirements in sign request"));
 
     final List<CertificateAttributeMapping> attributeMappingRequirements = Optional.ofNullable(
-        certificateRequirements.getAttributeMappings())
+            certificateRequirements.getAttributeMappings())
         .orElseThrow(() -> new AttributeMappingException("No attribute mapping requirements in sign request"));
 
     final List<AttributeMappingData> attrMappingDataList = new ArrayList<>();
@@ -95,7 +94,7 @@ public class DefaultAttributeMapper implements AttributeMapper {
             .orElseThrow(() -> new AttributeMappingException("Attribute mapping requirement lacks requirement data"));
 
     final List<IdentityAttributeIdentifier> sources = mappingRequirement.getSources();
-    if (CollectionUtils.isEmpty(sources)) {
+    if (sources == null || sources.isEmpty()) {
       if (requestedCertificateAttribute.isRequired()) {
         throw new AttributeMappingException("Required attribute has no mapping sources in sign request");
       }
@@ -163,8 +162,8 @@ public class DefaultAttributeMapper implements AttributeMapper {
     if (value == null) {
       return null;
     }
-    if (String.class.isInstance(value)) {
-      return String.class.cast(value);
+    if (value instanceof final String s) {
+      return s;
     }
     else {
       return String.valueOf(value);
@@ -189,7 +188,7 @@ public class DefaultAttributeMapper implements AttributeMapper {
     }
 
     for (final IdentityAttributeIdentifier source : sources) {
-      Optional<IdentityAttribute<?>> attribute = identityAttributes.stream()
+      final Optional<IdentityAttribute<?>> attribute = identityAttributes.stream()
           .filter(s -> Objects.equals(s.getIdentifier(), source.getIdentifier()))
           .findFirst();
       if (attribute.isPresent()) {
