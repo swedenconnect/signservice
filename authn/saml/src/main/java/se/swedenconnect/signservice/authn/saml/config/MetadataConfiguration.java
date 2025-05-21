@@ -15,10 +15,8 @@
  */
 package se.swedenconnect.signservice.authn.saml.config;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import jakarta.annotation.Nonnull;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.opensaml.saml.ext.saml2mdui.Logo;
 import org.opensaml.saml.ext.saml2mdui.UIInfo;
@@ -27,9 +25,6 @@ import org.opensaml.saml.saml2.metadata.ContactPerson;
 import org.opensaml.saml.saml2.metadata.ContactPersonTypeEnumeration;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.Organization;
-
-import jakarta.annotation.Nonnull;
-import lombok.Data;
 import se.swedenconnect.opensaml.common.utils.LocalizedString;
 import se.swedenconnect.opensaml.saml2.metadata.build.AttributeConsumingServiceBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.build.ContactPersonBuilder;
@@ -37,6 +32,10 @@ import se.swedenconnect.opensaml.saml2.metadata.build.LogoBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.build.OrganizationBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.build.RequestedAttributeBuilder;
 import se.swedenconnect.opensaml.saml2.metadata.build.UIInfoBuilder;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Configuration class for a SP's SAML metadata.
@@ -91,7 +90,9 @@ public class MetadataConfiguration {
     }
     final AttributeConsumingServiceBuilder builder = AttributeConsumingServiceBuilder.builder();
 
-    builder.serviceNames(this.serviceNames);
+    builder
+        .serviceNames(this.serviceNames)
+        .index(0);
 
     if (this.requestedAttributes != null) {
       builder.requestedAttributes(this.requestedAttributes.stream()
@@ -142,14 +143,14 @@ public class MetadataConfiguration {
     public UIInfo toElement(final String baseUrl) {
       final List<Logo> logos = this.getLogos() != null
           ? this.getLogos().stream()
-              .filter(logo -> StringUtils.isNotBlank(logo.getPath()) || StringUtils.isNoneBlank(logo.getUrl()))
-              .map(logo -> LogoBuilder.logo(
-                  StringUtils.isNotBlank(logo.getUrl())
-                      ? logo.getUrl()
-                      : String.format("%s%s", baseUrl, logo.getPath()),
-                  StringUtils.isNotBlank(logo.getLang()) ? logo.getLang() : "sv",
-                  logo.getHeight(), logo.getWidth()))
-              .collect(Collectors.toList())
+          .filter(logo -> StringUtils.isNotBlank(logo.getPath()) || StringUtils.isNoneBlank(logo.getUrl()))
+          .map(logo -> LogoBuilder.logo(
+              StringUtils.isNotBlank(logo.getUrl())
+                  ? logo.getUrl()
+                  : String.format("%s%s", baseUrl, logo.getPath()),
+              StringUtils.isNotBlank(logo.getLang()) ? logo.getLang() : "sv",
+              logo.getHeight(), logo.getWidth()))
+          .collect(Collectors.toList())
           : null;
 
       return UIInfoBuilder.builder()

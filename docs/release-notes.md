@@ -2,6 +2,18 @@
 
 # Signature Service - Release Notes
 
+## 1.2.0
+
+**Date:** 
+
+### Updated dependencies
+
+All underlying dependencies were updated to their latest versions.
+
+### Bugfix for publishing SAML metadata
+
+- See https://github.com/swedenconnect/signservice/issues/189
+
 ## 1.1.3
 
 **Date:** 2025-01-20

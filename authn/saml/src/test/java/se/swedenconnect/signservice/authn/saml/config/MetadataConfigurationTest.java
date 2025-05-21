@@ -15,19 +15,17 @@
  */
 package se.swedenconnect.signservice.authn.saml.config;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opensaml.saml.ext.saml2mdui.UIInfo;
 import org.opensaml.saml.saml2.metadata.AttributeConsumingService;
-
 import se.swedenconnect.opensaml.common.utils.LocalizedString;
 import se.swedenconnect.signservice.authn.saml.OpenSamlTestBase;
 import se.swedenconnect.signservice.authn.saml.config.MetadataConfiguration.RequestedAttributeConfig;
 import se.swedenconnect.signservice.authn.saml.config.MetadataConfiguration.UIInfoConfig;
 import se.swedenconnect.signservice.authn.saml.config.MetadataConfiguration.UIInfoConfig.UIInfoLogo;
+
+import java.util.List;
 
 /**
  * Test cases for MetadataConfiguration.
@@ -40,19 +38,21 @@ public class MetadataConfigurationTest extends OpenSamlTestBase {
 
     Assertions.assertNull(config.createAttributeConsumingServiceElement());
 
-    config.setServiceNames(Arrays.asList());
+    config.setServiceNames(List.of());
     Assertions.assertNull(config.createAttributeConsumingServiceElement());
 
-    config.setRequestedAttributes(Arrays.asList());
+    config.setRequestedAttributes(List.of());
     Assertions.assertNull(config.createAttributeConsumingServiceElement());
 
-    config.setServiceNames(Arrays.asList(new LocalizedString("en-Demo")));
+    config.setServiceNames(List.of(new LocalizedString("en-Demo")));
     final RequestedAttributeConfig rac = new RequestedAttributeConfig();
     rac.setName("urn:oid:1.2.752.29.4.13");
     rac.setRequired(true);
-    config.setRequestedAttributes(Arrays.asList(rac));
+    config.setRequestedAttributes(List.of(rac));
 
     AttributeConsumingService service = config.createAttributeConsumingServiceElement();
+    Assertions.assertNotNull(service.getIndex());
+    Assertions.assertEquals(0, service.getIndex());
     Assertions.assertTrue(service.getNames().size() == 1);
     Assertions.assertEquals("Demo", service.getNames().get(0).getValue());
     Assertions.assertEquals("en", service.getNames().get(0).getXMLLang());
