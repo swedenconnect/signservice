@@ -15,19 +15,10 @@
  */
 package se.swedenconnect.signservice.config;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import se.swedenconnect.opensaml.saml2.metadata.provider.MetadataProvider;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
@@ -60,13 +51,21 @@ import se.swedenconnect.signservice.storage.impl.DefaultMessageReplayChecker;
 import se.swedenconnect.signservice.storage.impl.InMemoryReplayCheckerStorageContainer;
 import se.swedenconnect.signservice.storage.impl.ReplayCheckerStorageContainer;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
  * Default implementation of the {@link SignServiceFactory} interface.
  */
 @Slf4j
 public class DefaultSignServiceFactory implements SignServiceFactory {
 
-  /** The bean name used if the factory creates and registers a {@link MessageReplayChecker} bean. */
+  /** The bean name used if the factory creates and registers a {@link MessageReplayChecker} bean. */
   public static final String MESSAGE_REPLAY_CHECKER_BEAN_NAME = "signservice.MessageReplayChecker";
 
   /** The handler factory registry. */
@@ -90,17 +89,18 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
    */
   public DefaultSignServiceFactory(@Nullable final HandlerFactoryRegistry handlerFactoryRegistry) {
     this.handlerFactoryRegistry = Optional.ofNullable(handlerFactoryRegistry)
-        .orElseGet(() -> new HandlerFactoryRegistry());
+        .orElseGet(HandlerFactoryRegistry::new);
   }
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public SignServiceEngineManager createSignServiceEngineManager(
       @Nonnull final SignServiceConfigurationProperties configuration,
       @Nullable final BeanLoader beanLoader,
       @Nullable final BeanRegistrator beanRegistrator) throws Exception {
 
-    // Setup the bean handlers ...
+    // Set up the bean handlers ...
     //
     final BeanLoader bLoader = new BeanLoaderWrapper(beanLoader);
     final BeanRegistratorWrapper bRegistrator = new BeanRegistratorWrapper(beanRegistrator);
@@ -205,7 +205,8 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
           throw new IllegalArgumentException("No protocol given for engine (and several default beans registered)");
         }
         final ProtocolHandlerConfigurationProperties props = new ProtocolHandlerConfigurationProperties();
-        final BeanReferenceHandlerConfiguration<ProtocolHandler> ext = new BeanReferenceHandlerConfiguration<ProtocolHandler>();
+        final BeanReferenceHandlerConfiguration<ProtocolHandler> ext =
+            new BeanReferenceHandlerConfiguration<ProtocolHandler>();
         ext.setBeanName(beanNames.get(0));
         ext.init();
         props.setExternal(ext);
@@ -236,10 +237,12 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
           throw new IllegalArgumentException("No signature handler given for engine (and no default bean)");
         }
         else if (beanNames.size() > 1) {
-          throw new IllegalArgumentException("No signature handler given for engine (and several default beans registered)");
+          throw new IllegalArgumentException(
+              "No signature handler given for engine (and several default beans registered)");
         }
         final SignatureHandlerConfigurationProperties props = new SignatureHandlerConfigurationProperties();
-        final BeanReferenceHandlerConfiguration<SignatureHandler> ext = new BeanReferenceHandlerConfiguration<SignatureHandler>();
+        final BeanReferenceHandlerConfiguration<SignatureHandler> ext =
+            new BeanReferenceHandlerConfiguration<SignatureHandler>();
         ext.setBeanName(beanNames.get(0));
         ext.init();
         props.setExternal(ext);
@@ -270,15 +273,18 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
           throw new IllegalArgumentException("No key and certificate handler given for engine (and no default bean)");
         }
         else if (beanNames.size() > 1) {
-          throw new IllegalArgumentException("No key and certificate given for engine (and several default beans registered)");
+          throw new IllegalArgumentException(
+              "No key and certificate given for engine (and several default beans registered)");
         }
         final KeyAndCertificateHandlerConfigurationProperties props =
             new KeyAndCertificateHandlerConfigurationProperties();
-        final BeanReferenceHandlerConfiguration<KeyAndCertificateHandler> ext = new BeanReferenceHandlerConfiguration<KeyAndCertificateHandler>();
+        final BeanReferenceHandlerConfiguration<KeyAndCertificateHandler> ext =
+            new BeanReferenceHandlerConfiguration<KeyAndCertificateHandler>();
         ext.setBeanName(beanNames.get(0));
         ext.init();
         props.setExternal(ext);
-        log.info("No key and certifucate handler assigned for engine {} - using default: {}", ecp.getName(), beanNames.get(0));
+        log.info("No key and certifucate handler assigned for engine {} - using default: {}", ecp.getName(),
+            beanNames.get(0));
         ecp.setCert(props);
       }
 
@@ -470,7 +476,8 @@ public class DefaultSignServiceFactory implements SignServiceFactory {
 
   /**
    * A {@link BeanRegistrator} that wraps the instance provided in the call to
-   * {@link DefaultSignServiceFactory#createSignServiceEngineManager(SignServiceConfigurationProperties, BeanLoader, BeanRegistrator)}.
+   * {@link DefaultSignServiceFactory#createSignServiceEngineManager(SignServiceConfigurationProperties, BeanLoader,
+   * BeanRegistrator)}.
    */
   private class BeanRegistratorWrapper implements BeanRegistrator {
 

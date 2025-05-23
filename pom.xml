@@ -21,7 +21,7 @@
   <groupId>se.swedenconnect.signservice</groupId>
   <artifactId>signservice-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.1.4-SNAPSHOT</version>
+  <version>1.2.0-SNAPSHOT</version>
 
   <name>Sweden Connect :: SignService :: Parent POM</name>
   <description>Parent POM for SignService libraries</description>
@@ -81,7 +81,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>17</java.version>
 
-    <spring.boot.version>3.4.1</spring.boot.version>
+    <spring.boot.version>3.4.5</spring.boot.version>
   </properties>
 
   <repositories>
@@ -96,17 +96,6 @@
       <url>https://build.shibboleth.net/nexus/content/repositories/releases</url>
     </repository>
   </repositories>
-
-  <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
 
   <modules>
     <module>core</module>
@@ -129,14 +118,14 @@
         <groupId>org.springframework</groupId>
         <artifactId>spring-framework-bom</artifactId>
         <type>pom</type>
-        <version>6.2.1</version>
+        <version>6.2.7</version>
         <scope>import</scope>
       </dependency>
 
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-bom</artifactId>
-        <version>2.2.0</version>
+        <version>2.3.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -144,31 +133,43 @@
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-commons</artifactId>
-        <version>2.2.0</version>
+        <version>2.3.1</version>
       </dependency>
 
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-xml-commons</artifactId>
-        <version>2.2.0</version>
+        <version>2.3.1</version>
       </dependency>
 
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-pdf-commons</artifactId>
-        <version>2.2.0</version>
+        <version>2.3.1</version>
       </dependency>
 
       <dependency>
         <groupId>org.apache.httpcomponents.client5</groupId>
         <artifactId>httpclient5</artifactId>
-        <version>5.4.1</version>
+        <version>5.4.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>nimbus-jose-jwt</artifactId>
+        <version>10.3</version>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.datatype</groupId>
         <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>2.18.2</version>
+        <version>2.19.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.cryptacular</groupId>
+        <artifactId>cryptacular</artifactId>
+        <version>1.2.7</version>
       </dependency>
 
     </dependencies>
@@ -176,11 +177,6 @@
   </dependencyManagement>
 
   <dependencies>
-
-    <dependency>
-      <groupId>jakarta.servlet</groupId>
-      <artifactId>jakarta.servlet-api</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>jakarta.annotation</groupId>
@@ -208,7 +204,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
-      <version>5.15.2</version>
+      <version>5.17.0</version>
       <scope>test</scope>
     </dependency>
 
@@ -230,7 +226,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.13.0</version>
+          <version>3.14.0</version>
           <configuration>
             <release>${java.version}</release>
           </configuration>
@@ -245,25 +241,25 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
-          <version>3.4.0</version>
+          <version>3.4.1</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>3.1.3</version>
+          <version>3.1.4</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>3.7.0</version>
+          <version>3.9.0</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.10.1</version>
+          <version>3.11.2</version>
         </plugin>
 
         <plugin>
@@ -275,13 +271,13 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.20.0</version>
+          <version>3.21.0</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.5.2</version>
+          <version>3.5.3</version>
         </plugin>
 
         <plugin>
@@ -330,14 +326,13 @@
         </plugin>
 
         <plugin>
-          <groupId>org.sonatype.plugins</groupId>
-          <artifactId>nexus-staging-maven-plugin</artifactId>
-          <version>1.7.0</version>
+          <groupId>org.sonatype.central</groupId>
+          <artifactId>central-publishing-maven-plugin</artifactId>
+          <version>0.7.0</version>
           <extensions>true</extensions>
           <configuration>
-            <serverId>ossrh</serverId>
-            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            <publishingServerId>central</publishingServerId>
+            <autoPublish>true</autoPublish>
           </configuration>
         </plugin>
 
@@ -418,8 +413,6 @@
     <profile>
       <id>release</id>
 
-      <!-- See http://central.sonatype.org/pages/apache-maven.html for setup -->
-
       <build>
         <plugins>
 
@@ -464,14 +457,14 @@
           </plugin>
 
           <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
           </plugin>
 
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.2.6</version>
+            <version>3.2.7</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>

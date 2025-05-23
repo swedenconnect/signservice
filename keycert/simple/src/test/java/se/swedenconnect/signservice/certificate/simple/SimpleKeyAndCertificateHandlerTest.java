@@ -15,23 +15,8 @@
  */
 package se.swedenconnect.signservice.certificate.simple;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.IOException;
-import java.security.Security;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -41,9 +26,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import se.idsec.utils.printcert.PrintCertificate;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
@@ -52,6 +34,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.ManagedPkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
 import se.swedenconnect.security.credential.container.keytype.KeyGenType;
@@ -78,6 +61,24 @@ import se.swedenconnect.signservice.protocol.msg.SigningCertificateRequirements;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultCertificateAttributeMapping;
 import se.swedenconnect.signservice.protocol.msg.impl.DefaultRequestedCertificateAttribute;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serial;
+import java.security.Security;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
  * Tests for the simple key and certificate handler
  */
@@ -92,10 +93,10 @@ class SimpleKeyAndCertificateHandlerTest {
 
   private static SimpleKeyAndCertificateHandler defaultHandler;
 
-  private static String crlPath = "/crl/cacrl.crl";
+  private static final String crlPath = "/crl/cacrl.crl";
 
-  private static String TEST_PATH = "target/test/ca-repo";
-  private static String TEST_CRL = "kht-ca.crl";
+  private static final String TEST_PATH = "target/test/ca-repo";
+  private static final String TEST_CRL = "kht-ca.crl";
 
   @BeforeAll
   public static void init() throws Exception {
@@ -104,9 +105,9 @@ class SimpleKeyAndCertificateHandlerTest {
     }
     final File caDir = new File(TEST_PATH);
 
-
     final PkiCredentialContainer ecProvider = new SoftPkiCredentialContainer("BC", "Test1234");
-    final PkiCredential caCredential = ecProvider.getCredential(ecProvider.generateCredential(KeyGenType.EC_P256));
+    final ManagedPkiCredential caCredential =
+        ecProvider.getCredential(ecProvider.generateCredential(KeyGenType.EC_P256));
 
     final SelfSignedCaCertificateGenerator caCertGenerator = new DefaultSelfSignedCaCertificateGenerator();
     caCertificate = caCertGenerator.generate(
@@ -123,7 +124,7 @@ class SimpleKeyAndCertificateHandlerTest {
         XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256, new File(caDir, TEST_CRL).getAbsolutePath()).build();
 
     defaultAttributeMapper =
-        new DefaultAttributeMapper((attributeType, ref, value) -> attributeType.equals(CertificateAttributeType.RDN)
+        new DefaultAttributeMapper((attributeType, ref, value) -> attributeType == CertificateAttributeType.RDN
             && ref.equalsIgnoreCase(CertAttributes.C.getId())
             && value.equalsIgnoreCase("SE"));
 
@@ -199,14 +200,12 @@ class SimpleKeyAndCertificateHandlerTest {
   }
 
   @Test
-  public void testBadProfile() throws Exception {
+  public void testBadProfile() {
 
-    assertThatThrownBy(() -> {
-      defaultHandler.checkRequirements(
-          this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1, CertificateType.PKC, "bad-profile",
-              TestData.defaultAttributeMappings),
-          new DefaultSignServiceContext("id"));
-    }).isInstanceOf(InvalidRequestException.class)
+    assertThatThrownBy(() -> defaultHandler.checkRequirements(
+        this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1, CertificateType.PKC, "bad-profile",
+            TestData.defaultAttributeMappings),
+        new DefaultSignServiceContext("id"))).isInstanceOf(InvalidRequestException.class)
         .hasMessage("This handler does not support profile: bad-profile");
 
     // This should be ok
@@ -223,7 +222,7 @@ class SimpleKeyAndCertificateHandlerTest {
 
     final AbstractCertificateModelBuilder<?> modelBuilder = Mockito.mock(AbstractCertificateModelBuilder.class);
 
-    CAService mockedCa = Mockito.mock(CAService.class);
+    final CAService mockedCa = Mockito.mock(CAService.class);
     Mockito.when(mockedCa.issueCertificate(Mockito.any())).thenReturn(holder);
     Mockito.when(mockedCa.getCertificateModelBuilder(Mockito.any(), Mockito.any())).thenReturn(modelBuilder);
 
@@ -231,28 +230,24 @@ class SimpleKeyAndCertificateHandlerTest {
         new SoftPkiCredentialContainer("BC", "Test1234"), null, defaultAttributeMapper,
         null, mockedCa, crlPath);
 
-    assertThatThrownBy(() -> {
-      handler.generateSigningCredential(
-          this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256, CertificateType.PKC, null,
-              TestData.defaultAttributeMappings),
-          TestData.stdAssertion,
-          new DefaultSignServiceContext("id"));
-    }).isInstanceOf(CertificateException.class);
+    assertThatThrownBy(() -> handler.generateSigningCredential(
+        this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256, CertificateType.PKC, null,
+            TestData.defaultAttributeMappings),
+        TestData.stdAssertion,
+        new DefaultSignServiceContext("id"))).isInstanceOf(CertificateException.class);
 
     Mockito.when(holder.getEncoded()).thenThrow(IOException.class);
 
-    assertThatThrownBy(() -> {
-      handler.generateSigningCredential(
-          this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256, CertificateType.PKC, null,
-              TestData.defaultAttributeMappings),
-          TestData.stdAssertion,
-          new DefaultSignServiceContext("id"));
-    }).isInstanceOf(CertificateException.class)
+    assertThatThrownBy(() -> handler.generateSigningCredential(
+        this.getSignRequest(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256, CertificateType.PKC, null,
+            TestData.defaultAttributeMappings),
+        TestData.stdAssertion,
+        new DefaultSignServiceContext("id"))).isInstanceOf(CertificateException.class)
         .hasMessage("Failed to decode issued X509 certificate");
   }
 
   @Test
-  public void testSupports() throws Exception {
+  public void testSupports() {
     final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     Mockito.when(request.getClientIpAddress()).thenReturn("227.123.34.21");
     Mockito.when(request.getServerServletPath()).thenReturn(crlPath);
@@ -280,7 +275,11 @@ class SimpleKeyAndCertificateHandlerTest {
   }
 
   @Test
-  public void testGetResourceError() throws Exception {
+  void name() {
+  }
+
+  @Test
+  public void testGetResourceError() {
     final HttpUserRequest request = Mockito.mock(HttpUserRequest.class);
     Mockito.when(request.getClientIpAddress()).thenReturn("227.123.34.21");
     Mockito.when(request.getServerServletPath()).thenReturn(crlPath);
@@ -385,6 +384,7 @@ class SimpleKeyAndCertificateHandlerTest {
   @Data
   static class MappedAttrSouce implements IdentityAttributeIdentifier {
 
+    @Serial
     private static final long serialVersionUID = 1201012063745204703L;
 
     public MappedAttrSouce(final String identifier) {

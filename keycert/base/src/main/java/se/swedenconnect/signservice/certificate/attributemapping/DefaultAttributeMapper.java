@@ -19,7 +19,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 import se.swedenconnect.signservice.authn.IdentityAssertion;
 import se.swedenconnect.signservice.core.attribute.IdentityAttribute;
 import se.swedenconnect.signservice.core.attribute.IdentityAttributeIdentifier;
@@ -183,7 +182,7 @@ public class DefaultAttributeMapper implements AttributeMapper {
       @Nonnull final IdentityAssertion assertion) {
 
     final List<IdentityAttribute<?>> identityAttributes = assertion.getIdentityAttributes();
-    if (CollectionUtils.isEmpty(identityAttributes)) {
+    if (identityAttributes == null || identityAttributes.isEmpty()) {
       return null;
     }
 

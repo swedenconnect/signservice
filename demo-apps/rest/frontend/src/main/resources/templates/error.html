@@ -20,38 +20,38 @@
 </head>
 <body>
 
-  <div th:replace="fragments/header :: logotype"></div>
+<div th:replace="fragments/header :: logotype"></div>
 
-  <div class="container main">
+<div class="container main">
 
-    <div class="row" id="mainDiv">
-      <div class="col-sm-12 content-container">
+  <div class="row" id="mainDiv">
+    <div class="col-sm-12 content-container">
 
-        <div class="error">
+      <div class="error">
 
-          <div class="row">
-            <div class="col-sm-12 content-heading">
-              <h2 th:text="#{signservice.msg.error-heading}">Error</h2>
-            </div>
-            <div class="col-sm-12">
-              <p th:text="#{${messageCode}}">Error message</p>
-            </div>
-            <div class="col-sm-12" th:if="${message != null}">
-              <p class="error-details" th:text="${message}">Details ...</p>
-            </div>
+        <div class="row">
+          <div class="col-sm-12 content-heading">
+            <h2 th:text="#{signservice.msg.error-heading}">Error</h2>
+          </div>
+          <div class="col-sm-12">
+            <p th:text="#{${messageCode}}">Error message</p>
+          </div>
+          <div class="col-sm-12" th:if="${message != null}">
+            <p class="error-details" th:text="${message}">Details ...</p>
           </div>
         </div>
+      </div>
 
-      </div> <!-- /.col-sm-12 content-container -->
+    </div> <!-- /.col-sm-12 content-container -->
 
-      <div th:replace="fragments/footer :: copyright"></div>
+    <div th:replace="fragments/footer :: copyright"></div>
 
-    </div> <!-- /#mainDiv -->
+  </div> <!-- /#mainDiv -->
 
-  </div> <!-- /.container main -->
+</div> <!-- /.container main -->
 
 
-  <th:block th:include="fragments/base :: scriptFragment"></th:block>
+<th:block th:include="fragments/base :: scriptFragment"></th:block>
 
 </body>
 </html>

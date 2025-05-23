@@ -15,12 +15,12 @@ server:
     key-password: secret
   error:
     include-message: always
-    
+
 signservice:
   frontend:
     backend-url: https://localhost:8543/signapi
     process-path: /process
-    
+
 #
 # Logging
 #

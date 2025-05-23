@@ -14,52 +14,52 @@
   ~ limitations under the License.
   -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:include="fragments/base :: headerFragment">
   <title id="pageTitle" th:inline="text">[[#{signservice.msg.title}]]</title>
 </head>
 <body onload="document.forms[0].submit()">
-  <form method="POST" action="#" th:action="${action}">
+<form method="POST" action="#" th:action="${action}">
 
-    <div th:each="par : ${parameters}">
-      <input type="hidden" th:name="${par.key}" th:value="${par.value}" />
-    </div>
+  <div th:each="par : ${parameters}">
+    <input type="hidden" th:name="${par.key}" th:value="${par.value}"/>
+  </div>
 
-    <noscript>
+  <noscript>
 
-      <div th:replace="fragments/header :: logotype"></div>
+    <div th:replace="fragments/header :: logotype"></div>
 
-      <div class="container main">
+    <div class="container main">
 
-        <div class="row" id="mainDiv">
-          <div class="col-sm-12 content-container">
+      <div class="row" id="mainDiv">
+        <div class="col-sm-12 content-container">
 
-            <div class="row">
-              <div class="col-sm-12 content-heading">
-                <h2 th:text="#{signservice.msg.heading}">Heading</h2>
-              </div>
-              <div class="col-sm-12">
-                <p class="info" th:text="#{signservice.msg.nojs}">No Javascript</p>
-              </div>
+          <div class="row">
+            <div class="col-sm-12 content-heading">
+              <h2 th:text="#{signservice.msg.heading}">Heading</h2>
             </div>
-
-            <hr class="full-width">
-
-            <div class="col-sm-12 section">
-              <button id="submitButton" type="submit" class="btn btn-primary">
-                <span th:text="#{signservice.msg.continue-button}">Test</span>
-              </button>
+            <div class="col-sm-12">
+              <p class="info" th:text="#{signservice.msg.nojs}">No Javascript</p>
             </div>
-
           </div>
 
-          <div th:replace="fragments/footer :: copyright"></div>
+          <hr class="full-width">
+
+          <div class="col-sm-12 section">
+            <button id="submitButton" type="submit" class="btn btn-primary">
+              <span th:text="#{signservice.msg.continue-button}">Test</span>
+            </button>
+          </div>
 
         </div>
+
+        <div th:replace="fragments/footer :: copyright"></div>
+
       </div>
+    </div>
 
-    </noscript>
+  </noscript>
 
-  </form>
+</form>
 </body>
 </html>

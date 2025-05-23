@@ -15,15 +15,7 @@
  */
 package se.swedenconnect.signservice.certificate.simple.config;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.security.Security;
-import java.time.Duration;
-import java.util.List;
-
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.FileUtils;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -31,10 +23,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
-
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
-import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationProperties;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.attributemapping.DefaultValuePolicyCheckerImpl;
@@ -46,6 +35,16 @@ import se.swedenconnect.signservice.certificate.base.config.CredentialContainerC
 import se.swedenconnect.signservice.certificate.simple.SimpleKeyAndCertificateHandler;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
+import se.swedenconnect.signservice.core.config.PkiCredentialConfigurationProperties;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.security.Security;
+import java.time.Duration;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Test cases for SimpleKeyAndCertificateHandlerFactory.
@@ -67,66 +66,67 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
   }
 
   @Test
-  public void testBadConfigType() throws Exception {
-    HandlerConfiguration<KeyAndCertificateHandler> config = new AbstractKeyAndCertificateHandlerConfiguration() {
+  public void testBadConfigType() {
+    final HandlerConfiguration<KeyAndCertificateHandler> config;
+    config = new AbstractKeyAndCertificateHandlerConfiguration() {
+      @Nonnull
       @Override
       protected String getDefaultFactoryClass() {
         return "dummy";
       }
     };
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Unknown configuration object supplied - ");
   }
 
   @Test
-  public void testFullConf() throws Exception {
+  public void testFullConf() {
     final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
 
     final KeyAndCertificateHandler handler = factory.create(config);
-    Assertions.assertTrue(SimpleKeyAndCertificateHandler.class.isInstance(handler));
+    Assertions.assertTrue(handler instanceof SimpleKeyAndCertificateHandler);
     Assertions.assertEquals("NAME", handler.getName());
   }
 
   @Test
-  public void testDefaultSigningAlgo() throws Exception {
+  public void testDefaultSigningAlgo() {
     final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
     config.setCaSigningAlgorithm(null);
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
 
     final KeyAndCertificateHandler handler = factory.create(config);
-    Assertions.assertTrue(SimpleKeyAndCertificateHandler.class.isInstance(handler));
+    Assertions.assertTrue(handler instanceof SimpleKeyAndCertificateHandler);
 
     // The same for EC
+    final SimpleKeyAndCertificateHandlerConfiguration config2 = this.getFullConfig();
     config.getCaCredential().getProps().setAlias("ec-ca");
 
-    final KeyAndCertificateHandler handler2 = factory.create(config);
-    Assertions.assertTrue(SimpleKeyAndCertificateHandler.class.isInstance(handler2));
+    final KeyAndCertificateHandler handler2 = factory.create(config2);
+    Assertions.assertTrue(handler2 instanceof SimpleKeyAndCertificateHandler);
   }
 
   @Test
-  public void testDefaultValidity() throws Exception {
+  public void testDefaultValidity() {
     final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
     config.setCertValidity(null);
     config.setCrlValidity(null);
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
 
     final KeyAndCertificateHandler handler = factory.create(config);
-    Assertions.assertTrue(SimpleKeyAndCertificateHandler.class.isInstance(handler));
+    Assertions.assertTrue(handler instanceof SimpleKeyAndCertificateHandler);
     Assertions.assertEquals("NAME", handler.getName());
   }
 
   @Test
-  public void testDefaultProfile() throws Exception {
+  public void testDefaultProfile() {
     final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
     config.setProfileConfiguration(null);
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
 
     final KeyAndCertificateHandler handler = factory.create(config);
-    Assertions.assertTrue(SimpleKeyAndCertificateHandler.class.isInstance(handler));
+    Assertions.assertTrue(handler instanceof SimpleKeyAndCertificateHandler);
     Assertions.assertEquals("NAME", handler.getName());
   }
 
@@ -151,9 +151,7 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
     crlDp.set(config, null);
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
 
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("CRL distributions point path must be set when CRL distribution point URL is not set");
   }
 
@@ -165,62 +163,52 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
     crlDp.set(config, null);
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
 
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Base URL must be set to form CRL Distribution point based on path");
   }
 
   @Test
-  public void testBadAlgorithm() throws Exception {
+  public void testBadAlgorithm() {
     final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
     config.setCaSigningAlgorithm("http://not.a.valid.alg");
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
 
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Failed to set up a CA service - Unsupported algorithm: http://not.a.valid.alg");
   }
 
   @Test
-  public void testIOError() throws Exception {
+  public void testIOError() {
     final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
     config.setCrlFileLocation("target");
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
 
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Failed to set up a CA repository - ")
         .hasCauseInstanceOf(IOException.class);
   }
 
   @Test
-  public void testMissingCrlFileLocation() throws Exception {
+  public void testMissingCrlFileLocation() {
     final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
     config.setCrlFileLocation(null);
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
 
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("CRL file location must be set");
   }
 
   @Test
-  public void testMissingCaCredential() throws Exception {
+  public void testMissingCaCredential() {
     final SimpleKeyAndCertificateHandlerConfiguration config = this.getFullConfig();
     config.setCaCredential(null);
     final SimpleKeyAndCertificateHandlerFactory factory = new SimpleKeyAndCertificateHandlerFactory();
 
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Missing CA credential");
   }
 
-  private SimpleKeyAndCertificateHandlerConfiguration getFullConfig() throws Exception {
+  private SimpleKeyAndCertificateHandlerConfiguration getFullConfig() {
 
     final DefaultValuePolicyCheckerConfiguration checkerConfig = new DefaultValuePolicyCheckerConfiguration();
     checkerConfig.setRules(List.of(DefaultValuePolicyCheckerImpl.DefaultValuePolicyCheckerConfig.builder()
@@ -255,7 +243,7 @@ public class SimpleKeyAndCertificateHandlerFactoryTest {
 
   private PkiCredentialConfigurationProperties getCaCredentialProperties() {
     final PkiCredentialConfigurationProperties props = new PkiCredentialConfigurationProperties();
-    props.setResource(new ClassPathResource("test-ca.jks"));
+    props.setResource("classpath:test-ca.jks");
     props.setPassword("secret".toCharArray());
     props.setAlias("rsa-ca");
     props.setKeyPassword("secret".toCharArray());

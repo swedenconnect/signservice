@@ -24,6 +24,7 @@ import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.algorithms.SignatureAlgorithm;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.ManagedPkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.security.credential.container.PkiCredentialContainerException;
 import se.swedenconnect.security.credential.container.keytype.KeyGenType;
@@ -193,6 +194,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
 
   /** {@inheritDoc} */
   @Override
+  @Nonnull
   public PkiCredential generateSigningCredential(@Nonnull final SignRequestMessage signRequest,
       @Nonnull final IdentityAssertion assertion, @Nonnull final SignServiceContext context)
       throws CertificateException, KeyException {
@@ -217,7 +219,7 @@ public abstract class AbstractKeyAndCertificateHandler extends AbstractSignServi
 
     // Obtain the credential (public and private key)
     //
-    final PkiCredential signingKeyCredentials;
+    final ManagedPkiCredential signingKeyCredentials;
     try {
       final String keyType = this.algorithmKeyTypes.get(algorithm.getKeyType());
       final String alias = this.keyProvider.generateCredential(keyType);

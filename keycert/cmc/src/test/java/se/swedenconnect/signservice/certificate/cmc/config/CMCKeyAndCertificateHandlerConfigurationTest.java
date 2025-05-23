@@ -17,11 +17,9 @@ package se.swedenconnect.signservice.certificate.cmc.config;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
-
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationProperties;
 import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
+import se.swedenconnect.signservice.core.config.PkiCredentialConfigurationProperties;
 
 /**
  * Test cases for CMCKeyAndCertificateHandlerConfiguration.
@@ -39,7 +37,7 @@ public class CMCKeyAndCertificateHandlerConfigurationTest {
     final CMCKeyAndCertificateHandlerConfiguration config = new CMCKeyAndCertificateHandlerConfiguration();
 
     final PkiCredentialConfigurationProperties props = new PkiCredentialConfigurationProperties();
-    props.setResource(new ClassPathResource("cmc-client.jks"));
+    props.setResource("classpath:cmc-client.jks");
     props.setPassword("secret".toCharArray());
     props.setAlias("cmc");
     props.setKeyPassword("secret".toCharArray());
@@ -48,16 +46,6 @@ public class CMCKeyAndCertificateHandlerConfigurationTest {
 
     final PkiCredential cred = config.getCmcClientCredential().resolvePkiCredential(null);
     Assertions.assertNotNull(cred);
-
-    // Assert that the same object is returned
-    Assertions.assertEquals(cred, config.getCmcClientCredential().resolvePkiCredential(null));
-
-    // Assert that a new object is created
-    props.setAlias("cmc-ec");
-
-    final PkiCredential cred2 = config.getCmcClientCredential().resolvePkiCredential(null);
-    Assertions.assertNotNull(cred2);
-    Assertions.assertNotEquals(cred, cred2);
   }
 
   @Test

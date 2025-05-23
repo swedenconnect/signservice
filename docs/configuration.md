@@ -186,7 +186,7 @@ same way. One, and only one, of the following properties must be set to configur
 object. This setting is used when the application code creates the credential object outside of the SignService
 configuration.
 
-`props.*` - Configuration of the `PkiCredential` object using property values. See [3.3.2](https://docs.swedenconnect.se/credentials-support/old-readme.html#generic-pkicredentialfactorybean-for-springboot-users) for the [credentials-support](https://github.com/swedenconnect/credentials-support) repository.
+`props.*` - Configuration of the `PkiCredential` object using property values. See [Section 5](https://docs.swedenconnect.se/credentials-support/#credential-bundles-and-configuration-support) for the [credentials-support](https://github.com/swedenconnect/credentials-support) repository.
 
 `cred` - Assignment of an already instantiated `PkiCredential`. This setting is not possible to use when 
 configuring the application using properties files, only when a programmatic setup is made.
@@ -210,7 +210,18 @@ settings documented on this page. We include the demo application configuration 
 
 The demo application is configured with two clients (engines).
 
-```
+```yaml
+
+# See section 5 at https://docs.swedenconnect.se/credentials-support
+#
+credential:
+  bundles:
+    keystore:
+      saml-ks:
+        location: classpath:sandbox/saml-sp.jks
+        type: JKS
+        password: secret
+
 signservice:
   domain: localhost
   base-url: https://${signservice.domain}:${server.port}
@@ -221,12 +232,15 @@ signservice:
       principal: "SignService"
   default-credential:    
     props:
-      name: SignService
-      resource: classpath:signservice.jks
-      alias: signservice
-      type: JKS
-      password: secret
-      key-password: secret
+      jks:
+        name: SignService
+        store:
+          location: classpath:signservice.jks
+          type: JKS
+          password: secret
+        key:
+          alias: signservice      
+          key-password: secret
   validation-config:
     allowed-clock-skew: PT30S
     max-message-age: PT3M
@@ -260,12 +274,15 @@ signservice:
       built-in-ca:
         base-url: ${signservice.base-url}
         ca-credential:
-          props:            
-            resource: classpath:ca/test-ca.jks
-            type: JKS
-            password: secret
-            alias: test-ca
-            key-password: secret
+          props:
+            jks:
+              store:            
+                location: classpath:ca/test-ca.jks
+                type: JKS
+                password: secret
+              key:
+                alias: test-ca
+                key-password: secret
         ca-signing-algorithm: http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256                
         key-provider:
           security-provider: BC  
@@ -308,20 +325,20 @@ signservice:
         metadata-provider-ref: signservice.SamlMetadataProvider
         signature-credential:
           props:
-            name: SignService SAML Signing
-            resource: classpath:sandbox/saml-sp.jks
-            alias: sign
-            type: JKS
-            password: secret
-            key-password: secret
+            jks:
+              store-reference: saml-ks
+              name: SignService SAML Signing
+              key:
+                alias: sign
+                key-password: secret
         decryption-credential:
-          props:            
-            name: SignService SAML Decryption
-            resource: classpath:sandbox/saml-sp.jks
-            alias: encrypt
-            type: JKS
-            password: secret
-            key-password: secret
+          props:
+            jks:
+              store-reference: saml-ks
+              name: SignService SAML Decryption
+              key:
+                alias: encrypt
+                key-password: secret
         sign-authn-requests: true
         require-encrypted-assertions: true
         require-signed-assertions: true
