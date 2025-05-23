@@ -15,19 +15,11 @@
  */
 package se.swedenconnect.signservice.certificate.simple.config;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CRLException;
-import java.security.cert.CertificateException;
-import java.util.Map;
-import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.xml.security.signature.XMLSignature;
-
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.xml.security.signature.XMLSignature;
 import se.swedenconnect.security.algorithms.AlgorithmRegistry;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
@@ -41,6 +33,13 @@ import se.swedenconnect.signservice.certificate.simple.ca.BasicCAService;
 import se.swedenconnect.signservice.certificate.simple.ca.BasicCAServiceBuilder;
 import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CRLException;
+import java.security.cert.CertificateException;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Factory for creating {@link SimpleKeyAndCertificateHandler} instances.
@@ -60,12 +59,12 @@ public class SimpleKeyAndCertificateHandlerFactory extends AbstractKeyAndCertifi
       @Nonnull final AlgorithmRegistry algorithmRegistry,
       @Nullable final CertificateProfileConfiguration profileConfiguration) throws IllegalArgumentException {
 
-    if (!SimpleKeyAndCertificateHandlerConfiguration.class.isInstance(configuration)) {
+    if (!(configuration instanceof SimpleKeyAndCertificateHandlerConfiguration)) {
       throw new IllegalArgumentException(
           "Unknown configuration object supplied - " + configuration.getClass().getSimpleName());
     }
     final SimpleKeyAndCertificateHandlerConfiguration conf =
-        SimpleKeyAndCertificateHandlerConfiguration.class.cast(configuration);
+        (SimpleKeyAndCertificateHandlerConfiguration) configuration;
 
     final PkiCredential caCredential = Optional.ofNullable(conf.getCaCredential())
         .map(c -> c.resolvePkiCredential(beanLoader))
@@ -86,20 +85,20 @@ public class SimpleKeyAndCertificateHandlerFactory extends AbstractKeyAndCertifi
     }
 
     final String crlDpPath = Optional.ofNullable(conf.getCrlDpPath())
-      .filter(StringUtils::isNotBlank)
-      .orElse(null);
+        .filter(StringUtils::isNotBlank)
+        .orElse(null);
 
     final String crlDp = Optional.ofNullable(conf.getCrlDpUrl())
-      .filter(StringUtils::isNotBlank)
-      .orElseGet(() -> {
-        Optional.ofNullable(crlDpPath)
-          .orElseThrow(() -> new IllegalArgumentException("CRL distributions point path must be set when CRL "
-            + "distribution point URL is not set"));
-        return String.format("%s%s", Optional.ofNullable(conf.getBaseUrl())
-          .filter(StringUtils::isNotBlank)
-          .orElseThrow(() -> new IllegalArgumentException("Base URL must be set to form CRL Distribution point "
-            + "based on path")), crlDpPath);
-      });
+        .filter(StringUtils::isNotBlank)
+        .orElseGet(() -> {
+          Optional.ofNullable(crlDpPath)
+              .orElseThrow(() -> new IllegalArgumentException("CRL distributions point path must be set when CRL "
+                  + "distribution point URL is not set"));
+          return String.format("%s%s", Optional.ofNullable(conf.getBaseUrl())
+              .filter(StringUtils::isNotBlank)
+              .orElseThrow(() -> new IllegalArgumentException("Base URL must be set to form CRL Distribution point "
+                  + "based on path")), crlDpPath);
+        });
 
     final String crlFileLocation = Optional.ofNullable(conf.getCrlFileLocation())
         .filter(StringUtils::isNotBlank)
@@ -107,7 +106,7 @@ public class SimpleKeyAndCertificateHandlerFactory extends AbstractKeyAndCertifi
 
     // Set up a CA service
     //
-    BasicCAService caService = null;
+    final BasicCAService caService;
     try {
       final BasicCAServiceBuilder builder =
           BasicCAServiceBuilder.getInstance(caCredential, crlDp, caSigningAlgorithm, crlFileLocation);

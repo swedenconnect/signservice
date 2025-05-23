@@ -4,7 +4,11 @@
 
 ## 1.2.0
 
-**Date:** 
+**Date:** 2025-05-23
+
+### New and improved credentials handling
+
+The way credentials is used and configured has been improved. See https://docs.swedenconnect.se/credentials-support.
 
 ### Updated dependencies
 

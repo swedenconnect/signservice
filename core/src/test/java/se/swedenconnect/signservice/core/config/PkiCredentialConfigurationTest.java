@@ -15,15 +15,13 @@
  */
 package se.swedenconnect.signservice.core.config;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
-
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationProperties;
-import se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean;
+import se.swedenconnect.security.credential.config.properties.StoreConfigurationProperties;
+import se.swedenconnect.security.credential.config.properties.StoreCredentialConfigurationProperties;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Test cases for PkiCredentialConfiguration.
@@ -68,7 +66,7 @@ public class PkiCredentialConfigurationTest {
   @Test
   public void testProps() {
     final PkiCredentialConfigurationProperties props = new PkiCredentialConfigurationProperties();
-    props.setResource(new ClassPathResource("keys.jks"));
+    props.setResource("classpath:keys.jks");
     props.setAlias("sign");
     props.setPassword("secret".toCharArray());
     props.setName("PROP");
@@ -92,7 +90,7 @@ public class PkiCredentialConfigurationTest {
   @Test
   public void testPropsError() {
     final PkiCredentialConfigurationProperties props = new PkiCredentialConfigurationProperties();
-    props.setResource(new ClassPathResource("keys.jks"));
+    props.setResource("classpath:keys.jks");
     props.setAlias("sign");
     props.setName("PROP");
     final PkiCredentialConfiguration config = new PkiCredentialConfiguration(props);
@@ -115,13 +113,22 @@ public class PkiCredentialConfigurationTest {
   }
 
   private PkiCredential getCredential(final String name) throws Exception {
-    final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean();
-    factory.setResource(new ClassPathResource("keys.jks"));
-    factory.setAlias("sign");
-    factory.setPassword("secret".toCharArray());
-    factory.setName(name);
-    factory.afterPropertiesSet();
-    return factory.getObject();
+    final StoreCredentialConfigurationProperties props = new StoreCredentialConfigurationProperties();
+    props.setName(name);
+
+    final StoreConfigurationProperties storeProps = new StoreConfigurationProperties();
+    storeProps.setLocation("classpath:keys.jks");
+    storeProps.setPassword("secret");
+    storeProps.setType("JKS");
+    props.setStore(storeProps);
+
+    final StoreCredentialConfigurationProperties.KeyConfigurationProperties keyProps =
+        new StoreCredentialConfigurationProperties.KeyConfigurationProperties();
+    keyProps.setAlias("sign");
+    keyProps.setKeyPassword("secret");
+    props.setKey(keyProps);
+
+    return PkiCredentialFactorySingleton.getInstance().getPkiCredentialFactory().createCredential(props);
   }
 
 }

@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.signservice.spring.config;
 
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -24,8 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
-
-import lombok.Setter;
+import se.swedenconnect.security.credential.factory.PkiCredentialFactory;
 import se.swedenconnect.signservice.application.SignServiceEngineManager;
 import se.swedenconnect.signservice.audit.actuator.ActuatorAuditLoggerFactory;
 import se.swedenconnect.signservice.config.BeanRegistrator;
@@ -38,6 +38,7 @@ import se.swedenconnect.signservice.config.spring.SpringSignServiceConfiguration
 import se.swedenconnect.signservice.config.spring.converters.SignServiceConverterConfiguration;
 import se.swedenconnect.signservice.core.config.BeanLoader;
 import se.swedenconnect.signservice.core.config.HandlerFactoryRegistry;
+import se.swedenconnect.signservice.core.config.PkiCredentialFactorySingleton;
 import se.swedenconnect.signservice.core.config.spring.SpringBeanLoader;
 
 /**
@@ -113,6 +114,19 @@ public class SignServiceConfiguration {
   }
 
   /**
+   * Assigns the {@link PkiCredentialFactory} bean to the {@link PkiCredentialFactorySingleton}.
+   *
+   * @param pkiCredentialFactory credential factory
+   * @return the {@link PkiCredentialFactorySingleton}
+   */
+  @Bean("signservice.PkiCredentialFactorySingleton")
+  PkiCredentialFactorySingleton pkiCredentialFactorySingleton(final PkiCredentialFactory pkiCredentialFactory) {
+    final PkiCredentialFactorySingleton singleton = PkiCredentialFactorySingleton.getInstance();
+    singleton.setPkiCredentialFactory(pkiCredentialFactory);
+    return singleton;
+  }
+
+  /**
    * Creates the {@link SignServiceEngineManager} bean.
    *
    * @param signServiceFactory the factory for creating a manager bean
@@ -121,6 +135,7 @@ public class SignServiceConfiguration {
    */
   @ConditionalOnMissingBean
   @Bean("signservice.SignServiceEngineManager")
+  @DependsOn("signservice.PkiCredentialFactorySingleton")
   SignServiceEngineManager signServiceEngineManager(
       final SignServiceFactory signServiceFactory) throws Exception {
 

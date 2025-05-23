@@ -15,16 +15,6 @@
  */
 package se.swedenconnect.signservice.authn.saml.config;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
@@ -33,10 +23,9 @@ import org.opensaml.saml.saml2.metadata.ContactPersonTypeEnumeration;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.springframework.core.io.ClassPathResource;
 import org.w3c.dom.Element;
-
 import se.swedenconnect.opensaml.common.utils.LocalizedString;
 import se.swedenconnect.security.credential.KeyStoreCredential;
-import se.swedenconnect.security.credential.factory.KeyStoreFactoryBean;
+import se.swedenconnect.security.credential.factory.KeyStoreBuilder;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.authn.saml.DefaultSamlAuthenticationHandler;
 import se.swedenconnect.signservice.authn.saml.OpenSamlTestBase;
@@ -52,6 +41,16 @@ import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
 import se.swedenconnect.signservice.storage.MessageReplayChecker;
 import se.swedenconnect.signservice.storage.MessageReplayException;
 
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 /**
  * Test cases for SamlAuthenticationHandlerFactory.
  */
@@ -65,10 +64,10 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
   private KeyStore keyStore;
 
   public SamlAuthenticationHandlerFactoryTest() throws Exception {
-    final KeyStoreFactoryBean factory = new KeyStoreFactoryBean(
-      new ClassPathResource("keys.jks"), "secret".toCharArray());
-    factory.afterPropertiesSet();
-    this.keyStore = factory.getObject();
+    this.keyStore = KeyStoreBuilder.builder()
+        .location("classpath:keys.jks")
+        .password("secret")
+        .build();
   }
 
   @Test
@@ -77,7 +76,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(null);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("Missing configuration for creating AuthenticationHandler instances");
+        .hasMessage("Missing configuration for creating AuthenticationHandler instances");
   }
 
   @Test
@@ -93,7 +92,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessageContaining("Unknown configuration object supplied - ");
+        .hasMessageContaining("Unknown configuration object supplied - ");
   }
 
   @Test
@@ -146,23 +145,25 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
 
     final MetadataConfiguration md = new MetadataConfiguration();
     md.setEntityCategories(Arrays.asList("http://id.elegnamnden.se/st/1.0/sigservice",
-      "http://id.elegnamnden.se/ec/1.0/loa3-pnr"));
+        "http://id.elegnamnden.se/ec/1.0/loa3-pnr"));
     md.setServiceNames(Arrays.asList(new LocalizedString("demo", Locale.ENGLISH)));
 
     final UIInfoConfig ui = new UIInfoConfig();
     ui.setDisplayNames(Arrays.asList(
-      new LocalizedString("en-DemoApp"), new LocalizedString("sv-DemoApp")));
+        new LocalizedString("en-DemoApp"), new LocalizedString("sv-DemoApp")));
     ui.setDescriptions(Arrays.asList(
-      new LocalizedString("en-DemoApp"), new LocalizedString("sv-DemoApp")));
+        new LocalizedString("en-DemoApp"), new LocalizedString("sv-DemoApp")));
     final UIInfoLogo logo = new UIInfoLogo();
     logo.setHeight(100);
     logo.setWidth(100);
     logo.setPath("/images/logo.svg");
     ui.setLogos(Arrays.asList(logo));
     ui.setInformationUrls(List.of(
-        new LocalizedString("en-https://www.example.com/info"), new LocalizedString("sv-https://www.example.com/info")));
+        new LocalizedString("en-https://www.example.com/info"),
+        new LocalizedString("sv-https://www.example.com/info")));
     ui.setPrivacyStatementsUrls(List.of(
-        new LocalizedString("en-https://www.example.com/info"), new LocalizedString("sv-https://www.example.com/info")));
+        new LocalizedString("en-https://www.example.com/info"),
+        new LocalizedString("sv-https://www.example.com/info")));
     md.setUiInfo(ui);
 
     final Map<ContactPersonTypeEnumeration, ContactPersonConfig> map = new HashMap<>();
@@ -209,13 +210,13 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("Illegal metadata provider configuration - Both url and file are set");
+        .hasMessage("Illegal metadata provider configuration - Both url and file are set");
 
     conf.setMetadataProviderRef("bean");
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("Illegal configuration - metadata-provider and metadata-provider-ref can not both be assigned");
+        .hasMessage("Illegal configuration - metadata-provider and metadata-provider-ref can not both be assigned");
 
     conf.getMetadataProvider().setFile(null);
     conf.getMetadataProvider().setUrl(null);
@@ -223,19 +224,19 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("Illegal metadata provider configuration - url or file must be set");
+        .hasMessage("Illegal metadata provider configuration - url or file must be set");
 
     conf.setMetadataProvider(null);
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("Missing metadata provider(s) from configuration object");
+        .hasMessage("Missing metadata provider(s) from configuration object");
 
     conf.setMetadataProvider(null);
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("Missing metadata provider(s) from configuration object");
+        .hasMessage("Missing metadata provider(s) from configuration object");
   }
 
   @Test
@@ -259,7 +260,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf, null);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("Missing bean loader - cannot load bean referenced by metadata-provider-ref");
+        .hasMessage("Missing bean loader - cannot load bean referenced by metadata-provider-ref");
   }
 
   @Test
@@ -274,7 +275,8 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("No decryption (or default) credential specified - required since require-encrypted-assertions is true");
+        .hasMessage(
+            "No decryption (or default) credential specified - required since require-encrypted-assertions is true");
   }
 
   @Test
@@ -285,7 +287,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessageContaining("Unknown saml-type - ");
+        .hasMessageContaining("Unknown saml-type - ");
   }
 
   @Test
@@ -296,7 +298,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("Missing entityId from configuration object");
+        .hasMessage("Missing entityId from configuration object");
   }
 
   @Test
@@ -307,7 +309,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("No sp-paths assigned");
+        .hasMessage("No sp-paths assigned");
   }
 
   @Test
@@ -318,7 +320,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("No sp-paths.base-url setting assigned");
+        .hasMessage("No sp-paths.base-url setting assigned");
   }
 
   @Test
@@ -329,7 +331,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("message-replay-checker or message-replay-checker-ref is missing");
+        .hasMessage("message-replay-checker or message-replay-checker-ref is missing");
   }
 
   @Test
@@ -340,7 +342,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("message-replay-checker and message-replay-checker-ref can not both be set");
+        .hasMessage("message-replay-checker and message-replay-checker-ref can not both be set");
   }
 
   @Test
@@ -370,7 +372,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("message-replay-checker-ref can not be loaded - missing bean loader");
+        .hasMessage("message-replay-checker-ref can not be loaded - missing bean loader");
   }
 
   @Test
@@ -381,7 +383,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     assertThatThrownBy(() -> {
       factory.create(conf);
     }).isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("Missing metadata configuration");
+        .hasMessage("Missing metadata configuration");
   }
 
   @Test
@@ -397,12 +399,10 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
 
     final KeyStoreCredential signCred = new KeyStoreCredential(this.keyStore, "sign", "secret".toCharArray());
     signCred.setName("SIGNING");
-    signCred.afterPropertiesSet();
     config.setSignatureCredential(new PkiCredentialConfiguration(signCred));
 
     final KeyStoreCredential decryptCred = new KeyStoreCredential(this.keyStore, "encrypt", "secret".toCharArray());
     decryptCred.setName("DECRYPTION");
-    decryptCred.afterPropertiesSet();
     config.setDecryptionCredential(new PkiCredentialConfiguration(decryptCred));
 
     final SpUrlConfiguration paths = new SpUrlConfiguration();
@@ -420,7 +420,7 @@ public class SamlAuthenticationHandlerFactoryTest extends OpenSamlTestBase {
     try (final InputStream is = new ClassPathResource("metadata.xml").getInputStream()) {
       final Element elm = XMLObjectProviderRegistrySupport.getParserPool().parse(is).getDocumentElement();
       metadataConf.setTemplate(
-        EntityDescriptor.class.cast(XMLObjectSupport.getUnmarshaller(elm).unmarshall(elm)));
+          EntityDescriptor.class.cast(XMLObjectSupport.getUnmarshaller(elm).unmarshall(elm)));
     }
     config.setMetadata(metadataConf);
 

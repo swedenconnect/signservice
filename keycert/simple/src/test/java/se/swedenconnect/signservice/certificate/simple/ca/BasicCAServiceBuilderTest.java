@@ -15,12 +15,7 @@
  */
 package se.swedenconnect.signservice.certificate.simple.ca;
 
-import java.io.File;
-import java.security.Security;
-import java.security.cert.X509Certificate;
-import java.time.Duration;
-import java.util.List;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -28,8 +23,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import lombok.extern.slf4j.Slf4j;
 import se.idsec.utils.printcert.PrintCertificate;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -37,11 +30,18 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.ManagedPkiCredential;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.security.credential.container.SoftPkiCredentialContainer;
 import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 import se.swedenconnect.signservice.certificate.base.config.CertificateProfileConfiguration;
 import se.swedenconnect.signservice.certificate.base.config.SigningKeyUsageDirective;
+
+import java.io.File;
+import java.security.Security;
+import java.security.cert.X509Certificate;
+import java.time.Duration;
+import java.util.List;
 
 /**
  * CA service builder test
@@ -67,8 +67,9 @@ class BasicCAServiceBuilderTest {
 
   @Test
   void getInstance() throws Exception {
-    final PkiCredentialContainer caKeyProvider = new SoftPkiCredentialContainer("BC","Test1234");
-    final PkiCredential caCredential = caKeyProvider.getCredential(caKeyProvider.generateCredential(KeyGenType.EC_P256));
+    final PkiCredentialContainer caKeyProvider = new SoftPkiCredentialContainer("BC", "Test1234");
+    final ManagedPkiCredential caCredential =
+        caKeyProvider.getCredential(caKeyProvider.generateCredential(KeyGenType.EC_P256));
     final SelfSignedCaCertificateGenerator caCertificateFactory = new DefaultSelfSignedCaCertificateGenerator();
     final X509Certificate caCertificate = caCertificateFactory.generate(
         caCredential,
@@ -82,9 +83,9 @@ class BasicCAServiceBuilderTest {
     caCredential.setCertificate(caCertificate);
 
     BasicCAServiceBuilder.getInstance(caCredential,
-        "http://localhost/testCa.crl",
-        XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
-        new File(caDir, TEST_CRL).toString())
+            "http://localhost/testCa.crl",
+            XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
+            new File(caDir, TEST_CRL).toString())
         .certificateStartOffset(Duration.ofSeconds(60))
         .certificateValidity(Duration.ofDays(730))
         .crlStartOffset(Duration.ofMinutes(20))
@@ -93,17 +94,17 @@ class BasicCAServiceBuilderTest {
     log.info("created instance with default CA repository");
 
     final BasicCAService caService = BasicCAServiceBuilder.getInstance(caCredential,
-        "http://localhost/testCa.crl",
-        XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
-        new NoStorageCARepository(new File(caDir, TEST_CRL).getAbsolutePath()))
+            "http://localhost/testCa.crl",
+            XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256,
+            new NoStorageCARepository(new File(caDir, TEST_CRL).getAbsolutePath()))
         .build();
     log.info("CA service created with provided CA repository");
     CertificateProfileConfiguration certProfileConfig = CertificateProfileConfiguration.builder()
-      .policies(List.of("1.2.3.4.5.6.7"))
-      .extendedKeyUsageCritical(true)
-      .extendedKeyUsages(List.of("2.3.4.5.6.7.8", "2.4.5.6.7.8.9"))
-      .usageDirective(SigningKeyUsageDirective.builder().excludeNonRepudiation(true).encrypt(true).build())
-      .build();
+        .policies(List.of("1.2.3.4.5.6.7"))
+        .extendedKeyUsageCritical(true)
+        .extendedKeyUsages(List.of("2.3.4.5.6.7.8", "2.4.5.6.7.8.9"))
+        .usageDirective(SigningKeyUsageDirective.builder().excludeNonRepudiation(true).encrypt(true).build())
+        .build();
     caService.setProfileConfiguration(certProfileConfig);
 
     final PkiCredential subjectKeys = caKeyProvider.getCredential(caKeyProvider.generateCredential(KeyGenType.EC_P256));

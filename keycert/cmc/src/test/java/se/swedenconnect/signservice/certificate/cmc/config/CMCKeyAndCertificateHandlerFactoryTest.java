@@ -15,25 +15,18 @@
  */
 package se.swedenconnect.signservice.certificate.cmc.config;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.security.PublicKey;
-import java.security.Security;
-import java.security.cert.X509Certificate;
-import java.util.List;
-
+import jakarta.annotation.Nonnull;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.cryptacular.io.ClassPathResource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.core.io.ClassPathResource;
-
 import se.swedenconnect.security.algorithms.AlgorithmRegistrySingleton;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.security.credential.factory.PkiCredentialConfigurationProperties;
-import se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean;
+import se.swedenconnect.security.credential.config.properties.StoreConfigurationProperties;
+import se.swedenconnect.security.credential.config.properties.StoreCredentialConfigurationProperties;
 import se.swedenconnect.security.credential.utils.X509Utils;
 import se.swedenconnect.signservice.certificate.CertificateAttributeType;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
@@ -47,6 +40,15 @@ import se.swedenconnect.signservice.certificate.cmc.CMCKeyAndCertificateHandler;
 import se.swedenconnect.signservice.certificate.cmc.RemoteCaInformation;
 import se.swedenconnect.signservice.core.config.HandlerConfiguration;
 import se.swedenconnect.signservice.core.config.PkiCredentialConfiguration;
+import se.swedenconnect.signservice.core.config.PkiCredentialConfigurationProperties;
+import se.swedenconnect.signservice.core.config.PkiCredentialFactorySingleton;
+
+import java.security.PublicKey;
+import java.security.Security;
+import java.security.cert.X509Certificate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Test cases for CMCKeyAndCertificateHandlerFactory.
@@ -61,17 +63,17 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
   }
 
   @Test
-  public void testBadConfigType() throws Exception {
-    HandlerConfiguration<KeyAndCertificateHandler> config = new AbstractKeyAndCertificateHandlerConfiguration() {
+  public void testBadConfigType() {
+    final HandlerConfiguration<KeyAndCertificateHandler> config;
+    config = new AbstractKeyAndCertificateHandlerConfiguration() {
+      @Nonnull
       @Override
       protected String getDefaultFactoryClass() {
         return "dummy";
       }
     };
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Unknown configuration object supplied - ");
   }
 
@@ -81,7 +83,7 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
     final KeyAndCertificateHandler handler = factory.create(config);
-    Assertions.assertTrue(CMCKeyAndCertificateHandler.class.isInstance(handler));
+    Assertions.assertTrue(handler instanceof CMCKeyAndCertificateHandler);
     Assertions.assertEquals("NAME", handler.getName());
   }
 
@@ -99,15 +101,15 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
     final KeyAndCertificateHandler handler = factory.create(config);
-    Assertions.assertTrue(CMCKeyAndCertificateHandler.class.isInstance(handler));
+    Assertions.assertTrue(handler instanceof CMCKeyAndCertificateHandler);
     Assertions.assertEquals(CMCKeyAndCertificateHandler.class.getSimpleName(), handler.getName());
 
     final PkiCredentialConfigurationProperties ecProps = this.getCmcClientCredentialProperties();
-    ecProps.setAlias("cmc-ec");
+    ecProps.getJks().getKey().setAlias("cmc-ec");
     config.setCmcClientCredential(new PkiCredentialConfiguration(ecProps));
 
     final KeyAndCertificateHandler handler2 = factory.create(config);
-    Assertions.assertTrue(CMCKeyAndCertificateHandler.class.isInstance(handler2));
+    Assertions.assertTrue(handler2 instanceof CMCKeyAndCertificateHandler);
   }
 
   @Test
@@ -116,9 +118,7 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
     config.setCmcRequestUrl(null);
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Missing CMC request URL");
   }
 
@@ -128,9 +128,7 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
     config.setCmcClientCredential(null);
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Missing CMC client credential");
   }
 
@@ -148,9 +146,7 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
 
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("No CMC signing algorithm given - could not apply defaults");
   }
 
@@ -160,9 +156,7 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
     config.setCmcResponderCertificate(null);
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Missing CMC responder certificate");
   }
 
@@ -172,9 +166,7 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
     config.setRemoteCaInfo(null);
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Missing remote CA information");
   }
 
@@ -184,9 +176,7 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
     config.setCmcRequestUrl("not-a-valid-url");
     final CMCKeyAndCertificateHandlerFactory factory = new CMCKeyAndCertificateHandlerFactory();
 
-    assertThatThrownBy(() -> {
-      factory.create(config);
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> factory.create(config)).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Failed to create CMC client");
   }
 
@@ -224,18 +214,20 @@ public class CMCKeyAndCertificateHandlerFactoryTest {
 
   private PkiCredentialConfigurationProperties getCmcClientCredentialProperties() {
     final PkiCredentialConfigurationProperties props = new PkiCredentialConfigurationProperties();
-    props.setResource(new ClassPathResource("cmc-client.jks"));
-    props.setPassword("secret".toCharArray());
-    props.setAlias("cmc");
-    props.setKeyPassword("secret".toCharArray());
+    props.setJks(new StoreCredentialConfigurationProperties());
+    props.getJks().setStore(new StoreConfigurationProperties());
+    props.getJks().getStore().setLocation("classpath:cmc-client.jks");
+    props.getJks().getStore().setPassword("secret");
+    props.getJks().setKey(new StoreCredentialConfigurationProperties.KeyConfigurationProperties());
+    props.getJks().getKey().setAlias("cmc");
+    props.getJks().getKey().setKeyPassword("secret");
     return props;
   }
 
   @SuppressWarnings("unused")
   private PkiCredential getCmcClientCredential() throws Exception {
-    final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean(this.getCmcClientCredentialProperties());
-    factory.afterPropertiesSet();
-    return factory.getObject();
+    return PkiCredentialFactorySingleton.getInstance().getPkiCredentialFactory()
+        .createCredential(this.getCmcClientCredentialProperties());
   }
 
   private X509Certificate getCmcResponderCert() throws Exception {

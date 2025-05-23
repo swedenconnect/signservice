@@ -70,7 +70,7 @@ public class CredentialContainerConfiguration {
       try {
         return new HsmPkiCredentialContainer(this.hsmConfigurationFile, this.hsmPin);
       }
-      catch (final KeyStoreException e) {
+      catch (final KeyStoreException | IllegalArgumentException e) {
         throw new IllegalArgumentException("Invalid HSM credential container configuration for user key generation",
             e);
       }

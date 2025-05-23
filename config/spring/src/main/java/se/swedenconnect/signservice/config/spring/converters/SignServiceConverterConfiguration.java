@@ -15,8 +15,6 @@
  */
 package se.swedenconnect.signservice.config.spring.converters;
 
-import java.security.cert.X509Certificate;
-
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
@@ -24,31 +22,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
-
-import se.swedenconnect.security.credential.converters.PropertyToX509CertificateConverter;
 import se.swedenconnect.signservice.authn.saml.spring.PropertyToEntityDescriptorConverter;
 import se.swedenconnect.signservice.config.spring.OpenSAMLConfiguration;
 
 /**
- * Configuration class that registers converters for Spring converters needed to applying properties to SignService
+ * Configuration class that registers converters for Spring converters needed to apply properties to SignService
  * configuration properties classes.
  */
 @Configuration
 @Import(OpenSAMLConfiguration.class)
 public class SignServiceConverterConfiguration {
-
-  /**
-   * Creates the bean the allows us to use property values that are referencing certificate resources and get the
-   * {@link X509Certificate} injected.
-   *
-   * @return a PropertyToX509CertificateConverter bean
-   */
-  @ConditionalOnMissingBean
-  @Bean
-  @ConfigurationPropertiesBinding
-  public PropertyToX509CertificateConverter propertyToX509CertificateConverter() {
-    return new PropertyToX509CertificateConverter();
-  }
 
   /**
    * Creates the bean the allows us to use property values that are referencing EntityDescriptor resources and get the

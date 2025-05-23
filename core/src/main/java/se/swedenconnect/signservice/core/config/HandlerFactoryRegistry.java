@@ -30,7 +30,7 @@ import se.swedenconnect.signservice.core.SignServiceHandler;
 public class HandlerFactoryRegistry {
 
   /** The registry of the factories created (or added). */
-  private List<HandlerFactory<?>> registry = new ArrayList<>();
+  private final List<HandlerFactory<?>> registry = new ArrayList<>();
 
   /**
    * Based on a class name and a type, the method checks if this factory exists in the registry, and if not, attempts to
@@ -46,7 +46,6 @@ public class HandlerFactoryRegistry {
    * @throws ClassCastException if the type does not match the factory
    */
   @Nonnull
-  @SuppressWarnings("unchecked")
   public <T extends SignServiceHandler> HandlerFactory<T> getFactory(@Nonnull final String className)
       throws IllegalArgumentException, ClassCastException {
 

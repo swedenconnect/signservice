@@ -15,21 +15,16 @@
  */
 package se.swedenconnect.signservice.protocol.dss;
 
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Base64;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.core.io.ClassPathResource;
 import org.w3c.dom.Document;
-
 import se.idsec.signservice.security.certificate.CertificateUtils;
 import se.idsec.signservice.utils.ProtocolVersion;
 import se.idsec.signservice.xml.DOMUtils;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.factory.KeyStoreBuilder;
 import se.swedenconnect.signservice.context.SignServiceContext;
 import se.swedenconnect.signservice.core.http.HttpResponseAction;
 import se.swedenconnect.signservice.core.http.HttpUserRequest;
@@ -38,6 +33,10 @@ import se.swedenconnect.signservice.engine.SignServiceErrorCode;
 import se.swedenconnect.signservice.protocol.ProtocolException;
 import se.swedenconnect.signservice.protocol.SignRequestMessage;
 import se.swedenconnect.signservice.protocol.SignResponseResult;
+
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * Test cases for DssProtocolHandler
@@ -395,10 +394,9 @@ public class DssProtocolHandlerTest {
   }
 
   private PkiCredential getTestCredential() throws Exception {
-    final KeyStoreCredential cred = new KeyStoreCredential(
-        new ClassPathResource("signservice.jks"), "secret".toCharArray(), "signservice", "secret".toCharArray());
-    cred.init();
-    return cred;
+    return new KeyStoreCredential(KeyStoreBuilder.builder()
+        .location("classpath:signservice.jks").password("secret").build(),
+        "signservice", "secret".toCharArray());
   }
 
 }

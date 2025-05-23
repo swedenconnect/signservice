@@ -15,17 +15,11 @@
  */
 package se.swedenconnect.signservice.engine.config;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-
-import java.util.Collections;
-import java.util.List;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import se.swedenconnect.security.credential.BasicCredential;
+import se.swedenconnect.security.credential.KeyStoreCredential;
+import se.swedenconnect.security.credential.factory.KeyStoreBuilder;
 import se.swedenconnect.signservice.audit.AuditLogger;
 import se.swedenconnect.signservice.authn.AuthenticationHandler;
 import se.swedenconnect.signservice.certificate.KeyAndCertificateHandler;
@@ -35,56 +29,52 @@ import se.swedenconnect.signservice.core.http.HttpResourceProvider;
 import se.swedenconnect.signservice.protocol.ProtocolHandler;
 import se.swedenconnect.signservice.signature.SignatureHandler;
 
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 /**
  * Test cases for DefaultEngineConfiguration.
  */
 public class DefaultEngineConfigurationTest {
 
   @Test
-  public void testSetterAndGetter() {
+  public void testSetterAndGetter() throws Exception {
     final DefaultEngineConfiguration config = new DefaultEngineConfiguration();
 
-    assertThatThrownBy(() -> {
-      config.init();
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(config::init).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("name must be set");
     config.setName("Engine");
     Assertions.assertEquals("Engine", config.getName());
 
-    assertThatThrownBy(() -> {
-      config.init();
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(config::init).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("signServiceId must be set");
     config.setSignServiceId("ID");
     Assertions.assertEquals("ID", config.getSignServiceId());
 
-    assertThatThrownBy(() -> {
-      config.init();
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(config::init).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("signServiceCredential must be set");
-    config.setSignServiceCredential(new BasicCredential());
+    config.setSignServiceCredential(new KeyStoreCredential(KeyStoreBuilder.builder()
+        .location("classpath:keys.jks").password("secret").build(),
+        "sign", "secret".toCharArray()));
     Assertions.assertNotNull(config.getSignServiceCredential());
 
-    assertThatThrownBy(() -> {
-      config.init();
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(config::init).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("processingPaths must be set");
 
     Assertions.assertNull(config.getProcessingPaths());
     config.setProcessingPaths(Collections.emptyList());
 
-    assertThatThrownBy(() -> {
-      config.init();
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(config::init).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("processingPaths must be set");
     config.setProcessingPaths(List.of("/path"));
     Assertions.assertEquals(List.of("/path"), config.getProcessingPaths());
 
     Assertions.assertTrue(config.getHttpResourceProviders().isEmpty());
 
-    assertThatThrownBy(() -> {
-      config.init();
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(config::init).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("protocolHandler must be set");
     final ProtocolHandler protocolHandler = Mockito.mock(ProtocolHandler.class);
     config.setProtocolHandler(protocolHandler);
@@ -99,9 +89,7 @@ public class DefaultEngineConfigurationTest {
 
     Assertions.assertTrue(config.getHttpResourceProviders().size() == 1);
 
-    assertThatThrownBy(() -> {
-      config.init();
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(config::init).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("authenticationHandler must be set");
     final AuthenticationHandler authnHandler = Mockito.mock(AuthenticationHandler.class);
     config.setAuthenticationHandler(authnHandler);
@@ -116,9 +104,7 @@ public class DefaultEngineConfigurationTest {
 
     Assertions.assertTrue(config.getHttpResourceProviders().size() == 2);
 
-    assertThatThrownBy(() -> {
-      config.init();
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(config::init).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("keyAndCertificateHandler must be set");
     final KeyAndCertificateHandler certHandler = Mockito.mock(KeyAndCertificateHandler.class);
     config.setKeyAndCertificateHandler(certHandler);
@@ -133,32 +119,24 @@ public class DefaultEngineConfigurationTest {
 
     Assertions.assertTrue(config.getHttpResourceProviders().size() == 3);
 
-    assertThatThrownBy(() -> {
-      config.init();
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(config::init).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("signatureHandler must be set");
     final SignatureHandler sigHandler = Mockito.mock(SignatureHandler.class);
     config.setSignatureHandler(sigHandler);
     Assertions.assertNotNull(config.getSignatureHandler());
 
-    assertThatThrownBy(() -> {
-      config.init();
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(config::init).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("clientConfiguraton must be set");
     final ClientConfiguration clientConf = new DefaultClientConfiguration();
     config.setClientConfiguration(clientConf);
     Assertions.assertEquals(clientConf, config.getClientConfiguration());
 
-    assertThatThrownBy(() -> {
-      config.init();
-    }).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(config::init).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("auditLogger must be set");
     final AuditLogger audit = Mockito.mock(AuditLogger.class);
     config.setAuditLogger(audit);
     Assertions.assertNotNull(config.getAuditLogger());
 
-    assertDoesNotThrow(() -> {
-      config.init();
-    });
+    assertDoesNotThrow(config::init);
   }
 }
