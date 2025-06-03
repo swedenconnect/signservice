@@ -4,7 +4,7 @@
 
 ## 1.2.0
 
-**Date:** 2025-05-23
+**Date:** 2025-06-03
 
 ### New and improved credentials handling
 
